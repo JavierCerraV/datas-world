@@ -3,8 +3,8 @@ id: 006
 nombre: organizations
 estado: borrador
 hito: M1 (generación y empleo inicial) · M2 (desempeño, despidos, contratación)
-depende_de: [004, 023]
-version: 0.2
+depende_de: [004, 023, 029]
+version: 0.3
 ---
 
 # 006 — Organizaciones y ocupación
@@ -23,7 +23,7 @@ Empresas, colegio, hospital y comercios: empleadores con puestos, salarios, jefe
 interface Organization {
   id: EntityId;                     // ORG-0012
   name: string;
-  sector: 'industry' | 'services' | 'education' | 'health' | 'retail' | 'hospitality';
+  sector: string;                   // código CIIU Rev. 4 A.C. del catálogo org_sectors (ADR-006)
   placeIds: EntityId[];             // lugares donde opera (spec 004)
   positions: Position[];            // orden por id
   culture: { strictness: number; warmth: number; stability: number }; // [0,1]
@@ -32,7 +32,8 @@ interface Organization {
 interface Position {
   id: string;                       // "ORG-0012/P03"
   title: string; level: number;     // 0 = base; el jefe tiene level 1
-  dailyWage: number;                // entero
+  occupation: string;               // código CIUO-08 A.C. del catálogo occupations
+  monthlyWage: number;              // entero, pesos; un puesto formal nunca está por debajo del salario mínimo
   shift: { days: 'mon-fri' | 'mon-sat'; start: number; end: number }; // minutos del día
   holderId?: EntityId; supervisorPositionId?: string;
 }
@@ -41,7 +42,8 @@ type Occupation =
   | { kind: 'formal'; orgId: EntityId; positionId: string }
   | { kind: 'informal'; trade: string }        // vendedor ambulante, domicilios, oficios
   | { kind: 'independent'; trade: string }     // independiente con clientela propia
-  | { kind: 'none'; since: WorldMinute };      // desempleado desde
+  | { kind: 'none'; reason: 'unemployed' | 'student' | 'home_duties' | 'pensioned' | 'other_inactive';
+      since: WorldMinute };                    // desocupado (busca trabajo) o inactivo, como en la GEIH
 ```
 Columnas nuevas (spec 001 §3.1): ninguna en M1. Las advertencias (`work.warnings`, u8) llegan en M2.
 
@@ -55,7 +57,12 @@ Coste en memoria: ≈ 150 B por puesto; con ≈ 50 puestos, unos 8 KB.
   3. Si lo tiene, es informal o independiente con probabilidad `INFORMAL_SHARE` y, si no, ocupa un puesto formal libre.
   4. El puesto formal se elige con pesos por estrato: oficina y hospital pesan ×3 para estrato 4, fábrica ×3 para estrato 2.
   5. El primer contratado de cada organización es el jefe, con el sueldo × 1,6.
-- **R-003 (M1)** — Sueldo diario = `pay × U(0,85, 1,2)`, redondeado a miles.
+- **R-003 (M1)** — Sueldo mensual = `WAGE_MULTIPLE[tipo de puesto] × labor.minimumWageMonthly × U(0,9, 1,2)`, redondeado a miles y **nunca por debajo del salario mínimo en un puesto formal** (ley). Con el perfil "prototipo", el sueldo diario es `pay × U(0,85, 1,2)` como en `hire`.
+- **R-008 (M1)** — La situación laboral sigue las definiciones de la GEIH. Se calibra para que, en la población de 15 años o más, la tasa de ocupación, la de participación y la de desempleo se acerquen a las del perfil (029), y la informalidad a `labor.informality.world`.
+  - La probabilidad de estar ocupado depende de la edad y del sexo: `EMPLOYMENT_BY_AGE`.
+  - Los menores de 15 años no trabajan.
+  - Los inactivos se reparten entre estudiantes, oficios del hogar, pensionados y otros.
+- **R-009 (M1)** — Los turnos de los puestos respetan `labor.maxWeeklyHours` vigente en la fecha del mundo (Ley 2101 de 2021), con la hora de almuerzo excluida. Los recargos nocturnos y dominicales (Ley 2466 de 2025) se aplican desde M2, con la economía.
 - **R-004 (M1)** — Si no quedan puestos formales libres, la persona pasa a informal. Quien no tiene trabajo queda como `none`, con `since` = epoch − U(10, 120) días.
 - **R-005 (M2)** — El desempeño combina puntualidad, energía y habilidades. Las faltas y los retrasos repetidos acumulan `warnings` del supervisor.
 - **R-006 (M2)** — El despido ocurre con `warnings ≥ WARN_LIMIT` o por crisis financiera de la organización, siempre con causas.
@@ -75,7 +82,8 @@ Coste en memoria: ≈ 150 B por puesto; con ≈ 50 puestos, unos 8 KB.
 - **INV-002** — Cada puesto tiene como mucho un titular, y cada persona con ocupación `formal` ocupa exactamente un puesto, que la referencia.
 
 ## 7. Criterios de aceptación
-- **CA-001 (M1)** — *Dado* 200 personas generadas, *entonces* la tasa de ocupación de los adultos de 18 a 64 años está en `EMPLOYMENT_RATE ± 0,08` y la parte informal en `INFORMAL_SHARE ± 0,1`.
+- **CA-001 (M1)** — *Dado* 200 personas generadas con el perfil colombiano, *entonces* en la población de 15 años o más la tasa de ocupación está en `labor.employmentRate ± 0,07` y la informalidad de los ocupados en `labor.informality.world ± 0,1`. Con el perfil "prototipo", la ocupación de 18 a 64 años está en `0,86 ± 0,08`.
+- **CA-007 (M1)** — *Dado* un mundo generado, *entonces* ningún puesto formal tiene un sueldo inferior al salario mínimo vigente y ningún turno supera la jornada máxima vigente.
 - **CA-002 (M1)** — *Dado* un mundo generado, *entonces* cumple INV-002 y cada organización con personal tiene jefe.
 - **CA-003 (M1)** — *Dado* `INFORMAL_SHARE = 0` y 60 personas, *entonces* la distribución de empleo por tipo de lugar está dentro de la tolerancia del prototipo (paridad estadística).
 - **CA-004 (M2)** — *Dado* una persona con 3 retrasos en un mes y `WARN_LIMIT = 3`, *entonces* recibe `JOB_LOST` con causas que incluyen los 3 retrasos.
@@ -85,8 +93,9 @@ Coste en memoria: ≈ 150 B por puesto; con ≈ 50 puestos, unos 8 KB.
 ## 8. Parámetros y calibración
 | Parámetro | Valor por defecto | Rango | Fuente / justificación |
 |---|---|---|---|
-| `EMPLOYMENT_RATE` | 0,86 | 0–1 | prototipo (`genJobs`) |
-| `INFORMAL_SHARE` | 0,3 | 0–0,7 | provisional. En Colombia la informalidad ronda la mitad de los ocupados; se baja por la escala del mundo. En el perfil de paridad con el prototipo vale 0 |
+| `EMPLOYMENT_BY_AGE` | calibrado para `labor.employmentRate` = 0,595 (15 años o más) | 0–1 | DANE, GEIH julio 2026 (spec 029). En el perfil "prototipo": 0,86 para 18 a 64 años |
+| `INFORMAL_SHARE` | `labor.informality.world` = 0,45 | 0–0,7 | spec 029: entre 13 ciudades (0,405) y el total nacional (0,545). En el perfil "prototipo" vale 0 |
+| `WAGE_MULTIPLE` | oficina 2,0 · hospital 2,2 · colegio 1,6 · fábrica 1,2 · tienda, café, restaurante y gimnasio 1,0 (× salario mínimo) | ≥ 1 en formal | estimado a partir del sueldo diario del prototipo × 22 días; pendiente de calibrar con la GEIH |
 | `BOSS_WAGE_FACTOR` | 1,6 | — | prototipo (`hire`) |
 | `WARN_LIMIT` (M2) | 3 | 1–10 | borrador 0.1 |
 
@@ -102,3 +111,4 @@ Ocupación por tipo y por estrato, puestos libres y sueldo medio por organizaci�
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: ocupación formal, informal, independiente o ninguna; empleo inicial portado de `genJobs`/`hire` (R-001 a R-004); eventos de trayectoria previa con fecha anterior al epoch; sueldo diario como en el prototipo; reglas y criterios marcados por hito |
+| 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): sectores CIIU y ocupaciones CIUO por catálogo (ADR-006); sueldo mensual en múltiplos del salario mínimo, nunca por debajo en un puesto formal; ocupación, desempleo e inactividad según la GEIH julio 2026 (R-008); informalidad 0,45; jornada de la Ley 2101 (R-009); CA-001 recalibrado y CA-007. El perfil "prototipo" conserva la paridad |

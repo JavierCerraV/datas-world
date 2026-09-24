@@ -3,8 +3,8 @@ id: 007
 nombre: population
 estado: borrador
 hito: M1 (generación) · peldaño 4 (nacimientos y muertes)
-depende_de: [001, 003, 004, 006, 008, 009, 014, 023]
-version: 0.2
+depende_de: [001, 003, 004, 006, 008, 009, 014, 023, 029]
+version: 0.3
 ---
 
 # 007 — Población
@@ -35,11 +35,11 @@ Columnas (spec 001 §3.1): los datos numéricos no van en el objeto.
 | Columna | Tipo | Rango | Inicial | Qué es |
 |---|---|---|---|---|
 | `demo.birthMinute` | `i32` | minutos, negativo = antes del epoch | 0 | nacimiento (edad = (now − birth) / 525 600) |
-| `demo.education` | `u8` | 0–5 | 0 | 0 ninguna · 1 primaria · 2 bachillerato · 3 técnico o tecnólogo · 4 universitario · 5 posgrado |
+| `demo.education` | `u8` | 0–9 | 0 | nivel CINE 2011 A.C. (catálogo `education_levels`): 0 ninguno · 1 primaria · 2 básica secundaria · 3 media (bachiller) · 4 técnica profesional · 5 tecnológica · 6 universitaria · 7 especialización · 8 maestría · 9 doctorado |
 | `money` | `i32` | pesos, entero | 0 | ahorro inicial; desde M2 lo mueve la economía (015) |
 | `health.physical` | `f32` | [0,1] | 1 | salud física base |
 | `demo.student` | `u8` | 0/1 | 0 | estudia, de 5 a 17 años |
-| `demo.retired` | `u8` | 0/1 | 0 | jubilado, 65 años o más |
+| `demo.pensioned` | `u8` | 0/1 | 0 | recibe pensión. Solo es posible desde `pension.age` (mujeres 57, hombres 62; spec 029), y con probabilidad `pension.coverage` |
 
 Coste en memoria: ≈ 300 B de objeto y 18 B de columnas por persona.
 
@@ -47,6 +47,7 @@ Coste en memoria: ≈ 300 B de objeto y 18 B de columnas por persona.
 - **R-001 (M1)** — La población se genera **por hogares** (008), no persona a persona, para que edades, apellidos y estratos sean coherentes. Orden del generador: geografía (003) → lugares (004) → organizaciones (006) → hogares con sus personas (008 + 007, con la personalidad de 009) → empleo (006) → objetos (005). Cada paso usa su flujo `gen:<paso>`.
 - **R-002 (M1)** — Nombres de `GIVEN_NAMES_F`, `GIVEN_NAMES_M` y `FAMILY_NAMES` (español colombiano, del prototipo), y lugar de nacimiento de `BIRTHPLACES`. Los menores nacen en Villa Cordillera.
 - **R-003 (M1)** — La fecha de nacimiento es el epoch menos la edad de la plantilla (008) menos `U(0, 364)` días.
+- **R-008 (M1)** — Con el perfil colombiano, la estructura por edades sigue `demo.share.*` y la educación sigue `education.attainment.*` por estrato (spec 029). Mientras esas entradas estén `por_confirmar`, se usa la tabla de R-004 traducida a niveles CINE, marcada `estimado`.
 - **R-004 (M1)** — Educación de los adultos según el estrato:
   - estrato 2: primaria, bachillerato o técnico;
   - estrato 3: bachillerato, técnico, tecnólogo o universitario;
@@ -63,7 +64,7 @@ Coste en memoria: ≈ 300 B de objeto y 18 B de columnas por persona.
 - **R-006 (M1)** — **Trayectoria previa.** Cada persona recibe eventos con fecha anterior al epoch que explican su situación inicial:
   - llegada al hogar (`HOUSEHOLD_FORMED`, 008);
   - fin de estudios (`STUDIES_COMPLETED`);
-  - su ocupación (`JOB_HIRED`, `INFORMAL_WORK_STARTED` o `JOB_LOST`, 006), o su jubilación (`RETIRED`);
+  - su ocupación (`JOB_HIRED`, `INFORMAL_WORK_STARTED` o `JOB_LOST`, 006), o su pensión (`RETIRED`, solo si `demo.pensioned`);
   - un hecho de infancia (`CHILDHOOD_EVENT`, de la lista `KID` del prototipo).
 
   Sus causas son `{ state: 'backstory' }` o eventos previos de la misma persona.
@@ -91,6 +92,7 @@ Los eventos anteriores al epoch tienen `at < 0`. Se registran con la creación d
 - **CA-003 (M1)** — *Dado* cualquier persona adulta, *entonces* su situación laboral inicial está explicada por ≥ 1 evento de su `backstory`.
 - **CA-004 (M1)** — *Dado* `population.target = 200`, *entonces* se generan entre 190 y 200 personas (los hogares no se parten).
 - **CA-005 (M1)** — *Dado* semillas distintas y la misma configuración, *entonces* los hashes difieren. Es la spec 001 CA-005, que M0 dejó pendiente.
+- **CA-007 (M1)** — *Dado* 200 personas con el perfil colombiano, *entonces* las proporciones de menores de 12 años, de 12 a 17 y de 60 o más están dentro de ±0,05 de `demo.share.*`, y nadie recibe pensión por debajo de `pension.age` de su sexo.
 - **CA-006 (M1)** — *Dado* `population.target = 60` y el perfil de paridad, *entonces* la edad media, el porcentaje de menores y el ahorro medio están dentro de la tolerancia de la línea base del prototipo.
 
 ## 8. Parámetros y calibración
@@ -112,3 +114,4 @@ Pirámide de edades, educación por estrato, ahorro por estrato y edad, y ocupac
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: datos numéricos como columnas (ADR-005); personalidad, estado y nivel de simulación fuera del objeto `Citizen` (009, 010, 021); orden del generador y flujos por paso; tablas de nombres, educación y ahorro portadas de `newAgent`; trayectoria previa con eventos de fecha anterior al epoch; nacimientos y muertes en el peldaño 4; incluye la 001 CA-005; criterios marcados por hito |
+| 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): educación en niveles CINE 2011 A.C. (0–9); pensión por edad según el sexo (57/62, Ley 100 de 1993 y Ley 2381 de 2024) y cobertura del perfil, en lugar de jubilación a los 65; estructura por edades del DANE 2026 (R-008, CA-007) |

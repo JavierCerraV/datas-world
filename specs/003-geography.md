@@ -3,8 +3,8 @@ id: 003
 nombre: geography
 estado: borrador
 hito: M1
-depende_de: [001, 023]
-version: 0.2
+depende_de: [001, 023, 029]
+version: 0.3
 ---
 
 # 003 — Geografía
@@ -18,6 +18,8 @@ Espacio físico del mundo: mapa de tiles, barrios con estrato, calles y distanci
 
 **Decisión (v0.2):** la ciudad es **ficticia, con sabor colombiano**: Villa Cordillera, con estratos, nombres de barrios locales y una rejilla de manzanas. No copia el mapa de una ciudad real.
 
+**Decisión (v0.3):** la organización del territorio sigue la jerarquía colombiana del ADR-006 §3 (departamento → municipio → comuna → barrio → manzana → predio). Villa Cordillera es un municipio de un departamento ficticio, con códigos DIVIPOLA ficticios. El estrato y las cifras salen del perfil de país (spec 029).
+
 ## 3. Modelo de datos
 ```ts
 type TileKind = 'grass' | 'road' | 'building' | 'water' | 'park' | 'plaza';
@@ -26,10 +28,12 @@ interface GeoMap {
   tiles: Uint8Array;                                  // índice y*width+x → TileKind (enum u8)
   districts: District[];                              // orden por id
 }
-interface District {
-  id: EntityId;                     // PLC-xxxx (lugar de tipo 'district', spec 004)
+interface District {                // un barrio: lugar de tipo 'territorio.barrio' (ADR-006, spec 004)
+  id: EntityId;                     // PLC-xxxx
+  parentId: EntityId;               // su comuna ('territorio.comuna')
+  divipola: string;                 // código ficticio (ADR-006 §2)
   name: string;                     // "San Martín"
-  stratum: 1 | 2 | 3 | 4 | 5 | 6;   // estrato socioeconómico colombiano
+  stratum: 1 | 2 | 3 | 4 | 5 | 6;   // Ley 142 de 1994, arts. 101–102
   bounds: { x: number; y: number; w: number; h: number };
   safety: number;                   // [0,1]
 }
@@ -45,6 +49,7 @@ Coste en memoria: mapa ≈ 2,5 KB. Distancias entre N puertas: N² × 2 B (con �
   - un barrio por fila.
 - **R-002** — La distancia entre dos lugares es la del camino más corto por las calles, entre sus puertas (BFS sobre tiles de calle). Se calcula una vez al cargar, para todos los pares de puertas.
 - **R-003** — Cada lugar pertenece exactamente a un barrio. El estrato del barrio condiciona la composición de hogares (008), la educación y el ahorro iniciales (007), la contratación (006) y, desde M2, los precios (015).
+- **R-005 (M1)** — La generación crea la cadena territorial completa: un departamento ficticio ("Departamento de la Cordillera"), el municipio Villa Cordillera (cabecera urbana), una comuna ("Comuna 1") y los barrios del mapa. Más comunas, zona rural con veredas o varios municipios se añaden como entradas nuevas, sin cambiar la estructura.
 - **R-004** — Barrios iniciales, de arriba abajo:
   - La Esperanza, estrato 3;
   - Centro, estrato 4;
@@ -64,6 +69,7 @@ Cada criterio indica el hito en que se prueba.
 - **CA-001 (M1)** — *Dado* la misma semilla, *entonces* el mapa, los barrios y el `stateHash` son idénticos.
 - **CA-002 (M1)** — *Dado* dos lugares A y B, *entonces* `dist(A,B) = dist(B,A)` y es ≥ la distancia de Manhattan entre sus puertas.
 - **CA-003 (M1)** — *Dado* un mundo generado, *entonces* toda puerta es alcanzable por calle desde cualquier otra.
+- **CA-005 (M1)** — *Dado* un mundo generado, *entonces* todo barrio tiene como padre una comuna, la comuna un municipio y el municipio un departamento, cada uno con su código DIVIPOLA ficticio.
 - **CA-004 (M1)** — *Dado* un mundo generado con la plantilla del prototipo, *entonces* los tiles de calle y los rectángulos de las manzanas coinciden con `isRoad`, `COLS` y `ROWS` del prototipo.
 
 ## 8. Parámetros y calibración
@@ -85,3 +91,4 @@ Número de puertas, longitud media de las rutas y la ruta más larga. Alerta si 
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: ciudad ficticia; estrato colombiano 1–6 (`stratum`) en lugar de 0–5; plantilla del prototipo (R-001, R-004, CA-004); distancias por BFS entre puertas, derivadas y no persistidas; criterios marcados por hito |
+| 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): jerarquía territorial del ADR-006 (departamento → municipio → comuna → barrio), códigos DIVIPOLA ficticios, estrato según la Ley 142 de 1994 y cifras del perfil de país (029); R-005 y CA-005 |

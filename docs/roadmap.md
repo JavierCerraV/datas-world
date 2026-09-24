@@ -5,7 +5,7 @@ Cada hito termina con una **demostración** y una **prueba de validación**. No 
 | Hito | Objetivo | Specs | Demostración / validación |
 |---|---|---|---|
 | **M0 — Arranque** | Repo en GitHub, guardarraíles activos, tooling, CI, RNG, reloj, eventos base, persistencia base | 001, 002, 014, 023, 027 | `pnpm check` y CI verdes; misma semilla → mismo hash; reloj avanza 1 año en CLI |
-| **M1 — Mundo estático** | Generar geografía, lugares, objetos, organizaciones, población, hogares, personalidad | 003–009 | `world:new` crea 200 personas coherentes; informe de población; mapa estático en web |
+| **M1 — Mundo estático** | Generar geografía, lugares, objetos, organizaciones, población, hogares, personalidad, con el perfil de Colombia y catálogos (ADR-006) | 003–009, 029 | `world:new` crea 200 personas coherentes; informe de población; mapa estático en web |
 | **M2 — Vida diaria** | Necesidades, rutinas, economía, movilidad, motor de decisiones, niveles de simulación; comando `validate:parity` | 010, 011, 015, 016, 017, 021 | Personas van a trabajar, comen, duermen, cobran, gastan; ánimo, estrés, empleo y dinero dentro de la tolerancia del prototipo |
 | **M3 — Vida social** | Relaciones asimétricas, memoria, causalidad, historia, conocimiento/creencias | 012, 013, 019, 020, 025 | **Prueba: 100 ciudadanos × 1 año**; paridad completa con el prototipo (corrigiendo sus desviaciones conocidas); informes de vida explicables; rumores con verdad ≠ creencia |
 | **M4 — Observación local** | API, SSE, visor pixel art (portado del prototipo), inspector, línea temporal | 022, 024 | `pnpm dev`: el mundo corre en local y se observa desde el navegador igual o mejor que el prototipo |

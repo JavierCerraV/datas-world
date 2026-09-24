@@ -3,8 +3,8 @@ id: 008
 nombre: households
 estado: borrador
 hito: M1 (plantillas y composición) · M2–M3 (economía del hogar, clima, mudanzas)
-depende_de: [001, 004, 023]
-version: 0.2
+depende_de: [001, 004, 023, 029]
+version: 0.3
 ---
 
 # 008 — Hogares
@@ -46,6 +46,7 @@ Coste en memoria: ≈ 120 B por hogar más 24 B por vínculo.
   - `couple`: pareja de 23 a 70 años, con edades separadas ±5;
   - `couple_kids`: pareja de 28 a 50 años con 1 a 3 hijos;
   - `single_parent`: un adulto de 25 a 50 años (mujer con p = 0,7) con 1 o 2 hijos;
+  - `roommates`: de 2 a 3 adultos de 18 a 40 años sin parentesco (hogar "no familiar" del DANE);
   - `extended`: abuelo o abuela de 64 a 84 años (mujer con p = 0,6), un hijo o hija adulto y un nieto o nieta.
 - **R-002 (M1)** — Apellidos al estilo colombiano: los hijos llevan el primer apellido del padre y el primero de la madre. En el hogar extendido, el nieto lleva el primero del adulto.
 - **R-003 (M1)** — En los hogares extendidos con menores, el abuelo o abuela figura en `caregiverIds` junto al adulto (abuelos cuidadores).
@@ -69,6 +70,7 @@ Coste en memoria: ≈ 120 B por hogar más 24 B por vínculo.
 ## 7. Criterios de aceptación
 - **CA-001 (M1)** — *Dado* la generación, *entonces* se cumplen INV-002 e INV-003.
 - **CA-002 (M1)** — *Dado* 200 personas generadas, *entonces* la proporción de plantillas está dentro de ±0,08 de `TEMPLATE_WEIGHTS`.
+- **CA-006 (M1)** — *Dado* 200 personas con el perfil colombiano, *entonces* el tamaño medio del hogar está en `household.meanSize ± 0,25` (2,82, DANE ECV 2025) y las tipologías DANE (unipersonal, biparental, monoparental, otros) están dentro de ±0,08 del perfil.
 - **CA-003 (M1)** — *Dado* un hogar extendido con menores, *entonces* el abuelo o abuela aparece en `caregiverIds`.
 - **CA-004 (M2)** — *Dado* un hogar sin ingresos durante 2 meses, *entonces* aparece `RENT_LATE` y sube el estrés de los adultos.
 - **CA-005 (M3)** — *Dado* una pareja que se separa, *entonces* uno de los dos cambia de hogar en ≤ 60 días.
@@ -76,7 +78,8 @@ Coste en memoria: ≈ 120 B por hogar más 24 B por vínculo.
 ## 8. Parámetros y calibración
 | Parámetro | Valor por defecto | Rango | Fuente / justificación |
 |---|---|---|---|
-| `TEMPLATE_WEIGHTS` | single 0,18 · couple 0,20 · couple_kids 0,40 · single_parent 0,12 · extended 0,10 · roommates 0 (igual en todos los estratos) | 0–1 | prototipo (`genPopulation`). Se calibrará por estrato con datos del DANE |
+| `TEMPLATE_WEIGHTS` (perfil colombiano) | single 0,202 · couple 0,14 · couple_kids 0,31 · extended 0,10 (biparental o monoparental con abuelos) · single_parent 0,205 · roommates 0,043 | 0–1 | DANE, ECV 2024–2025 (spec 029): unipersonal 0,202; biparental 0,516 ≈ couple + couple_kids + 2/3 de extended; monoparental 0,243 ≈ single_parent + 1/3 de extended; otros 0,043 = roommates. El reparto entre pareja sin hijos, con hijos y extendido es `estimado` |
+| `TEMPLATE_WEIGHTS` (perfil "prototipo") | single 0,18 · couple 0,20 · couple_kids 0,40 · single_parent 0,12 · extended 0,10 · roommates 0 | 0–1 | prototipo (`genPopulation`) |
 | `TEMPLATE_AGES` | ver R-001 | — | prototipo |
 | pareja del mismo sexo | 0,1 | 0–1 | prototipo |
 
@@ -92,3 +95,4 @@ Distribución de plantillas y tamaño medio del hogar (≈ 2,8 en el prototipo);
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: sin dependencias con 007 ni con 015 (el dinero y el arriendo pasan a M2); plantillas y edades portadas de `genPopulation`; apellidos colombianos; abuelos cuidadores (`caregiverIds`); parentesco dirigido y estructural (el afecto va en 012); vivienda `dwelling` (004); criterios marcados por hito |
+| 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): pesos de plantilla del perfil colombiano según las tipologías de hogar del DANE (ECV 2024–2025), con la plantilla `roommates` como hogar no familiar; el perfil "prototipo" conserva los pesos anteriores; CA-006 con tamaño medio de 2,82 |

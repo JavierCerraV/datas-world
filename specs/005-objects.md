@@ -3,8 +3,8 @@ id: 005
 nombre: objects
 estado: borrador
 hito: M1 (objetos iniciales) · M2–M3 (transferencias, valor emocional, pérdidas)
-depende_de: [001, 007, 008, 014, 023]
-version: 0.2
+depende_de: [001, 007, 008, 014, 023, 029]
+version: 0.3
 ---
 
 # 005 — Objetos con historia
@@ -22,7 +22,8 @@ Objetos con dueño, valor económico, valor emocional e historia propia (regalos
 ```ts
 interface WorldObject extends BaseEntity {  // spec 001; status 'active' | 'inactive'
   id: EntityId;                     // OBJ-001842
-  kind: string;                     // 'phone', 'bicycle', 'heirloom', 'car', 'watch', 'photo', 'guitar'
+  kind: string;                     // clave del catálogo object_kinds (ADR-006): 'tecnologia.telefono',
+                                    // 'transporte.bicicleta', 'transporte.carro', 'recuerdo.herencia'…
   name: string;                     // "el anillo de su abuela"
   ownerId: EntityId;                // CIT-… o HOU-… (propiedad del hogar)
   marketValue: number;              // entero, moneda del mundo
@@ -43,6 +44,7 @@ Coste en memoria: ≈ 250 B por objeto; con 1 a 4 objetos por persona, ≈ 1 KB 
   - herencia (`heirloom`, "el anillo de su abuela"): 25 años o más con p = 0,08; 300 000; valor emocional 0,95.
 - **R-002 (M1)** — Objetos del hogar: carro con probabilidad `CAR_P[estrato]` y dueño el hogar. Su valor emocional nace en 0 para cada miembro.
 - **R-003 (M1)** — Cada objeto inicial tiene un evento de origen con fecha anterior al epoch (`OBJECT_ACQUIRED` u `OBJECT_INHERITED`) en `historyEventIds`.
+- **R-008 (M1)** — Los precios salen del catálogo `object_kinds`, en pesos colombianos y marcados `estimado` hasta tener una fuente (spec 029 R-001).
 - **R-004 (M1)** — Solo se crean objetos significativos: con valor emocional > `SENTIMENTAL_MIN` o valor de mercado ≥ `MARKET_MIN`.
 - **R-005 (M2)** — Transferir un objeto (regalo, venta, herencia, robo) genera un evento y añade su id a `historyEventIds`.
 - **R-006 (M3)** — El valor emocional nace de eventos (recibirlo de alguien querido, usarlo en momentos importantes) y decae despacio (013).
@@ -88,3 +90,4 @@ Objetos por persona y hogar, por tipo y estrato; valor emocional medio. Alerta s
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: propiedad personal o del hogar; `fate` separado de `status` (001); objetos iniciales portados de `genObjects`; eventos de origen con fecha anterior al epoch; dependencias con 007 y 008 (se generan después de la población); criterios marcados por hito |
+| 2026-09-24 | 0.3 | Orden para crecer (usuario): `kind` pasa al catálogo `object_kinds` (ADR-006); precios en el catálogo, en pesos y marcados `estimado` (R-008) |
