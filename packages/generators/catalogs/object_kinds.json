@@ -1,0 +1,18 @@
+{
+  "name": "object_kinds",
+  "version": "2026.09.1",
+  "source": "ADR-006; spec 005 v0.3. Precios en pesos colombianos: los de M1 vienen de PRICE del prototipo; el del carro es una estimación (estado: estimado, spec 029 R-001).",
+  "entries": [
+    { "key": "accesorio.reloj", "name": "Reloj", "since": "M2" },
+    { "key": "musica.guitarra", "name": "Guitarra", "since": "M2" },
+    { "key": "recuerdo.fotografia", "name": "Fotografía", "since": "M2" },
+    { "key": "recuerdo.herencia", "name": "Herencia familiar", "since": "M1",
+      "attrs": { "proto": "recuerdo", "defaultName": "el anillo de su abuela", "price": 300000, "priceStatus": "estimado", "sentimental": 0.95 } },
+    { "key": "tecnologia.telefono", "name": "Teléfono", "since": "M1",
+      "attrs": { "proto": "teléfono", "defaultName": "un teléfono", "price": 650000, "priceStatus": "estimado" } },
+    { "key": "transporte.bicicleta", "name": "Bicicleta", "since": "M1",
+      "attrs": { "proto": "bicicleta", "defaultName": "una bicicleta", "price": 480000, "priceStatus": "estimado" } },
+    { "key": "transporte.carro", "name": "Carro", "since": "M1",
+      "attrs": { "defaultName": "el carro de la casa", "price": 45000000, "priceStatus": "estimado", "ownedBy": "household" } }
+  ]
+}

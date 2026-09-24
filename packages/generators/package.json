@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "description": "Generación de mundo y población",
-  "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@datas-world/engine": "workspace:*" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@datas-world/engine": "workspace:*",
+    "zod": "^4.6.5"
+  }
 }

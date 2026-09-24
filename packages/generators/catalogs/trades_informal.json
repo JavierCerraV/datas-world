@@ -1,0 +1,18 @@
+{
+  "name": "trades_informal",
+  "version": "2026.09.1",
+  "source": "Oficios informales e independientes frecuentes en Colombia (spec 006), con su código CIUO-08 A.C. Sus ingresos se definen con la economía (spec 015, M2).",
+  "entries": [
+    { "key": "oficio.carpinteria", "name": "Carpintería", "code": "7115", "since": "M1", "attrs": { "occupation": "ciuo.7115", "kind": "independent" } },
+    { "key": "oficio.domicilios", "name": "Domicilios en moto", "code": "8321", "since": "M1", "attrs": { "occupation": "ciuo.8321", "kind": "informal" } },
+    { "key": "oficio.electricidad", "name": "Electricidad", "code": "7411", "since": "M1", "attrs": { "occupation": "ciuo.7411", "kind": "independent" } },
+    { "key": "oficio.empleo_domestico", "name": "Empleo doméstico por días", "code": "9111", "since": "M1", "attrs": { "occupation": "ciuo.9111", "kind": "informal" } },
+    { "key": "oficio.modisteria", "name": "Modistería y arreglos", "code": "7531", "since": "M1", "attrs": { "occupation": "ciuo.7531", "kind": "independent" } },
+    { "key": "oficio.peluqueria", "name": "Peluquería", "code": "5141", "since": "M1", "attrs": { "occupation": "ciuo.5141", "kind": "independent" } },
+    { "key": "oficio.plomeria", "name": "Plomería", "code": "7126", "since": "M1", "attrs": { "occupation": "ciuo.7126", "kind": "independent" } },
+    { "key": "oficio.reciclaje", "name": "Reciclaje", "code": "9612", "since": "M1", "attrs": { "occupation": "ciuo.9612", "kind": "informal" } },
+    { "key": "oficio.taxi", "name": "Conducción de taxi", "code": "8322", "since": "M1", "attrs": { "occupation": "ciuo.8322", "kind": "informal" } },
+    { "key": "oficio.venta_ambulante", "name": "Venta ambulante", "code": "9520", "since": "M1", "attrs": { "occupation": "ciuo.9520", "kind": "informal" } },
+    { "key": "oficio.venta_plaza_mercado", "name": "Puesto en la plaza de mercado", "code": "5211", "since": "M1", "attrs": { "occupation": "ciuo.5211", "kind": "informal" } }
+  ]
+}

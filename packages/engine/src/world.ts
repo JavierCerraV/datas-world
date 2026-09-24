@@ -9,6 +9,8 @@ import { makeEvent } from './events.ts';
 import type { WorldEvent } from './events.ts';
 import { allocateId, emptyCounters, idKind, idNumber } from './ids.ts';
 import type { Counters, EntityId, WorldId } from './ids.ts';
+import { checkProfile } from './profile.ts';
+import type { CountryProfile } from './profile.ts';
 import { createScheduler } from './scheduler.ts';
 import type { Scheduler } from './scheduler.ts';
 
@@ -23,6 +25,15 @@ export interface WorldConfig {
   params: Record<string, number>;
   initialCapabilities: Capability[];
   holidays: string[]; // "AAAA-MM-DD"
+  /** Perfil de país copiado al crear el mundo (spec 029). Opcional: los mundos de M0 no lo tienen. */
+  profile?: CountryProfile;
+  /** Versión y hash de cada catálogo usado (ADR-006 §4), por nombre. */
+  catalogs?: Record<string, CatalogRef>;
+}
+
+export interface CatalogRef {
+  version: string;
+  hash: string;
 }
 
 export type WorldStatus = 'created' | 'running' | 'paused' | 'closed';
@@ -63,20 +74,34 @@ const deepFreeze = <T>(v: T): T => {
 };
 
 export function validateConfig(c: WorldConfig): void {
-  if (!Number.isSafeInteger(c.seed) || c.seed < 0 || c.seed > 0xffffffff) throw new RangeError(`Semilla no es uint32: ${c.seed}`);
+  if (!Number.isSafeInteger(c.seed) || c.seed < 0 || c.seed > 0xffffffff)
+    throw new RangeError(`Semilla no es uint32: ${c.seed}`);
   const t = c.tickMinutes;
   if (!Number.isInteger(t) || t < 1 || t > 60 || MINUTES_PER_DAY % t !== 0) {
     throw new RangeError(`tickMinutes debe ser un divisor de 1440 entre 1 y 60: ${t}`);
   }
   const e = parseEpoch(c.epoch);
   if (e.hour !== 0 || e.minute !== 0) throw new RangeError(`El epoch debe empezar a las 00:00: ${c.epoch}`);
-  if (!Number.isInteger(c.population.target) || c.population.target < 0) throw new RangeError('population.target inválido');
-  if (!Number.isInteger(c.currency.minorUnit) || c.currency.minorUnit < 1) throw new RangeError('currency.minorUnit inválido');
+  if (!Number.isInteger(c.population.target) || c.population.target < 0)
+    throw new RangeError('population.target inválido');
+  if (!Number.isInteger(c.currency.minorUnit) || c.currency.minorUnit < 1)
+    throw new RangeError('currency.minorUnit inválido');
   const bad = validateCapabilities(c.initialCapabilities);
   if (bad) throw new RangeError(`initialCapabilities: ${bad}`);
   if (!c.initialCapabilities.includes('clock')) throw new RangeError('initialCapabilities debe incluir clock');
   c.holidays.forEach(parseDate);
-  for (const [k, v] of Object.entries(c.params)) if (!Number.isFinite(v)) throw new RangeError(`params.${k} no es finito`);
+  for (const [k, v] of Object.entries(c.params))
+    if (!Number.isFinite(v)) throw new RangeError(`params.${k} no es finito`);
+  if (c.profile) {
+    const bad = checkProfile(c.profile);
+    if (bad) throw new RangeError(`profile ${c.profile.id}: ${bad}`);
+    if (c.profile.currency.code !== c.currency.code)
+      throw new RangeError('La moneda del perfil y la del mundo no coinciden');
+  }
+  for (const [name, ref] of Object.entries(c.catalogs ?? {})) {
+    if (!ref.version || !/^[0-9a-f]{16}$/.test(ref.hash))
+      throw new RangeError(`catalogs.${name}: versión o hash inválidos`);
+  }
 }
 
 /** Estructura vacía de un mundo (sin evento). La usan createWorld y la deserialización. */
@@ -123,9 +148,13 @@ export function addCitizen(world: World): EntityId {
 
 const collectionFor = (world: World, id: EntityId): Map<EntityId, BaseEntity> => {
   const kind = idKind(id);
-  const map = { CIT: world.citizens, HOU: world.households, ORG: world.organizations, PLC: world.places, OBJ: world.objects }[
-    kind as 'CIT'
-  ];
+  const map = {
+    CIT: world.citizens,
+    HOU: world.households,
+    ORG: world.organizations,
+    PLC: world.places,
+    OBJ: world.objects,
+  }[kind as 'CIT'];
   if (!map) throw new Error(`El tipo ${kind} no es una colección del mundo`);
   return map;
 };
