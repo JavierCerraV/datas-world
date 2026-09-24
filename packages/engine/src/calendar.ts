@@ -48,6 +48,17 @@ export function civilFromDays(z: number): CivilDate {
 const pad = (n: number, w = 2) => String(n).padStart(w, '0');
 export const formatDate = (d: CivilDate): string => `${pad(d.year, 4)}-${pad(d.month)}-${pad(d.day)}`;
 
+/**
+ * Años cumplidos en el minuto `at` por alguien nacido en el minuto `birth` (ambos relativos al epoch).
+ * Cuenta por fechas del calendario: el cumpleaños se cumple el mismo día y mes (el 29-feb, el 1-mar).
+ */
+export function ageInYears(birth: WorldMinute, at: WorldMinute, epoch: string): number {
+  const b = toCalendar(birth, epoch);
+  const a = toCalendar(at, epoch);
+  const had = a.month > b.month || (a.month === b.month && a.day >= b.day);
+  return a.year - b.year - (had ? 0 : 1);
+}
+
 /** Valida una fecha "AAAA-MM-DD" y devuelve sus días desde 1970-01-01. */
 export function parseDate(s: string): number {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
@@ -55,7 +66,8 @@ export function parseDate(s: string): number {
   const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
   const days = daysFromCivil(year, month, day);
   const back = civilFromDays(days);
-  if (month < 1 || month > 12 || back.month !== month || back.day !== day) throw new RangeError(`Fecha inexistente: ${s}`);
+  if (month < 1 || month > 12 || back.month !== month || back.day !== day)
+    throw new RangeError(`Fecha inexistente: ${s}`);
   return days;
 }
 

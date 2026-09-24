@@ -10,7 +10,12 @@ export const CATALOGS_DIR = join(import.meta.dirname, '..', '..', 'catalogs');
 
 /** Catálogos que usa M1, en orden canónico. */
 export const CATALOG_NAMES = [
+  'appearance',
+  'birthplaces',
+  'childhood_events',
   'education_levels',
+  'family_names',
+  'given_names',
   'historical_events',
   'object_kinds',
   'occupations',

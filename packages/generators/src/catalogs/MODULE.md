@@ -2,7 +2,7 @@
 modulo: catalogs
 ruta: packages/generators/src/catalogs
 estado: en-desarrollo
-specs: [003, 004, 005, 006, 007, 009, 030]
+specs: [003, 004, 005, 006, 007, 008, 009, 030]
 actualizado: 2026-09-24
 ---
 
@@ -23,7 +23,7 @@ Desde `@datas-world/generators`:
 
 | Símbolo | Descripción |
 |---|---|
-| `CATALOG_NAMES`, tipo `CatalogName` | Los 10 catálogos de M1, en orden canónico |
+| `CATALOG_NAMES`, tipo `CatalogName` | Los 15 catálogos de M1, en orden canónico |
 | `loadCatalog(name, dir?)`, `loadCatalogs(dir?)` → `Catalogs` | Lee `packages/generators/catalogs/<nombre>.json` y lo valida. Lanza con todos los problemas |
 | `parseCatalog(data, label?)` | Valida un catálogo ya leído (Zod + orden de claves) |
 | `catalogRef(c)`, `catalogRefs(cs)` | `{ version, hash }` para `WorldConfig.catalogs` (ADR-006 §4). El hash es el `hashString` del motor sobre el JSON canónico |
@@ -73,3 +73,4 @@ Las entradas de M1 de `place_kinds` llevan `proto` (el tipo del prototipo), `def
 | 2026-09-24 | m1/a-catalogos (A1, A2) | ADR-006, 004, 005, 006, 007, 030 | Esquema Zod, cargador con hash y los 8 catálogos iniciales (lugares con entradas hasta P4, objetos, sectores CIIU, ocupaciones CIUO, niveles CINE, territorio, oficios informales, hechos históricos). 8 pruebas |
 | 2026-09-24 | m1/d-organizaciones | 006 | `place_kinds` 2026.09.2: atributo `occupations` (`{ boss, staff[] }`, códigos CIUO) en los 8 lugares de trabajo de M1 |
 | 2026-09-24 | m1/e-personalidad | 009 | Catálogos nuevos `personality_traits` (10 rasgos: Big Five + 5 extras, con columna, rasgo del prototipo y correlaciones) y `personal_values` (12 valores del prototipo). `CATALOG_NAMES` pasa a 10 |
+| 2026-09-24 | m1/f-poblacion | 007, 008 | Catálogos nuevos de población: `given_names` (48, con sexo), `family_names` (24), `birthplaces` (10, con código DIVIPOLA real), `childhood_events` (7) y `appearance` (piel, peinados con límites de edad, colores de pelo, gafas y barba). `CATALOG_NAMES` pasa a 15 |

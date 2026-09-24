@@ -1,0 +1,28 @@
+{
+  "name": "appearance",
+  "version": "2026.09.1",
+  "source": "Apariencia de los sprites del concepto visual B (docs/identidad-visual.md; spec 007 R-009). Colores de la maqueta; pesos y probabilidades estimados. El tono de piel es uniforme y no se asocia a etnia. Las canas y la ropa las deduce el visor de la edad y la ocupación.",
+  "entries": [
+    {"key": "accessory.beard", "name": "Barba", "since": "M1", "attrs": {"pAdultMale": 0.3, "minAge": 18}},
+    {"key": "accessory.glasses", "name": "Gafas", "since": "M1", "attrs": {"base": 0.08, "perYearAfter30": 0.006, "max": 0.6}},
+    {"key": "hair_color.0", "name": "Negro café", "since": "M1", "attrs": {"hex": "#2B1D14", "weight": 0.45, "code": 0}},
+    {"key": "hair_color.1", "name": "Castaño muy oscuro", "since": "M1", "attrs": {"hex": "#3A2418", "weight": 0.2, "code": 1}},
+    {"key": "hair_color.2", "name": "Castaño oscuro", "since": "M1", "attrs": {"hex": "#5A3522", "weight": 0.15, "code": 2}},
+    {"key": "hair_color.3", "name": "Castaño claro", "since": "M1", "attrs": {"hex": "#8B5A2B", "weight": 0.1, "code": 3}},
+    {"key": "hair_color.4", "name": "Rubio oscuro", "since": "M1", "attrs": {"hex": "#C98B3C", "weight": 0.06, "code": 4}},
+    {"key": "hair_color.5", "name": "Pelirrojo", "since": "M1", "attrs": {"hex": "#B8452F", "weight": 0.04, "code": 5}},
+    {"key": "hair_style.0_short", "name": "Corto", "since": "M1", "attrs": {"code": 0, "weightF": 0.1, "weightM": 0.4}},
+    {"key": "hair_style.1_bob", "name": "Bob", "since": "M1", "attrs": {"code": 1, "weightF": 0.3, "weightM": 0}},
+    {"key": "hair_style.2_long", "name": "Largo", "since": "M1", "attrs": {"code": 2, "weightF": 0.3, "weightM": 0.03}},
+    {"key": "hair_style.3_bun", "name": "Moño", "since": "M1", "attrs": {"code": 3, "weightF": 0.15, "weightM": 0, "minAge": 14}},
+    {"key": "hair_style.4_pigtails", "name": "Colitas", "since": "M1", "attrs": {"code": 4, "weightF": 0.15, "weightM": 0, "maxAge": 13}},
+    {"key": "hair_style.5_spiky", "name": "En punta", "since": "M1", "attrs": {"code": 5, "weightF": 0, "weightM": 0.2}},
+    {"key": "hair_style.6_cap", "name": "Gorra", "since": "M1", "attrs": {"code": 6, "weightF": 0, "weightM": 0.2, "minAge": 12}},
+    {"key": "hair_style.7_bald", "name": "Calvo", "since": "M1", "attrs": {"code": 7, "weightF": 0, "weightM": 0.17, "minAge": 35}},
+    {"key": "skin.1", "name": "Tono de piel 1", "since": "M1", "attrs": {"hex": "#F7D5B5", "weight": 1}},
+    {"key": "skin.2", "name": "Tono de piel 2", "since": "M1", "attrs": {"hex": "#EBB98F", "weight": 1}},
+    {"key": "skin.3", "name": "Tono de piel 3", "since": "M1", "attrs": {"hex": "#D09467", "weight": 1}},
+    {"key": "skin.4", "name": "Tono de piel 4", "since": "M1", "attrs": {"hex": "#A56B45", "weight": 1}},
+    {"key": "skin.5", "name": "Tono de piel 5", "since": "M1", "attrs": {"hex": "#7A4B30", "weight": 1}}
+  ]
+}

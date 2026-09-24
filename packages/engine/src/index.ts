@@ -7,6 +7,7 @@ export type { Counters, EntityId, EntityKind, WorldId } from './ids.ts';
 
 export {
   MINUTES_PER_DAY,
+  ageInYears,
   civilFromDays,
   daysFromCivil,
   formatDate,
@@ -35,12 +36,27 @@ export type { Capability } from './capabilities.ts';
 export { capacityFor, columns, defineColumn, ensureCapacity } from './components.ts';
 export type { CitizenComponents, ColumnType } from './components.ts';
 
-export { addCitizen, addOrganization, addPlace, createWorld, deactivateEntity, validateConfig } from './world.ts';
+export {
+  addCitizen,
+  addHousehold,
+  addOrganization,
+  addPerson,
+  addPlace,
+  completeHousehold,
+  createWorld,
+  deactivateEntity,
+  validateConfig,
+} from './world.ts';
 export type {
   BaseEntity,
   CatalogRef,
   Citizen,
+  Household,
+  Kinship,
+  KinshipKind,
   NewOrganization,
+  NewPerson,
+  Occupation,
   NewPlace,
   NewPosition,
   OpeningHours,

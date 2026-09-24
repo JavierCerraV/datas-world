@@ -1,0 +1,31 @@
+{
+  "name": "family_names",
+  "version": "2026.09.1",
+  "source": "Apellidos del prototipo (lista SUR de prototipo/index.html), frecuentes en Colombia.",
+  "entries": [
+    {"key": "apellido.acosta", "name": "Acosta", "since": "M1"},
+    {"key": "apellido.beltran", "name": "Beltrán", "since": "M1"},
+    {"key": "apellido.cardenas", "name": "Cárdenas", "since": "M1"},
+    {"key": "apellido.castro", "name": "Castro", "since": "M1"},
+    {"key": "apellido.diaz", "name": "Díaz", "since": "M1"},
+    {"key": "apellido.gomez", "name": "Gómez", "since": "M1"},
+    {"key": "apellido.herrera", "name": "Herrera", "since": "M1"},
+    {"key": "apellido.lopez", "name": "López", "since": "M1"},
+    {"key": "apellido.martinez", "name": "Martínez", "since": "M1"},
+    {"key": "apellido.mejia", "name": "Mejía", "since": "M1"},
+    {"key": "apellido.moreno", "name": "Moreno", "since": "M1"},
+    {"key": "apellido.nieto", "name": "Nieto", "since": "M1"},
+    {"key": "apellido.ortiz", "name": "Ortiz", "since": "M1"},
+    {"key": "apellido.osorio", "name": "Osorio", "since": "M1"},
+    {"key": "apellido.pardo", "name": "Pardo", "since": "M1"},
+    {"key": "apellido.parra", "name": "Parra", "since": "M1"},
+    {"key": "apellido.quintero", "name": "Quintero", "since": "M1"},
+    {"key": "apellido.ramirez", "name": "Ramírez", "since": "M1"},
+    {"key": "apellido.rincon", "name": "Rincón", "since": "M1"},
+    {"key": "apellido.rodriguez", "name": "Rodríguez", "since": "M1"},
+    {"key": "apellido.rojas", "name": "Rojas", "since": "M1"},
+    {"key": "apellido.salazar", "name": "Salazar", "since": "M1"},
+    {"key": "apellido.suarez", "name": "Suárez", "since": "M1"},
+    {"key": "apellido.vargas", "name": "Vargas", "since": "M1"}
+  ]
+}

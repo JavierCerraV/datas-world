@@ -30,6 +30,20 @@ export {
   topValues,
 } from './personality/generate.ts';
 export type { PersonalityParams, PersonalityResult } from './personality/generate.ts';
+
+export { generatePopulation } from './population/generate.ts';
+export type { PopulationResult } from './population/generate.ts';
+export { composeHousehold, pickTemplate } from './population/households.ts';
+export type { HouseholdSpec, MemberSpec } from './population/households.ts';
+export { TEMPLATES, populationParams } from './population/params.ts';
+export type { PopulationParams, Template } from './population/params.ts';
+export {
+  COMPLETION_AGE,
+  PEOPLE_COLUMNS,
+  birthMinuteFor,
+  definePeopleColumns,
+  maxLevelForAge,
+} from './population/people.ts';
 export type { OrganizationsOptions } from './organizations/generate.ts';
 export type { PlacedPlot, PlacesResult } from './places/generate.ts';
 export type { DistrictTemplate, MapTemplate, PlotTemplate } from './geography/template.ts';

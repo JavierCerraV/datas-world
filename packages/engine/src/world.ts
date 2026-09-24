@@ -44,9 +44,50 @@ export interface BaseEntity {
   id: EntityId;
   status: 'active' | 'inactive';
 }
-export type Citizen = BaseEntity;
-export type Household = BaseEntity;
 export type WorldObject = BaseEntity;
+
+/** Ocupación de una persona (spec 006 §3). */
+export type Occupation =
+  | { kind: 'formal'; orgId: EntityId; positionId: string }
+  | { kind: 'informal' | 'independent'; trade: string }
+  | {
+      kind: 'none';
+      reason: 'unemployed' | 'student' | 'home_duties' | 'pensioned' | 'other_inactive' | 'minor';
+      since: WorldMinute;
+    };
+
+/**
+ * Ciudadano (spec 007). Los datos numéricos van en columnas (ADR-005). Los campos son opcionales porque
+ * `addCitizen` crea filas mínimas para pruebas del motor; `addPerson` exige los de M1.
+ */
+export interface Citizen extends BaseEntity {
+  name?: { given: string; family: [string, string] };
+  sex?: 'F' | 'M';
+  /** Clave del catálogo `birthplaces` o id del municipio del mundo. */
+  birthplace?: string;
+  householdId?: EntityId;
+  occupation?: Occupation;
+  /** Eventos anteriores al presente del mundo, en orden de fecha (007 R-006, INV-003). */
+  backstory?: EntityId[];
+}
+
+export type KinshipKind = 'parent' | 'partner' | 'sibling' | 'grandparent';
+/** Parentesco dirigido: "from es <kind> de to" (spec 008). */
+export interface Kinship {
+  from: EntityId;
+  to: EntityId;
+  kind: KinshipKind;
+}
+
+/** Hogar (spec 008). */
+export interface Household extends BaseEntity {
+  template: string;
+  dwellingId: EntityId;
+  memberIds: EntityId[];
+  headId?: EntityId;
+  kinship: Kinship[];
+  caregiverIds: EntityId[];
+}
 
 /** Turno de un puesto (spec 006): minutos del día; `lunch` no cuenta como jornada (Ley 2101). */
 export interface Shift {
@@ -285,6 +326,59 @@ export function addCitizen(world: World): EntityId {
   world.components.u8.active![row] = 1;
   world.citizens.set(id, { id, status: 'active' });
   return id;
+}
+
+/** Alta de un hogar vacío en una vivienda libre (spec 008). Los miembros se añaden con `addPerson`. */
+export function addHousehold(world: World, data: { template: string; dwellingId: EntityId }): EntityId {
+  if (!KEY_RE.test(data.template)) throw new Error(`Plantilla de hogar inválida: ${data.template}`);
+  if (!world.places.has(data.dwellingId)) throw new Error(`No existe la vivienda ${data.dwellingId}`);
+  for (const h of world.households.values()) {
+    if (h.dwellingId === data.dwellingId) throw new Error(`La vivienda ${data.dwellingId} ya tiene el hogar ${h.id}`);
+  }
+  const id = allocateId(world.counters, 'HOU');
+  world.households.set(id, { id, status: 'active', ...data, memberIds: [], kinship: [], caregiverIds: [] });
+  return id;
+}
+
+export interface NewPerson {
+  name: { given: string; family: [string, string] };
+  sex: 'F' | 'M';
+  birthplace: string;
+  householdId: EntityId;
+}
+
+/**
+ * Alta de una persona de M1 (spec 007) en su hogar: crea la fila de componentes (como `addCitizen`) y la
+ * añade a los miembros del hogar. Las columnas de datos (nacimiento, educación…) las escribe el generador.
+ */
+export function addPerson(world: World, data: NewPerson): EntityId {
+  const household = world.households.get(data.householdId);
+  if (!household) throw new Error(`No existe el hogar ${data.householdId}`);
+  if (!data.name.given.trim() || data.name.family.some((f) => !f.trim())) throw new Error('Nombre incompleto');
+  if (data.sex !== 'F' && data.sex !== 'M') throw new Error(`Sexo inválido: ${String(data.sex)}`);
+  const id = addCitizen(world);
+  world.citizens.set(id, { id, status: 'active', ...structuredClone(data), backstory: [] });
+  household.memberIds.push(id);
+  return id;
+}
+
+/** Cierra la composición de un hogar: cabeza, parentesco y cuidadores, todos miembros del hogar (008 INV-002). */
+export function completeHousehold(
+  world: World,
+  householdId: EntityId,
+  data: { headId: EntityId; kinship: Kinship[]; caregiverIds: EntityId[] },
+): void {
+  const h = world.households.get(householdId);
+  if (!h) throw new Error(`No existe el hogar ${householdId}`);
+  const member = (id: EntityId) => h.memberIds.includes(id);
+  if (!member(data.headId)) throw new Error(`${data.headId} no es miembro de ${householdId}`);
+  for (const k of data.kinship) {
+    if (!member(k.from) || !member(k.to) || k.from === k.to) throw new Error(`Parentesco inválido en ${householdId}`);
+  }
+  for (const c of data.caregiverIds) if (!member(c)) throw new Error(`${c} no es miembro de ${householdId}`);
+  h.headId = data.headId;
+  h.kinship = structuredClone(data.kinship);
+  h.caregiverIds = [...data.caregiverIds];
 }
 
 const collectionFor = (world: World, id: EntityId): Map<EntityId, BaseEntity> => {
