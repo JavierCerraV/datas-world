@@ -21,19 +21,19 @@ Cada bloque se hace en una rama (`m0/a-tooling`, `m0/b-rng`…) y termina con un
 - [x] A7. `.editorconfig` y licencia (preguntar al usuario). El `.gitignore` ya existe. → Sin licencia (UNLICENSED, todos los derechos reservados), decidido por el usuario.
 
 ## Bloque B — Azar reproducible (spec 023)
-- [ ] B0. Leer `class RNG` y `sm32` del prototipo; decidir con el usuario si se mantiene splitmix32 o se pasa a PCG32/xoshiro (registrar la decisión en la spec 023 y en `packages/engine/MODULE.md`).
-- [ ] B1. Pruebas CA-003 (fork estable) y distribución básica (media de `next()` ≈ 0,5; `int` sin sesgo).
-- [ ] B2. Implementar `Rng` (PCG32 o xoshiro128**) con `fork`, `int`, `chance`, `pick`, `weighted`, `normal`, `state/restore`.
-- [ ] B3. Prueba CA-005: el linter falla con `Math.random` en engine (fixture).
+- [x] B0. Leer `class RNG` y `sm32` del prototipo; decidir con el usuario si se mantiene splitmix32 o se pasa a PCG32/xoshiro (registrar la decisión en la spec 023 y en `packages/engine/MODULE.md`). → **xoshiro128**** (decidido por el usuario; registrado en la spec 023 y en engine/MODULE.md).
+- [x] B1. Pruebas CA-003 (fork estable) y distribución básica (media de `next()` ≈ 0,5; `int` sin sesgo).
+- [x] B2. Implementar `Rng` (PCG32 o xoshiro128**) con `fork`, `int`, `chance`, `pick`, `weighted`, `normal`, `state/restore`.
+- [x] B3. Prueba CA-005: el linter falla con `Math.random` en engine (fixture).
 
 ## Bloque C — Mundo y reloj (specs 001, 002)
-- [ ] C1. Tipos `WorldMinute`, `EntityId`, `WorldConfig`, `World`; generador de ids (CA-002 de 001).
-- [ ] C2. Calendario `toCalendar(minute, epoch)` con festivos (CA-001 de 002).
-- [ ] C3. Scheduler (cola de prioridad por `(at, id)`) (CA-003 de 002).
-- [ ] C4. Serialización canónica y `stateHash` (CA-001, CA-003 de 001).
-- [ ] C5. Tipo `WorldEvent` y catálogo mínimo de eventos (spec 014: `WORLD_CREATED`, `DAY_STARTED`, `SPEED_CHANGED`, `EXTERNAL_INPUT_APPLIED`).
-- [ ] C5b. `tick(world, rng)` mínimo: avanza reloj, emite `DAY_STARTED`, procesa scheduler.
-- [ ] C6. Velocidad y controles (pausa, paso, avanzar N días) en una clase `Runner` que no depende del reloj real salvo en el worker (CA-002, CA-004 de 002).
+- [x] C1. Tipos `WorldMinute`, `EntityId`, `WorldConfig`, `World`; generador de ids (CA-002 de 001).
+- [x] C2. Calendario `toCalendar(minute, epoch)` con festivos (CA-001 de 002).
+- [x] C3. Scheduler (cola de prioridad por `(at, id)`) (CA-003 de 002).
+- [x] C4. Serialización canónica y `stateHash` (CA-001, CA-003 de 001).
+- [x] C5. Tipo `WorldEvent` y catálogo mínimo de eventos (spec 014: `WORLD_CREATED`, `DAY_STARTED`, `SPEED_CHANGED`, `EXTERNAL_INPUT_APPLIED`).
+- [x] C5b. `tick(world, rng)` mínimo: avanza reloj, emite `DAY_STARTED`, procesa scheduler.
+- [x] C6. Velocidad y controles (pausa, paso, avanzar N días) en una clase `Runner` que no depende del reloj real salvo en el worker (CA-002, CA-004 de 002).
 
 ## Bloque D — Persistencia (spec 027)
 - [ ] D1. Esquema SQLite y migración 001; pragmas WAL.
