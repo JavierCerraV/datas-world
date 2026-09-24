@@ -44,7 +44,20 @@ export interface BaseEntity {
   id: EntityId;
   status: 'active' | 'inactive';
 }
-export type WorldObject = BaseEntity;
+/** Objeto con historia (spec 005). `kind` es una clave de `object_kinds`; el dueño es una persona o un hogar. */
+export interface WorldObject extends BaseEntity {
+  kind: string;
+  name: string;
+  ownerId: EntityId;
+  marketValue: number;
+  condition: number;
+  /** Valor emocional por persona, en [0,1]. */
+  sentimental: Record<string, number>;
+  historyEventIds: EntityId[];
+  fate: 'owned' | 'lost' | 'destroyed' | 'sold' | 'given';
+}
+
+export type NewObject = Omit<WorldObject, 'id' | 'status' | 'historyEventIds' | 'fate'>;
 
 /** Ocupación de una persona (spec 006 §3). */
 export type Occupation =

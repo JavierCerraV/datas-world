@@ -4,7 +4,7 @@ nombre: organizations
 estado: aprobada
 hito: M1 (generación y empleo inicial) · M2 (desempeño, despidos, contratación)
 depende_de: [004, 023, 029]
-version: 0.4
+version: 0.5
 ---
 
 # 006 — Organizaciones y ocupación
@@ -82,10 +82,10 @@ Coste en memoria: ≈ 150 B por puesto; con ≈ 50 puestos, unos 8 KB.
 - **INV-002** — Cada puesto tiene como mucho un titular, y cada persona con ocupación `formal` ocupa exactamente un puesto, que la referencia.
 
 ## 7. Criterios de aceptación
-- **CA-001 (M1)** — *Dado* 200 personas generadas con el perfil colombiano, *entonces* en la población de 15 años o más la tasa de ocupación está en `labor.employmentRate ± 0,07` y la informalidad de los ocupados en `labor.informality.world ± 0,1`. Con el perfil "prototipo", la ocupación de 18 a 64 años está en `0,86 ± 0,08`.
+- **CA-001 (M1)** — *Dado* 20 mundos de 200 personas con el perfil colombiano, *entonces* en la población de 15 años o más la tasa de ocupación agregada está en `labor.employmentRate ± 0,03` (y la de cada mundo, a ±0,10), la tasa de desempleo agregada en `labor.unemploymentRate ± 0,03`, y la informalidad agregada de los ocupados entre `labor.informality` de las 13 ciudades y la nacional. Con el perfil "prototipo", la ocupación agregada de 18 a 64 años está en `0,86 ± 0,04`.
 - **CA-007 (M1)** — *Dado* un mundo generado, *entonces* ningún puesto formal tiene un sueldo inferior al salario mínimo vigente y ningún turno supera la jornada máxima vigente.
 - **CA-002 (M1)** — *Dado* un mundo generado, *entonces* cumple INV-002 y cada organización con personal tiene jefe.
-- **CA-003 (M1)** — *Dado* `INFORMAL_SHARE = 0` y 60 personas, *entonces* la distribución de empleo por tipo de lugar está dentro de la tolerancia del prototipo (paridad estadística).
+- **CA-003 (M1)** — *Dado* el perfil "prototipo" (sin informalidad, 60 personas) y 10 semillas, *entonces* la proporción del empleo formal en cada tipo de lugar está a ±0,06 de la que genera `genJobs` del prototipo con las semillas 100 a 109.
 - **CA-004 (M2)** — *Dado* una persona con 3 retrasos en un mes y `WARN_LIMIT = 3`, *entonces* recibe `JOB_LOST` con causas que incluyen los 3 retrasos.
 - **CA-005 (M2)** — *Dado* una vacante con candidatos, *entonces* se cubre en ≤ 30 días con probabilidad alta.
 - **CA-006 (M2)** — *Dado* una organización con caja negativa 2 meses, *entonces* reduce plantilla.
@@ -114,3 +114,4 @@ Ocupación por tipo y por estrato, puestos libres y sueldo medio por organizaci�
 | 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): sectores CIIU y ocupaciones CIUO por catálogo (ADR-006); sueldo mensual en múltiplos del salario mínimo, nunca por debajo en un puesto formal; ocupación, desempleo e inactividad según la GEIH julio 2026 (R-008); informalidad 0,45; jornada de la Ley 2101 (R-009); CA-001 recalibrado y CA-007. El perfil "prototipo" conserva la paridad |
 | 2026-09-24 | 0.3 | Estado → aprobada |
 | 2026-09-24 | 0.4 | Implementación del bloque D: el sueldo es `wage` con `wagePeriod` (`month` en el perfil colombiano; `day` en el perfil prototipo, por paridad con `hire`); el turno incluye `lunch`, que no cuenta como jornada (Ley 2101); el sueldo se fija por puesto al generar, con la misma distribución que el prototipo al contratar; ocupaciones del jefe y del personal en el catálogo `place_kinds`; cultura con normal 0,5 ± 0,15 (estimada); la caja llega en M2. Sin cambios en CA |
+| 2026-09-24 | 0.5 | Implementación del bloque G, con la revisión de CA aprobada por el usuario (agregado de 20 mundos). La informalidad agregada sale 0,53 y no 0,45: con 45 puestos formales (los del prototipo) y unas 95 personas ocupadas, al menos la mitad trabaja de forma informal. Por eso el criterio pide que quede entre la informalidad de las 13 ciudades (0,405) y la nacional (0,545), lo propio de una ciudad intermedia. CA-003 se compara con el empleo inicial del prototipo (repartos a menos de 0,06). Precisiones: los de 15 a 17 años solo trabajan de forma informal; un pensionado trabaja con el 30 % de la probabilidad de su edad; los no ocupados se reparten en pensión, estudio (18–24), desempleo y oficios del hogar u otro motivo; los menores de 15 son `minor` o `student`; eventos `JOB_HIRED`, `INFORMAL_WORK_STARTED`, `JOB_LOST` y `RETIRED` con fecha anterior al presente |

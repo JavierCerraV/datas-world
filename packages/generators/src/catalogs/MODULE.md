@@ -36,7 +36,7 @@ Desde `@datas-world/generators`:
 - **Orden obligatorio.** Las entradas van en orden estricto de clave. Así el catálogo ya es canónico y un duplicado se detecta al validar.
 - **`attrs` libre** (`Record<string, unknown>`). Cada generador valida los atributos que usa. En M1:
   - lugares: `defaultName`, `open`, `openDays`, `slots`, `payProtoDaily`, `shiftProto`, `shiftCO`, `wageMultiple`, `occupations` (`{ boss, staff[] }`), `factor`, `unitsPerBuilding`, `capacity`;
-  - objetos: `price`, `priceStatus`, `sentimental`, `ownedBy`;
+  - objetos: `price`, `priceStatus`, `sentimental`, `ownedBy`, `gen` (reglas por edad), `condition`;
   - educación: `column`;
   - territorio: `parent`, `placeKind`;
   - oficios: `occupation`, `kind`;
@@ -74,3 +74,4 @@ Las entradas de M1 de `place_kinds` llevan `proto` (el tipo del prototipo), `def
 | 2026-09-24 | m1/d-organizaciones | 006 | `place_kinds` 2026.09.2: atributo `occupations` (`{ boss, staff[] }`, códigos CIUO) en los 8 lugares de trabajo de M1 |
 | 2026-09-24 | m1/e-personalidad | 009 | Catálogos nuevos `personality_traits` (10 rasgos: Big Five + 5 extras, con columna, rasgo del prototipo y correlaciones) y `personal_values` (12 valores del prototipo). `CATALOG_NAMES` pasa a 10 |
 | 2026-09-24 | m1/f-poblacion | 007, 008 | Catálogos nuevos de población: `given_names` (48, con sexo), `family_names` (24), `birthplaces` (10, con código DIVIPOLA real), `childhood_events` (7) y `appearance` (piel, peinados con límites de edad, colores de pelo, gafas y barba). `CATALOG_NAMES` pasa a 15 |
+| 2026-09-24 | m1/g-empleo-objetos | 005 | `object_kinds` 2026.09.2: reglas de generación por edad (`gen`) y rango de estado (`condition`) de teléfono, bicicleta, herencia y carro |

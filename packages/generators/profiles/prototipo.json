@@ -37,6 +37,12 @@
     {"key": "gen.education.s3", "value": [3, 4, 5, 6], "validFrom": "1900-01-01", "source": "prototipo (newAgent) en CINE", "status": "oficial"},
     {"key": "gen.education.s4", "value": [6, 6, 7], "validFrom": "1900-01-01", "source": "prototipo (newAgent) en CINE", "status": "oficial"},
     {"key": "pension.age", "value": {"F": 65, "M": 65}, "validFrom": "1900-01-01", "source": "prototipo (retired: edad ≥ 65)", "status": "oficial"},
-    {"key": "pension.coverage", "value": 1, "validFrom": "1900-01-01", "source": "prototipo (todos los mayores de 65 se jubilan)", "status": "oficial"}
+    {"key": "pension.coverage", "value": 1, "validFrom": "1900-01-01", "source": "prototipo (todos los mayores de 65 se jubilan)", "status": "oficial"},
+    {"key": "gen.labor.employmentByAge.M", "value": {"15": 0, "18": 0.86, "65": 0}, "validFrom": "1900-01-01", "source": "prototipo/index.html (genJobs: 86 % de los adultos de 18 a 64 años; el resto, desempleado)", "status": "oficial"},
+    {"key": "gen.labor.employmentByAge.F", "value": {"15": 0, "18": 0.86, "65": 0}, "validFrom": "1900-01-01", "source": "prototipo/index.html (genJobs: 86 % de los adultos de 18 a 64 años; el resto, desempleado)", "status": "oficial"},
+    {"key": "gen.labor.unemployedP", "value": 1, "validFrom": "1900-01-01", "source": "prototipo/index.html (genJobs: 86 % de los adultos de 18 a 64 años; el resto, desempleado)", "status": "oficial"},
+    {"key": "gen.labor.adultStudentP", "value": 0, "validFrom": "1900-01-01", "source": "prototipo/index.html (genJobs: 86 % de los adultos de 18 a 64 años; el resto, desempleado)", "status": "oficial"},
+    {"key": "gen.labor.homeDutiesP.F", "value": 0, "validFrom": "1900-01-01", "source": "prototipo/index.html (genJobs: 86 % de los adultos de 18 a 64 años; el resto, desempleado)", "status": "oficial"},
+    {"key": "gen.labor.homeDutiesP.M", "value": 0, "validFrom": "1900-01-01", "source": "prototipo/index.html (genJobs: 86 % de los adultos de 18 a 64 años; el resto, desempleado)", "status": "oficial"}
   ]
 }

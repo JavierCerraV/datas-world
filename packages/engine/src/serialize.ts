@@ -8,7 +8,17 @@ import type { Counters, EntityId, WorldId } from './ids.ts';
 import { schedulerFrom, sortedItems } from './scheduler.ts';
 import type { ScheduledItem } from './scheduler.ts';
 import { emptyWorld } from './world.ts';
-import type { BaseEntity, Citizen, Household, Organization, Place, World, WorldConfig, WorldStatus } from './world.ts';
+import type {
+  BaseEntity,
+  Citizen,
+  Household,
+  Organization,
+  Place,
+  World,
+  WorldConfig,
+  WorldObject,
+  WorldStatus,
+} from './world.ts';
 import type { Capability } from './capabilities.ts';
 
 /** Forma plana y JSON-compatible del mundo. No incluye la capacidad reservada ni cachés (R-010). */
@@ -23,7 +33,7 @@ export interface WorldSnapshot {
   households: Household[];
   organizations: Organization[];
   places: Place[];
-  objects: BaseEntity[];
+  objects: WorldObject[];
   components: { type: ColumnType; name: string; initial: number; rows: number[] }[];
   scheduler: ScheduledItem[];
   /** Solo si el mundo tiene mapa (spec 003); los mundos de M0 no lo llevan y su hash no cambia. */

@@ -4,7 +4,7 @@ nombre: objects
 estado: aprobada
 hito: M1 (objetos iniciales) · M2–M3 (transferencias, valor emocional, pérdidas)
 depende_de: [001, 007, 008, 014, 023, 029]
-version: 0.3
+version: 0.4
 ---
 
 # 005 — Objetos con historia
@@ -64,7 +64,7 @@ Coste en memoria: ≈ 250 B por objeto; con 1 a 4 objetos por persona, ≈ 1 KB 
 - **INV-002** — `ownerId` existe y es un `CIT` o un `HOU`.
 
 ## 7. Criterios de aceptación
-- **CA-001 (M1)** — *Dado* 200 personas generadas, *entonces* las proporciones de teléfono, bicicleta y herencia por edad están dentro de ±0,08 de R-001.
+- **CA-001 (M1)** — *Dado* 20 mundos de 200 personas, *entonces* las proporciones agregadas de teléfono (adultos), bicicleta y herencia están a ±0,03 de R-001, y la de teléfono de 12 a 17 años a ±0,06 (hay pocos adolescentes); el carro del hogar por estrato está a ±0,08 de `CAR_P`.
 - **CA-002 (M1)** — *Dado* un objeto inicial, *entonces* su `historyEventIds` empieza con un evento de origen con `at < 0`.
 - **CA-003 (M1)** — *Dado* un carro de hogar, *entonces* su `ownerId` es el `HOU` y todos los miembros pueden verlo como suyo.
 - **CA-004 (M2)** — *Dado* un reloj regalado por la madre, *entonces* `sentimental[hijo] ≥ 0,6` y su historia incluye `OBJECT_GIFTED`.
@@ -92,3 +92,4 @@ Objetos por persona y hogar, por tipo y estrato; valor emocional medio. Alerta s
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: propiedad personal o del hogar; `fate` separado de `status` (001); objetos iniciales portados de `genObjects`; eventos de origen con fecha anterior al epoch; dependencias con 007 y 008 (se generan después de la población); criterios marcados por hito |
 | 2026-09-24 | 0.3 | Orden para crecer (usuario): `kind` pasa al catálogo `object_kinds` (ADR-006); precios en el catálogo, en pesos y marcados `estimado` (R-008) |
 | 2026-09-24 | 0.3 | Estado → aprobada |
+| 2026-09-24 | 0.4 | Implementación del bloque G, con la revisión de CA aprobada por el usuario (agregado de 20 mundos). Precisiones: las reglas por edad y el rango de estado (`condition`) de cada tipo están en el catálogo `object_kinds` (2026.09.2); una compra ocurre en los últimos 5 años (desde los 10 de edad) y una herencia en algún momento de la vida adulta; el carro lo registra la cabeza del hogar |

@@ -2,7 +2,7 @@
 modulo: engine
 ruta: packages/engine
 estado: en-desarrollo
-specs: [001, 002, 003, 004, 006, 007, 008, 014, 023, 029]
+specs: [001, 002, 003, 004, 005, 006, 007, 008, 014, 023, 029]
 actualizado: 2026-09-23
 ---
 
@@ -22,8 +22,9 @@ Núcleo puro de la simulación: tipos del dominio, RNG, reloj, scheduler, evento
 | 023 | CA-003, CA-004, CA-005, CA-006; CA-001 en parte: mismo hash en un proceso y entre dos procesos (`apps/cli`), pero con un mundo vacío | CA-001 con 100 personas y CA-002 (necesitan población, M1–M2) |
 | 003 | Soporte del mapa: R-002 (distancias por calle), INV-002 (con `generators/src/geography`). Los CA se prueban en el generador | — |
 | 004 | `Place` y `addPlace` validado (R-001 en parte). Los CA se prueban en el generador de lugares (bloque C) | — |
-| 006 | `Organization`, `Position` y `addOrganization` validado. Los CA se prueban en el generador de organizaciones | — |
+| 006 | `Organization`, `Position` y `addOrganization` validado; `hire` y `setOccupation`; eventos `JOB_HIRED`, `INFORMAL_WORK_STARTED`, `JOB_LOST` y `RETIRED`. Los CA se prueban en el generador de organizaciones | — |
 | 007, 008 | Tipos `Citizen`, `Household`, `Kinship` y `Occupation`; `addPerson`, `addHousehold`, `completeHousehold`; `ageInYears`; eventos `HOUSEHOLD_FORMED`, `STUDIES_COMPLETED`, `CHILDHOOD_EVENT`. Los CA se prueban en el generador de población | — |
+| 005 | `WorldObject`, `addObject`, `objectsOf`; eventos `OBJECT_ACQUIRED` y `OBJECT_INHERITED`. Los CA se prueban en el generador de objetos | — |
 | 029 | Consulta del perfil (R-002, R-003 con `profileValue`); INV-001 e INV-002 (`checkProfile`). Los CA se prueban en `generators/src/country` | — |
 
 
@@ -46,6 +47,8 @@ Desde `@datas-world/engine` (`src/index.ts`). Todo lo público se reexporta desd
 | `serializeWorld`, `deserializeWorld`, `stateHash`, `canonicalize`, `hashString`, tipo `WorldSnapshot` | `src/serialize.ts`, `src/hash.ts` | Instantánea JSON y hash canónico de 64 bits (001 R-004, R-010) |
 | `tick`, `applyExternalInput`, tipos `ExternalInput`/`InputResult`/`ScheduledHandler` | `src/tick.ts` | Tick mínimo y entradas externas: `enable_capability`, `set_speed`, `pause`, `resume`, `close` (002, 023 R-004) |
 | `Runner`, tipo `Speed` | `src/runner.ts` | Velocidad, pausa, paso, avanzar N días, tiempo real → ticks, replay (002, 023). `continueInputsAfter(última)` continúa la numeración `seq` al retomar un mundo guardado |
+| `hire`, `setOccupation` | `src/employment.ts` | Única vía para cambiar la ocupación. `hire` ocupa un puesto libre y lo refleja en la persona y en el puesto (006 INV-002); `setOccupation` asigna una ocupación informal, independiente o ninguna, con su motivo |
+| `addObject`, `recordObjectEvent`, `objectsOf`, tipos `WorldObject`/`NewObject` | `src/objects.ts`, `src/world.ts` | Objetos con dueño CIT o HOU validado, valores en rango e historia de eventos; `objectsOf` devuelve los objetos propios y los del hogar (005) |
 | `ENGINE_VERSION` | `src/version.ts` | Versión del motor para `WorldConfig.engineVersion` y `meta.engine_version` (027 R-009). `0.2.0` desde M1 |
 | `profileValue`, `profileNumber`, `profileEntry`, `checkProfile`, tipos `CountryProfile`/`ProfileEntry`/`ProfileScope`/`ProfileStatus`/`ProfileValue` | `src/profile.ts` | Perfil de país (029): valor vigente por clave, fecha ("AAAA-MM-DD") y alcance territorial, con respaldo en el nacional. Lanza si falta la cifra. `checkProfile` comprueba INV-001 e INV-002 |
 | `TILE`, `createGeoMap`, `tileAt`, `setTile`, `roadDistances`, `doorDistanceMatrix`, `geoToData`, `geoFromData`, tipos `GeoMap`/`GeoMapData`/`TileKind`/`TilePoint` | `src/geo.ts` | Mapa de tiles (u8) y distancias por calle (BFS, 4 vecinos en orden fijo). La matriz entre puertas es derivada: no se guarda (003 R-002) |
@@ -128,3 +131,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-24 | m1/c-lugares | 004 | `Place` gana `capacity` y `openingHours` (tipo `OpeningHours`), validados en `addPlace`. 1 prueba |
 | 2026-09-24 | m1/d-organizaciones | 006 | Tipos `Organization`, `Position`, `Shift`, `NewOrganization`, `NewPosition` y `addOrganization` validado (ids de puesto `ORG-0001/P01`, supervisor por índice). 2 pruebas |
 | 2026-09-24 | m1/f-poblacion | 007, 008, 014 | `Citizen` (nombre, sexo, lugar de nacimiento, hogar, ocupación, trayectoria; campos opcionales por compatibilidad con `addCitizen`), `Household`, `Kinship`, `Occupation`; `addPerson`, `addHousehold`, `completeHousehold`; `ageInYears` por calendario (también antes del epoch y con bisiestos); eventos `HOUSEHOLD_FORMED`, `STUDIES_COMPLETED` y `CHILDHOOD_EVENT`. 4 pruebas |
+| 2026-09-24 | m1/g-empleo-objetos | 005, 006, 014 | `employment.ts` (`hire`, `setOccupation`) y `objects.ts` (`addObject`, `recordObjectEvent`, `objectsOf`) en archivos propios, porque `world.ts` pasaba de 300 líneas; tipo `WorldObject`; 6 eventos nuevos en el catálogo. 5 pruebas |

@@ -68,3 +68,4 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 | 2026-09-24 | 0.1 | Catálogo: se añade `WORLD_CLOSED` (spec 001 §5), aprobado por el usuario en el bloque E. Sin cambios en reglas ni CA |
 | 2026-09-24 | 0.1 | Estado → implementada |
 | 2026-09-24 | 0.1 | Catálogo: `HOUSEHOLD_FORMED` (008), `STUDIES_COMPLETED` y `CHILDHOOD_EVENT` (007), para la trayectoria previa de M1. Sin cambios en reglas ni CA |
+| 2026-09-24 | 0.1 | Catálogo: `JOB_HIRED`, `INFORMAL_WORK_STARTED`, `JOB_LOST`, `RETIRED` (006, 007), `OBJECT_ACQUIRED` y `OBJECT_INHERITED` (005). Sin cambios en reglas ni CA |
