@@ -2,7 +2,7 @@
 // Cambia el estado de una o varias specs y registra el cambio en su historial.
 // Uso: node scripts/aprobar-spec.mjs 001 002 014          (→ aprobada)
 //      node scripts/aprobar-spec.mjs --estado en-revision 012
-// Es el paso humano del flujo SDD: úsalo tú, no Claude Code.
+// Es la decisión humana del flujo SDD: Claude Code lo ejecuta solo tras la aprobación explícita del usuario.
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 const args = process.argv.slice(2);
 let estado = 'aprobada';

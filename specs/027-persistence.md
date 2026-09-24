@@ -4,7 +4,7 @@ nombre: persistence
 estado: aprobada
 hito: M0 (base) · M4 (retención)
 depende_de: [001, 002, 014]
-version: 0.2
+version: 0.3
 ---
 
 # 027 — Persistencia
@@ -23,7 +23,8 @@ CREATE TABLE entities (id TEXT PRIMARY KEY, kind TEXT NOT NULL, status TEXT NOT 
                        data BLOB NOT NULL, updated_at INTEGER NOT NULL); -- estado actual (JSON o msgpack)
 CREATE TABLE events (seq INTEGER PRIMARY KEY, id TEXT UNIQUE NOT NULL, type TEXT NOT NULL,
                      at INTEGER NOT NULL, importance REAL NOT NULL, payload BLOB NOT NULL,
-                     causes TEXT NOT NULL);                              -- append-only
+                     causes TEXT NOT NULL, origin TEXT NOT NULL,         -- 'engine' | 'external' | 'llm'
+                     place_id TEXT);                                     -- append-only
 CREATE TABLE event_participants (event_seq INTEGER NOT NULL, entity_id TEXT NOT NULL, role TEXT,
                      PRIMARY KEY (entity_id, event_seq)) WITHOUT ROWID;
 CREATE INDEX events_at ON events(at);
@@ -34,7 +35,8 @@ CREATE TABLE control_commands (id INTEGER PRIMARY KEY, cmd TEXT, arg TEXT, creat
 
 -- Componentes densos (spec 001 §3.1): una fila por columna, datos binarios little-endian.
 CREATE TABLE components (name TEXT PRIMARY KEY, type TEXT NOT NULL,   -- 'f32' | 'i32' | 'u8'
-                         length INTEGER NOT NULL, data BLOB NOT NULL, updated_at INTEGER NOT NULL);
+                         length INTEGER NOT NULL, initial REAL NOT NULL, -- valor con que nacen las filas nuevas
+                         data BLOB NOT NULL, updated_at INTEGER NOT NULL);
 
 -- Memoria fuera de RAM (spec 013): episodios consolidados u olvidados, esquemas y capítulos archivados.
 CREATE TABLE memory_archive (id TEXT PRIMARY KEY, owner_id TEXT NOT NULL, kind TEXT NOT NULL, -- 'MEM'|'SCH'|'CHP'
@@ -85,3 +87,4 @@ CREATE INDEX memory_archive_owner_at ON memory_archive(owner_id, at);
 | 2026-09-23 | 0.1 | Borrador inicial |
 | 2026-09-23 | 0.2 | Tablas `components` y `memory_archive`, capacidades en `meta`, compatibilidad entre peldaños (R-008 a R-011, CA-006 a CA-008). ADR-005 |
 | 2026-09-24 | 0.2 | Estado → aprobada |
+| 2026-09-24 | 0.3 | Implementación M0 (bloque D): `events` gana `origin` y `place_id` (campos de `WorldEvent`, spec 014) y `components` gana `initial` (valor inicial de la columna, necesario para crecer igual tras cargar). Decidido por el usuario |

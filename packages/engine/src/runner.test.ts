@@ -46,7 +46,12 @@ describe('Entradas externas y capacidades (spec 001 R-007, 023 R-004)', () => {
   it('CA-006: activar memory sin relationships se rechaza y no cambia el hash', () => {
     const { world } = createWorld(testConfig());
     const h = stateHash(world);
-    const r = applyExternalInput(world, { at: 0, seq: 0, kind: 'enable_capability', payload: { capability: 'memory' } });
+    const r = applyExternalInput(world, {
+      at: 0,
+      seq: 0,
+      kind: 'enable_capability',
+      payload: { capability: 'memory' },
+    });
     expect(r.ok).toBe(false);
     expect(stateHash(world)).toBe(h);
   });
@@ -70,6 +75,32 @@ describe('Entradas externas y capacidades (spec 001 R-007, 023 R-004)', () => {
     expect(input?.type).toBe('EXTERNAL_INPUT_APPLIED');
     expect(enabled?.type).toBe('CAPABILITY_ENABLED');
     expect(enabled?.causes).toEqual([{ event: input?.id, weight: 1 }]);
+  });
+
+  it('close emite WORLD_CLOSED con el minuto y el hash previo, sin cambiar el estado del mundo', () => {
+    const r = newRunner();
+    r.resume('arranque');
+    r.advanceDays(1);
+    const before = stateHash(r.world);
+    const [applied, closed] = r.submit('close', { reason: 'SIGTERM' }).events;
+    expect(closed!.type).toBe('WORLD_CLOSED');
+    expect(closed!.payload).toEqual({ minute: 1440, hash: before, reason: 'SIGTERM' });
+    expect(closed!.causes).toEqual([{ event: applied!.id, weight: 1 }]);
+    expect(r.world.status).toBe('running');
+  });
+
+  it('continueInputsAfter sigue la numeración de las entradas del minuto actual', () => {
+    const a = newRunner();
+    a.pause();
+    const last = a.submit('close', {}).input;
+    const b = new Runner(deserializeWorld(serializeWorld(a.world)), createRng(a.world.config.seed));
+    b.continueInputsAfter(last);
+    expect(b.resume().length).toBe(2);
+    expect(b.inputs()[0]).toMatchObject({ at: 0, seq: 2 });
+    const c = newRunner();
+    c.continueInputsAfter({ at: -5, seq: 9 }); // de otro minuto: no afecta
+    c.pause();
+    expect(c.inputs()[0]!.seq).toBe(0);
   });
 
   it('rechaza entradas con un minuto distinto del actual o de tipo desconocido', () => {

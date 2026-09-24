@@ -32,6 +32,14 @@ export class Runner {
     return this.#speed;
   }
 
+  /**
+   * Al retomar un mundo guardado: la próxima entrada de ese minuto sigue la numeración de la última
+   * registrada, para que `(at, seq)` no se repita (023 R-004).
+   */
+  continueInputsAfter(last: Pick<ExternalInput, 'at' | 'seq'> | null): void {
+    if (last && last.at === this.world.now) [this.#seqAt, this.#seq] = [last.at, last.seq + 1];
+  }
+
   /** Aplica una entrada externa ahora y la registra para el replay. Lanza si se rechaza. */
   submit(kind: string, payload: unknown): { input: ExternalInput; events: WorldEvent[] } {
     if (this.#seqAt !== this.world.now) [this.#seqAt, this.#seq] = [this.world.now, 0];
@@ -69,7 +77,8 @@ export class Runner {
   enqueueReplay(inputs: readonly ExternalInput[]): void {
     this.#replay.push(...inputs.map((i) => structuredClone(i)));
     this.#replay.sort((a, b) => a.at - b.at || a.seq - b.seq);
-    if (this.#replay[0] && this.#replay[0].at < this.world.now) throw new Error('Replay: hay entradas anteriores al minuto actual');
+    if (this.#replay[0] && this.#replay[0].at < this.world.now)
+      throw new Error('Replay: hay entradas anteriores al minuto actual');
   }
 
   /** Aplica las entradas de replay del minuto actual (también al final de un avance). */

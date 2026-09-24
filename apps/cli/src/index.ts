@@ -1,2 +1,4 @@
-// Punto de entrada de la CLI. Los comandos world:new, world:advance y world:info llegan en el bloque E1.
-export {};
+// API de la CLI. El proceso se lanza con main.ts; `run` se usa directamente en las pruebas.
+export { DEFAULT_DB, USAGE, run } from './commands.ts';
+export type { Io } from './commands.ts';
+export { bench } from './bench.ts';

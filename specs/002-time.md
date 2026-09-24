@@ -1,7 +1,7 @@
 ---
 id: 002
 nombre: time
-estado: aprobada
+estado: implementada
 hito: M0
 depende_de: []
 version: 0.1
@@ -78,3 +78,4 @@ interface ScheduledItem {
 | 2026-09-23 | 0.1 | Borrador inicial |
 | 2026-09-24 | 0.1 | Estado → aprobada |
 | 2026-09-23 | 0.1 | Precisiones de la implementación (bloque C): R-007 (epoch a medianoche, tick divisor de 1440, cuándo se emite `DAY_STARTED`) y R-008 (el motor recibe el tiempo real, no lo lee). Sin cambios en CA |
+| 2026-09-24 | 0.1 | Estado → implementada |

@@ -36,18 +36,18 @@ Cada bloque se hace en una rama (`m0/a-tooling`, `m0/b-rng`…) y termina con un
 - [x] C6. Velocidad y controles (pausa, paso, avanzar N días) en una clase `Runner` que no depende del reloj real salvo en el worker (CA-002, CA-004 de 002).
 
 ## Bloque D — Persistencia (spec 027)
-- [ ] D1. Esquema SQLite y migración 001; pragmas WAL.
-- [ ] D2. Repositorio: guardar/cargar mundo, añadir eventos por lote, instantánea comprimida.
-- [ ] D3. CA-001 (guardar, cerrar, cargar, continuar = mismo hash) y CA-003 (SIGTERM).
+- [x] D1. Esquema SQLite y migración 001; pragmas WAL.
+- [x] D2. Repositorio: guardar/cargar mundo, añadir eventos por lote, instantánea comprimida.
+- [x] D3. CA-001 (guardar, cerrar, cargar, continuar = mismo hash) y CA-003 (SIGTERM).
 
 ## Bloque E — CLI y worker mínimos
-- [ ] E1. `pnpm cli world:new --seed N`, `world:advance --days N`, `world:info`.
-- [ ] E2. `apps/worker` que carga el mundo, avanza a la velocidad configurada, atiende `control_commands` y hace flush.
-- [ ] E3. `pnpm bench`: ticks/s y RSS para un mundo vacío durante 365 días (CA-005 de 002).
+- [x] E1. `pnpm cli world:new --seed N`, `world:advance --days N`, `world:info`.
+- [x] E2. `apps/worker` que carga el mundo, avanza a la velocidad configurada, atiende `control_commands` y hace flush.
+- [x] E3. `pnpm bench`: ticks/s y RSS para un mundo vacío durante 365 días (CA-005 de 002).
 
 ## Cierre de M0
-- [ ] Prueba de determinismo en CI (dos procesos, mismo hash).
-- [ ] `/sincronizar-docs all` sin discrepancias.
-- [ ] Proponer al usuario pasar 001, 002, 014, 023 y 027 a `implementada` (lo hace él con `node scripts/aprobar-spec.mjs --estado implementada …`) si todos sus CA están cubiertos. Si no, listar los CA pendientes en cada `MODULE.md`.
-- [ ] Nota breve en `docs/validaciones/` con los números del bench.
+- [x] Prueba de determinismo en CI (dos procesos, mismo hash).
+- [x] `/sincronizar-docs all` sin discrepancias.
+- [x] Proponer al usuario pasar 001, 002, 014, 023 y 027 a `implementada` (→ 002 y 014 implementadas; 001, 023 y 027 siguen aprobadas con CA pendientes listados en sus `MODULE.md`; lo ejecuta Claude con `node scripts/aprobar-spec.mjs --estado implementada …`) si todos sus CA están cubiertos. Si no, listar los CA pendientes en cada `MODULE.md`.
+- [x] Nota breve en `docs/validaciones/` con los números del bench.
 - [ ] Revisar y aprobar las specs de M1 antes de crear `tasks/M1-mundo-estatico.md` (pedir a Claude Code que la redacte).
