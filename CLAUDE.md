@@ -1,4 +1,4 @@
-# CLAUDE.md — Mundo Social Autónomo Simulado
+# CLAUDE.md — Datas World
 
 Este archivo lo lee Claude Code al empezar cada sesión. Es la fuente de verdad sobre **cómo** se trabaja en este repositorio. El **qué** está en `specs/` y el **por qué** en `docs/`.
 

@@ -1,9 +1,9 @@
 {
-  "name": "@mundo-social/worker",
+  "name": "@datas-world/worker",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "description": "Proceso que avanza el mundo y persiste",
   "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@mundo-social/engine": "workspace:*", "@mundo-social/persistence": "workspace:*" }
+  "dependencies": { "@datas-world/engine": "workspace:*", "@datas-world/persistence": "workspace:*" }
 }

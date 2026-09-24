@@ -1,9 +1,9 @@
 {
-  "name": "@mundo-social/generators",
+  "name": "@datas-world/generators",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "description": "Generación de mundo y población",
   "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@mundo-social/engine": "workspace:*" }
+  "dependencies": { "@datas-world/engine": "workspace:*" }
 }

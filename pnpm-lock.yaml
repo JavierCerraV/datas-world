@@ -196,19 +196,19 @@ importers:
 
   apps/api:
     dependencies:
-      '@mundo-social/persistence':
+      '@datas-world/persistence':
         specifier: workspace:*
         version: link:../../packages/persistence
 
   apps/cli:
     dependencies:
-      '@mundo-social/engine':
+      '@datas-world/engine':
         specifier: workspace:*
         version: link:../../packages/engine
-      '@mundo-social/generators':
+      '@datas-world/generators':
         specifier: workspace:*
         version: link:../../packages/generators
-      '@mundo-social/persistence':
+      '@datas-world/persistence':
         specifier: workspace:*
         version: link:../../packages/persistence
 
@@ -216,10 +216,10 @@ importers:
 
   apps/worker:
     dependencies:
-      '@mundo-social/engine':
+      '@datas-world/engine':
         specifier: workspace:*
         version: link:../../packages/engine
-      '@mundo-social/persistence':
+      '@datas-world/persistence':
         specifier: workspace:*
         version: link:../../packages/persistence
 
@@ -227,13 +227,13 @@ importers:
 
   packages/generators:
     dependencies:
-      '@mundo-social/engine':
+      '@datas-world/engine':
         specifier: workspace:*
         version: link:../engine
 
   packages/persistence:
     dependencies:
-      '@mundo-social/engine':
+      '@datas-world/engine':
         specifier: workspace:*
         version: link:../engine
 

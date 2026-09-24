@@ -1,9 +1,9 @@
 {
-  "name": "@mundo-social/persistence",
+  "name": "@datas-world/persistence",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "description": "Persistencia SQLite del mundo",
   "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@mundo-social/engine": "workspace:*" }
+  "dependencies": { "@datas-world/engine": "workspace:*" }
 }
