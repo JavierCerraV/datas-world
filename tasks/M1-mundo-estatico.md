@@ -1,6 +1,6 @@
 # M1 — Mundo estático
 
-Specs: 003, 004, 005, 006, 007, 008, 009, 029 (aprobadas) y 030 (pendiente de aprobación). ADR-006 aceptado.
+Specs: 003, 004, 005, 006, 007, 008, 009, 029 y 030 (aprobadas). ADR-006 aceptado.
 
 Resultado esperado: `pnpm cli world:new --seed N` crea Villa Cordillera con unas 200 personas coherentes con el perfil colombiano y una historia consultable desde 1900. El presente del mundo es el 2026-01-01.
 - El mundo se guarda en SQLite y da el mismo hash con la misma semilla.

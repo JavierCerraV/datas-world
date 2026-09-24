@@ -1,7 +1,7 @@
 ---
 id: 030
 nombre: generated-history
-estado: borrador
+estado: aprobada
 hito: M1
 depende_de: [001, 003, 004, 006, 007, 008, 014, 023, 029]
 version: 0.1
@@ -151,3 +151,4 @@ Alerta si alguna invariante vital se incumple o si una década queda vacía.
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-24 | 0.1 | Borrador inicial: el mundo existe desde 1900 con historia generada y consultable; la vida detallada empieza el 2026-01-01 (decisiones del usuario) |
+| 2026-09-24 | 0.1 | Estado → aprobada |
