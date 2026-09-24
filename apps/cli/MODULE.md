@@ -18,7 +18,7 @@ Herramientas de línea de comandos: crear mundo, avanzar N días, informes, expo
 |---|---|---|
 | 001 | — (crea el mundo con `createWorld`; los CA se prueban en el motor) | CA-005 (generación de población, M1) |
 | 002 | CA-005 desde la CLI (`world:advance --days 365` en < 2 s, 365 `DAY_STARTED`) | — |
-| 023 | CA-001 entre dos procesos | — |
+| 023 | CA-001 entre dos procesos, con un mundo vacío | CA-001 con 100 personas (M1) |
 | 027 | — (usa persistence; sus CA se prueban allí) | — |
 
 
@@ -33,7 +33,7 @@ Desde la raíz, `pnpm cli <comando>` (`src/main.ts`). Base por defecto: `data/wo
 | `control pause\|resume\|step\|stop\|speed <v> [--db RUTA]` | Encola una orden en `control_commands` para el worker. En M0 solo la CLI encola órdenes (decisión del usuario) |
 | `bench [--days N] [--json]` | También `pnpm bench`. Ticks/s y memoria de un mundo vacío, solo con el motor y con el motor + SQLite |
 
-Código de salida: 0 bien, 1 error de ejecución, 2 uso incorrecto. Para las pruebas: `run(argv, io)` (`src/commands.ts`), con `io = { out, err, now }`.
+Código de salida: 0 bien, 1 error de ejecución, 2 uso incorrecto. Desde `src/index.ts`, para pruebas y reutilización: `run(argv, io)` con `io = { out, err, now }`, `bench(args, io)`, `DEFAULT_DB`, `USAGE` y el tipo `Io`.
 
 ## 4. Diseño interno y decisiones
 - Sin dependencias: argumentos con `node:util` `parseArgs` (estricto: una opción desconocida es error de uso).
@@ -73,3 +73,4 @@ Sustituye a los scripts headless usados para calibrar el prototipo.
 | 2026-09-23 | kit de arranque | — | Documento creado (sin código) |
 | 2026-09-23 | m0/a-tooling (A5) | — | Esqueleto del paquete: `package.json` (workspace, ESM, `exports` → `src/index.ts`) y `src/index.ts` vacío. Sin API todavía |
 | 2026-09-24 | m0/e-cli-worker (E1, E3) | 002, 023, 027 | Comandos `world:new`, `world:advance`, `world:info`, `control` y `bench`; scripts `pnpm cli` y `pnpm bench`. 9 pruebas |
+| 2026-09-24 | m0/cierre (sincronizar-docs) | 023 | Solo documentación: exportaciones de `index.ts` completas; 023 CA-001 marcada como parcial (mundo vacío) |

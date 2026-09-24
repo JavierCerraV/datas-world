@@ -46,8 +46,8 @@ Cada bloque se hace en una rama (`m0/a-tooling`, `m0/b-rng`…) y termina con un
 - [x] E3. `pnpm bench`: ticks/s y RSS para un mundo vacío durante 365 días (CA-005 de 002).
 
 ## Cierre de M0
-- [ ] Prueba de determinismo en CI (dos procesos, mismo hash).
-- [ ] `/sincronizar-docs all` sin discrepancias.
+- [x] Prueba de determinismo en CI (dos procesos, mismo hash).
+- [x] `/sincronizar-docs all` sin discrepancias.
 - [ ] Proponer al usuario pasar 001, 002, 014, 023 y 027 a `implementada` (lo hace él con `node scripts/aprobar-spec.mjs --estado implementada …`) si todos sus CA están cubiertos. Si no, listar los CA pendientes en cada `MODULE.md`.
-- [ ] Nota breve en `docs/validaciones/` con los números del bench.
+- [x] Nota breve en `docs/validaciones/` con los números del bench.
 - [ ] Revisar y aprobar las specs de M1 antes de crear `tasks/M1-mundo-estatico.md` (pedir a Claude Code que la redacte).

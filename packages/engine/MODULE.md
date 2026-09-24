@@ -17,13 +17,13 @@ Núcleo puro de la simulación: tipos del dominio, RNG, reloj, scheduler, evento
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
 | 001 | CA-001, CA-002, CA-003, CA-004, CA-006, CA-007, CA-008 | CA-005 (necesita generación de población, M1) |
-| 002 | CA-001, CA-002, CA-003, CA-004, CA-005 (a nivel de motor; desde la CLI en el bloque E) | — |
+| 002 | CA-001, CA-002, CA-003, CA-004, CA-005 (en el motor y desde la CLI, `apps/cli`) | — |
 | 014 | CA-001, CA-002, CA-003 | — |
-| 023 | CA-001 (también entre dos procesos, prueba en `apps/cli`), CA-003, CA-004, CA-005, CA-006 | CA-002 (necesita personas, M1–M2) |
+| 023 | CA-003, CA-004, CA-005, CA-006; CA-001 en parte: mismo hash en un proceso y entre dos procesos (`apps/cli`), pero con un mundo vacío | CA-001 con 100 personas y CA-002 (necesitan población, M1–M2) |
 
 
 ## 3. API pública
-Desde `@datas-world/engine` (`src/index.ts`). Todo lo público se reexporta desde ahí:
+Desde `@mundo-social/engine` (`src/index.ts`; pasará a `@datas-world/engine` con el PR del renombrado). Todo lo público se reexporta desde ahí:
 
 | Símbolo | Archivo | Descripción |
 |---|---|---|
@@ -31,16 +31,16 @@ Desde `@datas-world/engine` (`src/index.ts`). Todo lo público se reexporta desd
 | `restoreRng(state): Rng` | `src/rng.ts` | Reconstruye un flujo desde `state()`, en el mismo punto de la secuencia |
 | `interface Rng` | `src/rng.ts` | `next`, `int`, `chance`, `pick`, `weighted`, `normal`, `fork`, `state` (spec 023 §3) |
 | `interface RngState` | `src/rng.ts` | `{ key: [u32, u32], s: [u32 ×4] }`, serializable como JSON |
-| `formatId`, `allocateId`, `idKind`, `idNumber`, `emptyCounters`, `ID_WIDTH`, tipos `EntityId`/`EntityKind`/`Counters` | `src/ids.ts` | Identificadores con relleno por tipo; los contadores nunca retroceden (001 R-001) |
-| `toCalendar`, `parseEpoch`, `parseDate`, `daysFromCivil`, `civilFromDays`, `formatDate`, `MINUTES_PER_DAY`, tipo `WorldMinute` | `src/calendar.ts` | Calendario gregoriano con aritmética entera, sin `Date` (002) |
-| `createScheduler`, `schedule`, `popDue`, `sortedItems` | `src/scheduler.ts` | Montículo por `(at, id)` (002 R-004) |
-| `makeEvent`, `eventText`, `EVENT_TYPES`, tipos `WorldEvent`/`CauseRef`/`NewEvent` | `src/events.ts` | Catálogo central; creación validada e inmutable (014) |
-| `CAPABILITIES`, `CAPABILITY_DEPS`, `canEnable`, `withCapability`, `validateCapabilities` | `src/capabilities.ts` | Capacidades y dependencias (001 R-007) |
-| `defineColumn`, `ensureCapacity`, `columns`, `capacityFor`, tipo `CitizenComponents` | `src/components.ts` | Columnas tipadas por índice denso (001 §3.1) |
-| `createWorld`, `addCitizen`, `deactivateEntity`, `validateConfig`, tipos `World`/`WorldConfig` | `src/world.ts` | Mundo raíz (001) |
-| `serializeWorld`, `deserializeWorld`, `stateHash`, `canonicalize`, `hashString` | `src/serialize.ts`, `src/hash.ts` | Instantánea JSON y hash canónico de 64 bits (001 R-004, R-010) |
-| `tick`, `applyExternalInput`, tipos `ExternalInput`/`ScheduledHandler` | `src/tick.ts` | Tick mínimo y entradas externas (002, 023 R-004) |
-| `Runner` | `src/runner.ts` | Velocidad, pausa, paso, avanzar N días, tiempo real → ticks, replay (002, 023). `continueInputsAfter(última)` continúa la numeración `seq` al retomar un mundo guardado |
+| `formatId`, `allocateId`, `idKind`, `idNumber`, `emptyCounters`, `ID_WIDTH`, `ENTITY_KINDS`, tipos `EntityId`/`EntityKind`/`Counters`/`WorldId` | `src/ids.ts` | Identificadores con relleno por tipo; los contadores nunca retroceden (001 R-001) |
+| `toCalendar`, `parseEpoch`, `parseDate`, `daysFromCivil`, `civilFromDays`, `formatDate`, `MINUTES_PER_DAY`, tipos `WorldMinute`/`CalendarView`/`CivilDate`/`CivilDateTime` | `src/calendar.ts` | Calendario gregoriano con aritmética entera, sin `Date` (002) |
+| `createScheduler`, `schedule`, `popDue`, `sortedItems`, tipos `Scheduler`/`ScheduledItem` | `src/scheduler.ts` | Montículo por `(at, id)` (002 R-004) |
+| `makeEvent`, `eventText`, `EVENT_TYPES`, tipos `WorldEvent`/`CauseRef`/`NewEvent`/`EventType`/`EventOrigin` | `src/events.ts` | Catálogo central; creación validada e inmutable (014) |
+| `CAPABILITIES`, `CAPABILITY_DEPS`, `canEnable`, `isCapability`, `withCapability`, `validateCapabilities`, tipo `Capability` | `src/capabilities.ts` | Capacidades y dependencias (001 R-007) |
+| `defineColumn`, `ensureCapacity`, `columns`, `capacityFor`, tipos `CitizenComponents`/`ColumnType` | `src/components.ts` | Columnas tipadas por índice denso (001 §3.1) |
+| `createWorld`, `addCitizen`, `deactivateEntity`, `validateConfig`, tipos `World`/`WorldConfig`/`WorldStatus`/`BaseEntity`/`Citizen` | `src/world.ts` | Mundo raíz (001) |
+| `serializeWorld`, `deserializeWorld`, `stateHash`, `canonicalize`, `hashString`, tipo `WorldSnapshot` | `src/serialize.ts`, `src/hash.ts` | Instantánea JSON y hash canónico de 64 bits (001 R-004, R-010) |
+| `tick`, `applyExternalInput`, tipos `ExternalInput`/`InputResult`/`ScheduledHandler` | `src/tick.ts` | Tick mínimo y entradas externas: `enable_capability`, `set_speed`, `pause`, `resume`, `close` (002, 023 R-004) |
+| `Runner`, tipo `Speed` | `src/runner.ts` | Velocidad, pausa, paso, avanzar N días, tiempo real → ticks, replay (002, 023). `continueInputsAfter(última)` continúa la numeración `seq` al retomar un mundo guardado |
 | `ENGINE_VERSION` | `src/version.ts` | Versión del motor para `WorldConfig.engineVersion` y `meta.engine_version` (027 R-009) |
 
 ## 4. Diseño interno y decisiones
@@ -90,7 +90,7 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 - **Diferencias deliberadas.** El generador es xoshiro128\*\* y no `sm32` directamente, así que las secuencias no coinciden número a número; la paridad es estadística, como pide `docs/prototipo-referencia.md`. `int` no tiene sesgo de módulo. Hay flujos con nombre (`fork`) que el prototipo no tiene.
 
 ## 8. Pendientes y deuda
-- [ ] Spec 023 CA-002 (necesita personas).
+- [ ] Spec 023 CA-001 con 100 personas y CA-002 (necesitan población, M1).
 - [ ] Spec 001 CA-005 (semillas distintas → hashes distintos tras la generación, M1).
 - [ ] Registro de sistemas y bucle por fases (spec 021, cuando se apruebe).
 - [ ] Si `#replay` crece mucho, pasar a un índice por minuto (hoy es un arreglo ordenado).
@@ -103,3 +103,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-23 | m0/b-rng (B0–B3) | 023 | `Rng` xoshiro128\*\* con `fork` por clave de 64 bits, `state`/`restoreRng`, `int` sin sesgo, `weighted`, `normal`. Pruebas de CA-003 y CA-005 más distribución y vector de referencia. Excepción de determinismo aprobada para el ejemplo de `lint.test.ts` |
 | 2026-09-23 | m0/c-mundo (C1–C6) | 001, 002, 014, 023 | Mundo (ids, configuración validada e inmutable, capacidades, componentes por columnas), calendario entero, scheduler por (at, id), catálogo de eventos validados e inmutables, `tick` mínimo, entradas externas con causalidad, `Runner` (velocidad, pausa, paso, N días, tiempo real → ticks, replay), `serializeWorld`/`stateHash`. 45 pruebas nuevas |
 | 2026-09-24 | m0/e-cli-worker (E1–E3) | 001, 014, 023 | Evento `WORLD_CLOSED` y entrada externa `close` (sin cambiar `status`), `Runner.continueInputsAfter` para no repetir `(at, seq)` al retomar un mundo, `ENGINE_VERSION`. 2 pruebas nuevas |
+| 2026-09-24 | m0/cierre (sincronizar-docs) | 002, 023 | Solo documentación: tabla de API completa (tipos y constantes que faltaban), paquete `@mundo-social/engine` (el nombre actual), 002 CA-005 cubierta también desde la CLI, 023 CA-001 marcada como parcial (probada con un mundo vacío; la spec pide 100 personas) |
