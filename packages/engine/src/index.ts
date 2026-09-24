@@ -1,2 +1,3 @@
-// API pública del motor. Se llena en los bloques B (Rng, spec 023) y C (mundo, reloj y eventos, specs 001, 002, 014).
-export {};
+// API pública del motor. Mundo, reloj y eventos (specs 001, 002, 014) llegan en el bloque C.
+export { createRng, restoreRng } from './rng.ts';
+export type { Rng, RngState } from './rng.ts';

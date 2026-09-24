@@ -21,10 +21,10 @@ Cada bloque se hace en una rama (`m0/a-tooling`, `m0/b-rng`…) y termina con un
 - [x] A7. `.editorconfig` y licencia (preguntar al usuario). El `.gitignore` ya existe. → Sin licencia (UNLICENSED, todos los derechos reservados), decidido por el usuario.
 
 ## Bloque B — Azar reproducible (spec 023)
-- [ ] B0. Leer `class RNG` y `sm32` del prototipo; decidir con el usuario si se mantiene splitmix32 o se pasa a PCG32/xoshiro (registrar la decisión en la spec 023 y en `packages/engine/MODULE.md`).
-- [ ] B1. Pruebas CA-003 (fork estable) y distribución básica (media de `next()` ≈ 0,5; `int` sin sesgo).
-- [ ] B2. Implementar `Rng` (PCG32 o xoshiro128**) con `fork`, `int`, `chance`, `pick`, `weighted`, `normal`, `state/restore`.
-- [ ] B3. Prueba CA-005: el linter falla con `Math.random` en engine (fixture).
+- [x] B0. Leer `class RNG` y `sm32` del prototipo; decidir con el usuario si se mantiene splitmix32 o se pasa a PCG32/xoshiro (registrar la decisión en la spec 023 y en `packages/engine/MODULE.md`). → **xoshiro128**** (decidido por el usuario; registrado en la spec 023 y en engine/MODULE.md).
+- [x] B1. Pruebas CA-003 (fork estable) y distribución básica (media de `next()` ≈ 0,5; `int` sin sesgo).
+- [x] B2. Implementar `Rng` (PCG32 o xoshiro128**) con `fork`, `int`, `chance`, `pick`, `weighted`, `normal`, `state/restore`.
+- [x] B3. Prueba CA-005: el linter falla con `Math.random` en engine (fixture).
 
 ## Bloque C — Mundo y reloj (specs 001, 002)
 - [ ] C1. Tipos `WorldMinute`, `EntityId`, `WorldConfig`, `World`; generador de ids (CA-002 de 001).
