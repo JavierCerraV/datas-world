@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import { acquireWriterLock, closeDb, openWorldDb, pendingCommands } from '@mundo-social/persistence';
+import { acquireWriterLock, closeDb, openWorldDb, pendingCommands } from '@datas-world/persistence';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { run } from './commands.ts';
 

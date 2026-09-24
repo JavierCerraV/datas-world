@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
-import { Runner, createRng, createWorld, stateHash } from '@mundo-social/engine';
+import { Runner, createRng, createWorld, stateHash } from '@datas-world/engine';
 import { afterEach, describe, expect, it } from 'vitest';
 import { closeDb, openWorldDb } from './db.ts';
 import { FLUSH_TICKS } from './params.ts';

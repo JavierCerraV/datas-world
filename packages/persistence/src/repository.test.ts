@@ -1,5 +1,5 @@
-import { Runner, addCitizen, columns, createRng, createWorld, defineColumn, stateHash } from '@mundo-social/engine';
-import type { World, WorldConfig, WorldEvent } from '@mundo-social/engine';
+import { Runner, addCitizen, columns, createRng, createWorld, defineColumn, stateHash } from '@datas-world/engine';
+import type { World, WorldConfig, WorldEvent } from '@datas-world/engine';
 import { afterEach, describe, expect, it } from 'vitest';
 import { columnToLE } from './codec.ts';
 import { closeDb, openReadonly, openWorldDb } from './db.ts';

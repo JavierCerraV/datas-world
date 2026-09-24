@@ -1,7 +1,7 @@
 // Codificación binaria de componentes e instantáneas (spec 027 R-004, R-008).
 import { zstdCompressSync, zstdDecompressSync } from 'node:zlib';
-import { deserializeWorld, serializeWorld } from '@mundo-social/engine';
-import type { ColumnType, World, WorldSnapshot } from '@mundo-social/engine';
+import { deserializeWorld, serializeWorld } from '@datas-world/engine';
+import type { ColumnType, World, WorldSnapshot } from '@datas-world/engine';
 
 type Column = Float32Array | Int32Array | Uint8Array;
 

@@ -1,4 +1,4 @@
-import { Runner, createRng, createWorld } from '@mundo-social/engine';
+import { Runner, createRng, createWorld } from '@datas-world/engine';
 import { afterEach, describe, expect, it } from 'vitest';
 import { closeDb, openWorldDb } from './db.ts';
 import { FLUSH_TICKS } from './params.ts';

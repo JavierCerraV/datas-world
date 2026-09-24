@@ -4,9 +4,9 @@ import { mkdtempSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-import { ENGINE_VERSION, MINUTES_PER_DAY, Runner, createRng, createWorld } from '@mundo-social/engine';
-import type { WorldConfig } from '@mundo-social/engine';
-import { WorldRepository, WorldSession, closeDb, openWorldDb } from '@mundo-social/persistence';
+import { ENGINE_VERSION, MINUTES_PER_DAY, Runner, createRng, createWorld } from '@datas-world/engine';
+import type { WorldConfig } from '@datas-world/engine';
+import { WorldRepository, WorldSession, closeDb, openWorldDb } from '@datas-world/persistence';
 import type { Io } from './commands.ts';
 
 const config: WorldConfig = {

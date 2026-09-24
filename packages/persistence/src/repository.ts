@@ -7,7 +7,7 @@ import {
   isCapability,
   serializeWorld,
   stateHash,
-} from '@mundo-social/engine';
+} from '@datas-world/engine';
 import type {
   BaseEntity,
   CauseRef,
@@ -19,7 +19,7 @@ import type {
   World,
   WorldEvent,
   WorldSnapshot,
-} from '@mundo-social/engine';
+} from '@datas-world/engine';
 import { columnFromLE, columnToLE, decodeSnapshot, encodeSnapshot } from './codec.ts';
 import type { Db } from './db.ts';
 

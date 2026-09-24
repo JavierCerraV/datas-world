@@ -1,7 +1,7 @@
 // Sesión de escritura: une un Runner con el repositorio y decide cuándo hacer flush e instantánea
 // (spec 027 R-002, R-004). La usan el worker y `world:advance` de la CLI.
-import { MINUTES_PER_DAY } from '@mundo-social/engine';
-import type { Runner, World } from '@mundo-social/engine';
+import { MINUTES_PER_DAY } from '@datas-world/engine';
+import type { Runner, World } from '@datas-world/engine';
 import { FLUSH_TICKS, SNAPSHOT_EVERY_DAYS } from './params.ts';
 import type { WorldRepository } from './repository.ts';
 

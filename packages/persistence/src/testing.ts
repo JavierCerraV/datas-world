@@ -2,7 +2,7 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { WorldConfig } from '@mundo-social/engine';
+import type { WorldConfig } from '@datas-world/engine';
 
 export const testConfig = (over: Partial<WorldConfig> = {}): WorldConfig => ({
   name: 'Villa Cordillera',

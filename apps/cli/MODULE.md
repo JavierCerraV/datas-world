@@ -74,3 +74,4 @@ Sustituye a los scripts headless usados para calibrar el prototipo.
 | 2026-09-23 | m0/a-tooling (A5) | — | Esqueleto del paquete: `package.json` (workspace, ESM, `exports` → `src/index.ts`) y `src/index.ts` vacío. Sin API todavía |
 | 2026-09-24 | m0/e-cli-worker (E1, E3) | 002, 023, 027 | Comandos `world:new`, `world:advance`, `world:info`, `control` y `bench`; scripts `pnpm cli` y `pnpm bench`. 9 pruebas |
 | 2026-09-24 | m0/cierre (sincronizar-docs) | 023 | Solo documentación: exportaciones de `index.ts` completas; 023 CA-001 marcada como parcial (mundo vacío) |
+| 2026-09-24 | chore/renombrar-datas-world-2 | — | Renombrado de los paquetes `@mundo-social/*` → `@datas-world/*` (imports y `package.json`). Sin cambios de comportamiento |
