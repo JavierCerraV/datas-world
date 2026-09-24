@@ -53,3 +53,4 @@ Porta `genWorld`, `buildPlaces`, `genPopulation`, `newAgent`, `genJobs`, `genRel
 | 2026-09-24 | m1/c-lugares | 004 | Submódulo `places` (lugares de las parcelas y viviendas) |
 | 2026-09-24 | m1/d-organizaciones | 006 | Submódulo `organizations` (organizaciones y puestos) |
 | 2026-09-24 | m1/e-personalidad | 009 | Submódulo `personality` y catálogos de rasgos y valores |
+| 2026-09-24 | m1/f-poblacion | 007, 008 | Submódulo `population` (hogares, personas, apariencia y trayectoria) y 5 catálogos de población |

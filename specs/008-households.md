@@ -4,7 +4,7 @@ nombre: households
 estado: aprobada
 hito: M1 (plantillas y composición) · M2–M3 (economía del hogar, clima, mudanzas)
 depende_de: [001, 004, 023, 029]
-version: 0.3
+version: 0.4
 ---
 
 # 008 — Hogares
@@ -69,8 +69,8 @@ Coste en memoria: ≈ 120 B por hogar más 24 B por vínculo.
 
 ## 7. Criterios de aceptación
 - **CA-001 (M1)** — *Dado* la generación, *entonces* se cumplen INV-002 e INV-003.
-- **CA-002 (M1)** — *Dado* 200 personas generadas, *entonces* la proporción de plantillas está dentro de ±0,08 de `TEMPLATE_WEIGHTS`.
-- **CA-006 (M1)** — *Dado* 200 personas con el perfil colombiano, *entonces* el tamaño medio del hogar está en `household.meanSize ± 0,25` (2,82, DANE ECV 2025) y las tipologías DANE (unipersonal, biparental, monoparental, otros) están dentro de ±0,08 del perfil.
+- **CA-002 (M1)** — *Dado* 20 mundos de 200 personas, *entonces* la proporción agregada de plantillas está dentro de ±0,03 de `TEMPLATE_WEIGHTS`.
+- **CA-006 (M1)** — *Dado* 20 mundos de 200 personas con el perfil colombiano, *entonces* el tamaño medio agregado del hogar está en `household.meanSize ± 0,15` (2,82, DANE ECV 2025) y las tipologías DANE agregadas (unipersonal, biparental, monoparental, otros) están dentro de ±0,05 del perfil.
 - **CA-003 (M1)** — *Dado* un hogar extendido con menores, *entonces* el abuelo o abuela aparece en `caregiverIds`.
 - **CA-004 (M2)** — *Dado* un hogar sin ingresos durante 2 meses, *entonces* aparece `RENT_LATE` y sube el estrés de los adultos.
 - **CA-005 (M3)** — *Dado* una pareja que se separa, *entonces* uno de los dos cambia de hogar en ≤ 60 días.
@@ -97,3 +97,5 @@ Distribución de plantillas y tamaño medio del hogar (≈ 2,8 en el prototipo);
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: sin dependencias con 007 ni con 015 (el dinero y el arriendo pasan a M2); plantillas y edades portadas de `genPopulation`; apellidos colombianos; abuelos cuidadores (`caregiverIds`); parentesco dirigido y estructural (el afecto va en 012); vivienda `dwelling` (004); criterios marcados por hito |
 | 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): pesos de plantilla del perfil colombiano según las tipologías de hogar del DANE (ECV 2024–2025), con la plantilla `roommates` como hogar no familiar; el perfil "prototipo" conserva los pesos anteriores; CA-006 con tamaño medio de 2,82 |
 | 2026-09-24 | 0.3 | Estado → aprobada |
+| 2026-09-24 | 0.4 | Implementación del bloque F. CA-002 y CA-006 se comprueban sobre el agregado de 20 mundos, con márgenes más estrictos (±0,03 y ±0,05), por el mismo motivo que la spec 007 v0.5. Precisiones: el hogar va a la primera vivienda libre de un barrio sorteado en proporción a sus viviendas libres; una vivienda, un hogar; la cabeza es el primer adulto; el parentesco incluye hermanos (un vínculo por pareja) y abuelo → nieto; `roommates` lleva de 2 a 3 adultos de 18 a 40 años |
+| 2026-09-24 | 0.4 | Revisión de CA estadísticos aprobada por el usuario |

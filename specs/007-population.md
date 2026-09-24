@@ -4,7 +4,7 @@ nombre: population
 estado: aprobada
 hito: M1 (generación) · peldaño 4 (nacimientos y muertes)
 depende_de: [001, 003, 004, 006, 008, 009, 014, 023, 029]
-version: 0.3
+version: 0.5
 ---
 
 # 007 — Población
@@ -40,8 +40,15 @@ Columnas (spec 001 §3.1): los datos numéricos no van en el objeto.
 | `health.physical` | `f32` | [0,1] | 1 | salud física base |
 | `demo.student` | `u8` | 0/1 | 0 | estudia, de 5 a 17 años |
 | `demo.pensioned` | `u8` | 0/1 | 0 | recibe pensión. Solo es posible desde `pension.age` (mujeres 57, hombres 62; spec 029), y con probabilidad `pension.coverage` |
+| `look.skin` | `u8` | 1–5 | 1 | tono de piel del sprite (catálogo `appearance`) |
+| `look.hairStyle` | `u8` | 0–7 | 0 | peinado: corto, bob, largo, moño, colitas, en punta, gorra, calvo |
+| `look.hairColor` | `u8` | índice | 0 | color de pelo base (sin canas) del catálogo `appearance` |
+| `look.glasses` | `u8` | 0/1 | 0 | gafas |
+| `look.beard` | `u8` | 0/1 | 0 | barba |
 
-Coste en memoria: ≈ 300 B de objeto y 18 B de columnas por persona.
+Coste en memoria: ≈ 300 B de objeto y 23 B de columnas por persona.
+
+**Apariencia (v0.4).** Las columnas `look.*` alimentan los sprites del concepto visual B (docs/identidad-visual.md). **Las canas y la ropa no se guardan:** el visor (M4) las deduce de la edad y de la ocupación, para no duplicar datos.
 
 ## 4. Reglas
 - **R-001 (M1)** — La población se genera **por hogares** (008), no persona a persona, para que edades, apellidos y estratos sean coherentes. Orden del generador: geografía (003) → lugares (004) → organizaciones (006) → hogares con sus personas (008 + 007, con la personalidad de 009) → empleo (006) → objetos (005). Cada paso usa su flujo `gen:<paso>`.
@@ -68,6 +75,9 @@ Coste en memoria: ≈ 300 B de objeto y 18 B de columnas por persona.
   - un hecho de infancia (`CHILDHOOD_EVENT`, de la lista `KID` del prototipo).
 
   Sus causas son `{ state: 'backstory' }` o eventos previos de la misma persona.
+- **R-009 (M1)** — **Apariencia.** Se genera con `rng.fork('gen:appearance').fork(citizenId)`, reproducible por persona:
+  - el tono de piel es uniforme entre 1 y 5 (estimado). No se asocia a etnia; podrá calibrarse con el autorreconocimiento del censo si el usuario lo considera pertinente;
+  - el peinado y las gafas dependen del sexo y la edad, y la barba solo de los hombres adultos, con probabilidades del catálogo `appearance` (estimadas).
 - **R-007 (peldaño 4)** — Nacimientos y muertes (`CITIZEN_BORN`, `CITIZEN_DIED`) con la capacidad `lifecourse`.
 
 ## 5. Eventos
@@ -87,12 +97,12 @@ Los eventos anteriores al epoch tienen `at < 0`. Se registran con la creación d
 - **INV-003** — `backstory` solo contiene eventos con `at < 0` en los que la persona participa.
 
 ## 7. Criterios de aceptación
-- **CA-001 (M1)** — *Dado* 200 personas generadas, *entonces* la pirámide de edades no difiere de la que producen las plantillas (008) (χ², p > 0,05), y el `stateHash` es idéntico con la misma semilla.
+- **CA-001 (M1)** — *Dado* 20 mundos de 200 personas, *entonces* su pirámide agregada (grupos 0–11, 12–17, 18–29, 30–44, 45–59, 60+) difiere menos de 0,03 por grupo de la de otros 20 mundos con otras semillas; y el `stateHash` es idéntico con la misma semilla.
 - **CA-002 (M1)** — *Dado* un menor de edad, *entonces* vive en un hogar con al menos un adulto.
 - **CA-003 (M1)** — *Dado* cualquier persona adulta, *entonces* su situación laboral inicial está explicada por ≥ 1 evento de su `backstory`.
 - **CA-004 (M1)** — *Dado* `population.target = 200`, *entonces* se generan entre 190 y 200 personas (los hogares no se parten).
 - **CA-005 (M1)** — *Dado* semillas distintas y la misma configuración, *entonces* los hashes difieren. Es la spec 001 CA-005, que M0 dejó pendiente.
-- **CA-007 (M1)** — *Dado* 200 personas con el perfil colombiano, *entonces* las proporciones de menores de 12 años, de 12 a 17 y de 60 o más están dentro de ±0,05 de `demo.share.*`, y nadie recibe pensión por debajo de `pension.age` de su sexo.
+- **CA-007 (M1)** — *Dado* 20 mundos de 200 personas con el perfil colombiano, *entonces* las proporciones agregadas de menores de 12 años, de 12 a 17 y de 60 o más están dentro de ±0,03 de `demo.share.*` y, en cada mundo, dentro de ±0,10; y nadie recibe pensión por debajo de `pension.age` de su sexo.
 - **CA-006 (M1)** — *Dado* `population.target = 60` y el perfil de paridad, *entonces* la edad media, el porcentaje de menores y el ahorro medio están dentro de la tolerancia de la línea base del prototipo.
 
 ## 8. Parámetros y calibración
@@ -118,3 +128,6 @@ Pirámide de edades, educación por estrato, ahorro por estrato y edad, y ocupac
 | 2026-09-24 | 0.3 | Estado → aprobada |
 | 2026-09-24 | 0.3 | Aclaración por la spec 030 (usuario): los nacimientos y las muertes **anteriores al presente** (desde 1900) los genera la historia; R-007 (peldaño 4) se refiere solo a los del presente simulado. El presente del mundo es el 2026-01-01 |
 | 2026-09-24 | 0.3 | Nombre (usuario): el mundo y su municipio se llaman **Data's World**, en lugar de Villa Cordillera. Inspirado en el androide Data: ciudadanos autónomos, curiosos y capaces de aprender. Solo cambia el nombre; la información sigue siendo de Colombia |
+| 2026-09-24 | 0.4 | Apariencia para los sprites del concepto visual B, aprobada por el usuario: columnas `look.*` y R-009. El tono de piel es uniforme (estimado) y no se asocia a etnia; las canas y la ropa las deduce el visor de la edad y la ocupación |
+| 2026-09-24 | 0.5 | Implementación del bloque F. CA-001 y CA-007 se comprueban sobre el agregado de 20 mundos (±0,03), con un margen por pueblo (±0,10), porque las personas vienen agrupadas en hogares y un pueblo de 200 varía ±5 puntos: con 20 semillas, las proporciones de un solo pueblo van de 8,5 % a 22,6 % en menores de 12, mientras el agregado da 17,5 / 8,6 / 14,3 frente a 17,1 / 9,4 / 15,3 del DANE. Precisiones: las edades de hogares, el ahorro y la educación por estrato son parámetros del perfil (`gen.household.*`, `gen.savings.*`, `gen.education.*`); con el perfil colombiano, la edad de los hijos es la edad del progenitor menos la que tenía al tenerlos (calibrado con el DANE); la educación se limita por la edad; los menores nacen en el municipio; nombres, apellidos, lugares de nacimiento (DIVIPOLA real), hechos de infancia y apariencia en catálogos |
+| 2026-09-24 | 0.5 | Revisión de CA estadísticos aprobada por el usuario |

@@ -91,6 +91,30 @@ export const EVENT_TYPES = Object.freeze({
     text: (e) =>
       `El proceso del mundo se detiene en el minuto ${e.payload.minute}${e.payload.reason ? ` (${e.payload.reason})` : ''}.`,
   }),
+  // Trayectoria previa (spec 007 R-006, spec 008): eventos con fecha anterior al presente del mundo.
+  HOUSEHOLD_FORMED: def<{ householdId: string; template: string; members: string[] }>({
+    baseImportance: 0.5,
+    spontaneous: false,
+    check: (p) =>
+      needObj(p, {
+        householdId: str,
+        template: str,
+        members: (v) => Array.isArray(v) && v.length > 0 && v.every(str),
+      }),
+    text: (e) => `Se forma el hogar ${e.payload.householdId} (${e.payload.members.length} personas).`,
+  }),
+  STUDIES_COMPLETED: def<{ citizenId: string; level: number; levelName: string }>({
+    baseImportance: 0.4,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, level: int, levelName: str }),
+    text: (e) => `${e.payload.citizenId} termina sus estudios: ${e.payload.levelName}.`,
+  }),
+  CHILDHOOD_EVENT: def<{ citizenId: string; kind: string; text: string }>({
+    baseImportance: 0.5,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, kind: str, text: str }),
+    text: (e) => `Infancia de ${e.payload.citizenId}: ${e.payload.text}.`,
+  }),
   CAPABILITY_ENABLED: def<{ capability: Capability }>({
     baseImportance: 0.8,
     spontaneous: false,

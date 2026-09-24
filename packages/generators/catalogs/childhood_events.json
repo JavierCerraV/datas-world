@@ -1,0 +1,14 @@
+{
+  "name": "childhood_events",
+  "version": "2026.09.1",
+  "source": "Hechos de infancia de la lista `kid` del prototipo (newAgent), redactados en forma neutra; el visor puede ajustarlos al sexo.",
+  "entries": [
+    {"key": "infancia.abuelos", "name": "creció con sus abuelos", "since": "M1"},
+    {"key": "infancia.campo", "name": "tuvo una infancia tranquila en el campo", "since": "M1"},
+    {"key": "infancia.familia_unida", "name": "creció en una familia muy unida", "since": "M1"},
+    {"key": "infancia.hermano_mayor", "name": "fue la persona mayor de cuatro hermanos", "since": "M1"},
+    {"key": "infancia.mudanzas", "name": "se mudó muchas veces de pequeño", "since": "M1"},
+    {"key": "infancia.padres_separados", "name": "sus padres se separaron cuando tenía diez años", "since": "M1"},
+    {"key": "infancia.perdida_padre", "name": "perdió a su padre en la adolescencia", "since": "M1"}
+  ]
+}

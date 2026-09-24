@@ -8,7 +8,7 @@ import type { Counters, EntityId, WorldId } from './ids.ts';
 import { schedulerFrom, sortedItems } from './scheduler.ts';
 import type { ScheduledItem } from './scheduler.ts';
 import { emptyWorld } from './world.ts';
-import type { BaseEntity, Organization, Place, World, WorldConfig, WorldStatus } from './world.ts';
+import type { BaseEntity, Citizen, Household, Organization, Place, World, WorldConfig, WorldStatus } from './world.ts';
 import type { Capability } from './capabilities.ts';
 
 /** Forma plana y JSON-compatible del mundo. No incluye la capacidad reservada ni cachés (R-010). */
@@ -19,8 +19,8 @@ export interface WorldSnapshot {
   status: WorldStatus;
   counters: Counters;
   capabilities: Capability[];
-  citizens: BaseEntity[];
-  households: BaseEntity[];
+  citizens: Citizen[];
+  households: Household[];
   organizations: Organization[];
   places: Place[];
   objects: BaseEntity[];
