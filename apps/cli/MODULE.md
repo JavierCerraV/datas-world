@@ -1,7 +1,7 @@
 ---
 modulo: cli
 ruta: apps/cli
-estado: planificado
+estado: en-desarrollo
 specs: [001, 002, 027]
 actualizado: 2026-09-23
 ---
@@ -43,3 +43,4 @@ Sustituye a los scripts headless usados para calibrar el prototipo.
 | Fecha | Tarea / commit | Specs | Cambio |
 |---|---|---|---|
 | 2026-09-23 | kit de arranque | — | Documento creado (sin código) |
+| 2026-09-23 | m0/a-tooling (A5) | — | Esqueleto del paquete: `package.json` (workspace, ESM, `exports` → `src/index.ts`) y `src/index.ts` vacío. Sin API todavía |

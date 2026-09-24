@@ -1,7 +1,7 @@
 ---
 modulo: persistence
 ruta: packages/persistence
-estado: planificado
+estado: en-desarrollo
 specs: [027]
 actualizado: 2026-09-23
 ---
@@ -41,3 +41,4 @@ No aplica (el prototipo no persiste).
 | Fecha | Tarea / commit | Specs | Cambio |
 |---|---|---|---|
 | 2026-09-23 | kit de arranque | — | Documento creado (sin código) |
+| 2026-09-23 | m0/a-tooling (A5) | — | Esqueleto del paquete: `package.json` (workspace, ESM, `exports` → `src/index.ts`) y `src/index.ts` vacío. Sin API todavía |

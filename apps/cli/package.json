@@ -1,0 +1,9 @@
+{
+  "name": "@mundo-social/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Herramientas de línea de comandos",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { "@mundo-social/engine": "workspace:*", "@mundo-social/generators": "workspace:*", "@mundo-social/persistence": "workspace:*" }
+}

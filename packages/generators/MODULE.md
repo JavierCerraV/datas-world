@@ -1,7 +1,7 @@
 ---
 modulo: generators
 ruta: packages/generators
-estado: planificado
+estado: en-desarrollo
 specs: [001, 023]
 actualizado: 2026-09-23
 ---
@@ -42,3 +42,4 @@ Porta `genWorld`, `buildPlaces`, `genPopulation`, `newAgent`, `genJobs`, `genRel
 | Fecha | Tarea / commit | Specs | Cambio |
 |---|---|---|---|
 | 2026-09-23 | kit de arranque | — | Documento creado (sin código) |
+| 2026-09-23 | m0/a-tooling (A5) | — | Esqueleto del paquete: `package.json` (workspace, ESM, `exports` → `src/index.ts`) y `src/index.ts` vacío. Sin API todavía |
