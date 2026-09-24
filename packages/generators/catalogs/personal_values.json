@@ -1,0 +1,19 @@
+{
+  "name": "personal_values",
+  "version": "2026.09.1",
+  "source": "Spec 009 v0.2: los 12 valores de la lista VALUES del prototipo, provisionales hasta la tabla de expertos. `column` es la columna f32 del ciudadano.",
+  "entries": [
+    { "key": "valor.altruismo", "name": "Altruismo", "since": "M1", "attrs": { "column": "val.altruism", "proto": "altruismo" } },
+    { "key": "valor.autonomia", "name": "Autonomía", "since": "M1", "attrs": { "column": "val.autonomy", "proto": "autonomía" } },
+    { "key": "valor.conocimiento", "name": "Conocimiento", "since": "M1", "attrs": { "column": "val.knowledge", "proto": "conocimiento" } },
+    { "key": "valor.creatividad", "name": "Creatividad", "since": "M1", "attrs": { "column": "val.creativity", "proto": "creatividad" } },
+    { "key": "valor.dinero", "name": "Dinero", "since": "M1", "attrs": { "column": "val.money", "proto": "dinero" } },
+    { "key": "valor.exito", "name": "Éxito", "since": "M1", "attrs": { "column": "val.success", "proto": "éxito" } },
+    { "key": "valor.familia", "name": "Familia", "since": "M1", "attrs": { "column": "val.family", "proto": "familia" } },
+    { "key": "valor.libertad", "name": "Libertad", "since": "M1", "attrs": { "column": "val.freedom", "proto": "libertad" } },
+    { "key": "valor.pertenencia", "name": "Pertenencia", "since": "M1", "attrs": { "column": "val.belonging", "proto": "pertenencia" } },
+    { "key": "valor.prestigio", "name": "Prestigio", "since": "M1", "attrs": { "column": "val.prestige", "proto": "prestigio" } },
+    { "key": "valor.salud", "name": "Salud", "since": "M1", "attrs": { "column": "val.health", "proto": "salud" } },
+    { "key": "valor.seguridad", "name": "Seguridad", "since": "M1", "attrs": { "column": "val.security", "proto": "seguridad" } }
+  ]
+}

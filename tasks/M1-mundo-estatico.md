@@ -31,7 +31,7 @@ Cada bloque se hace en su rama (`m1/a-catalogos`, `m1/b-geografia`…) y termina
 - [x] D1. Una organización por lugar de trabajo, con sector CIIU, puestos con ocupación CIUO y sueldo mensual en múltiplos del salario mínimo (006 CA-007 en su parte de sueldos y turnos).
 
 ## Bloque E — Personalidad (spec 009)
-- [ ] E1. Rasgos Big Five + extras y valores como columnas, con flujo por persona, correlaciones y afrontamiento (009 CA-001, CA-002, CA-003).
+- [x] E1. Rasgos Big Five + extras y valores como columnas, con flujo por persona, correlaciones y afrontamiento (009 CA-001, CA-002, CA-003).
 
 ## Bloque F — Hogares y población (specs 008, 007)
 - [ ] F1. Plantillas de hogar del perfil colombiano y del perfil prototipo; viviendas; apellidos; abuelos cuidadores (008 CA-001, CA-002, CA-003, CA-006).

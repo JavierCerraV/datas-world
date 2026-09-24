@@ -4,7 +4,7 @@ nombre: personality
 estado: aprobada
 hito: M1 (generación) · M2–M3 (efectos y cambio lento)
 depende_de: [001, 023]
-version: 0.2
+version: 0.3
 ---
 
 # 009 — Personalidad y valores
@@ -94,3 +94,4 @@ Media, desviación típica y porcentaje de extremos por rasgo; matriz de correla
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: Big Five + extras (con los extras del prototipo, más honestidad y resiliencia), en listas configurables a la espera de la tabla de expertos; rasgos y valores como columnas (ADR-005); 12 valores del prototipo; generación portada de `newAgent` con flujo por persona; afrontamiento derivado de los rasgos; sin dependencia de 007; criterios marcados por hito |
 | 2026-09-24 | 0.2 | Estado → aprobada |
+| 2026-09-24 | 0.3 | Implementación del bloque E: rasgos y valores en los catálogos `personality_traits` y `personal_values` (ADR-006), con las correlaciones como atributo del rasgo (deben apuntar a un rasgo anterior); en CA-001, "tener un rasgo extremo" significa que se aplicó el paso 2 de R-001 (se cuenta en la generación), no que un valor caiga en la banda extrema por azar; el afrontamiento se calcula con los rasgos ya guardados en f32. Sin cambios en los umbrales |
