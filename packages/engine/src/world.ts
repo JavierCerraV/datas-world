@@ -67,7 +67,13 @@ export interface Place extends BaseEntity {
   stratum?: number;
   /** [0,1]; solo en barrios. */
   safety?: number;
+  /** Personas a la vez; en una vivienda, residentes máximos (spec 004). */
+  capacity?: number;
+  /** Horario público (spec 004): minutos del día; `null` = privado (viviendas); '24h' = siempre abierto. */
+  openingHours?: OpeningHours;
 }
+
+export type OpeningHours = { days: 'all' | 'mon-fri' | 'mon-sat'; open: number; close: number } | '24h' | null;
 
 export type NewPlace = Omit<Place, 'id' | 'status'>;
 
@@ -185,6 +191,15 @@ export function addPlace(world: World, data: NewPlace): EntityId {
   }
   if (data.safety !== undefined && !(data.safety >= 0 && data.safety <= 1))
     throw new RangeError('safety fuera de [0,1]');
+  if (data.capacity !== undefined && !(Number.isInteger(data.capacity) && data.capacity >= 1)) {
+    throw new RangeError(`Capacidad inválida: ${data.capacity}`);
+  }
+  const h = data.openingHours;
+  if (h !== undefined && h !== null && h !== '24h') {
+    const okDays = h.days === 'all' || h.days === 'mon-fri' || h.days === 'mon-sat';
+    const okRange = Number.isInteger(h.open) && Number.isInteger(h.close) && h.open >= 0 && h.close <= MINUTES_PER_DAY;
+    if (!okDays || !okRange || h.open >= h.close) throw new RangeError(`Horario inválido: ${JSON.stringify(h)}`);
+  }
   const id = allocateId(world.counters, 'PLC');
   world.places.set(id, { ...structuredClone(data), id, status: 'active' });
   return id;
