@@ -1,0 +1,2 @@
+#!/bin/sh
+node scripts/guardrails/commit-msg.mjs "$1"

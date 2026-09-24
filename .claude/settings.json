@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR\"/scripts/guardrails/contexto.mjs" } ] }
+    ],
+    "PreToolUse": [
+      { "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [ { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR\"/scripts/guardrails/pre-edit.mjs" } ] },
+      { "matcher": "Bash",
+        "hooks": [ { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR\"/scripts/guardrails/bash-guard.mjs" } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR\"/scripts/guardrails/check.mjs --hook" } ] }
+    ]
+  },
+  "permissions": {
+    "deny": [ "Read(./.env)", "Read(./.env.*)", "Edit(./docs/vision/**)", "Edit(./prototipo/**)" ]
+  }
+}

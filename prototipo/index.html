@@ -1,0 +1,1071 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Villa Cordillera: prototipo del mundo social autónomo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Pixelify+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --paper:#E4E8EC; --panel:#F5F6F8; --ink:#1C2630; --muted:#56636F; --line:#C5CDD5; --soft:#E9EDF1;
+  --accent:#4535C0; --accent-soft:#E3E0F8; --good:#23784F; --bad:#AE3630; --warn:#A8700A; --info:#2A679A;
+  --font-ui:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-px:"Pixelify Sans","Courier New",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#12171D; --panel:#1A2129; --ink:#E3E8ED; --muted:#95A2AF; --line:#2C3641; --soft:#222B35;
+    --accent:#9D93FF; --accent-soft:#2B2750; --good:#5CC592; --bad:#F07A73; --warn:#E6AE45; --info:#6DB1E8;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12171D; --panel:#1A2129; --ink:#E3E8ED; --muted:#95A2AF; --line:#2C3641; --soft:#222B35;
+  --accent:#9D93FF; --accent-soft:#2B2750; --good:#5CC592; --bad:#F07A73; --warn:#E6AE45; --info:#6DB1E8;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;height:100%;background:var(--paper);color:var(--ink);font:15px/1.45 var(--font-ui)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-rows:auto minmax(0,1fr);height:100%}
+
+/* Barra superior */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 28px;padding:10px 18px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand h1{font:600 22px/1 var(--font-px);margin:0;letter-spacing:.5px}
+.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
+.clock{display:grid;grid-template-columns:auto auto;column-gap:10px;align-items:end}
+.clock .time{grid-row:span 2;font:600 38px/0.9 var(--font-px);letter-spacing:1px;font-variant-numeric:tabular-nums}
+.clock .date{font-size:13px;color:var(--muted)}
+.clock .day{font-size:13px;font-weight:700}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:6px 11px;line-height:1.1}
+.btn:hover{background:var(--soft)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;min-width:96px}
+:root[data-theme="dark"] .btn.primary{color:#15122E}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.primary{color:#15122E}}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:6px 10px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.group-label{font-size:12px;color:var(--muted);margin-right:2px}
+.seed{display:flex;align-items:center;gap:6px}
+.seed input{width:92px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);font-variant-numeric:tabular-nums}
+.stats{display:flex;gap:18px;margin:0 0 0 auto}
+.stats div{display:flex;flex-direction:column}
+.stats dt{font-size:12px;color:var(--muted)}
+.stats dd{margin:0;font:600 20px/1.1 var(--font-px);font-variant-numeric:tabular-nums}
+
+main{display:grid;grid-template-columns:minmax(0,1fr) 410px;min-height:0}
+.stage{display:grid;grid-template-rows:minmax(0,1fr) 240px;min-height:0;border-right:1px solid var(--line)}
+.mapwrap{position:relative;min-height:0;background:#5B8440;overflow:hidden}
+#map{display:block;width:100%;height:100%;image-rendering:pixelated;cursor:grab;touch-action:none}
+#map.dragging{cursor:grabbing}
+.mapctl{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}
+.mapctl .btn{background:rgba(245,246,248,.94);color:#1C2630;border-color:rgba(0,0,0,.2)}
+.mapctl .btn[aria-pressed="true"]{background:#E3E0F8;color:#4535C0;font-weight:700}
+.tip{position:absolute;pointer-events:none;background:rgba(20,24,32,.92);color:#fff;font-size:13px;padding:5px 8px;border-radius:5px;max-width:240px;display:none;z-index:3}
+.tip b{display:block}
+.progress{position:absolute;inset:0;display:none;place-items:center;background:rgba(18,22,40,.55);color:#fff;z-index:4}
+.progress.on{display:grid}
+.progress .box{background:rgba(20,24,32,.9);padding:14px 18px;border-radius:8px;min-width:240px;text-align:center}
+.progress .track{height:8px;background:rgba(255,255,255,.2);border-radius:4px;margin-top:8px;overflow:hidden}
+.progress .track i{display:block;height:100%;width:0;background:#9D93FF}
+.progress .pct{font:600 22px var(--font-px)}
+
+/* Registro de eventos */
+.log{display:grid;grid-template-rows:auto minmax(0,1fr);min-height:0;background:var(--panel);border-top:1px solid var(--line)}
+.loghead{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 14px;border-bottom:1px solid var(--line)}
+.loghead h2{font-size:15px;margin:0 6px 0 0}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chips button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:2px 10px;font-size:13px}
+.chips button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.minor{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-left:auto}
+#events{list-style:none;margin:0;padding:0;overflow:auto}
+#events li{display:grid;grid-template-columns:92px 108px minmax(0,1fr);gap:10px;padding:6px 14px;border-bottom:1px solid var(--soft);font-size:14px}
+#events time{color:var(--muted);font-variant-numeric:tabular-nums;font-size:13px}
+.kind{font-size:12px;font-weight:700;align-self:start;padding:1px 7px;border-radius:4px;justify-self:start;border:1px solid currentColor}
+.k-good{color:var(--good)} .k-bad{color:var(--bad)} .k-warn{color:var(--warn)} .k-info{color:var(--info)}
+.why{display:block;color:var(--muted);font-size:13px}
+.who{border:0;background:none;padding:0;font-weight:700;color:var(--accent);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+.empty{padding:14px;color:var(--muted)}
+
+/* Inspector */
+.inspector{background:var(--panel);overflow:auto;min-height:0}
+.ins-pad{padding:14px 16px}
+.inspector h2{font-size:19px;margin:0}
+.inspector h3{font-size:14px;margin:16px 0 6px}
+.sub{color:var(--muted);font-size:13px;margin:2px 0 0}
+.back{border:0;background:none;color:var(--accent);padding:0;margin-bottom:8px;font-weight:700}
+.now{margin:10px 0 0;padding:8px 10px;background:var(--soft);border-radius:6px;font-size:14px}
+.badge{display:inline-block;font-size:12px;border:1px solid var(--accent);color:var(--accent);border-radius:4px;padding:0 6px;margin-left:6px;vertical-align:2px}
+.search{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--paper);margin:10px 0 6px}
+.people{list-style:none;margin:0;padding:0}
+.people button{width:100%;display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:4px 10px;align-items:center;text-align:left;border:0;border-bottom:1px solid var(--soft);background:none;padding:7px 2px}
+.people button:hover{background:var(--soft)}
+.people .nm{font-weight:700}
+.people .age{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.people .doing{grid-column:2 / 4;color:var(--muted);font-size:13px}
+.dot{width:10px;height:10px;border-radius:2px;grid-row:span 2}
+.note{color:var(--muted);font-size:13px;border-top:1px solid var(--line);margin-top:14px;padding-top:10px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:12px -16px 0;padding:0 12px;overflow-x:auto}
+.tabs button{border:0;background:none;padding:8px 6px;font-size:14px;border-bottom:2px solid transparent;white-space:nowrap;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:700}
+.bar{display:grid;grid-template-columns:128px minmax(0,1fr) 32px;gap:8px;align-items:center;font-size:13px;margin:4px 0}
+.bar .track{height:8px;background:var(--soft);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.bar i.hot{background:var(--bad)}
+.bar b{text-align:right;font-variant-numeric:tabular-nums;font-weight:400;color:var(--muted)}
+.kv{display:grid;grid-template-columns:118px minmax(0,1fr);gap:4px 10px;font-size:14px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tags span{background:var(--soft);border-radius:4px;padding:1px 8px;font-size:13px}
+.list{list-style:none;margin:0;padding:0}
+.list>li{padding:8px 0;border-bottom:1px solid var(--soft);font-size:14px}
+.list small{display:block;color:var(--muted);font-size:13px}
+.rel-head{display:flex;justify-content:space-between;gap:8px}
+.rel-type{color:var(--muted);font-size:13px}
+.mini{display:grid;grid-template-columns:118px minmax(0,1fr) 34px;gap:6px;align-items:center;font-size:12px;color:var(--muted);margin-top:3px}
+.mini .track{height:5px;background:var(--soft);border-radius:3px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--accent)}
+.mini i.hot{background:var(--bad)}
+.faded{opacity:.45}
+.ok{color:var(--good);font-weight:700} .no{color:var(--bad);font-weight:700}
+.report{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:6px 0 4px}
+.report div{background:var(--soft);border-radius:6px;padding:6px 8px}
+.report span{display:block;font-size:12px;color:var(--muted)}
+.report b{font-variant-numeric:tabular-nums;font-size:14px}
+
+@media (max-width:1020px){
+  .app{height:auto}
+  main{grid-template-columns:1fr}
+  .stage{grid-template-rows:auto 280px;border-right:0}
+  .mapwrap{height:62vw;min-height:280px;max-height:560px}
+  .stats{margin:0}
+  #events li{grid-template-columns:80px minmax(0,1fr)}
+  #events li .kind{grid-column:2}
+  #events li .txt{grid-column:1 / 3}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <h1>Villa Cordillera</h1>
+      <p>Prototipo de observación del mundo social autónomo</p>
+    </div>
+    <div class="clock" aria-live="off">
+      <div class="time" id="clkTime">06:00</div>
+      <div class="date" id="clkDate">martes 13 abr 2027</div>
+      <div class="day" id="clkDay">Día 1 de simulación</div>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="play" aria-label="Pausar la simulación">Pausar</button>
+      <span class="group-label" id="lblSpeed">Velocidad</span>
+      <div class="seg" role="group" aria-labelledby="lblSpeed" id="speeds">
+        <button data-speed="1">1x</button><button data-speed="10">10x</button><button data-speed="100" aria-pressed="true">100x</button><button data-speed="1000">1000x</button>
+      </div>
+      <span class="group-label" id="lblAdv">Avanzar</span>
+      <div class="seg" role="group" aria-labelledby="lblAdv">
+        <button data-adv="1440">1 día</button><button data-adv="10080">1 semana</button><button data-adv="43200">1 mes</button><button data-adv="525600">1 año</button>
+      </div>
+    </div>
+    <form class="seed" id="seedForm">
+      <label for="seed" class="group-label">Semilla</label>
+      <input id="seed" type="number" value="108" inputmode="numeric">
+      <button class="btn" type="submit">Regenerar</button>
+    </form>
+    <dl class="stats">
+      <div><dt>Personas</dt><dd id="stPop">0</dd></div>
+      <div><dt>Con empleo</dt><dd id="stJob">0%</dd></div>
+      <div><dt>Ánimo medio</dt><dd id="stMood">0</dd></div>
+      <div><dt>Eventos hoy</dt><dd id="stEv">0</dd></div>
+    </dl>
+  </header>
+
+  <main>
+    <section class="stage" aria-label="Mapa y registro">
+      <div class="mapwrap" id="mapwrap">
+        <canvas id="map" aria-label="Mapa de Villa Cordillera. Haz clic en una persona o edificio para inspeccionarlo."></canvas>
+        <div class="tip" id="tip"></div>
+        <div class="mapctl">
+          <button class="btn" id="zoomOut" aria-label="Alejar">−</button>
+          <button class="btn" id="zoomIn" aria-label="Acercar">+</button>
+          <button class="btn" id="follow" aria-pressed="false">Seguir</button>
+          <button class="btn" id="center">Ver todo</button>
+        </div>
+        <div class="progress" id="progress" role="status"><div class="box"><div>Simulando sin observar</div><div class="pct" id="progPct">0%</div><div class="track"><i id="progBar"></i></div></div></div>
+      </div>
+      <section class="log" aria-label="Registro de eventos">
+        <div class="loghead">
+          <h2>Registro de eventos</h2>
+          <div class="chips" id="chips">
+            <button data-f="all" aria-pressed="true">Todos</button>
+            <button data-f="trabajo">Trabajo</button>
+            <button data-f="relaciones">Relaciones</button>
+            <button data-f="economia">Economía</button>
+            <button data-f="salud">Salud</button>
+            <button data-f="info">Información</button>
+          </div>
+          <label class="minor"><input type="checkbox" id="showMinor"> Incluir menores</label>
+        </div>
+        <ul id="events"></ul>
+      </section>
+    </section>
+    <aside class="inspector" id="inspector" aria-live="polite"></aside>
+  </main>
+</div>
+
+<script>
+'use strict';
+/*ENGINE-START*/
+// ============================================================
+//  MOTOR DE SIMULACIÓN (sin DOM). Toda aleatoriedad pasa por W.R
+//  para que la misma semilla reproduzca el mismo mundo.
+// ============================================================
+const TS=8, TW=64, TH=40, TICK=5, MPT=0.6;
+const DAY0=Date.UTC(2027,3,13);
+const ROAD_X=[5,17,29,41,53], ROAD_Y=[4,14,24,34];
+const isRoad=(x,y)=>ROAD_X.some(r=>x===r||x===r+1)||ROAD_Y.some(r=>y===r||y===r+1);
+const clamp=(v,a=0,b=1)=>v<a?a:v>b?b:v;
+function sm32(a){return function(){a|=0;a=a+0x9e3779b9|0;let t=a^a>>>16;t=Math.imul(t,0x21f0aaad);t=t^t>>>15;t=Math.imul(t,0x735a2d97);return((t=t^t>>>15)>>>0)/4294967296;};}
+class RNG{
+  constructor(s){this.f=sm32(s>>>0);}
+  next(){return this.f();}
+  range(a,b){return a+(b-a)*this.f();}
+  int(a,b){return a+Math.floor(this.f()*(b-a+1));}
+  pick(arr){return arr[Math.floor(this.f()*arr.length)];}
+  chance(p){return this.f()<p;}
+  normal(m=0,s=1){const u=1-this.f(),v=this.f();return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+}
+const TRAITS=['apertura','responsabilidad','extraversion','amabilidad','estabilidad','impulsividad','sensibilidad','aprobacion'];
+const TRAIT_LABEL={apertura:'Apertura',responsabilidad:'Responsabilidad',extraversion:'Extraversión',amabilidad:'Amabilidad',estabilidad:'Estabilidad emocional',impulsividad:'Impulsividad',sensibilidad:'Sensibilidad social',aprobacion:'Búsqueda de aprobación'};
+const VALUES=['familia','seguridad','libertad','éxito','dinero','prestigio','pertenencia','conocimiento','creatividad','autonomía','altruismo','salud'];
+const MN=['Carlos','Andrés','Juan','Felipe','Santiago','Julián','Camilo','Diego','Mateo','Sebastián','Óscar','Hernando','Luis','Jorge','Iván','Tomás','Samuel','Emilio','Fabio','Ricardo','Nicolás','Esteban','Alirio','Mauricio'];
+const FN=['Laura','María','Valentina','Camila','Daniela','Paola','Natalia','Luisa','Sofía','Carolina','Diana','Marta','Gloria','Isabela','Juliana','Adriana','Lucía','Sara','Ana','Rosa','Teresa','Yolanda','Mariana','Ximena'];
+const SUR=['Rojas','Gómez','Martínez','Rodríguez','López','Castro','Herrera','Vargas','Moreno','Suárez','Ramírez','Ortiz','Díaz','Pardo','Cárdenas','Mejía','Salazar','Quintero','Rincón','Beltrán','Osorio','Parra','Nieto','Acosta'];
+const BIRTH=['Villa Cordillera','Tunja','Ibagué','Medellín','Cali','Bucaramanga','un pueblo de Boyacá','Pasto','Neiva','Villavicencio'];
+const GIFTS=['un reloj','una bufanda tejida','un libro de poemas','una taza pintada a mano','un anillo','una planta'];
+const PRICE={'teléfono':650000,bicicleta:480000,libro:45000,ropa:90000,regalo:70000};
+const ARTICLE={'teléfono':'un teléfono',bicicleta:'una bicicleta',libro:'un libro',ropa:'ropa nueva'};
+const COST=[35000,55000,85000];
+const BARRIOS=[{name:'La Esperanza',cls:1},{name:'Centro',cls:2},{name:'San Martín',cls:0}];
+const COLS=[7,19,31,43], ROWS=[6,16,26];
+const LAYOUT=[
+  [['casa','casa'],['colegio','casa'],['casa','casa'],['casa','gimnasio']],
+  [['cafe','restaurante'],'parque',['oficina','hospital'],['casa','tienda']],
+  [['casa','casa'],['fabrica','casa'],['casa','casa'],['casa','casa']]
+];
+const PDEF={
+  casa:{label:'Vivienda'},
+  parque:{label:'Parque',name:'Parque Central',open:[330,1260],vd:'all'},
+  oficina:{label:'Oficinas',name:'Oficinas Andina',slots:12,pay:160000,shift:[480,1020],wd:'lv',open:[420,1140],vd:'lv'},
+  hospital:{label:'Hospital',name:'Hospital San Rafael',slots:6,pay:170000,shift:[420,1020],wd:'ls',open:[0,1440],vd:'all'},
+  colegio:{label:'Colegio',name:'Colegio Los Alisos',slots:4,pay:120000,shift:[400,800],wd:'lv',open:[360,840],vd:'lv'},
+  fabrica:{label:'Fábrica',name:'Textiles del Sur',slots:12,pay:95000,shift:[360,840],wd:'lv',open:[330,900],vd:'lv'},
+  tienda:{label:'Tienda',name:'Tienda El Surtidor',slots:3,pay:70000,shift:[540,1140],wd:'ls',open:[540,1200],vd:'all'},
+  cafe:{label:'Café',name:'Café Cordillera',slots:3,pay:65000,shift:[420,900],wd:'ls',open:[420,1260],vd:'all'},
+  restaurante:{label:'Restaurante',name:'Restaurante La Mesa',slots:3,pay:70000,shift:[660,1200],wd:'ls',open:[660,1320],vd:'all'},
+  gimnasio:{label:'Gimnasio',name:'Gimnasio Forja',slots:2,pay:80000,shift:[360,840],wd:'ls',open:[360,1260],vd:'all'}
+};
+const FACTOR={cafe:2.2,parque:1.6,restaurante:1.4,casa:1.3,colegio:1.2,gimnasio:1};
+
+const dayOf=t=>Math.floor(t/1440), modOf=t=>((t%1440)+1440)%1440, dowOf=t=>(2+dayOf(t))%7;
+const isDay=(code,dow)=>code==='all'||(code==='lv'&&dow>=1&&dow<=5)||(code==='ls'&&dow>=1&&dow<=6);
+const DOWN=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const dateOf=t=>new Date(DAY0+t*60000);
+const pad=n=>String(n).padStart(2,'0');
+const fmtClock=t=>{const m=modOf(t);return pad(Math.floor(m/60))+':'+pad(m%60);};
+const fmtDate=t=>{const d=dateOf(t);return `${DOWN[d.getUTCDay()]} ${d.getUTCDate()} ${MES[d.getUTCMonth()]} ${d.getUTCFullYear()}`;};
+const fmtStamp=t=>{const d=dateOf(t);return `${d.getUTCDate()} ${MES[d.getUTCMonth()]} ${d.getUTCFullYear()!==2027?d.getUTCFullYear()+' ':''}${fmtClock(t)}`;};
+const dayOfYear=t=>{const d=dateOf(t);return Math.floor((d-Date.UTC(d.getUTCFullYear(),0,1))/86400000);};
+const pct=v=>Math.round(v*100)+'%';
+const money=n=>(n<0?'−':'')+'$ '+Math.abs(Math.round(n)).toLocaleString('es-CO');
+const g=(a,m,f)=>a.sex==='F'?f:m;
+
+const W={};
+const AG=id=>W.byId[id];
+
+function genWorld(seed){
+  Object.assign(W,{seed,R:new RNG(seed),t:360,evN:0,events:[],agents:[],byId:{},places:[],byType:{},households:[],
+    facts:[],objs:[],objN:0,counts:{},todayEvents:0,bulk:false,logDirty:true,pathCache:new Map()});
+  buildPlaces(); genPopulation(); genJobs(); genRelations(); genObjects(); genFacts(); initAgents();
+}
+
+function buildPlaces(){
+  let hn=0;
+  const add=(type,rect,door,b)=>{
+    const d=PDEF[type];
+    const p={id:W.places.length,type,rect,door,barrio:b.name,cls:b.cls,label:d.label,
+      name:type==='casa'?`Vivienda ${pad(++hn)}`:d.name,open:d.open,vd:d.vd};
+    if(d.slots) Object.assign(p,{slots:d.slots,pay:d.pay,shift:d.shift,wd:d.wd,staff:[],bossId:null});
+    W.places.push(p);(W.byType[type]=W.byType[type]||[]).push(p);return p;
+  };
+  LAYOUT.forEach((row,r)=>row.forEach((cell,c)=>{
+    const x0=COLS[c],y0=ROWS[r],b=BARRIOS[r];
+    if(cell==='parque'){add('parque',{x:x0+1,y:y0+1,w:8,h:6},{x:x0+4,y:y0+8},b);return;}
+    cell.forEach((type,i)=>{const x=x0+1+i*4;add(type,{x,y:y0+1,w:4,h:6},{x:x+(i?1:2),y:y0+8},b);});
+  }));
+  const pk=W.byType.parque[0], R=W.R; pk.spots=[];
+  for(let i=0;i<40;i++){
+    const onH=R.chance(.5);
+    pk.spots.push(onH?[pk.rect.x*TS+R.int(4,pk.rect.w*TS-5),pk.rect.y*TS+Math.floor(pk.rect.h*TS/2)+R.int(-1,2)]
+                     :[pk.rect.x*TS+Math.floor(pk.rect.w*TS/2)+R.int(-1,2),pk.rect.y*TS+R.int(6,pk.rect.h*TS-3)]);
+  }
+}
+
+function newAgent(sex,age,s1,s2,home,hid){
+  const R=W.R, id='CIT-'+String(W.agents.length+1).padStart(3,'0');
+  const first=R.pick(sex==='F'?FN:MN);
+  const pers={};TRAITS.forEach(k=>pers[k]=clamp(R.normal(0.5,0.17),0.03,0.97));
+  if(R.chance(0.22)){const k=R.pick(TRAITS);pers[k]=R.chance(.5)?R.range(0.03,0.12):R.range(0.88,0.97);}
+  const vals=VALUES.slice();for(let i=vals.length-1;i>0;i--){const j=R.int(0,i);[vals[i],vals[j]]=[vals[j],vals[i]];}
+  const cls=home.cls;
+  const sav=[[300,1600],[800,4000],[2500,9000]][cls];
+  const a={id,idx:W.agents.length,first,name:first+' '+s1,full:`${first} ${s1} ${s2}`,s1,s2,sex,age,bday:R.int(0,364),
+    homeId:home.id,loc:home.id,hh:hid,barrio:home.barrio,cls,pers,values:vals.slice(0,3),
+    needs:{hambre:R.range(.1,.35),energia:R.range(.65,.9),soledad:R.range(.1,.45)},st:{estres:R.range(.1,.35),animo:R.range(.5,.72)},
+    money:age>=18?R.int(sav[0],sav[1])*1000:0,job:null,student:age>=5&&age<18,retired:age>=65,
+    lateLog:[],sickUntil:0,rels:{},mems:[],beliefs:new Map(),selfStory:{},objs:[],history:[],want:null,wantCause:null,giftFor:null,
+    pendingGift:null,worked:false,exercised:false,act:null,travel:null,maxCf:0,inDebt:false,deps:0,
+    lastOversleep:0,lastWakeEnergy:1,lastDelay:false,
+    look:{skin:R.pick(['#F1C9A5','#D9A47C','#B97F57','#8D5A3A','#E8B98F']),hair:R.pick(['#2B1D14','#4A3020','#7A5230','#1A1A1A','#B0B0B0','#8C3B1F']),
+      shirt:R.pick(['#D24B4B','#3E7CC2','#E0B53A','#4F9A5B','#9A5CC0','#E07B39','#2F9C9C','#F2F2F2','#C2527E']),pants:R.pick(['#2F3A55','#4A4A4A','#5A4632','#26313F'])}};
+  const edu=age<18?null:R.pick([['primaria','bachillerato','técnico'],['bachillerato','técnico','tecnólogo','universitario'],['universitario','universitario','posgrado']][cls]);
+  const kid=[`creció con sus abuelos`,`fue ${g(a,'el','la')} mayor de cuatro hermanos`,`se mudó muchas veces de niñ${g(a,'o','a')}`,`creció en una familia muy unida`,
+    `sus padres se separaron cuando tenía diez años`,`perdió a su padre en la adolescencia`,`tuvo una infancia tranquila en el campo`];
+  a.bio=age<18?`Nació en Villa Cordillera. Vive con su familia en ${home.barrio}.`
+    :`Nació en ${R.pick(BIRTH)}; ${R.pick(kid)}. Estudios: ${edu}.`;
+  if(age>=65) a.money+=R.int(300,2000)*1000;
+  W.agents.push(a);W.byId[id]=a;return a;
+}
+function setRel(a,b,type,c,tr,cf,fam=true){a.rels[b.id]={type,c:clamp(c),tr:clamp(tr),cf:clamp(cf),n:0,last:0,args:0,fam};}
+function famPair(a,b,tAB,tBA){
+  const R=W.R,conf=R.chance(0.12),base=R.normal(0.72,0.1);
+  setRel(a,b,tAB,base+R.normal(0,.08),R.normal(.7,.12),conf?R.range(.4,.7):R.range(.02,.2));
+  setRel(b,a,tBA,base+R.normal(0,.08),R.normal(.7,.12),conf?R.range(.3,.7):R.range(.02,.2));
+}
+const parentLbl=p=>g(p,'padre','madre'), childLbl=c=>g(c,'hijo','hija'), sibLbl=s=>g(s,'hermano','hermana');
+function linkParent(p,c){famPair(p,c,childLbl(c),parentLbl(p));}
+function linkSibs(list){for(let i=0;i<list.length;i++)for(let j=i+1;j<list.length;j++)famPair(list[i],list[j],sibLbl(list[j]),sibLbl(list[i]));}
+
+function genPopulation(){
+  const R=W.R, homes=W.byType.casa; let hh=0;
+  while(W.agents.length<60 && hh<homes.length*2){
+    const home=homes[hh%homes.length], hid=W.households.length, members=[];
+    const r=R.next(); const kind=r<.18?'unipersonal':r<.38?'pareja':r<.78?'familia':r<.9?'monoparental':'extendida';
+    const mk=(sex,age,s1,s2)=>{const a=newAgent(sex,Math.round(age),s1,s2,home,hid);members.push(a);return a;};
+    const S=()=>R.pick(SUR);
+    if(kind==='unipersonal'){mk(R.chance(.5)?'F':'M',R.int(21,74),S(),S());}
+    else if(kind==='pareja'||kind==='familia'){
+      const age=kind==='pareja'?R.int(23,70):R.int(28,50);
+      const A=mk('M',age,S(),S()), B=mk(R.chance(.1)?'M':'F',clamp(age+R.int(-5,5),20,90),S(),S());
+      famPair(A,B,'pareja','pareja');
+      if(kind==='familia'){const n=R.int(1,3),kids=[];for(let i=0;i<n;i++){const k=mk(R.chance(.5)?'F':'M',R.int(0,Math.min(17,age-20)),A.s1,B.s1);linkParent(A,k);linkParent(B,k);kids.push(k);}linkSibs(kids);}
+    } else if(kind==='monoparental'){
+      const A=mk(R.chance(.7)?'F':'M',R.int(25,50),S(),S()),n=R.int(1,2),kids=[];
+      for(let i=0;i<n;i++){const k=mk(R.chance(.5)?'F':'M',R.int(0,Math.min(17,A.age-19)),A.s1,S());linkParent(A,k);kids.push(k);}linkSibs(kids);
+    } else {
+      const G=mk(R.chance(.6)?'F':'M',R.int(64,84),S(),S()), A=mk(R.chance(.5)?'F':'M',Math.max(20,G.age-R.int(22,35)),G.s1,S());
+      linkParent(G,A);const k=mk(R.chance(.5)?'F':'M',R.int(0,Math.min(17,A.age-19)),A.s1,S());linkParent(A,k);
+      famPair(G,k,g(k,'nieto','nieta'),g(G,'abuelo','abuela'));
+    }
+    const head=members.find(m=>m.age>=18);head.deps=members.filter(m=>m.age<18).length;
+    W.households.push({id:hid,home:home.id,kind,members:members.map(m=>m.id)});hh++;
+  }
+}
+function hire(a,o,ref,init){
+  const R=W.R;
+  a.job={org:o.id,start:o.shift[0],end:o.shift[1],wd:o.wd,salary:Math.round(o.pay*R.range(.85,1.2)/1000)*1000,boss:false};
+  if(!o.bossId){o.bossId=a.id;a.job.boss=true;a.job.salary=Math.round(a.job.salary*1.6/1000)*1000;}
+  o.staff.push(a.id);setRoutine(a);
+  if(!init){
+    const days=a.unempSince!=null?Math.round((W.t-a.unempSince)/1440):null;
+    ev('JOB_STARTED',[a],`{0} empezó a trabajar en ${o.name}`,[ref?`recomendación de ${ref.name}`:'búsqueda activa',days!=null?`${days} días sin empleo`:null].filter(Boolean));
+    mem(a,`Conseguí trabajo en ${o.name}`,0.7,0.8,ref?ref.id:null);bump(a,-0.15,0.15);a.unempSince=null;
+    if(ref){const r=rel(a,ref);r.c=clamp(r.c+0.08);r.tr=clamp(r.tr+0.08);}
+  }
+}
+function genJobs(){
+  const R=W.R, orgs=W.places.filter(p=>p.slots), adults=W.agents.filter(a=>a.age>=18&&a.age<65);
+  for(let i=adults.length-1;i>0;i--){const j=R.int(0,i);[adults[i],adults[j]]=[adults[j],adults[i]];}
+  for(const a of adults){
+    if(!R.chance(.86)){a.unempSince=W.t-R.int(10,120)*1440;continue;}
+    const open=orgs.filter(o=>o.staff.length<o.slots);if(!open.length)break;
+    const w=open.map(o=>(o.type==='oficina'||o.type==='hospital')?(a.cls===2?3:1):o.type==='fabrica'?(a.cls===0?3:1):1);
+    let s=R.next()*w.reduce((x,y)=>x+y,0),k=0;while(s>w[k]){s-=w[k];k++;}
+    hire(a,open[k],null,true);
+  }
+}
+function genRelations(){
+  const R=W.R, A=W.agents;
+  const mild=(a,b,type,lo,hi)=>{if(a.rels[b.id])return;setRel(a,b,type,R.range(lo,hi),R.range(.35,.6),R.range(0,.12),false);};
+  for(const o of W.places.filter(p=>p.slots)){const st=o.staff.map(AG);
+    for(let i=0;i<st.length;i++)for(let j=i+1;j<st.length;j++)if(R.chance(.4)){mild(st[i],st[j],'compañero',.1,.35);mild(st[j],st[i],'compañero',.1,.35);}}
+  const studs=A.filter(a=>a.student);
+  for(let i=0;i<studs.length;i++)for(let j=i+1;j<studs.length;j++)if(Math.abs(studs[i].age-studs[j].age)<=2&&R.chance(.35)){
+    mild(studs[i],studs[j],'compañero de clase',.1,.4);mild(studs[j],studs[i],'compañero de clase',.1,.4);}
+  for(const a of A)for(const b of A)if(a!==b&&a.homeId===b.homeId&&a.hh!==b.hh)mild(a,b,'vecino',.05,.2);
+  for(const a of A){
+    if(a.age<14)continue;
+    if(R.chance(.12)){a.isolated=true;continue;}
+    const n=R.int(1,3);
+    for(let i=0;i<n;i++){
+      const b=R.pick(A);if(b===a||b.isolated||b.age<14||Math.abs(a.age-b.age)>15||(a.rels[b.id]&&a.rels[b.id].fam))continue;
+      const ca=clamp(R.normal(.6,.13)),cb=clamp(R.normal(.55,.16));
+      setRel(a,b,ca>=.45?'amigo':'conocido',ca,R.range(.5,.8),R.range(0,.15),false);
+      setRel(b,a,cb>=.45?'amigo':'conocido',cb,R.range(.5,.8),R.range(0,.15),false);
+      if(ca>=.45&&cb>=.45)a.rels[b.id].friendEv=b.rels[a.id].friendEv=true;
+    }
+  }
+}
+function newObj(a,kind,name,value,history,emo=0){
+  const o={id:'OBJ-'+String(++W.objN).padStart(4,'0'),kind,name,owner:a.id,value,bought:W.t,from:null,emo,history:[history]};
+  W.objs.push(o);a.objs.push(o);return o;
+}
+function genObjects(){
+  const R=W.R;
+  for(const a of W.agents){
+    if((a.age>=18&&R.chance(.9))||(a.age>=12&&a.age<18&&R.chance(.6)))newObj(a,'teléfono','un teléfono',PRICE['teléfono'],'Adquirido antes del inicio de la simulación');
+    if(a.age>=10&&a.age<60&&R.chance(.3))newObj(a,'bicicleta','una bicicleta',PRICE.bicicleta,'Adquirida antes del inicio de la simulación');
+    if(a.age>=25&&R.chance(.08))newObj(a,'recuerdo','el anillo de su abuela',300000,'Herencia familiar',0.95);
+  }
+}
+function genFacts(){
+  const R=W.R, cand=W.agents.filter(a=>a.job&&!a.job.boss);
+  for(let i=0;i<3&&cand.length;i++){
+    const a=cand.splice(R.int(0,cand.length-1),1)[0], o=W.places[a.job.org];
+    const f=addFact(a,`${a.name} fue ascendid${g(a,'o','a')} en ${o.name}`,
+      [`${a.name} pidió aumento y se lo negaron`,`${a.name} se va de ${o.name}`,`${a.name} consiguió el puesto por palancas`]);
+    const boss=AG(o.bossId);if(boss)boss.beliefs.set(f.id,{text:f.truth,correct:true,from:null,t:W.t});
+  }
+}
+function addFact(subject,truth,variants,story){
+  const f={id:W.facts.length,subject:subject.id,truth,variants,t:W.t,rumors:new Set()};W.facts.push(f);
+  subject.beliefs.set(f.id,{text:truth,correct:true,from:null,t:W.t});
+  subject.selfStory[f.id]=story||truth;return f;
+}
+function setRoutine(a){
+  const R=W.R;
+  if(a.job)a.wakeW=a.job.start-85;else if(a.student)a.wakeW=335;else a.wakeW=clamp(420+Math.round(R.normal(0,30)),330,540);
+  a.wakeE=a.wakeW+R.int(60,110);
+  let sleepH=a.age<12?10:clamp(7.5+R.normal(0,.4)-a.pers.impulsividad*1.2-a.pers.extraversion*.5+a.pers.responsabilidad*.6,5.5,9);
+  a.bed=((a.wakeW-Math.round(sleepH*60))%1440+1440)%1440;
+}
+function initAgents(){
+  for(const a of W.agents){
+    if(a.wakeW==null)setRoutine(a);
+    const w=a.wakeW;
+    a.act={type:'dormir',placeId:a.homeId,until:w>370?w:365+W.R.int(0,25),active:true};
+    a.initial={money:a.money,animo:a.st.animo,estres:a.st.estres,job:a.job?W.places[a.job.org].name:null,
+      friends:Object.values(a.rels).filter(r=>r.type==='amigo').length,partner:!!partnerOf(a)};
+  }
+}
+
+// ---------- utilidades de agente ----------
+function rel(a,b){let r=a.rels[b.id];if(!r)r=a.rels[b.id]={type:'desconocido',c:0,tr:.3,cf:0,n:0,last:0,args:0,fam:false};return r;}
+function partnerOf(a){for(const k in a.rels)if(a.rels[k].type==='pareja')return AG(k);return null;}
+function bestFriend(a){let best=null,bc=.5;for(const k in a.rels){const r=a.rels[k];if((r.type==='amigo'||r.type==='pareja')&&r.c>bc){bc=r.c;best=AG(k);}}return best;}
+const has=(a,k)=>a.objs.some(o=>o.kind===k);
+function bump(a,de,da){a.st.estres=clamp(a.st.estres+de);a.st.animo=clamp(a.st.animo+da);}
+function mStrength(m){const age=(W.t-m.t)/1440;const tau=5+40*m.i+10*m.r;return m.i*Math.exp(-age/tau);}
+function mem(a,text,i,v,w,distorted=false){
+  a.mems.push({t:W.t,text,i:clamp(i),v,w,d:distorted,r:0});
+  if(a.mems.length>90){let wi=0,ws=9;a.mems.forEach((m,k)=>{const s=mStrength(m);if(s<ws){ws=s;wi=k;}});a.mems.splice(wi,1);}
+}
+function ev(type,actors,text,causes=[],minor=false){
+  const e={id:++W.evN,t:W.t,type,actors:actors.map(x=>x.id),text,causes,minor};
+  W.counts[type]=(W.counts[type]||0)+1;W.events.push(e);if(W.events.length>5000)W.events.splice(0,1000);
+  for(const x of actors){x.history.push(e);if(x.history.length>220)x.history.splice(0,20);}
+  if(!minor)W.todayEvents++;W.logDirty=true;return e;
+}
+const openAt=(p,mod,dow)=>p.type==='casa'||(isDay(p.vd,dow)&&mod>=p.open[0]&&mod<p.open[1]-30);
+function inSleep(a,mod){const b=a.bed,w=a.wakeW-45;return b<w?(mod>=b&&mod<w):(mod>=b||mod<w);}
+function wakeFor(a,dow){return (a.job&&isDay(a.job.wd,dow))||(a.student&&isDay('lv',dow))?a.wakeW:a.wakeE;}
+
+function path(a,b){
+  const k=a.x+','+a.y+'>'+b.x+','+b.y;if(W.pathCache.has(k))return W.pathCache.get(k);
+  const prev=new Int32Array(TW*TH).fill(-1),s=a.y*TW+a.x,goal=b.y*TW+b.x,q=[s];prev[s]=s;let h=0;
+  while(h<q.length){const cur=q[h++];if(cur===goal)break;const cx=cur%TW,cy=(cur/TW)|0;
+    for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=TW||ny>=TH)continue;const ni=ny*TW+nx;if(prev[ni]!==-1||!isRoad(nx,ny))continue;prev[ni]=cur;q.push(ni);}}
+  const out=[];if(prev[goal]===-1){out.push([a.x,a.y],[b.x,b.y]);}else{let c=goal;while(c!==s){out.push([c%TW,(c/TW)|0]);c=prev[c];}out.push([a.x,a.y]);out.reverse();}
+  W.pathCache.set(k,out);return out;
+}
+function go(a,type,placeId,until){
+  until=Math.max(until,W.t+TICK);
+  if(a.loc===placeId){a.act={type,placeId,until,active:true};onStart(a);return;}
+  const delay=W.R.chance(.03)?W.R.int(10,30):0;a.lastDelay=delay>0;
+  a.travel={path:path(W.places[a.loc].door,W.places[placeId].door),depart:W.t,dest:placeId,delay};
+  a.loc=null;a.act={type,placeId,until,active:false};
+}
+function sleepUntil(a){
+  const t=W.t,d=dayOf(t);let wake=d*1440+wakeFor(a,dowOf(d*1440));
+  if(wake<=t+60)wake=(d+1)*1440+wakeFor(a,dowOf((d+1)*1440));
+  const q=1-0.45*a.st.estres,proj=clamp(a.needs.energia+((wake-t)/60)*0.125*q);
+  let over=proj<0.72?Math.round((0.72-proj)*200*(1.3-a.pers.responsabilidad)):0;
+  over=Math.max(0,over+W.R.int(-5,8));a.lastOversleep=over;a.lastWakeEnergy=proj;
+  return Math.max(wake+over,t+240);
+}
+
+// ---------- decisión ----------
+function decide(a){
+  const R=W.R,t=W.t,mod=modOf(t),d=dayOf(t),dow=dowOf(t),p=a.pers,n=a.needs,prev=a.act.type;
+  if(a.sickUntil>t)return go(a,'enfermo',a.homeId,Math.min(a.sickUntil,t+180));
+  if(prev==='dormir')return go(a,'desayunar',a.homeId,t+R.int(25,35));
+  if(inSleep(a,mod))return go(a,'dormir',a.homeId,sleepUntil(a));
+  if(a.job&&isDay(a.job.wd,dow)&&!a.worked&&mod>=a.job.start-150&&mod<a.job.end-30)return go(a,'trabajar',a.job.org,d*1440+a.job.end);
+  if(a.student&&isDay('lv',dow)&&!a.worked&&mod>=a.wakeW&&mod<720)return go(a,'estudiar',W.byType.colegio[0].id,d*1440+800);
+  let cap=Infinity;
+  if(a.job&&isDay(a.job.wd,dow)&&!a.worked&&mod<a.job.start-150)cap=d*1440+a.job.start-150;
+  const toBed=((a.bed-mod)+1440)%1440;cap=Math.min(cap,t+toBed);
+  const T=k=>W.byType[k][0], cafe=T('cafe'),rest=T('restaurante'),park=T('parque'),shop=T('tienda'),gym=T('gimnasio');
+  const wk=isDay('lv',dow);
+  const opts=[{type:'descansar',place:a.homeId,s:.3+.2*(1-n.energia),dur:[40,90]}];
+  if(n.hambre>.35){
+    let pl=null;
+    if(a.money>80000&&R.chance(.2+.4*p.extraversion))pl=openAt(rest,mod,dow)?rest:openAt(cafe,mod,dow)?cafe:null;
+    opts.push({type:'comer',place:pl?pl.id:a.homeId,s:n.hambre*1.5,dur:[30,50]});
+  }
+  if(n.soledad>.25&&a.age>=12){
+    const pls=[];if(openAt(cafe,mod,dow)&&a.money>20000)pls.push(cafe);if(openAt(park,mod,dow))pls.push(park);
+    if(pls.length)opts.push({type:'socializar',place:R.pick(pls).id,s:n.soledad*(.6+p.extraversion)*(n.energia>.2?1:.3)*(wk?1:1.3),dur:[50,140]});
+  }
+  if(a.want&&openAt(shop,mod,dow)&&a.money>PRICE[a.want]+100000)opts.push({type:'comprar',place:shop.id,s:.35+p.impulsividad*.5,dur:[20,40]});
+  if(!a.exercised&&openAt(gym,mod,dow)&&a.age>=15&&a.age<75&&n.energia>.35)opts.push({type:'ejercicio',place:gym.id,s:p.responsabilidad*.6*n.energia+(a.values.includes('salud')?.2:0),dur:[45,75]});
+  if(a.age<12&&openAt(park,mod,dow))opts.push({type:'jugar',place:park.id,s:.45,dur:[40,90]});
+  let best=null;for(const o of opts){o.s+=R.next()*.25;if(!best||o.s>best.s)best=o;}
+  let until=Math.min(t+R.int(best.dur[0],best.dur[1]),cap);
+  if(until<=t+TICK){best=opts[0];until=t+TICK*2;}
+  go(a,best.type,best.place,until);
+}
+function onStart(a){
+  const pl=W.places[a.loc];
+  switch(a.act.type){
+    case 'desayunar':a.needs.hambre=clamp(a.needs.hambre-.4);break;
+    case 'comer':{const c=pl.type==='restaurante'?28000:pl.type==='cafe'?12000:0;a.money-=c;a.needs.hambre=clamp(a.needs.hambre-.65);if(c)a.st.animo=clamp(a.st.animo+.03);break;}
+    case 'socializar':if(pl.type==='cafe')a.money-=9000;break;
+    case 'ejercicio':a.exercised=true;bump(a,-.08,.05);break;
+    case 'comprar':purchase(a);break;
+    case 'trabajar':arriveWork(a);break;
+  }
+}
+function onEnd(a){
+  if(a.act.type==='trabajar'&&a.job){a.money+=a.job.salary;a.worked=true;}
+  if(a.act.type==='estudiar')a.worked=true;
+}
+function arriveWork(a){
+  const o=W.places[a.job.org],late=modOf(W.t)-a.job.start;
+  if(late<=10||a.job.boss)return;
+  const cause=a.lastDelay?'tráfico en el camino':a.lastOversleep>10?`se quedó dormid${g(a,'o','a')} ${a.lastOversleep} min (energía al despertar ${pct(a.lastWakeEnergy)})`:'salió tarde de casa';
+  a.lateLog.push({t:W.t,cause});
+  const boss=AG(o.bossId);
+  if(boss){const r=rel(boss,a);r.tr=clamp(r.tr-.04);mem(boss,`${a.name} llegó ${late} minutos tarde`,.25,-.3,a.id);}
+  ev('LLEGADA_TARDE',[a],`{0} llegó ${late} min tarde a ${o.name}`,[cause,a.lateLog.length>1?`${a.lateLog.length}.ª vez en 2 semanas`:null].filter(Boolean),true);
+  mem(a,'Llegué tarde al trabajo',.3,-.3,boss?boss.id:null);bump(a,.05,-.03);
+}
+function purchase(a){
+  const k=a.want;if(!k)return;const price=PRICE[k];if(a.money<price)return;
+  a.money-=price;const name=k==='regalo'?W.R.pick(GIFTS):ARTICLE[k];
+  const o=newObj(a,k,name,price,`${fmtStamp(W.t)}: comprado por ${a.name} en Tienda El Surtidor`);
+  ev('OBJECT_PURCHASED',[a],`{0} compró ${name}`,a.wantCause?[a.wantCause]:[],k==='libro'||k==='ropa');
+  mem(a,`Compré ${name}`,.25,.3,null);
+  if(k==='regalo'&&a.giftFor)a.pendingGift={obj:o,to:a.giftFor};
+  a.want=null;a.wantCause=null;
+}
+function giveGift(a,b){
+  const o=a.pendingGift.obj;a.pendingGift=null;
+  const i=a.objs.indexOf(o);if(i<0)return;a.objs.splice(i,1);
+  o.owner=b.id;o.from=a.id;o.emo=.7;b.objs.push(o);o.history.push(`${fmtStamp(W.t)}: regalado por ${a.name} a ${b.name}`);
+  const r=rel(b,a);r.c=clamp(r.c+.08);r.tr=clamp(r.tr+.05);
+  ev('REGALO',[a,b],`{0} le regaló ${o.name} a {1}`,[`cercanía de ${a.name} hacia ${b.name}: ${pct(rel(a,b).c)}`]);
+  mem(b,`${a.name} me regaló ${o.name}`,.7,.9,a.id);mem(a,`Le regalé ${o.name} a ${b.name}`,.4,.6,b.id);bump(b,-.03,.08);
+}
+
+// ---------- interacción social ----------
+const irrit=x=>clamp((1-x.needs.energia)*.45+x.st.estres*.6-x.pers.amabilidad*.35+x.pers.impulsividad*.2);
+function firstMeet(r,a,b,pl){
+  if(r.type!=='desconocido')return;
+  r.type=(pl.slots&&a.job&&b.job&&a.job.org===pl.id&&b.job.org===pl.id)?'compañero':(pl.type==='colegio'&&a.student&&b.student)?'compañero de clase':(pl.type==='casa'&&a.homeId===b.homeId&&a.hh!==b.hh)?'vecino':'conocido';
+}
+function upgrade(r){if(r.fam||r.type==='pareja'||r.type==='ex pareja')return;if(r.c>=.45)r.type='amigo';else if(r.type==='amigo'&&r.c<.3)r.type='conocido';}
+function interact(a,b,pl){
+  const R=W.R,ra=rel(a,b),rb=rel(b,a);firstMeet(ra,a,b,pl);firstMeet(rb,b,a,pl);
+  const where=pl.type==='casa'?(pl.id===a.homeId?'casa':pl.name):pl.name;
+  const v=.3+.35*(a.pers.amabilidad+b.pers.amabilidad)/2+.25*((a.st.animo+b.st.animo)/2-.5)+.3*(ra.c+rb.c)/2-.3*(ra.cf+rb.cf)/2-.45*(irrit(a)+irrit(b))/2+R.normal(0,.12);
+  ra.n++;rb.n++;ra.last=rb.last=W.t;
+  if(v<0){
+    const sev=clamp(-v*1.5+.2);
+    for(const[x,y,rx]of[[a,b,ra],[b,a,rb]]){
+      const amp=1.4-x.pers.estabilidad;rx.cf=clamp(rx.cf+sev*.25*amp);rx.tr=clamp(rx.tr-sev*.12);rx.c=clamp(rx.c-sev*.07);rx.args++;
+      bump(x,sev*.12*amp,-sev*.1);const perceived=clamp(sev*amp+R.normal(0,.05));
+      mem(x,`Discutí con ${y.name} en ${where}`,perceived,-.8,y.id,perceived>sev+.2);upgrade(rx);
+    }
+    if((sev>.4||((ra.fam||ra.type==='pareja')&&sev>.3))&&W.t-(ra.argEv||-1e9)>2*1440){
+      ra.argEv=rb.argEv=W.t;
+      const c=[];
+      for(const x of[a,b]){if(x.needs.energia<.3)c.push(`energía baja de ${x.name} (${pct(x.needs.energia)})`);if(x.st.estres>.55)c.push(`estrés de ${x.name} (${pct(x.st.estres)})`);}
+      if((ra.cf+rb.cf)/2>.35)c.push('conflicto previo sin resolver');if(!c.length)c.push('malentendido');
+      ev('ARGUMENT_OCCURRED',[a,b],`{0} y {1} discutieron en ${where}`,c);
+    }
+    return;
+  }
+  for(const[x,y,rx]of[[a,b,ra],[b,a,rb]]){
+    const gain=.016*(.5+x.pers.extraversion*.4+x.pers.sensibilidad*.5+x.pers.aprobacion*.3)*(1-rx.c*.6);
+    rx.c=clamp(rx.c+gain);rx.tr=clamp(rx.tr+.015);rx.cf=clamp(rx.cf*.97);
+    x.needs.soledad=clamp(x.needs.soledad-.1*(.5+x.pers.extraversion));x.st.animo=clamp(x.st.animo+.015);
+    if(rx.n===1&&!rx.fam)mem(x,`Conocí a ${y.name} en ${where}`,.3,.4,y.id);
+    else for(const m of x.mems)if(m.w===y.id&&m.r<5)m.r+=.2;
+    upgrade(rx);
+  }
+  if(!ra.fam&&ra.type==='amigo'&&rb.type==='amigo'&&!ra.friendEv){
+    ra.friendEv=rb.friendEv=true;
+    ev('AMISTAD',[a,b],`{0} y {1} se hicieron ${a.sex==='F'&&b.sex==='F'?'amigas':'amigos'}`,[`${ra.n} encuentros`,`cercanía ${pct(ra.c)} / ${pct(rb.c)}`]);
+  }
+  if(a.age>=20&&b.age>=20&&!ra.fam&&ra.type==='amigo'&&rb.type==='amigo'&&Math.abs(a.age-b.age)<=12&&ra.c>.55&&rb.c>.5
+     &&!partnerOf(a)&&!partnerOf(b)&&(a.sex!==b.sex||R.chance(.15))&&R.chance(.08)){
+    ra.type=rb.type='pareja';
+    ev('RELATIONSHIP_STARTED',[a,b],'{0} y {1} empezaron una relación de pareja',[`${ra.n} encuentros`,`cercanía ${pct(ra.c)} / ${pct(rb.c)}`]);
+    mem(a,`Empecé una relación con ${b.name}`,.85,.9,b.id);mem(b,`Empecé una relación con ${a.name}`,.85,.9,a.id);bump(a,-.05,.1);bump(b,-.05,.1);
+  }
+  if(a.pendingGift&&a.pendingGift.to===b.id)giveGift(a,b);
+  if(b.pendingGift&&b.pendingGift.to===a.id)giveGift(b,a);
+  if(R.chance(.3))share(a,b);else if(R.chance(.2))share(b,a);
+}
+function share(a,b){
+  const R=W.R,cand=[];
+  for(const[fid]of a.beliefs){const f=W.facts[fid];if(f.subject!==b.id&&!b.beliefs.has(fid))cand.push(fid);}
+  if(!cand.length)return;
+  const f=W.facts[R.pick(cand)];
+  let text=f.subject===a.id?a.selfStory[f.id]:a.beliefs.get(f.id).text,distorted=false;
+  if(R.chance(.08+.18*(1-b.pers.responsabilidad)+.1*a.pers.impulsividad)){const alt=f.variants.filter(x=>x!==text);if(alt.length){text=R.pick(alt);distorted=true;}}
+  const correct=text===f.truth;
+  b.beliefs.set(f.id,{text,correct,from:a.id,t:W.t});
+  mem(b,`${a.name} me contó: «${text}»`,.35,0,a.id);
+  if(!correct&&!f.rumors.has(text)){
+    f.rumors.add(text);
+    ev('RUMOR',[a,b],`Circula una versión falsa: «${text}»`,[distorted?`${b.name} entendió otra cosa de lo que le contó ${a.name}`:f.subject===a.id?`${a.name} dio su propia versión de los hechos`:`${a.name} repitió una versión que ya era falsa`]);
+  }
+}
+
+// ---------- ciclo diario ----------
+function fire(a,late){
+  const o=W.places[a.job.org],boss=AG(o.bossId);
+  const causes=late>=3?[`${late} llegadas tarde en 2 semanas`]:['recorte de personal en '+o.name];
+  if(late>=3){const cs={};a.lateLog.forEach(l=>{const k=l.cause.split(' (')[0].replace(/ \d+ min$/,'');cs[k]=(cs[k]||0)+1;});
+    const top=Object.entries(cs).sort((x,y)=>y[1]-x[1])[0];if(top)causes.push(`causa más frecuente: ${top[0]}`);
+    if(boss)causes.push(`confianza del jefe: ${pct(rel(boss,a).tr)}`);}
+  o.staff=o.staff.filter(id=>id!==a.id);a.job=null;a.unempSince=W.t;a.lateLog=[];setRoutine(a);
+  ev('JOB_LOST',[a],`{0} perdió su empleo en ${o.name}`,causes);
+  const lie=a.pers.aprobacion>.6;
+  const f=addFact(a,`${a.name} fue despedid${g(a,'o','a')} de ${o.name}`,
+    [`${a.name} renunció a ${o.name}`,`${a.name} se peleó con el jefe`,`${a.name} se va de Villa Cordillera`],lie?`${a.name} renunció a ${o.name}`:null);
+  if(boss)boss.beliefs.set(f.id,{text:f.truth,correct:true,from:null,t:W.t});
+  for(const id of W.households[a.hh].members){const m=AG(id);if(m!==a&&m.age>=12)m.beliefs.set(f.id,{text:f.truth,correct:true,from:a.id,t:W.t});}
+  mem(a,`Me despidieron de ${o.name}`,.9,-.9,boss?boss.id:null);bump(a,.3,-.25);
+}
+function daily(){
+  const R=W.R,t=W.t,doy=dayOfYear(t);W.todayEvents=0;
+  for(const a of W.agents){
+    if(a.age>=18)a.money-=COST[a.cls]+a.deps*15000;
+    for(const k in a.rels){const r=a.rels[k];r.cf*=.985;}
+    if(a.retired)a.money+=55000;
+    if(a.money<0&&!a.inDebt&&a.age>=18){a.inDebt=true;ev('DEUDA',[a],'{0} quedó en números rojos',[a.job?'gastos mayores que ingresos':a.retired?'pensión insuficiente':'sin ingresos',`gasto diario ${money(COST[a.cls]+a.deps*15000)}`]);mem(a,'Me quedé sin dinero',.6,-.7,null);}
+    if(a.money>200000)a.inDebt=false;
+    a.worked=false;a.exercised=false;
+    a.lateLog=a.lateLog.filter(l=>t-l.t<14*1440);
+    if(a.bday===doy){a.age++;ev('CUMPLEAÑOS',[a],`{0} cumplió ${a.age} años`,[],true);bump(a,0,.08);if(a.age===65&&!a.retired&&!a.job)a.retired=true;}
+    const hp=.002+.018*a.st.estres*(1-a.needs.energia)+(a.age>60?.004:0);
+    if(a.sickUntil<t&&R.chance(hp)){
+      a.sickUntil=t+R.int(1,3)*1440;const c=[];
+      if(a.st.estres>.5)c.push(`estrés alto (${pct(a.st.estres)})`);if(a.needs.energia<.35)c.push(`energía baja (${pct(a.needs.energia)})`);if(a.age>60)c.push(`edad (${a.age})`);if(!c.length)c.push('contagio en la comunidad');
+      ev('SALUD',[a],`{0} se enfermó`,c);mem(a,'Estuve enferm'+g(a,'o','a'),.45,-.5,null);
+    }
+    if(has(a,'teléfono')&&R.chance(.0025*(.4+a.pers.impulsividad))){
+      const o=a.objs.find(x=>x.kind==='teléfono');a.objs.splice(a.objs.indexOf(o),1);o.owner=null;o.history.push(`${fmtStamp(t)}: perdido`);
+      ev('OBJECT_LOST',[a],'{0} perdió su teléfono',[a.pers.impulsividad>.6?`impulsividad alta (${pct(a.pers.impulsividad)})`:'descuido']);
+      bump(a,.1,-.06);mem(a,'Perdí mi teléfono',.5,-.6,null);
+    }
+    if(a.job&&!a.job.boss){const late=a.lateLog.length;if(R.chance(.0008+.035*Math.max(0,late-2)+(1-a.pers.responsabilidad)*.0015))fire(a,late);}
+    else if(!a.job&&a.age>=18&&a.age<65&&!a.student&&!a.retired){
+      const open=W.places.filter(o=>o.slots&&o.staff.length<o.slots);
+      if(open.length){
+        let ref=null;for(const k in a.rels){const r=a.rels[k],b=AG(k);if((r.type==='amigo'||r.fam)&&b.job&&open.includes(W.places[b.job.org])&&rel(b,a).c>.4){ref=b;break;}}
+        if(R.chance(.05*(.5+a.pers.responsabilidad)*(a.money<0?1.4:1)+(ref?.07:0)))hire(a,ref?W.places[ref.job.org]:R.pick(open),ref,false);
+      }
+    }
+    for(const k in a.rels){const r=a.rels[k];if(r.type!=='pareja')continue;const b=AG(k);if(a.idx>b.idx)continue;const rb=rel(b,a);
+      if(Math.max(r.cf,rb.cf)>.55&&R.chance(.1)){r.type=rb.type='ex pareja';
+        ev('RELATIONSHIP_ENDED',[a,b],'{0} y {1} terminaron su relación',[`conflicto acumulado ${pct(Math.max(r.cf,rb.cf))}`,`${r.args+rb.args} discusiones registradas`]);
+        for(const[x,y]of[[a,b],[b,a]]){mem(x,`Terminé con ${y.name}`,.85,-.85,y.id);bump(x,.25,-.2);}}}
+    if(!a.want&&a.age>=12&&a.money>0){
+      if(!has(a,'teléfono')&&a.age>=14){a.want='teléfono';a.wantCause='necesita un teléfono';}
+      else if(R.chance(.025)){const fr=bestFriend(a),r=R.next();
+        if(fr&&r<.35){a.want='regalo';a.giftFor=fr.id;a.wantCause=`quiere tener un detalle con ${fr.name}`;}
+        else if(r<.55&&!has(a,'bicicleta')&&a.age<60){a.want='bicicleta';a.wantCause='quiere moverse en bicicleta';}
+        else if(r<.75&&a.pers.apertura>.5){a.want='libro';a.wantCause='curiosidad (apertura alta)';}
+        else{a.want='ropa';a.wantCause=a.pers.impulsividad>.65?'compra impulsiva':'renovar ropa';}}
+    }
+  }
+}
+function updateNeeds(a,occ,hourly){
+  const dt=TICK/60,n=a.needs,s=a.st,p=a.pers,ty=a.act.type,act=a.act.active&&!a.travel;
+  const rest=act&&(ty==='dormir'||ty==='enfermo');
+  if(rest){n.energia+=.125*dt*(1-.45*s.estres)*(ty==='enfermo'?.6:1);n.hambre+=.035*dt;}
+  else{const work=act&&(ty==='trabajar'||ty==='estudiar');n.energia-=(work?.058:.045)*dt*(1+.4*s.estres);n.hambre+=(work?.09:.16)*dt;}
+  const company=act&&!rest&&(occ.get(a.loc)||[]).length>1;
+  n.soledad+=company?-.012*dt:rest?.004*dt:.045*dt*(.5+p.extraversion);
+  if(hourly){let m=0;for(const k in a.rels){const r=a.rels[k];if(r.c>.4&&r.cf>m)m=r.cf;}a.maxCf=m;}
+  const unemp=!a.job&&a.age>=18&&a.age<65&&!a.student&&!a.retired;
+  const target=.12+.25*(1-p.estabilidad)+(a.age>=18?(a.money<0?.25:a.money<150000?.1:0):0)+(unemp?.15:0)+a.lateLog.length*.03+a.maxCf*.2+(n.hambre>.8?.1:0)+(n.energia<.15?.08:0);
+  s.estres+=(clamp(target)-s.estres)*.05*dt;
+  const mt=.55+.2*(n.energia-.5)-.4*(s.estres-.3)-.25*n.soledad-.2*Math.max(0,n.hambre-.5)+.12*(p.estabilidad-.5);
+  s.animo+=(clamp(mt)-s.animo)*.08*dt;
+  n.energia=clamp(n.energia);n.hambre=clamp(n.hambre);n.soledad=clamp(n.soledad);s.estres=clamp(s.estres);s.animo=clamp(s.animo);
+}
+function tick(){
+  W.t+=TICK;const t=W.t;
+  if(modOf(t)===0)daily();
+  for(const a of W.agents){
+    const tr=a.travel;
+    if(tr&&t>=tr.depart+(tr.path.length-1)*MPT+tr.delay){a.loc=tr.dest;a.travel=null;a.act.active=true;onStart(a);}
+    if(!a.travel&&t>=a.act.until){if(a.act.active)onEnd(a);decide(a);}
+  }
+  const occ=new Map();
+  for(const a of W.agents)if(!a.travel&&a.act.active){let l=occ.get(a.loc);if(!l)occ.set(a.loc,l=[]);l.push(a);}
+  const hourly=modOf(t)%60===0;
+  for(const a of W.agents)updateNeeds(a,occ,hourly);
+  const R=W.R;
+  for(const[loc,list]of occ){
+    if(list.length<2)continue;const pl=W.places[loc],f=FACTOR[pl.type]||.8;
+    const aw=list.filter(x=>x.act.type!=='dormir');if(aw.length<2)continue;
+    for(const a of aw){if(!R.chance(.018*(.4+a.pers.extraversion)*f))continue;const b=aw[R.int(0,aw.length-1)];if(b!==a)interact(a,b,pl);}
+  }
+}
+/*ENGINE-END*/
+
+// ============================================================
+//  VISUALIZACIÓN E INTERFAZ (lee el estado; nunca lo decide)
+// ============================================================
+if(typeof document!=='undefined'){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cv=$('#map'),ctx=cv.getContext('2d'),base=document.createElement('canvas');
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const UI={running:true,speed:100,acc:0,sel:null,selPlace:null,tab:'estado',filter:'all',minor:false,query:'',cam:{x:TW*TS/2,y:TH*TS/2,z:1},follow:false,scale:1,lastUI:0,lastLog:0};
+
+const STYLE={
+  casa:{roof:['#B4583F','#8E4E6B','#C47A3A'],wall:'#E8D6B7',win:'#56789A',door:'#6B3E24'},
+  oficina:{roof:'#3F5E86',wall:'#B8C7D8',win:'#2F4B6B',door:'#2A3440'},
+  hospital:{roof:'#E6E6E6',wall:'#F4F4F4',win:'#7EA6C4',door:'#8A8A8A'},
+  colegio:{roof:'#D6B43E',wall:'#EADFC0',win:'#56789A',door:'#7A5A24'},
+  fabrica:{roof:'#7C7F87',wall:'#A7A69E',win:'#4E5560',door:'#3E3E3E'},
+  tienda:{roof:'#3D8A6A',wall:'#E9E1CC',win:'#56789A',door:'#2F5E48',awn:['#3D8A6A','#F1EDE2']},
+  cafe:{roof:'#6E4630',wall:'#E5D2B8',win:'#56789A',door:'#4A2E1E',awn:['#7A4A2E','#EFE0C8']},
+  restaurante:{roof:'#A33B2E',wall:'#EEDFC9',win:'#56789A',door:'#5A2019',awn:['#B23A2E','#F5EEE4']},
+  gimnasio:{roof:'#5D4E9E',wall:'#D6D0EA',win:'#3D3470',door:'#2E2750'}
+};
+function tree(g,x,y){g.fillStyle='#5A3A22';g.fillRect(x+2,y+4,1,3);g.fillStyle='#2F5E2D';g.fillRect(x+1,y,3,1);g.fillRect(x,y+1,5,3);g.fillRect(x+1,y+4,3,1);g.fillStyle='#437A3A';g.fillRect(x+1,y+1,2,1);}
+function renderBase(){
+  base.width=TW*TS;base.height=TH*TS;const g=base.getContext('2d'),R=new RNG(W.seed^0x5eed);
+  for(let y=0;y<TH;y++)for(let x=0;x<TW;x++){
+    const px=x*TS,py=y*TS;
+    if(isRoad(x,y)){g.fillStyle='#6A655C';g.fillRect(px,py,TS,TS);g.fillStyle='#625D55';g.fillRect(px+R.int(0,7),py+R.int(0,7),1,1);}
+    else{g.fillStyle=(x+y)%2?'#739C50':'#76A053';g.fillRect(px,py,TS,TS);for(let i=0;i<3;i++){g.fillStyle=R.chance(.5)?'#86AE60':'#658D46';g.fillRect(px+R.int(0,7),py+R.int(0,7),1,1);}
+      g.fillStyle='#A9A290';if(isRoad(x,y+1))g.fillRect(px,py+TS-1,TS,1);if(isRoad(x,y-1))g.fillRect(px,py,TS,1);if(isRoad(x+1,y))g.fillRect(px+TS-1,py,1,TS);if(isRoad(x-1,y))g.fillRect(px,py,1,TS);}
+  }
+  g.fillStyle='#C8BFA4';
+  ROAD_Y.forEach(r=>{for(let x=0;x<TW*TS;x+=6){const tx=Math.floor(x/TS);if(ROAD_X.some(c=>tx>=c-0&&tx<=c+1))continue;g.fillRect(x,(r+1)*TS-1,3,1);}});
+  ROAD_X.forEach(c=>{for(let y=0;y<TH*TS;y+=6){const ty=Math.floor(y/TS);if(ROAD_Y.some(r=>ty>=r&&ty<=r+1))continue;g.fillRect((c+1)*TS-1,y,1,3);}});
+  for(let y=0;y<TH;y++)for(let x=0;x<TW;x++){
+    if(isRoad(x,y)||isRoad(x+1,y)||isRoad(x,y+1)||isRoad(x-1,y)||isRoad(x,y-1))continue;
+    const inBlock=COLS.some(c=>x>=c&&x<=c+9)&&ROWS.some(r=>y>=r&&y<=r+7);
+    if(!inBlock&&R.chance(.22))tree(g,x*TS+R.int(0,2),y*TS+R.int(0,1));
+  }
+  for(const p of W.places)drawPlace(g,p,R);
+}
+function drawPlace(g,p,R){
+  const x=p.rect.x*TS,y=p.rect.y*TS,w=p.rect.w*TS,h=p.rect.h*TS,dx=p.door.x*TS;
+  g.fillStyle='#B6AE98';g.fillRect(dx+2,y+h,4,p.door.y*TS-(y+h));
+  if(p.type==='parque'){
+    g.fillStyle='#5F9146';g.fillRect(x,y,w,h);g.fillStyle='#4C7A38';g.fillRect(x,y,w,1);g.fillRect(x,y+h-1,w,1);g.fillRect(x,y,1,h);g.fillRect(x+w-1,y,1,h);
+    g.fillStyle='#CDBF98';g.fillRect(x+2,y+Math.floor(h/2)-1,w-4,3);g.fillRect(x+Math.floor(w/2)-1,y+2,3,h-2);
+    g.fillStyle='#3F7FB5';g.fillRect(x+6,y+6,14,8);g.fillRect(x+8,y+5,10,10);g.fillStyle='#6FA8D6';g.fillRect(x+9,y+7,4,1);
+    for(let i=0;i<9;i++){const tx=x+R.int(4,w-9),ty=y+R.int(3,h-9);if(Math.abs(ty+3-(y+h/2))<5||Math.abs(tx+2-(x+w/2))<5||(tx<x+22&&ty<y+16))continue;tree(g,tx,ty);}
+    g.fillStyle='#7A5A3A';g.fillRect(x+w-18,y+Math.floor(h/2)+4,6,2);g.fillRect(x+26,y+Math.floor(h/2)-5,6,2);
+    return;
+  }
+  const S=STYLE[p.type],roof=Array.isArray(S.roof)?S.roof[p.cls===1?0:p.cls===2?1:2]:S.roof,rh=Math.round(h*.4);
+  g.fillStyle='rgba(0,0,0,.2)';g.fillRect(x+2,y+2,w,h);
+  g.fillStyle=S.wall;g.fillRect(x+1,y+rh,w-2,h-rh);
+  g.fillStyle=roof;g.fillRect(x,y,w,rh);
+  g.fillStyle='rgba(0,0,0,.18)';for(let yy=y+3;yy<y+rh-2;yy+=3)g.fillRect(x+1,yy,w-2,1);
+  g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x,y+rh-2,w,2);
+  p.windows=[];
+  const wy0=y+rh+3,wstep=p.type==='oficina'?4:6;
+  for(let wy=wy0;wy<y+h-8;wy+=wstep)for(let wx=x+4;wx<x+w-5;wx+=6){if(Math.abs(wx+1-(dx+4))<4&&wy>y+h-12)continue;g.fillStyle=S.win;g.fillRect(wx,wy,3,p.type==='oficina'?2:3);p.windows.push([wx,wy,3,p.type==='oficina'?2:3]);}
+  g.fillStyle=S.door;g.fillRect(dx+2,y+h-6,4,6);
+  if(S.awn){for(let i=0;i<w-2;i++){g.fillStyle=S.awn[Math.floor(i/2)%2];g.fillRect(x+1+i,y+rh,1,3);}}
+  if(p.type==='hospital'){g.fillStyle='#C83A34';g.fillRect(x+w/2-1,y+3,3,9);g.fillRect(x+w/2-4,y+6,9,3);}
+  if(p.type==='fabrica'){g.fillStyle='#5A5A60';g.fillRect(x+w-8,y-6,4,9);g.fillStyle='#B04A3A';g.fillRect(x+w-8,y-6,4,1);}
+  if(p.type==='colegio'){g.fillStyle='#6A5020';g.fillRect(x+3,y-6,1,8);g.fillStyle='#F2D24A';g.fillRect(x+4,y-6,4,2);g.fillStyle='#2A5FA8';g.fillRect(x+4,y-4,4,1);g.fillStyle='#C83A34';g.fillRect(x+4,y-3,4,1);}
+  if(p.type==='gimnasio'){g.fillStyle='#EDEAF7';g.fillRect(x+w/2-5,y+5,11,1);g.fillRect(x+w/2-6,y+3,2,5);g.fillRect(x+w/2+5,y+3,2,5);}
+}
+
+function agentXY(a,rt){
+  if(a.travel){
+    const tr=a.travel,P=tr.path,k=(rt-tr.depart)/MPT,i=clamp(Math.floor(k),0,P.length-1),f=clamp(k-i),p0=P[i],p1=P[Math.min(i+1,P.length-1)];
+    return{x:(p0[0]+(p1[0]-p0[0])*f)*TS+1+(a.idx%3)*2,y:(p0[1]+(p1[1]-p0[1])*f)*TS+2+((a.idx>>2)%3)*2,walk:true,frame:Math.floor(k*2)%2};
+  }
+  const pl=W.places[a.loc];
+  if(pl&&pl.type==='parque'&&a.act.active){const s=pl.spots[a.idx%pl.spots.length];return{x:s[0],y:s[1],walk:false,frame:0};}
+  return null;
+}
+function drawAgent(a,pos){
+  const x=Math.round(pos.x),y=Math.round(pos.y)-4,L=a.look,small=a.age<12;
+  ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(x-1,y+(small?4:5),5,1);
+  ctx.fillStyle=L.hair;ctx.fillRect(x,y,3,1);
+  ctx.fillStyle=L.skin;ctx.fillRect(x,y+1,3,1);
+  ctx.fillStyle=L.shirt;ctx.fillRect(x,y+2,3,small?1:2);
+  ctx.fillStyle=L.pants;const ly=y+(small?3:4);
+  if(pos.walk&&pos.frame){ctx.fillRect(x,ly,1,1);ctx.fillRect(x+2,ly,1,1);}else{ctx.fillRect(x+1,ly,1,1);ctx.fillRect(x,ly,1,1);}
+}
+function dark(mod){if(mod<300||mod>=1230)return .5;if(mod<420)return .5*(1-(mod-300)/120);if(mod>=1080)return .5*(mod-1080)/150;return 0;}
+
+function resize(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1,w=Math.round(r.width*d),h=Math.round(r.height*d);if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}return{r,d};}
+function camera(){
+  const{r,d}=resize();const fit=Math.min(r.width/(TW*TS),r.height/(TH*TS));
+  const raw=fit*UI.cam.z*d,s=(raw>=3?Math.floor(raw):raw)/d;UI.scale=s;
+  const c=UI.cam,vw=r.width/s,vh=r.height/s;
+  if(UI.follow&&UI.sel){const a=AG(UI.sel),p=agentXY(a,W.t+UI.acc)||(()=>{const pl=W.places[a.loc??a.act.placeId];return{x:(pl.rect.x+pl.rect.w/2)*TS,y:(pl.rect.y+pl.rect.h/2)*TS};})();c.x=p.x;c.y=p.y;}
+  c.x=vw>=TW*TS?TW*TS/2:clamp(c.x,vw/2,TW*TS-vw/2);c.y=vh>=TH*TS?TH*TS/2:clamp(c.y,vh/2,TH*TS-vh/2);
+  return{r,d,s};
+}
+function draw(now){
+  const{r,d,s}=camera(),c=UI.cam;
+  ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#5B8440';ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.setTransform(d*s,0,0,d*s,d*(r.width/2-c.x*s),d*(r.height/2-c.y*s));ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(base,0,0);
+  const rt=W.t+Math.min(UI.acc,TICK);
+  for(const a of W.agents){const p=agentXY(a,rt);if(p)drawAgent(a,p);}
+  const dk=dark(modOf(W.t));
+  if(dk>0){
+    ctx.fillStyle=`rgba(16,20,56,${dk})`;ctx.fillRect(0,0,TW*TS,TH*TS);
+    if(dk>.15){
+      const occ={};for(const a of W.agents)if(!a.travel&&a.act.active&&a.act.type!=='dormir')occ[a.loc]=(occ[a.loc]||0)+1;
+      ctx.fillStyle='#FFD66B';
+      for(const p of W.places){if(!p.windows)continue;const lit=p.type==='casa'?occ[p.id]:openAt(p,modOf(W.t),dowOf(W.t));if(!lit)continue;
+        p.windows.forEach((w,i)=>{if(p.type==='casa'&&(i+p.id)%3===2&&occ[p.id]<3)return;ctx.fillRect(w[0],w[1],w[2],w[3]);});}
+    }
+  }
+  const blink=reduced?1:(Math.floor(now/400)%2);
+  if(UI.selPlace!=null){const p=W.places[UI.selPlace];ctx.strokeStyle='#FFE46B';ctx.lineWidth=1/s*Math.max(1,Math.round(s));ctx.strokeRect(p.rect.x*TS-1.5,p.rect.y*TS-1.5,p.rect.w*TS+3,p.rect.h*TS+3);}
+  if(UI.sel){
+    const a=AG(UI.sel),p=agentXY(a,rt);
+    if(p){ctx.fillStyle='#FFE46B';const x=Math.round(p.x),y=Math.round(p.y)-8-(blink?1:0);ctx.fillRect(x,y,3,1);ctx.fillRect(x+1,y+1,1,1);}
+    else{const pl=W.places[a.loc];if(pl&&blink){ctx.strokeStyle='#FFE46B';ctx.lineWidth=1/s*Math.max(1,Math.round(s));ctx.strokeRect(pl.rect.x*TS-1.5,pl.rect.y*TS-1.5,pl.rect.w*TS+3,pl.rect.h*TS+3);}}
+  }
+}
+
+// ---------- textos ----------
+const VERB={dormir:'durmiendo',desayunar:'desayunando',comer:'comiendo',trabajar:'trabajando',estudiar:'estudiando',socializar:'pasando el rato',descansar:'descansando',comprar:'de compras',ejercicio:'entrenando',jugar:'jugando'};
+function doing(a){
+  const pl=W.places[a.act.placeId],home=a.act.placeId===a.homeId,where=home?'en casa':pl.type==='casa'?'en '+pl.name:'en '+pl.name;
+  if(a.travel)return `camino a ${home?'casa':pl.name}`;
+  if(a.act.type==='enfermo')return `enferm${g(a,'o','a')}, en casa`;
+  return `${VERB[a.act.type]||a.act.type} ${where}`;
+}
+function ago(t){const m=W.t-t;if(m<60)return `hace ${m} min`;if(m<1440)return `hace ${Math.round(m/60)} h`;const d=Math.round(m/1440);if(d<60)return `hace ${d} ${d===1?'día':'días'}`;return `hace ${Math.round(d/30)} meses`;}
+const moodColor=v=>v>.62?'#2E9A62':v>.45?'#C7A23A':v>.3?'#D97A34':'#C0433C';
+const REL_LBL={amigo:['amigo','amiga'],conocido:['conocido','conocida'],'compañero':['compañero','compañera'],'compañero de clase':['compañero de clase','compañera de clase'],vecino:['vecino','vecina'],desconocido:['desconocido','desconocida'],pareja:['pareja','pareja'],'ex pareja':['ex pareja','ex pareja']};
+const relLbl=(r,other)=>REL_LBL[r.type]?REL_LBL[r.type][other.sex==='F'?1:0]:r.type;
+const EVK={JOB_STARTED:['Empleo nuevo','good','trabajo'],JOB_LOST:['Despido','bad','trabajo'],LLEGADA_TARDE:['Llegada tarde','warn','trabajo'],
+  ARGUMENT_OCCURRED:['Discusión','bad','relaciones'],AMISTAD:['Amistad','good','relaciones'],RELATIONSHIP_STARTED:['Nueva pareja','good','relaciones'],
+  RELATIONSHIP_ENDED:['Ruptura','bad','relaciones'],REGALO:['Regalo','good','relaciones'],CUMPLEAÑOS:['Cumpleaños','info','relaciones'],
+  OBJECT_PURCHASED:['Compra','info','economia'],OBJECT_LOST:['Pérdida','warn','economia'],DEUDA:['Números rojos','bad','economia'],
+  SALUD:['Salud','warn','salud'],RUMOR:['Rumor','info','info']};
+function evText(e){return esc(e.text).replace(/\{(\d)\}/g,(_,i)=>{const a=AG(e.actors[+i]);return `<button class="who" data-id="${a.id}">${esc(a.name)}</button>`;});}
+function evRow(e,withKind=true){
+  const k=EVK[e.type]||[e.type,'info'];
+  return `<li><time>${fmtStamp(e.t)}</time>${withKind?`<span class="kind k-${k[1]}">${k[0]}</span>`:''}<span class="txt">${evText(e)}${e.causes&&e.causes.length?`<span class="why">Por qué: ${esc(e.causes.join('; '))}</span>`:''}</span></li>`;
+}
+function renderLog(){
+  const list=[];for(let i=W.events.length-1;i>=0&&list.length<150;i--){const e=W.events[i];if(e.minor&&!UI.minor)continue;if(UI.filter!=='all'&&(EVK[e.type]||[])[2]!==UI.filter)continue;list.push(e);}
+  $('#events').innerHTML=list.length?list.map(e=>evRow(e)).join(''):`<li class="empty" style="display:block">Aún no hay eventos de este tipo. Sube la velocidad o avanza un día para que el mundo produzca historia.</li>`;
+  W.logDirty=false;
+}
+function bar(label,v,hot){return `<div class="bar"><span>${label}</span><div class="track"><i class="${hot&&v>.6?'hot':''}" style="width:${Math.round(v*100)}%"></i></div><b>${Math.round(v*100)}</b></div>`;}
+function mini(label,v,hot){return `<div class="mini"><span>${label}</span><div class="track"><i class="${hot?'hot':''}" style="width:${Math.round(v*100)}%"></i></div><span>${Math.round(v*100)}</span></div>`;}
+const nameBtn=id=>{const a=AG(id);return a?`<button class="who" data-id="${a.id}">${esc(a.name)}</button>`:'alguien';};
+
+function renderPopulation(){
+  const q=UI.query.trim().toLowerCase();
+  const rows=W.agents.filter(a=>!q||a.full.toLowerCase().includes(q)).map(a=>`<li><button data-id="${a.id}"><i class="dot" style="background:${moodColor(a.st.animo)}" title="Ánimo ${pct(a.st.animo)}"></i><span class="nm">${esc(a.name)}</span><span class="age">${a.age} años</span><span class="doing">${esc(doing(a))}</span></button></li>`).join('');
+  return rows||'<li class="empty">Nadie coincide con esa búsqueda.</li>';
+}
+function renderInspector(full){
+  const box=$('#inspector');
+  if(!UI.sel&&UI.selPlace==null){
+    if(full||!$('#peopleList')){
+      box.innerHTML=`<div class="ins-pad"><h2>Población</h2><p class="sub">${W.agents.length} personas en ${W.households.length} hogares y 3 barrios. El color indica el ánimo actual.</p>
+      <input class="search" id="q" type="search" placeholder="Buscar por nombre" value="${esc(UI.query)}" aria-label="Buscar persona">
+      <ul class="people" id="peopleList">${renderPopulation()}</ul>
+      <p class="note">Todo corre en tu navegador. Nadie tiene guion: cada persona decide según sus necesidades, su personalidad, su dinero y sus relaciones, y el azar sale de la semilla. Con la misma semilla obtienes exactamente el mismo mundo.</p></div>`;
+      $('#q').addEventListener('input',e=>{UI.query=e.target.value;$('#peopleList').innerHTML=renderPopulation();});
+    } else $('#peopleList').innerHTML=renderPopulation();
+    return;
+  }
+  if(UI.selPlace!=null&&!UI.sel){
+    const p=W.places[UI.selPlace],inside=W.agents.filter(a=>!a.travel&&a.loc===p.id);
+    const hours=p.open?`Abierto de ${fmtClock(p.open[0])} a ${p.open[1]>=1440?'24:00':fmtClock(p.open[1])}`:'Vivienda privada';
+    const residents=p.type==='casa'?W.agents.filter(a=>a.homeId===p.id):[];
+    box.innerHTML=`<div class="ins-pad"><button class="back" data-back>Volver a la población</button><h2>${esc(p.name)}</h2><p class="sub">${p.label}, barrio ${p.barrio}. ${hours}.</p>
+      ${p.staff?`<h3>Personal (${p.staff.length} de ${p.slots})</h3><ul class="list">${p.staff.map(id=>`<li>${nameBtn(id)}${id===p.bossId?' <small style="display:inline">(jefe/a)</small>':''}</li>`).join('')||'<li class="empty">Sin personal.</li>'}</ul>`:''}
+      ${residents.length?`<h3>Residentes</h3><ul class="list">${residents.map(a=>`<li>${nameBtn(a.id)} <small style="display:inline">${a.age} años</small></li>`).join('')}</ul>`:''}
+      <h3>Dentro ahora (${inside.length})</h3><ul class="list">${inside.map(a=>`<li>${nameBtn(a.id)}<small>${esc(doing(a))}</small></li>`).join('')||'<li class="empty">No hay nadie.</li>'}</ul></div>`;
+    return;
+  }
+  const a=AG(UI.sel);
+  if(full||!$('#tabBody')){
+    box.innerHTML=`<div class="ins-pad"><button class="back" data-back>Volver a la población</button>
+      <h2>${esc(a.full)}<span class="badge" title="En el diseño final, observar a una persona eleva su nivel de simulación a cognición detallada.">Nivel 3, observada</span></h2>
+      <p class="sub">${a.id}, ${a.age} años, ${esc(W.places[a.homeId].name)} en ${a.barrio}</p>
+      <p class="now" id="nowLine"></p>
+      <div class="tabs" role="tablist">${[['estado','Estado'],['relaciones','Relaciones'],['memoria','Memoria'],['historia','Historia'],['conocimiento','Creencias']].map(([k,l])=>`<button role="tab" data-tab="${k}" aria-selected="${UI.tab===k}">${l}</button>`).join('')}</div>
+      <div id="tabBody"></div></div>`;
+  }
+  $('#nowLine').textContent=`Ahora: ${doing(a)}`+(a.act.until>W.t&&!a.travel?` hasta las ${fmtClock(a.act.until)}`:'');
+  $('#tabBody').innerHTML=TAB[UI.tab](a);
+}
+const TAB={
+  estado(a){
+    const j=a.job?W.places[a.job.org]:null;
+    return `<h3>Estado interno</h3>${bar('Energía',a.needs.energia)}${bar('Hambre',a.needs.hambre,1)}${bar('Soledad',a.needs.soledad,1)}${bar('Estrés',a.st.estres,1)}${bar('Ánimo',a.st.animo)}
+    <h3>Recursos y situación</h3><dl class="kv"><dt>Dinero</dt><dd>${money(a.money)}</dd>
+    <dt>Ocupación</dt><dd>${j?`${esc(j.name)}${a.job.boss?' (jefe/a)':''}, ${money(a.job.salary)} al día`:a.student?'Estudiante':a.retired?'Pensionad'+g(a,'o','a'):a.age<5?'Primera infancia':'Sin empleo'+(a.unempSince!=null?`, ${Math.round((W.t-a.unempSince)/1440)} días`:'')}</dd>
+    ${a.job?`<dt>Llegadas tarde</dt><dd>${a.lateLog.length} en las últimas 2 semanas</dd>`:''}
+    <dt>Rutina</dt><dd>Se levanta hacia las ${fmtClock(a.wakeW)} y se acuesta hacia las ${fmtClock(a.bed)}</dd>
+    <dt>Deseo actual</dt><dd>${a.want?esc(ARTICLE[a.want]||'un regalo')+(a.wantCause?` (${esc(a.wantCause)})`:''):'Nada en particular'}</dd></dl>
+    <h3>Antecedentes</h3><p style="margin:0;font-size:14px">${esc(a.bio)}</p>
+    <h3>Personalidad</h3>${TRAITS.map(k=>mini(TRAIT_LABEL[k],a.pers[k])).join('')}
+    <h3>Valores</h3><div class="tags">${a.values.map(v=>`<span>${v}</span>`).join('')}</div>
+    <h3>Objetos (${a.objs.length})</h3><ul class="list">${a.objs.map(o=>`<li>${esc(o.name)} <small style="display:inline">${o.id}</small><small>${esc(o.history[o.history.length-1])}${o.emo>.5?'. Valor sentimental alto.':''}</small></li>`).join('')||'<li class="empty">No tiene objetos registrados.</li>'}</ul>`;
+  },
+  relaciones(a){
+    const rows=Object.entries(a.rels).map(([id,r])=>({b:AG(id),r,rb:AG(id).rels[a.id]})).filter(x=>x.r.type!=='desconocido').sort((x,y)=>y.r.c-x.r.c).slice(0,24);
+    if(!rows.length)return '<p class="empty">Todavía no conoce a nadie.</p>';
+    return `<p class="sub" style="margin-top:12px">Cada relación se mide desde las dos perspectivas; no tienen por qué coincidir.</p><ul class="list">${rows.map(({b,r,rb})=>`<li><div class="rel-head"><span>${nameBtn(b.id)}</span><span class="rel-type">${esc(relLbl(r,b))}${rb&&rb.type!==r.type?`; para ${esc(b.first)}: ${esc(relLbl(rb,a))}`:''}</span></div>
+      ${mini(`Cercanía de ${a.first}`,r.c)}${mini(`Cercanía de ${b.first}`,rb?rb.c:0)}${mini('Confianza',r.tr)}${mini('Conflicto',r.cf,1)}<small>${r.n} encuentros${r.args?`, ${r.args} discusiones`:''}${r.last?`, último ${ago(r.last)}`:''}</small></li>`).join('')}</ul>`;
+  },
+  memoria(a){
+    const ms=a.mems.map(m=>({m,s:mStrength(m)})).sort((x,y)=>y.m.t-x.m.t);
+    if(!ms.length)return '<p class="empty">Aún no ha formado recuerdos. Aparecen cuando le pasan cosas.</p>';
+    return `<p class="sub" style="margin-top:12px">Lo que recuerda, no lo que pasó. La fuerza baja con el tiempo y sube cuando vuelve a ver a la persona implicada.</p><ul class="list">${ms.map(({m,s})=>`<li class="${s<.08?'faded':''}">${esc(m.text)}<small>${ago(m.t)}${s<.08?', casi olvidado':''}${m.d?'. Lo recuerda como más grave de lo que fue.':''}</small>${mini('Fuerza',clamp(s),m.v<0)}</li>`).join('')}</ul>`;
+  },
+  historia(a){
+    const i=a.initial,H=a.history,cnt=t=>H.filter(e=>e.type===t).length,days=Math.round((W.t-360)/1440);
+    const friends=Object.values(a.rels).filter(r=>r.type==='amigo').length,partner=partnerOf(a);
+    const report=`<h3>Informe de vida (${days} ${days===1?'día':'días'} simulados)</h3><div class="report">
+      <div><span>Dinero</span><b>${money(i.money)} → ${money(a.money)}</b></div><div><span>Ánimo</span><b>${pct(i.animo)} → ${pct(a.st.animo)}</b></div>
+      <div><span>Estrés</span><b>${pct(i.estres)} → ${pct(a.st.estres)}</b></div><div><span>Trabajo</span><b>${(i.job||'ninguno')===(a.job?W.places[a.job.org].name:'ninguno')?'Sin cambios: '+esc(i.job||'ninguno'):esc(i.job||'ninguno')+' → '+esc(a.job?W.places[a.job.org].name:'ninguno')}</b></div>
+      <div><span>Amistades</span><b>${i.friends} → ${friends}</b></div><div><span>Pareja</span><b>${i.partner?'sí':'no'} → ${partner?esc(partner.name):'no'}</b></div>
+      <div><span>Discusiones</span><b>${cnt('ARGUMENT_OCCURRED')}</b></div><div><span>Llegadas tarde</span><b>${cnt('LLEGADA_TARDE')}</b></div></div>
+      <p class="sub">La historia no se borra cuando cambia el estado. Cada hecho guarda sus causas.</p>`;
+    const list=H.slice().reverse().map(e=>evRow(e,true)).join('');
+    return report+`<h3>Trayectoria</h3><ul class="list" style="list-style:none">${list?list.replace(/<li>/g,'<li style="display:block">'):'<li class="empty">Todavía no le ha pasado nada registrable.</li>'}</ul>`;
+  },
+  conocimiento(a){
+    const others=[...a.beliefs].filter(([fid])=>W.facts[fid].subject!==a.id);
+    const about=W.facts.filter(f=>f.subject===a.id);
+    const o1=others.length?`<ul class="list">${others.map(([fid,b])=>{const f=W.facts[fid];return `<li>«${esc(b.text)}»<small>${b.correct?'<span class="ok">Coincide con la realidad.</span>':`<span class="no">No coincide.</span> Realidad: ${esc(f.truth)}.`} ${b.from?`Se lo contó ${esc(AG(b.from).name)}`:'Lo sabe de primera mano'}, ${ago(b.t)}.</small></li>`;}).join('')}</ul>`:'<p class="empty">No ha oído noticias sobre otras personas. La información viaja cuando la gente conversa.</p>';
+    const o2=about.length?about.map(f=>{
+      const holders=W.agents.filter(x=>x!==a&&x.beliefs.has(f.id));const groups={};holders.forEach(x=>{const t=x.beliefs.get(f.id).text;(groups[t]=groups[t]||[]).push(x);});
+      return `<div class="now" style="margin-top:8px"><b>Verdad del mundo:</b> ${esc(f.truth)}<br><b>Lo que cuenta ${esc(a.first)}:</b> «${esc(a.selfStory[f.id])}»${a.selfStory[f.id]!==f.truth?' <span class="no">(no es cierto)</span>':''}</div>
+        <ul class="list">${Object.entries(groups).map(([t,xs])=>`<li>«${esc(t)}» <span class="${t===f.truth?'ok':'no'}">${t===f.truth?'cierto':'falso'}</span><small>Lo creen: ${xs.map(x=>esc(x.name)).join(', ')}</small></li>`).join('')||'<li class="empty">Nadie más lo sabe todavía.</li>'}</ul>`;}).join(''):'<p class="empty">No circula información sobre esta persona.</p>';
+    return `<h3>Lo que cree sobre otras personas</h3>${o1}<h3>Lo que se sabe de ${esc(a.first)}</h3>${o2}`;
+  }
+};
+function updateHeader(){
+  $('#clkTime').textContent=fmtClock(W.t);$('#clkDate').textContent=fmtDate(W.t);$('#clkDay').textContent=`Día ${dayOf(W.t-360)+1} de simulación`;
+  const wa=W.agents.filter(a=>a.age>=18&&a.age<65&&!a.student&&!a.retired);
+  $('#stPop').textContent=W.agents.length;$('#stJob').textContent=pct(wa.filter(a=>a.job).length/Math.max(1,wa.length));
+  $('#stMood').textContent=Math.round(W.agents.reduce((s,a)=>s+a.st.animo,0)/W.agents.length*100);$('#stEv').textContent=W.todayEvents;
+}
+
+// ---------- ciclo principal ----------
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(.25,(now-last)/1000);last=now;
+  if(UI.running&&!W.bulk){UI.acc+=dt*UI.speed;let n=0;while(UI.acc>=TICK&&n<600){tick();UI.acc-=TICK;n++;}if(n>=600)UI.acc=0;}
+  draw(now);
+  if(!W.bulk&&now-UI.lastUI>300){UI.lastUI=now;updateHeader();renderInspector(false);}
+  if(!W.bulk&&W.logDirty&&now-UI.lastLog>500){UI.lastLog=now;renderLog();}
+  requestAnimationFrame(frame);
+}
+function runFor(min){
+  if(W.bulk)return;W.bulk=true;const end=W.t+min;$('#progress').classList.add('on');
+  const step=()=>{const t0=performance.now();while(W.t<end&&performance.now()-t0<28)tick();const f=1-(end-W.t)/min;$('#progPct').textContent=pct(f);$('#progBar').style.width=pct(f);
+    if(W.t<end)setTimeout(step,0);else{W.bulk=false;UI.acc=0;$('#progress').classList.remove('on');updateHeader();renderInspector(true);renderLog();}};
+  step();
+}
+function start(seed){genWorld(seed);renderBase();UI.sel=null;UI.selPlace=null;UI.acc=0;updateHeader();renderInspector(true);renderLog();}
+
+// ---------- eventos de interfaz ----------
+function select(id){UI.sel=id;UI.selPlace=null;UI.tab=UI.tab||'estado';renderInspector(true);}
+document.addEventListener('click',e=>{
+  const w=e.target.closest('[data-id]');if(w){select(w.dataset.id);return;}
+  const tb=e.target.closest('[data-tab]');if(tb){UI.tab=tb.dataset.tab;renderInspector(true);return;}
+  if(e.target.closest('[data-back]')){UI.sel=null;UI.selPlace=null;UI.follow=false;$('#follow').setAttribute('aria-pressed','false');renderInspector(true);}
+});
+$('#play').onclick=()=>{UI.running=!UI.running;$('#play').textContent=UI.running?'Pausar':'Reanudar';$('#play').setAttribute('aria-label',UI.running?'Pausar la simulación':'Reanudar la simulación');};
+document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{UI.speed=+b.dataset.speed;document.querySelectorAll('[data-speed]').forEach(x=>x.setAttribute('aria-pressed',x===b));});
+document.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>runFor(+b.dataset.adv));
+$('#seedForm').onsubmit=e=>{e.preventDefault();start((+$('#seed').value|0)>>>0);};
+$('#chips').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;UI.filter=b.dataset.f;document.querySelectorAll('#chips [data-f]').forEach(x=>x.setAttribute('aria-pressed',x===b));renderLog();};
+$('#showMinor').onchange=e=>{UI.minor=e.target.checked;renderLog();};
+$('#zoomIn').onclick=()=>{UI.cam.z=Math.min(6,UI.cam.z*1.5);};
+$('#zoomOut').onclick=()=>{UI.cam.z=Math.max(1,UI.cam.z/1.5);};
+$('#center').onclick=()=>{UI.cam={x:TW*TS/2,y:TH*TS/2,z:1};UI.follow=false;$('#follow').setAttribute('aria-pressed','false');};
+$('#follow').onclick=()=>{if(!UI.sel)return;UI.follow=!UI.follow;$('#follow').setAttribute('aria-pressed',UI.follow);if(UI.follow&&UI.cam.z<2.5)UI.cam.z=3;};
+
+function toWorld(ev){const r=cv.getBoundingClientRect(),s=UI.scale;return{x:(ev.clientX-r.left-(r.width/2-UI.cam.x*s))/s,y:(ev.clientY-r.top-(r.height/2-UI.cam.y*s))/s};}
+function hit(ev){
+  const p=toWorld(ev),rt=W.t+Math.min(UI.acc,TICK);let best=null,bd=7;
+  for(const a of W.agents){const q=agentXY(a,rt);if(!q)continue;const d=Math.hypot(q.x+1-p.x,q.y-2-p.y);if(d<bd){bd=d;best=a;}}
+  if(best)return{agent:best};
+  const tx=Math.floor(p.x/TS),ty=Math.floor(p.y/TS);
+  const pl=W.places.find(q=>tx>=q.rect.x&&tx<q.rect.x+q.rect.w&&ty>=q.rect.y&&ty<q.rect.y+q.rect.h);return pl?{place:pl}:null;
+}
+let drag=null;
+cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,cx:UI.cam.x,cy:UI.cam.y,moved:false};cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointermove',e=>{
+  if(drag){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>4){drag.moved=true;cv.classList.add('dragging');UI.follow=false;$('#follow').setAttribute('aria-pressed','false');}
+    if(drag.moved){UI.cam.x=drag.cx-dx/UI.scale;UI.cam.y=drag.cy-dy/UI.scale;}return;}
+  const h=hit(e),tip=$('#tip');
+  if(!h){tip.style.display='none';return;}
+  const r=$('#mapwrap').getBoundingClientRect();
+  if(h.agent)tip.innerHTML=`<b>${esc(h.agent.name)}</b>${esc(doing(h.agent))}`;
+  else{const n=W.agents.filter(a=>!a.travel&&a.loc===h.place.id).length;tip.innerHTML=`<b>${esc(h.place.name)}</b>${h.place.label}, ${n} ${n===1?'persona':'personas'} dentro`;}
+  tip.style.display='block';tip.style.left=Math.min(e.clientX-r.left+12,r.width-250)+'px';tip.style.top=(e.clientY-r.top+12)+'px';
+});
+cv.addEventListener('pointerup',e=>{
+  const wasDrag=drag&&drag.moved;drag=null;cv.classList.remove('dragging');if(wasDrag)return;
+  const h=hit(e);if(!h)return;
+  if(h.agent)select(h.agent.id);else{UI.sel=null;UI.selPlace=h.place.id;renderInspector(true);}
+});
+cv.addEventListener('pointerleave',()=>{$('#tip').style.display='none';});
+cv.addEventListener('wheel',e=>{e.preventDefault();UI.cam.z=clamp(UI.cam.z*(e.deltaY<0?1.2:1/1.2),1,6);},{passive:false});
+
+start(108);requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>

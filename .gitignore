@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+*.sqlite
+*.sqlite-*
+data/
+.env
+.env.*
+.guardrails/permitir-referencia
+.claude/settings.local.json
+.DS_Store

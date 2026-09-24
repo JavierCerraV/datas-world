@@ -1,0 +1,25 @@
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - name: Guardarraíles (specs, MODULE.md, determinismo, índices)
+        run: |
+          BASE=${{ github.event.pull_request.base.sha || github.event.before }}
+          if git cat-file -e "$BASE^{commit}" 2>/dev/null; then node scripts/guardrails/check.mjs --ci --base "$BASE"; else node scripts/guardrails/check.mjs --ci --base HEAD~0; fi
+      - name: Instalar dependencias
+        if: hashFiles('pnpm-lock.yaml') != ''
+        run: corepack enable && pnpm install --frozen-lockfile
+      - name: Tipos, lint y pruebas
+        if: hashFiles('pnpm-lock.yaml') != ''
+        run: pnpm check
+      - name: Determinismo (dos ejecuciones, mismo hash)
+        if: hashFiles('pnpm-lock.yaml') != ''
+        run: pnpm test:determinism

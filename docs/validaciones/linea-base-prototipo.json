@@ -1,0 +1,373 @@
+{
+  "generatedWith": "scripts/prototipo/linea-base.mjs",
+  "seeds": [
+    100,
+    109
+  ],
+  "days": 365,
+  "seconds": 66.448,
+  "note": "Línea base del prototipo. El motor TS no tiene que ser idéntico, pero cada métrica debe caer dentro de la tolerancia definida en docs/prototipo-referencia.md o justificarse en la spec.",
+  "runs": [
+    {
+      "seed": 100,
+      "population": 61,
+      "nan": 0,
+      "mood": {
+        "mean": 0.5429492896874637,
+        "sd": 0.09142302166874469
+      },
+      "stress": {
+        "mean": 0.3250673650533945,
+        "sd": 0.10832696250220365
+      },
+      "moneyAdults": {
+        "p10": -8644000,
+        "p50": 547000,
+        "p90": 16796000
+      },
+      "employedAdultsPct": 0.8857142857142857,
+      "closeRelationsPerPerson": 16.868852459016395,
+      "memoriesPerPerson": 58.09836065573771,
+      "eventsByType": {
+        "LLEGADA_TARDE": 34,
+        "OBJECT_LOST": 33,
+        "RUMOR": 63,
+        "OBJECT_PURCHASED": 188,
+        "JOB_STARTED": 22,
+        "RELATIONSHIP_ENDED": 1,
+        "SALUD": 134,
+        "REGALO": 46,
+        "AMISTAD": 351,
+        "CUMPLEAÑOS": 61,
+        "JOB_LOST": 18,
+        "DEUDA": 21,
+        "ARGUMENT_OCCURRED": 6
+      }
+    },
+    {
+      "seed": 101,
+      "population": 62,
+      "nan": 0,
+      "mood": {
+        "mean": 0.5499541228168966,
+        "sd": 0.10665977150631147
+      },
+      "stress": {
+        "mean": 0.32381328271161497,
+        "sd": 0.11499330188792019
+      },
+      "moneyAdults": {
+        "p10": -7531000,
+        "p50": 75000,
+        "p90": 15803000
+      },
+      "employedAdultsPct": 0.7435897435897436,
+      "closeRelationsPerPerson": 15.758064516129032,
+      "memoriesPerPerson": 47.45161290322581,
+      "eventsByType": {
+        "LLEGADA_TARDE": 18,
+        "RUMOR": 30,
+        "JOB_STARTED": 10,
+        "SALUD": 134,
+        "OBJECT_PURCHASED": 185,
+        "CUMPLEAÑOS": 62,
+        "OBJECT_LOST": 27,
+        "REGALO": 50,
+        "AMISTAD": 346,
+        "DEUDA": 21,
+        "RELATIONSHIP_STARTED": 6,
+        "JOB_LOST": 7,
+        "ARGUMENT_OCCURRED": 2
+      }
+    },
+    {
+      "seed": 102,
+      "population": 63,
+      "nan": 0,
+      "mood": {
+        "mean": 0.5317093311494908,
+        "sd": 0.0866381836818666
+      },
+      "stress": {
+        "mean": 0.341865125906653,
+        "sd": 0.11885291326548685
+      },
+      "moneyAdults": {
+        "p10": -9319000,
+        "p50": 21000,
+        "p90": 18783000
+      },
+      "employedAdultsPct": 0.8974358974358975,
+      "closeRelationsPerPerson": 17.19047619047619,
+      "memoriesPerPerson": 70.2063492063492,
+      "eventsByType": {
+        "LLEGADA_TARDE": 105,
+        "RUMOR": 87,
+        "SALUD": 156,
+        "JOB_STARTED": 34,
+        "OBJECT_PURCHASED": 198,
+        "REGALO": 65,
+        "AMISTAD": 305,
+        "CUMPLEAÑOS": 63,
+        "OBJECT_LOST": 29,
+        "DEUDA": 26,
+        "JOB_LOST": 26,
+        "ARGUMENT_OCCURRED": 3
+      }
+    },
+    {
+      "seed": 103,
+      "population": 62,
+      "nan": 0,
+      "mood": {
+        "mean": 0.5435016055205967,
+        "sd": 0.09265421108371806
+      },
+      "stress": {
+        "mean": 0.32438160455315534,
+        "sd": 0.12349145268821525
+      },
+      "moneyAdults": {
+        "p10": -1139000,
+        "p50": 205000,
+        "p90": 17031000
+      },
+      "employedAdultsPct": 0.8809523809523809,
+      "closeRelationsPerPerson": 16.951612903225808,
+      "memoriesPerPerson": 62.17741935483871,
+      "eventsByType": {
+        "LLEGADA_TARDE": 39,
+        "AMISTAD": 348,
+        "SALUD": 140,
+        "RUMOR": 62,
+        "OBJECT_PURCHASED": 246,
+        "ARGUMENT_OCCURRED": 114,
+        "JOB_STARTED": 19,
+        "DEUDA": 28,
+        "CUMPLEAÑOS": 62,
+        "JOB_LOST": 18,
+        "REGALO": 64,
+        "OBJECT_LOST": 21,
+        "RELATIONSHIP_STARTED": 1
+      }
+    },
+    {
+      "seed": 104,
+      "population": 60,
+      "nan": 0,
+      "mood": {
+        "mean": 0.5476217541831813,
+        "sd": 0.08934570231271036
+      },
+      "stress": {
+        "mean": 0.3250971676268371,
+        "sd": 0.12407432329657689
+      },
+      "moneyAdults": {
+        "p10": -4564000,
+        "p50": 104000,
+        "p90": 19267000
+      },
+      "employedAdultsPct": 0.8095238095238095,
+      "closeRelationsPerPerson": 13.633333333333333,
+      "memoriesPerPerson": 56.233333333333334,
+      "eventsByType": {
+        "LLEGADA_TARDE": 51,
+        "RUMOR": 51,
+        "JOB_STARTED": 18,
+        "OBJECT_PURCHASED": 234,
+        "SALUD": 138,
+        "OBJECT_LOST": 31,
+        "DEUDA": 30,
+        "AMISTAD": 290,
+        "CUMPLEAÑOS": 60,
+        "ARGUMENT_OCCURRED": 1,
+        "REGALO": 75,
+        "JOB_LOST": 14,
+        "RELATIONSHIP_STARTED": 1
+      }
+    },
+    {
+      "seed": 105,
+      "population": 60,
+      "nan": 0,
+      "mood": {
+        "mean": 0.5408795224570073,
+        "sd": 0.0876664085448309
+      },
+      "stress": {
+        "mean": 0.33818167547356454,
+        "sd": 0.11097030850588746
+      },
+      "moneyAdults": {
+        "p10": -5209000,
+        "p50": 91000,
+        "p90": 14289000
+      },
+      "employedAdultsPct": 0.8292682926829268,
+      "closeRelationsPerPerson": 14.85,
+      "memoriesPerPerson": 62.05,
+      "eventsByType": {
+        "LLEGADA_TARDE": 38,
+        "RUMOR": 69,
+        "SALUD": 145,
+        "RELATIONSHIP_ENDED": 1,
+        "OBJECT_PURCHASED": 204,
+        "JOB_STARTED": 25,
+        "DEUDA": 31,
+        "CUMPLEAÑOS": 60,
+        "OBJECT_LOST": 31,
+        "JOB_LOST": 21,
+        "AMISTAD": 303,
+        "REGALO": 48,
+        "ARGUMENT_OCCURRED": 4
+      }
+    },
+    {
+      "seed": 106,
+      "population": 61,
+      "nan": 0,
+      "mood": {
+        "mean": 0.5322445086401957,
+        "sd": 0.10149938976818805
+      },
+      "stress": {
+        "mean": 0.3354112776703279,
+        "sd": 0.12442859392384727
+      },
+      "moneyAdults": {
+        "p10": -4554000,
+        "p50": 68000,
+        "p90": 12244000
+      },
+      "employedAdultsPct": 0.8,
+      "closeRelationsPerPerson": 19.114754098360656,
+      "memoriesPerPerson": 55.47540983606557,
+      "eventsByType": {
+        "LLEGADA_TARDE": 66,
+        "RUMOR": 51,
+        "RELATIONSHIP_ENDED": 1,
+        "SALUD": 129,
+        "OBJECT_PURCHASED": 186,
+        "ARGUMENT_OCCURRED": 88,
+        "JOB_STARTED": 19,
+        "AMISTAD": 413,
+        "DEUDA": 24,
+        "REGALO": 50,
+        "CUMPLEAÑOS": 61,
+        "JOB_LOST": 14,
+        "OBJECT_LOST": 29,
+        "RELATIONSHIP_STARTED": 4
+      }
+    },
+    {
+      "seed": 107,
+      "population": 61,
+      "nan": 0,
+      "mood": {
+        "mean": 0.5420063824692642,
+        "sd": 0.10309023286682119
+      },
+      "stress": {
+        "mean": 0.3343758588419574,
+        "sd": 0.1300440972666974
+      },
+      "moneyAdults": {
+        "p10": -4658000,
+        "p50": 49000,
+        "p90": 19202000
+      },
+      "employedAdultsPct": 0.8333333333333334,
+      "closeRelationsPerPerson": 16.78688524590164,
+      "memoriesPerPerson": 56.19672131147541,
+      "eventsByType": {
+        "LLEGADA_TARDE": 39,
+        "RUMOR": 39,
+        "JOB_STARTED": 14,
+        "JOB_LOST": 10,
+        "OBJECT_PURCHASED": 200,
+        "SALUD": 153,
+        "AMISTAD": 327,
+        "REGALO": 51,
+        "OBJECT_LOST": 37,
+        "ARGUMENT_OCCURRED": 272,
+        "CUMPLEAÑOS": 61,
+        "DEUDA": 22,
+        "RELATIONSHIP_STARTED": 1
+      }
+    },
+    {
+      "seed": 108,
+      "population": 60,
+      "nan": 0,
+      "mood": {
+        "mean": 0.5291976716194975,
+        "sd": 0.08786406964541052
+      },
+      "stress": {
+        "mean": 0.342822089029381,
+        "sd": 0.11782488458673937
+      },
+      "moneyAdults": {
+        "p10": -898000,
+        "p50": 54000,
+        "p90": 18136000
+      },
+      "employedAdultsPct": 0.8717948717948718,
+      "closeRelationsPerPerson": 14.633333333333333,
+      "memoriesPerPerson": 47.86666666666667,
+      "eventsByType": {
+        "LLEGADA_TARDE": 20,
+        "RUMOR": 33,
+        "OBJECT_PURCHASED": 223,
+        "ARGUMENT_OCCURRED": 8,
+        "RELATIONSHIP_ENDED": 1,
+        "JOB_STARTED": 13,
+        "OBJECT_LOST": 31,
+        "CUMPLEAÑOS": 60,
+        "SALUD": 138,
+        "DEUDA": 55,
+        "AMISTAD": 298,
+        "REGALO": 57,
+        "RELATIONSHIP_STARTED": 1,
+        "JOB_LOST": 8
+      }
+    },
+    {
+      "seed": 109,
+      "population": 62,
+      "nan": 0,
+      "mood": {
+        "mean": 0.5482496578034424,
+        "sd": 0.07141698709334543
+      },
+      "stress": {
+        "mean": 0.3110444229868064,
+        "sd": 0.09226521475811347
+      },
+      "moneyAdults": {
+        "p10": -683000,
+        "p50": 890000,
+        "p90": 18371000
+      },
+      "employedAdultsPct": 0.9487179487179487,
+      "closeRelationsPerPerson": 16.70967741935484,
+      "memoriesPerPerson": 61.16129032258065,
+      "eventsByType": {
+        "LLEGADA_TARDE": 26,
+        "RUMOR": 62,
+        "SALUD": 146,
+        "OBJECT_PURCHASED": 267,
+        "JOB_STARTED": 25,
+        "AMISTAD": 357,
+        "REGALO": 84,
+        "OBJECT_LOST": 29,
+        "JOB_LOST": 18,
+        "DEUDA": 33,
+        "CUMPLEAÑOS": 62,
+        "ARGUMENT_OCCURRED": 2,
+        "RELATIONSHIP_STARTED": 3
+      }
+    }
+  ]
+}
