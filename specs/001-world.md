@@ -1,7 +1,7 @@
 ---
 id: 001
 nombre: world
-estado: borrador
+estado: aprobada
 hito: M0
 depende_de: [002, 023]
 version: 0.2
@@ -157,3 +157,4 @@ Número de entidades por tipo y estado; hash de estado en cada instantánea.
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial |
 | 2026-09-23 | 0.2 | Capacidades del mundo (R-007, R-008, tabla de dependencias) y almacenamiento por componentes con índice denso (§3.1, R-009, R-010). ADR-005 |
+| 2026-09-24 | 0.2 | Estado → aprobada |

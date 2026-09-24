@@ -1,7 +1,7 @@
 ---
 id: 023
 nombre: reproducibility
-estado: borrador
+estado: aprobada
 hito: M0 (base) · M5 (rewind/replay y ramas)
 depende_de: [001, 002]
 version: 0.2
@@ -68,3 +68,4 @@ interface ExternalInput {
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial |
 | 2026-09-23 | 0.2 | Replay de activaciones de capacidades y flujos RNG por sistema y por capacidad (R-006, R-007, CA-006). ADR-005 |
+| 2026-09-24 | 0.2 | Estado → aprobada |

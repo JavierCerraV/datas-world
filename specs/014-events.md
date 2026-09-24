@@ -1,7 +1,7 @@
 ---
 id: 014
 nombre: events
-estado: borrador
+estado: aprobada
 hito: M2
 depende_de: [001, 002]
 version: 0.1
@@ -63,3 +63,4 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
+| 2026-09-24 | 0.1 | Estado → aprobada |

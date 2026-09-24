@@ -1,7 +1,7 @@
 ---
 id: 027
 nombre: persistence
-estado: borrador
+estado: aprobada
 hito: M0 (base) · M4 (retención)
 depende_de: [001, 002, 014]
 version: 0.2
@@ -84,3 +84,4 @@ CREATE INDEX memory_archive_owner_at ON memory_archive(owner_id, at);
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial |
 | 2026-09-23 | 0.2 | Tablas `components` y `memory_archive`, capacidades en `meta`, compatibilidad entre peldaños (R-008 a R-011, CA-006 a CA-008). ADR-005 |
+| 2026-09-24 | 0.2 | Estado → aprobada |

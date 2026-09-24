@@ -1,7 +1,7 @@
 ---
 id: 002
 nombre: time
-estado: borrador
+estado: aprobada
 hito: M0
 depende_de: []
 version: 0.1
@@ -74,3 +74,4 @@ interface ScheduledItem {
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial |
+| 2026-09-24 | 0.1 | Estado → aprobada |
