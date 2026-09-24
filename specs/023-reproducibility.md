@@ -28,8 +28,17 @@ interface Rng {
   fork(name: string): Rng;           // flujo derivado estable
   state(): RngState;                 // serializable
 }
-// Implementación: PCG32 o splitmix64/xoshiro128** (el prototipo usa splitmix32).
-// fork(name) = new Rng(hash32(parentSeed, name)) — no consume del padre.
+// Implementación: xoshiro128** (decisión B0, 2026-09-23). 128 bits de estado, solo Math.imul y
+// operaciones de 32 bits. El estado inicial se deriva de la clave del flujo con splitmix32
+// (el mismo núcleo que `sm32` del prototipo).
+// Cada flujo tiene una clave de 64 bits (dos uint32), fija desde su creación:
+//   createRng(seed).key = [seed >>> 0, 0x9e3779b9]
+//   fork(name).key      = hash64(padre.key, String(name))   — no consume del padre.
+// Con 64 bits la probabilidad de que dos de ~4 millones de flujos (10 000 personas × 365 días)
+// coincidan es < 1e-6; con 32 bits sería casi segura.
+
+type RngState = { key: [number, number]; s: [number, number, number, number] };
+// restoreRng(state) reconstruye un Rng idéntico (misma clave y mismo punto de la secuencia).
 
 interface ExternalInput {
   at: WorldMinute; seq: number;
@@ -61,7 +70,7 @@ interface ExternalInput {
 - **CA-006** — *Dado* un mundo que activó `relationships` el día 10 por entrada externa, *cuando* se hace replay desde el día 0, *entonces* el hash del día 30 coincide con el original.
 
 ## 10. Preguntas abiertas
-- [ ] ¿PCG32 o xoshiro128**? Ambos válidos; elegir el más simple de auditar.
+- [x] ¿PCG32 o xoshiro128**? → **xoshiro128\*\***, decidido por el usuario (B0). PCG32 necesita multiplicación de 64 bits (BigInt en JS): más lento y más difícil de auditar.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
@@ -69,3 +78,4 @@ interface ExternalInput {
 | 2026-09-23 | 0.1 | Borrador inicial |
 | 2026-09-23 | 0.2 | Replay de activaciones de capacidades y flujos RNG por sistema y por capacidad (R-006, R-007, CA-006). ADR-005 |
 | 2026-09-24 | 0.2 | Estado → aprobada |
+| 2026-09-23 | 0.2 | Decisión B0: xoshiro128** sembrado con splitmix32; claves de flujo de 64 bits en lugar de `hash32` para evitar colisiones entre millones de flujos; tipo `RngState` y `restoreRng`. Sin cambios en reglas ni CA |
