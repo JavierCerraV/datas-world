@@ -1,0 +1,124 @@
+---
+id: 029
+nombre: country-profile
+estado: aprobada
+hito: M1 (demografía, territorio, festivos, salario base) · M2 (reglas laborales y de economía)
+depende_de: [001, 002]
+version: 0.1
+---
+
+# 029 — Perfil de país: Colombia
+
+## 1. Propósito
+Reunir en un solo lugar, con fuente y fecha de vigencia, cómo es Colombia:
+- sus indicadores (demografía, hogares, empleo, informalidad, educación, estratos);
+- sus leyes (salario mínimo, jornada, recargos, pensión, festivos, estratificación);
+- su organización territorial.
+
+Las demás specs no escriben cifras propias: leen `profile.<clave>`. Así el mundo se parece a Colombia y se puede actualizar cuando cambien las leyes o los datos. Es una decisión del usuario (2026-09-24) y aplica el ADR-006.
+
+## 2. Alcance
+**Incluye:** parámetros con fuente y vigencia, festivos, perfiles alternativos ("prototipo", para paridad) y la regla de qué valor rige en cada fecha del mundo.
+**Fuera de alcance:** simular el proceso legislativo; otros países (la estructura los admite).
+
+## 3. Modelo de datos
+```ts
+interface CountryProfile {
+  id: string;                        // 'CO-2026.09'
+  country: 'CO';
+  currency: { code: 'COP'; minorUnit: 1 };
+  entries: ProfileEntry[];           // orden por clave y luego por vigencia
+}
+interface ProfileEntry {
+  key: string;                       // 'labor.minimumWageMonthly'
+  value: number | string | number[] | Record<string, number>;
+  validFrom: string;                 // 'AAAA-MM-DD' (fecha del mundo desde la que rige)
+  source: string;                    // norma o publicación y fecha
+  status: 'oficial' | 'estimado' | 'por_confirmar';
+}
+```
+- El perfil se copia en `WorldConfig` al crear el mundo (versión y hash), como los catálogos del ADR-006.
+- `profileValue(key, worldDate)` devuelve la entrada vigente más reciente con `validFrom ≤ worldDate`. Es una función pura y determinista.
+
+## 4. Reglas
+- **R-001** — Toda cifra de comportamiento colombiano en otra spec se lee del perfil. Una cifra sin fuente se registra como `estimado` o `por_confirmar`, **nunca se inventa en silencio**.
+- **R-002** — Las normas con fecha de entrada escalonada se registran como varias entradas con su `validFrom`. Por ejemplo, la jornada de 42 h rige desde el 2026-07-15.
+- **R-003** — Los valores anuales que aún no existen se prolongan con el último vigente, marcado `estimado`. Por ejemplo, el salario mínimo de 2027 en un mundo que empieza en 2027.
+- **R-004** — El perfil **"prototipo"** reproduce los valores del prototipo para la paridad estadística (docs/prototipo-referencia.md). El perfil por defecto de los mundos nuevos es el colombiano.
+- **R-005 (M1)** — **Festivos.** `world:new` calcula los festivos de Colombia de los años del mundo (Ley 51 de 1983, "Ley Emiliani") y los guarda en `WorldConfig.holidays` (spec 002 R-001):
+  - fijos: 1 de enero, 1 de mayo, 20 de julio, 7 de agosto, 8 de diciembre y 25 de diciembre;
+  - trasladables al lunes siguiente: 6 de enero, 19 de marzo, 29 de junio, 15 de agosto, 12 de octubre, 1 de noviembre y 11 de noviembre;
+  - según la Pascua: Jueves y Viernes Santo, y Ascensión, Corpus Christi y Sagrado Corazón, trasladados a lunes.
+
+  La Pascua se calcula con aritmética entera, sin `Date`.
+- **R-006 (M1)** — **Territorio.** La jerarquía y los niveles siguen el ADR-006 §3. El estrato va de 1 a 6 (Ley 142 de 1994, arts. 101–102).
+
+## 5. Eventos
+No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada externa (023), y su diseño queda para cuando haga falta.
+
+## 6. Invariantes
+- **INV-001** — Cada entrada tiene `source` no vacío y `validFrom` válido.
+- **INV-002** — Para cada clave hay como mucho una entrada por `validFrom`.
+
+## 7. Criterios de aceptación
+- **CA-001 (M1)** — *Dado* el año 2027, *entonces* los festivos calculados coinciden con el calendario oficial. Se prueba con los años 2026 y 2027 completos.
+- **CA-002 (M1)** — *Dado* `worldDate = 2026-07-14` y `2026-07-15`, *entonces* `labor.maxWeeklyHours` vale 44 y 42.
+- **CA-003 (M1)** — *Dado* el perfil por defecto, *entonces* todas sus entradas cumplen INV-001 e INV-002, y las `por_confirmar` aparecen listadas en `world:info`.
+- **CA-004 (M1)** — *Dado* el perfil "prototipo", *entonces* reproduce exactamente los parámetros de paridad de las specs 004 a 009.
+
+## 8. Parámetros (perfil `CO-2026.09`)
+
+**Demografía y hogares**
+| Clave | Valor | Vigencia | Fuente | Estado |
+|---|---|---|---|---|
+| `demo.share.age0to11` | 0,171 | 2026 | DANE, proyecciones de población 2026 (vía UNFPA/ICBF) | oficial |
+| `demo.share.age12to17` | 0,094 | 2026 | ídem | oficial |
+| `demo.share.age60plus` | 0,153 | 2026 | ídem | oficial |
+| `household.meanSize` | 2,82 | 2025 | DANE, ECV 2025 | oficial |
+| `household.share.unipersonal` | 0,202 | 2025 | DANE, ECV 2025 | oficial |
+| `household.share.biparental` | 0,516 | 2024 | DANE, ECV 2024 | oficial |
+| `household.share.monoparental` | 0,243 | 2024 | DANE, ECV 2024 | oficial |
+| `household.share.otros` | 0,043 | 2024 | DANE, ECV 2024 (no familiar y familiar sin núcleo) | oficial |
+| `household.share.extensa` | — | — | ECV (el hogar extenso se reparte dentro de las tipologías de arriba) | por_confirmar |
+
+**Mercado laboral**
+| Clave | Valor | Vigencia | Fuente | Estado |
+|---|---|---|---|---|
+| `labor.employmentRate` (ocupados / población ≥ 15) | 0,595 | 2026-07 | DANE, GEIH julio 2026 | oficial |
+| `labor.participationRate` | 0,648 | 2026-07 | DANE, GEIH julio 2026 | oficial |
+| `labor.unemploymentRate` | 0,081 | 2026-07 | DANE, GEIH julio 2026 | oficial |
+| `labor.informality.national` | 0,545 | 2026-07 | DANE, GEIH julio 2026 | oficial |
+| `labor.informality.13cities` | 0,405 | 2026-07 | DANE, GEIH julio 2026 | oficial |
+| `labor.informality.world` | 0,45 | — | Villa Cordillera es una ciudad intermedia: entre 13 ciudades (0,405) y el total nacional (0,545) | estimado |
+
+**Leyes laborales y pensión**
+| Clave | Valor | Vigencia | Fuente | Estado |
+|---|---|---|---|---|
+| `labor.minimumWageMonthly` | 1 750 905 | 2026-01-01 | Decreto 1469 de 2025, suspendido; transitorio Decreto 0159 de 2026 (19-feb-2026), mientras falla el Consejo de Estado | oficial (transitorio) |
+| `labor.transportAllowance` | 249 095 | 2026-01-01 | Decreto 1470 de 2025 (hasta 2 SMMLV) | oficial |
+| `labor.maxWeeklyHours` | 46 · 44 · 42 | 2024-07-15 · 2025-07-15 · 2026-07-15 | Ley 2101 de 2021 | oficial |
+| `labor.nightStartsAt` | 19:00 (1 140 min) | 2025-12-25 | Ley 2466 de 2025 | oficial |
+| `labor.nightSurcharge` | 0,35 | — | Código Sustantivo del Trabajo, Ley 2466 de 2025 | oficial |
+| `labor.sundaySurcharge` | 0,80 · 0,90 · 1,00 | 2025-07-01 · 2026-07-01 · 2027-07-01 | Ley 2466 de 2025 | oficial |
+| `pension.age` | mujeres 57, hombres 62 | — | Ley 100 de 1993; se mantiene en la Ley 2381 de 2024, que rige desde el 2027-04-01 según la Corte Constitucional | oficial |
+| `pension.coverage` (mayores con pensión) | — | — | pendiente de fuente | por_confirmar |
+
+**Educación y estratos**
+| Clave | Valor | Vigencia | Fuente | Estado |
+|---|---|---|---|---|
+| `education.levels` | CINE 2011 A.C.: ninguno, primaria, básica secundaria, media, técnica profesional, tecnológica, universitaria, especialización, maestría, doctorado | — | DANE | oficial |
+| `education.attainment.25to64` | — | — | GEIH 2024 (microdatos DANE) | por_confirmar |
+| `stratum.share` | estratos 1–3 ≈ 0,80 de la población; estrato 1 ≈ 0,159; estrato 6 ≈ 0,027 | 2018 | DANE, CNPV 2018 (citado en fuentes secundarias) | por_confirmar |
+
+## 9. Métricas y observabilidad
+`world:report` compara cada indicador generado con su valor del perfil y marca las desviaciones fuera de tolerancia. `world:info` lista las entradas `por_confirmar`.
+
+## 10. Preguntas abiertas
+- [ ] Completar las entradas `por_confirmar` con fuente oficial: cobertura pensional, nivel educativo y distribución por estrato.
+- [ ] ¿El mundo empieza en 2027 (como el prototipo) o en 2026? Con 2027, el salario mínimo y otros valores anuales se prolongan como `estimado` hasta que se decreten (R-003).
+
+## 11. Historial de cambios
+| Fecha | Versión | Cambio |
+|---|---|---|
+| 2026-09-24 | 0.1 | Borrador inicial a partir de la petición del usuario de ajustar el proyecto a los indicadores, las leyes y la organización de Colombia (ADR-006) |
+| 2026-09-24 | 0.1 | Estado → aprobada |
