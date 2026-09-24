@@ -6,7 +6,7 @@ Resultado esperado: repositorio en GitHub con guardarraíles activos y CI verde;
 Cada bloque se hace en una rama (`m0/a-tooling`, `m0/b-rng`…) y termina con un PR.
 
 ## Bloque 0 — Verificación del entorno (lo hace el usuario con ayuda de Claude)
-- [ ] 0.1 Repositorio creado y subido (`gh repo create mundo-social --private --source=. --push`) y `git config core.hooksPath .githooks` ejecutado.
+- [x] 0.1 Repositorio creado y subido (`gh repo create mundo-social --private --source=. --push`) y `git config core.hooksPath .githooks` ejecutado.
 - [ ] 0.2 Claude Code abierto en la carpeta, carpeta marcada como de confianza; `/hooks` muestra SessionStart, PreToolUse y Stop.
 - [ ] 0.3 Prueba de guardarraíles: pedir a Claude que cree `packages/engine/src/tmp.ts` con una spec sin aprobar debe bloquearse; tras aprobar las de M0, debe permitirse y el hook Stop debe exigir la bitácora en `packages/engine/MODULE.md`. Borrar el archivo de prueba.
 - [ ] 0.4 Primera CI en verde en GitHub Actions.
