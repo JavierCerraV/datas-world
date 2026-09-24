@@ -17,7 +17,7 @@ Cada bloque se hace en una rama (`m0/a-tooling`, `m0/b-rng`…) y termina con un
 - [x] A3. ESLint (flat config) + Prettier. Regla que prohíbe `Math.random`, `Date`, `performance`, `crypto.randomUUID` y módulos `fs`/`net`/`http` en `packages/engine` (spec 023 R-001).
 - [x] A4. Vitest configurado en workspaces, con las pruebas junto al código (`src/**/*.test.ts`). Scripts: `pnpm test`, `pnpm check` (typecheck + lint + test + `node scripts/guardrails/check.mjs`), `pnpm test:determinism` (usado por la CI).
 - [x] A5. Esqueleto de paquetes con `package.json` y `src/index.ts` junto a los `MODULE.md` ya existentes: `engine`, `generators`, `persistence`, `apps/worker`, `apps/api`, `apps/web`, `apps/cli` (llm-gateway queda solo con su MODULE.md hasta M6). Cada `MODULE.md` tocado pasa a `estado: en-desarrollo` y recibe su fila en la bitácora.
-- [ ] A6. Verificar que `.github/workflows/ci.yml` (ya incluido) ejecuta todos los pasos una vez que existe `pnpm-lock.yaml`.
+- [x] A6. Verificar que `.github/workflows/ci.yml` (ya incluido) ejecuta todos los pasos una vez que existe `pnpm-lock.yaml`.
 - [x] A7. `.editorconfig` y licencia (preguntar al usuario). El `.gitignore` ya existe. → Sin licencia (UNLICENSED, todos los derechos reservados), decidido por el usuario.
 
 ## Bloque B — Azar reproducible (spec 023)
