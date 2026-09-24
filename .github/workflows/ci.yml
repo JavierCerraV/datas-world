@@ -23,3 +23,6 @@ jobs:
       - name: Determinismo (dos ejecuciones, mismo hash)
         if: hashFiles('pnpm-lock.yaml') != ''
         run: pnpm test:determinism
+      - name: Rendimiento (002 CA-005, sin otras pruebas en paralelo)
+        if: hashFiles('pnpm-lock.yaml') != ''
+        run: pnpm bench --check

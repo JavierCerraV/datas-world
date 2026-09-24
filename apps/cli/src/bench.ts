@@ -64,10 +64,17 @@ function measure(
 export function bench(args: string[], io: Io): void {
   const { values: v } = parseArgs({
     args,
-    options: { days: { type: 'string', default: '365' }, json: { type: 'boolean', default: false } },
+    options: {
+      days: { type: 'string', default: '365' },
+      json: { type: 'boolean', default: false },
+      // Falla (código 1) si no se cumple la 002 CA-005. La CI lo ejecuta en un paso propio, sin otras
+      // pruebas en paralelo: medir tiempos dentro de la suite en paralelo daba falsos fallos.
+      check: { type: 'boolean', default: false },
+    },
   });
   const days = Number(v.days);
   if (!Number.isSafeInteger(days) || days < 1) throw new Error('--days debe ser un entero ≥ 1');
+  if (v.check && days !== 365) throw new Error('--check mide la 002 CA-005: úsalo con --days 365');
   const ticks = (days * MINUTES_PER_DAY) / config.tickMinutes;
 
   const engine = measure('motor', days, (runner) => {
@@ -94,9 +101,18 @@ export function bench(args: string[], io: Io): void {
 
   const results = [engine, sqlite];
   const maxRssMB = +(process.resourceUsage().maxRSS / 1024).toFixed(1);
-  if (v.json) return io.out(JSON.stringify({ results, maxRssMB }));
+  const passes = (r: Result) => r.ms < 2000 && r.daysStarted === days;
+  if (v.json) io.out(JSON.stringify({ results, maxRssMB }));
+  else reportText(results, days, maxRssMB, passes, io);
+  const failed = results.filter((r) => !passes(r));
+  if (v.check && failed.length > 0) {
+    throw new Error(`002 CA-005 no se cumple en: ${failed.map((r) => `${r.mode} (${r.ms} ms)`).join(', ')}`);
+  }
+}
+
+function reportText(results: Result[], days: number, maxRssMB: number, passes: (r: Result) => boolean, io: Io): void {
   for (const r of results) {
-    const ok = r.ms < 2000 && r.daysStarted === days;
+    const ok = passes(r);
     io.out(
       `${r.mode.padEnd(15)} ${r.days} días · ${r.ticks} ticks en ${r.ms} ms · ${r.ticksPerSecond} ticks/s · ` +
         `DAY_STARTED ${r.daysStarted} · RSS ${r.rssMB} MB · heap ${r.heapMB} MB` +
