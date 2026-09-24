@@ -1,0 +1,9 @@
+{
+  "name": "@mundo-social/engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Núcleo puro y determinista de la simulación",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {}
+}

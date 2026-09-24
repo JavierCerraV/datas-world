@@ -41,3 +41,4 @@ Porta el render de mapa, sprites, día/noche, inspector (Estado, Relaciones, Mem
 | Fecha | Tarea / commit | Specs | Cambio |
 |---|---|---|---|
 | 2026-09-23 | kit de arranque | — | Documento creado (sin código) |
+| 2026-09-23 | m0/a-tooling (A5) | — | Solo `package.json` del workspace. Sin `src/` hasta que su spec esté aprobada (el guardarraíl lo bloquea) |

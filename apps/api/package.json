@@ -1,0 +1,8 @@
+{
+  "name": "@mundo-social/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "API HTTP y SSE de solo lectura",
+  "dependencies": { "@mundo-social/persistence": "workspace:*" }
+}

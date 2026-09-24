@@ -2,4 +2,4 @@
 # Guardarraíles antes de cada commit (instalado con: git config core.hooksPath .githooks)
 node scripts/guardrails/check.mjs || exit 1
 git add specs/000-indice.md docs/modulos.md 2>/dev/null
-if [ -f pnpm-lock.yaml ] && command -v pnpm >/dev/null 2>&1; then pnpm -s check || exit 1; fi
+if [ -f pnpm-lock.yaml ] && command -v pnpm >/dev/null 2>&1; then pnpm --silent check || exit 1; fi
