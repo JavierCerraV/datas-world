@@ -79,3 +79,4 @@ interface ExternalInput {
 | 2026-09-23 | 0.2 | Replay de activaciones de capacidades y flujos RNG por sistema y por capacidad (R-006, R-007, CA-006). ADR-005 |
 | 2026-09-24 | 0.2 | Estado → aprobada |
 | 2026-09-23 | 0.2 | Decisión B0: xoshiro128** sembrado con splitmix32; claves de flujo de 64 bits en lugar de `hash32` para evitar colisiones entre millones de flujos; tipo `RngState` y `restoreRng`. Sin cambios en reglas ni CA |
+| 2026-09-24 | 0.2 | Precisión de la implementación (bloque E, R-004): al retomar un mundo guardado, `Runner.continueInputsAfter(última entrada)` hace que la numeración `seq` del minuto actual continúe, para que `(at, seq)` no se repita entre sesiones. Sin cambios en CA |

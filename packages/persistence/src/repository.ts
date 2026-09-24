@@ -62,11 +62,36 @@ export class WorldRepository {
   #lastSeq: number;
   #entities = new Map<EntityId, string>();
   #columns = new Map<string, Buffer>();
+  /**
+   * Sentencias preparadas una vez. Prepararlas en cada flush deja miles de sentencias nativas esperando
+   * al recolector: en 365 días (8 760 flush) el RSS pasaba de 480 MB.
+   */
+  readonly #st;
+  readonly #flushTx;
 
   constructor(db: Db) {
     this.db = db;
     const row = db.prepare('SELECT MAX(seq) AS s FROM events').get() as { s: number | null };
     this.#lastSeq = row.s ?? 0;
+    this.#st = {
+      getMeta: db.prepare('SELECT value FROM meta WHERE key = ?'),
+      setMeta: db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)'),
+      event: db.prepare(
+        `INSERT INTO events (seq, id, type, at, importance, payload, causes, origin, place_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ),
+      participant: db.prepare('INSERT INTO event_participants (event_seq, entity_id, role) VALUES (?, ?, ?)'),
+      input: db.prepare('INSERT INTO external_inputs (at, seq, kind, payload) VALUES (?, ?, ?, ?)'),
+      entity: db.prepare('INSERT OR REPLACE INTO entities (id, kind, status, data, updated_at) VALUES (?, ?, ?, ?, ?)'),
+      column: db.prepare(
+        'INSERT OR REPLACE INTO components (name, type, length, initial, data, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
+      ),
+    };
+    this.#flushTx = db.transaction((batch: FlushBatch) => {
+      const seq = this.#appendEvents(batch.events ?? []);
+      this.#appendInputs(batch.inputs ?? []);
+      return { lastSeq: seq, written: this.#saveState(batch.world) };
+    });
   }
 
   get lastSeq(): number {
@@ -80,31 +105,23 @@ export class WorldRepository {
   /** R-002: estado modificado + eventos + participantes + entradas, en una sola transacción. */
   flush(batch: FlushBatch): void {
     // Los cachés solo avanzan si la transacción se confirma.
-    const { lastSeq, written } = this.db.transaction(() => {
-      const seq = this.#appendEvents(batch.events ?? []);
-      this.#appendInputs(batch.inputs ?? []);
-      return { lastSeq: seq, written: this.#saveState(batch.world) };
-    })();
+    const { lastSeq, written } = this.#flushTx(batch);
     this.#lastSeq = lastSeq;
     for (const [id, json] of written.entities) this.#entities.set(id, json);
     for (const [name, bytes] of written.columns) this.#columns.set(name, bytes);
   }
 
   #meta(key: string): string | undefined {
-    return (this.db.prepare('SELECT value FROM meta WHERE key = ?').get(key) as { value: string } | undefined)?.value;
+    return (this.#st.getMeta.get(key) as { value: string } | undefined)?.value;
   }
 
   #setMeta(key: string, value: string): void {
-    this.db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)').run(key, value);
+    this.#st.setMeta.run(key, value);
   }
 
   /** Devuelve el nuevo último `seq`. */
   #appendEvents(events: readonly WorldEvent[]): number {
-    const ins = this.db.prepare(
-      `INSERT INTO events (seq, id, type, at, importance, payload, causes, origin, place_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    );
-    const part = this.db.prepare('INSERT INTO event_participants (event_seq, entity_id, role) VALUES (?, ?, ?)');
+    const { event: ins, participant: part } = this.#st;
     let last = this.#lastSeq;
     for (const e of events) {
       const seq = idNumber(e.id);
@@ -128,8 +145,7 @@ export class WorldRepository {
   }
 
   #appendInputs(inputs: readonly ExternalInput[]): void {
-    const ins = this.db.prepare('INSERT INTO external_inputs (at, seq, kind, payload) VALUES (?, ?, ?, ?)');
-    for (const i of inputs) ins.run(i.at, i.seq, i.kind, JSON.stringify(i.payload));
+    for (const i of inputs) this.#st.input.run(i.at, i.seq, i.kind, JSON.stringify(i.payload));
   }
 
   #saveState(world: World): { entities: [EntityId, string][]; columns: [string, Buffer][] } {
@@ -149,9 +165,7 @@ export class WorldRepository {
     this.#setMeta('scheduler', JSON.stringify(serializeWorld(world).scheduler));
     this.#setMeta('state_hash', stateHash(world));
 
-    const upEntity = this.db.prepare(
-      'INSERT OR REPLACE INTO entities (id, kind, status, data, updated_at) VALUES (?, ?, ?, ?, ?)',
-    );
+    const upEntity = this.#st.entity;
     for (const list of ENTITY_LISTS) {
       for (const [id, entity] of [...world[list]].sort(([a], [b]) => (a < b ? -1 : 1))) {
         const json = JSON.stringify(entity);
@@ -162,9 +176,7 @@ export class WorldRepository {
     }
 
     const used = world.counters.CIT + 1;
-    const upCol = this.db.prepare(
-      'INSERT OR REPLACE INTO components (name, type, length, initial, data, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
-    );
+    const upCol = this.#st.column;
     for (const { type, name, data } of columns(world.components)) {
       const bytes = columnToLE(data.subarray(0, used));
       const prev = this.#columns.get(name);
@@ -276,6 +288,27 @@ export class WorldRepository {
       causes: JSON.parse(r.causes) as CauseRef[],
       origin: r.origin as EventOrigin,
     }));
+  }
+
+  /** Número de eventos guardados, en total o de un tipo. */
+  countEvents(type?: EventType): number {
+    const row = (
+      type === undefined
+        ? this.db.prepare('SELECT COUNT(*) AS n FROM events').get()
+        : this.db.prepare('SELECT COUNT(*) AS n FROM events WHERE type = ?').get(type)
+    ) as { n: number };
+    return row.n;
+  }
+
+  countSnapshots(): number {
+    return (this.db.prepare('SELECT COUNT(*) AS n FROM snapshots').get() as { n: number }).n;
+  }
+
+  /** Última entrada externa registrada, para continuar su numeración (`Runner.continueInputsAfter`). */
+  lastInput(): { at: number; seq: number } | null {
+    const row = this.db.prepare('SELECT at, seq FROM external_inputs ORDER BY at DESC, seq DESC LIMIT 1').get() as
+      { at: number; seq: number } | undefined;
+    return row ?? null;
   }
 
   readInputs(): ExternalInput[] {

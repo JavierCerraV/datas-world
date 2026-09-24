@@ -161,3 +161,4 @@ Número de entidades por tipo y estado; hash de estado en cada instantánea.
 | 2026-09-23 | 0.2 | Capacidades del mundo (R-007, R-008, tabla de dependencias) y almacenamiento por componentes con índice denso (§3.1, R-009, R-010). ADR-005 |
 | 2026-09-24 | 0.2 | Estado → aprobada |
 | 2026-09-23 | 0.2 | Precisiones de la implementación (bloque C): `WorldConfig.holidays` (lo exigía la spec 002 R-001), tipo de id `TSK` para el scheduler, rellenos de MEM/BEL/SCH/CHP/TSK = 9 dígitos, `tickMinutes` divisor de 1440. Sin cambios en reglas ni CA |
+| 2026-09-24 | 0.2 | Precisión de la implementación (bloque E): `WORLD_CLOSED` se emite con la entrada externa `close` (payload: `minute`, `hash` del estado justo antes y `reason`). No cambia `status`: marca el apagado del proceso y, al reiniciar, el mundo sigue como estaba (`running` o `paused`). El estado `closed` queda reservado para un mundo terminado. Sin cambios en CA |

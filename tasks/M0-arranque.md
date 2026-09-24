@@ -41,9 +41,9 @@ Cada bloque se hace en una rama (`m0/a-tooling`, `m0/b-rng`…) y termina con un
 - [x] D3. CA-001 (guardar, cerrar, cargar, continuar = mismo hash) y CA-003 (SIGTERM).
 
 ## Bloque E — CLI y worker mínimos
-- [ ] E1. `pnpm cli world:new --seed N`, `world:advance --days N`, `world:info`.
-- [ ] E2. `apps/worker` que carga el mundo, avanza a la velocidad configurada, atiende `control_commands` y hace flush.
-- [ ] E3. `pnpm bench`: ticks/s y RSS para un mundo vacío durante 365 días (CA-005 de 002).
+- [x] E1. `pnpm cli world:new --seed N`, `world:advance --days N`, `world:info`.
+- [x] E2. `apps/worker` que carga el mundo, avanza a la velocidad configurada, atiende `control_commands` y hace flush.
+- [x] E3. `pnpm bench`: ticks/s y RSS para un mundo vacío durante 365 días (CA-005 de 002).
 
 ## Cierre de M0
 - [ ] Prueba de determinismo en CI (dos procesos, mismo hash).

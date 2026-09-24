@@ -6,5 +6,17 @@ export { columnFromLE, columnToLE, decodeSnapshot, encodeSnapshot } from './code
 
 export { FLUSH_TICKS, SNAPSHOT_EVERY_DAYS } from './params.ts';
 
+export {
+  CONTROL_COMMANDS,
+  acquireWriterLock,
+  enqueueCommand,
+  finishCommand,
+  pendingCommands,
+  releaseWriterLock,
+  writerLock,
+} from './control.ts';
+export type { ControlCommand, ControlCommandName } from './control.ts';
+
 export { WorldRepository } from './repository.ts';
+export { WorldSession } from './session.ts';
 export type { FlushBatch } from './repository.ts';
