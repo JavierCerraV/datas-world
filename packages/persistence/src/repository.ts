@@ -2,6 +2,7 @@
 import {
   columns,
   deserializeWorld,
+  geoToData,
   idKind,
   idNumber,
   isCapability,
@@ -16,6 +17,7 @@ import type {
   EventOrigin,
   EventType,
   ExternalInput,
+  GeoMapData,
   World,
   WorldEvent,
   WorldSnapshot,
@@ -158,6 +160,8 @@ export class WorldRepository {
       this.#setMeta('config', JSON.stringify(world.config));
       this.#setMeta('engine_version', world.config.engineVersion);
     }
+    // El mapa no cambia después de generarse (spec 003 INV-002): se escribe una sola vez.
+    if (world.geo && this.#meta('geo') === undefined) this.#setMeta('geo', JSON.stringify(geoToData(world.geo)));
     this.#setMeta('now', String(world.now));
     this.#setMeta('status', world.status);
     this.#setMeta('counters', JSON.stringify(world.counters));
@@ -211,6 +215,8 @@ export class WorldRepository {
       components: [],
       scheduler: JSON.parse(this.#meta('scheduler')!),
     };
+    const geo = this.#meta('geo');
+    if (geo !== undefined) snap.geo = JSON.parse(geo) as GeoMapData;
     const rows = this.db.prepare('SELECT id, kind, data FROM entities ORDER BY id').all() as {
       id: EntityId;
       kind: string;
@@ -219,7 +225,7 @@ export class WorldRepository {
     for (const r of rows) {
       const list = LIST_OF_KIND[r.kind];
       if (!list) throw new Error(`Entidad ${r.id} de tipo desconocido ${r.kind}`);
-      snap[list].push(JSON.parse(r.data) as BaseEntity);
+      (snap[list] as BaseEntity[]).push(JSON.parse(r.data) as BaseEntity);
       this.#entities.set(r.id, r.data);
     }
     const cols = this.db.prepare('SELECT name, type, length, initial, data FROM components ORDER BY name').all() as {

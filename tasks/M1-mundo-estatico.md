@@ -19,9 +19,9 @@ Cada bloque se hace en su rama (`m1/a-catalogos`, `m1/b-geografia`…) y termina
 - [x] A5. `WorldConfig` con `profile` y `catalogs` (validados y dentro del hash) y `ENGINE_VERSION` 0.2.0. → Los tipos de cada entidad (`Citizen`, `Place`, `Organization`, `Household`, `WorldObject`) y sus columnas se amplían en el bloque que los genera (B a H), para no declarar campos sin usar.
 
 ## Bloque B — Geografía y territorio (spec 003)
-- [ ] B1. Plantilla `prototipo-64x40`: tiles, calles y manzanas (003 CA-004).
-- [ ] B2. Jerarquía departamento → municipio → comuna → barrio, con códigos DIVIPOLA ficticios y estratos (003 CA-005).
-- [ ] B3. Puertas y distancias por BFS, derivadas al cargar (003 CA-002, CA-003); mismo mapa con la misma semilla (003 CA-001).
+- [x] B1. Plantilla `prototipo-64x40`: tiles, calles y manzanas (003 CA-004).
+- [x] B2. Jerarquía departamento → municipio → comuna → barrio, con códigos DIVIPOLA ficticios y estratos (003 CA-005).
+- [x] B3. Puertas y distancias por BFS, derivadas al cargar (003 CA-002, CA-003); mismo mapa con la misma semilla (003 CA-001).
 
 ## Bloque C — Lugares (spec 004)
 - [ ] C1. Lugares desde `PLACE_LAYOUT` + catálogo; edificios con viviendas; iglesia (004 CA-001, CA-002, CA-003, CA-006).
@@ -38,6 +38,7 @@ Cada bloque se hace en su rama (`m1/a-catalogos`, `m1/b-geografia`…) y termina
 - [ ] F2. Ciudadanos:
   - nombres, nacimiento, educación CINE, ahorro y pensión por edad y sexo (007 CA-001, CA-002, CA-004, CA-007);
   - 001 CA-005, pendiente desde M0.
+- [ ] F3. **Apariencia** de cada ciudadano para los sprites del concepto visual B (docs/identidad-visual.md): tono de piel (1–5), peinado (8), color de pelo con canas según la edad, accesorios (gafas, barba) y ropa según el oficio. Determinista por persona. Requiere proponer el cambio en la spec 007 (la apariencia no está en su modelo de datos) antes de programarlo.
 
 ## Bloque G — Empleo y objetos (specs 006, 005)
 - [ ] G1. Situación laboral GEIH: ocupados formales e informales, desocupados e inactivos (006 CA-001, CA-002, CA-003, CA-007).

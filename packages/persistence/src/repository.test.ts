@@ -1,4 +1,16 @@
-import { Runner, addCitizen, columns, createRng, createWorld, defineColumn, stateHash } from '@datas-world/engine';
+import {
+  Runner,
+  TILE,
+  addCitizen,
+  addPlace,
+  columns,
+  createGeoMap,
+  createRng,
+  createWorld,
+  defineColumn,
+  setTile,
+  stateHash,
+} from '@datas-world/engine';
 import type { World, WorldConfig, WorldEvent } from '@datas-world/engine';
 import { afterEach, describe, expect, it } from 'vitest';
 import { columnToLE } from './codec.ts';
@@ -217,5 +229,40 @@ describe('027 CA-004: lectura mientras el worker escribe', () => {
     expect(count.get()).toEqual({ n: 21 });
     closeDb(ro);
     closeDb(db);
+  });
+});
+
+describe('mundo con mapa y lugares (specs 003, 004)', () => {
+  it('guardar, cargar y la instantánea conservan el mapa y los lugares; el mapa se escribe una vez', () => {
+    const { world, events } = createWorld(testConfig());
+    world.geo = createGeoMap(10, 6, 8);
+    for (let x = 0; x < 10; x++) setTile(world.geo, x, 3, TILE.road);
+    const dep = addPlace(world, { kind: 'territorio.departamento', name: 'Depto', divipola: '00' });
+    addPlace(world, {
+      kind: 'territorio.barrio',
+      name: 'Centro',
+      parentId: dep,
+      stratum: 4,
+      rect: { x: 0, y: 0, w: 10, h: 6 },
+    });
+    const db = openWorldDb(tmp.file('w.db'));
+    const repo = new WorldRepository(db);
+    repo.flush({ world, events });
+    repo.flush({ world });
+    const hash = repo.saveSnapshot(world);
+    closeDb(db);
+
+    const db2 = openWorldDb(tmp.file('w.db'));
+    const repo2 = new WorldRepository(db2);
+    const loaded = repo2.loadWorld();
+    expect(stateHash(loaded)).toBe(stateHash(world));
+    expect(Array.from(loaded.geo!.tiles)).toEqual(Array.from(world.geo.tiles));
+    expect(loaded.places.get('PLC-0002')).toMatchObject({
+      name: 'Centro',
+      stratum: 4,
+      rect: { x: 0, y: 0, w: 10, h: 6 },
+    });
+    expect(stateHash(repo2.loadSnapshot()!)).toBe(hash);
+    closeDb(db2);
   });
 });

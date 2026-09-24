@@ -35,8 +35,20 @@ export type { Capability } from './capabilities.ts';
 export { capacityFor, columns, defineColumn, ensureCapacity } from './components.ts';
 export type { CitizenComponents, ColumnType } from './components.ts';
 
-export { addCitizen, createWorld, deactivateEntity, validateConfig } from './world.ts';
-export type { BaseEntity, CatalogRef, Citizen, World, WorldConfig, WorldStatus } from './world.ts';
+export { addCitizen, addPlace, createWorld, deactivateEntity, validateConfig } from './world.ts';
+export type { BaseEntity, CatalogRef, Citizen, NewPlace, Place, World, WorldConfig, WorldStatus } from './world.ts';
+
+export {
+  TILE,
+  createGeoMap,
+  doorDistanceMatrix,
+  geoFromData,
+  geoToData,
+  roadDistances,
+  setTile,
+  tileAt,
+} from './geo.ts';
+export type { GeoMap, GeoMapData, TileKind, TilePoint } from './geo.ts';
 
 export { canonicalize, hashString } from './hash.ts';
 export { deserializeWorld, serializeWorld, stateHash } from './serialize.ts';

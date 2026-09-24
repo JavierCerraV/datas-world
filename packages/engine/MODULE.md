@@ -2,7 +2,7 @@
 modulo: engine
 ruta: packages/engine
 estado: en-desarrollo
-specs: [001, 002, 014, 023, 029]
+specs: [001, 002, 003, 004, 014, 023, 029]
 actualizado: 2026-09-23
 ---
 
@@ -20,6 +20,8 @@ Núcleo puro de la simulación: tipos del dominio, RNG, reloj, scheduler, evento
 | 002 | CA-001, CA-002, CA-003, CA-004, CA-005 (en el motor y desde la CLI, `apps/cli`) | — |
 | 014 | CA-001, CA-002, CA-003 | — |
 | 023 | CA-003, CA-004, CA-005, CA-006; CA-001 en parte: mismo hash en un proceso y entre dos procesos (`apps/cli`), pero con un mundo vacío | CA-001 con 100 personas y CA-002 (necesitan población, M1–M2) |
+| 003 | Soporte del mapa: R-002 (distancias por calle), INV-002 (con `generators/src/geography`). Los CA se prueban en el generador | — |
+| 004 | `Place` y `addPlace` validado (R-001 en parte). Los CA se prueban en el generador de lugares (bloque C) | — |
 | 029 | Consulta del perfil (R-002, R-003 con `profileValue`); INV-001 e INV-002 (`checkProfile`). Los CA se prueban en `generators/src/country` | — |
 
 
@@ -38,12 +40,13 @@ Desde `@datas-world/engine` (`src/index.ts`). Todo lo público se reexporta desd
 | `makeEvent`, `eventText`, `EVENT_TYPES`, tipos `WorldEvent`/`CauseRef`/`NewEvent`/`EventType`/`EventOrigin` | `src/events.ts` | Catálogo central; creación validada e inmutable (014) |
 | `CAPABILITIES`, `CAPABILITY_DEPS`, `canEnable`, `isCapability`, `withCapability`, `validateCapabilities`, tipo `Capability` | `src/capabilities.ts` | Capacidades y dependencias (001 R-007) |
 | `defineColumn`, `ensureCapacity`, `columns`, `capacityFor`, tipos `CitizenComponents`/`ColumnType` | `src/components.ts` | Columnas tipadas por índice denso (001 §3.1) |
-| `createWorld`, `addCitizen`, `deactivateEntity`, `validateConfig`, tipos `World`/`WorldConfig`/`WorldStatus`/`BaseEntity`/`Citizen` | `src/world.ts` | Mundo raíz (001) |
+| `createWorld`, `addCitizen`, `addPlace`, `deactivateEntity`, `validateConfig`, tipos `World`/`WorldConfig`/`WorldStatus`/`BaseEntity`/`Citizen`/`Place`/`NewPlace` | `src/world.ts` | Mundo raíz (001). `addPlace` da de alta un lugar o una unidad territorial validando padre, barrio, rectángulo y puerta dentro del mapa, estrato 1–6 y `safety` en [0,1] (003, 004) |
 | `serializeWorld`, `deserializeWorld`, `stateHash`, `canonicalize`, `hashString`, tipo `WorldSnapshot` | `src/serialize.ts`, `src/hash.ts` | Instantánea JSON y hash canónico de 64 bits (001 R-004, R-010) |
 | `tick`, `applyExternalInput`, tipos `ExternalInput`/`InputResult`/`ScheduledHandler` | `src/tick.ts` | Tick mínimo y entradas externas: `enable_capability`, `set_speed`, `pause`, `resume`, `close` (002, 023 R-004) |
 | `Runner`, tipo `Speed` | `src/runner.ts` | Velocidad, pausa, paso, avanzar N días, tiempo real → ticks, replay (002, 023). `continueInputsAfter(última)` continúa la numeración `seq` al retomar un mundo guardado |
 | `ENGINE_VERSION` | `src/version.ts` | Versión del motor para `WorldConfig.engineVersion` y `meta.engine_version` (027 R-009). `0.2.0` desde M1 |
 | `profileValue`, `profileNumber`, `profileEntry`, `checkProfile`, tipos `CountryProfile`/`ProfileEntry`/`ProfileScope`/`ProfileStatus`/`ProfileValue` | `src/profile.ts` | Perfil de país (029): valor vigente por clave, fecha ("AAAA-MM-DD") y alcance territorial, con respaldo en el nacional. Lanza si falta la cifra. `checkProfile` comprueba INV-001 e INV-002 |
+| `TILE`, `createGeoMap`, `tileAt`, `setTile`, `roadDistances`, `doorDistanceMatrix`, `geoToData`, `geoFromData`, tipos `GeoMap`/`GeoMapData`/`TileKind`/`TilePoint` | `src/geo.ts` | Mapa de tiles (u8) y distancias por calle (BFS, 4 vecinos en orden fijo). La matriz entre puertas es derivada: no se guarda (003 R-002) |
 | tipo `CatalogRef` | `src/world.ts` | `{ version, hash }` de un catálogo (ADR-006 §4) |
 
 ## 4. Diseño interno y decisiones
@@ -54,6 +57,10 @@ Funciones puras `(state, input, rng) => { patches, events }`. Sistemas en carpet
 - **Sistemas enchufables (spec 021)**: todavía no. La spec 021 está en borrador; el `tick` de M0 solo avanza el reloj, emite `DAY_STARTED` y atiende el scheduler con manejadores por tipo.
 - **El azar no tiene estado persistente.** El flujo raíz nunca se consume directamente: todo se deriva con `fork` (p. ej. `fork('sched').fork(item.id)`). Por eso el estado del RNG no se guarda y cargar un mundo da el mismo resultado que no haberlo cerrado.
 - **Mutación controlada.** `tick`, `applyExternalInput`, `addCitizen` y `deactivateEntity` modifican el `World` recibido y devuelven los eventos. Es el paso de "aplicar" del motor (CLAUDE.md regla 4). Los parches por sistema llegan con la 021.
+- **Mapa y lugares** (M1).
+  - `World.geo` es opcional. Cuando existe, entra en la instantánea como `geo` (tiles como arreglo) y, por tanto, en el hash. Sin mapa, la instantánea no lleva la clave y el hash de los mundos de M0 no cambia.
+  - Las entidades se copian con `structuredClone` al serializar y cargar, porque las de M1 tienen objetos anidados.
+  - Las distancias entre puertas se calculan por BFS sobre las calles; en la plantilla del prototipo, 23 puertas cuestan unos 23 × 2 560 pasos.
 - **Perfil y catálogos en la configuración** (M1).
   - `WorldConfig.profile` (029) y `WorldConfig.catalogs` (ADR-006) son opcionales, así que los mundos de M0 siguen siendo válidos.
   - Si están, se validan al crear el mundo: perfil correcto, misma moneda que el mundo y hashes de 16 hex. Quedan congelados y entran en el `stateHash`.
@@ -115,3 +122,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-24 | chore/renombrar-datas-world-2 | — | Renombrado de los paquetes `@mundo-social/*` → `@datas-world/*` (imports y `package.json`). Sin cambios de comportamiento |
 | 2026-09-24 | chore/nombre-datas-world | — | El nombre del mundo en las configuraciones de prueba y por defecto pasa de "Villa Cordillera" a "Data's World" (decisión del usuario). Sin cambios de comportamiento |
 | 2026-09-24 | m1/a-catalogos (A3, A5) | 029, ADR-006 | `profile.ts` (`profileValue`/`profileNumber`/`profileEntry`/`checkProfile`); `WorldConfig.profile` y `WorldConfig.catalogs` opcionales, validados y dentro del hash; `ENGINE_VERSION` 0.2.0. Los tipos de las entidades se amplían en sus bloques (B a H). 6 pruebas |
+| 2026-09-24 | m1/b-geografia | 003, 004 | `geo.ts` (mapa de tiles, distancias por calle, matriz entre puertas); `World.geo` opcional en la instantánea y el hash; tipo `Place` y `addPlace` validado; copia profunda de entidades al serializar. 6 pruebas |
