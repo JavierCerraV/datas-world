@@ -17,7 +17,7 @@ Herramientas de línea de comandos: crear mundo, avanzar N días, informes, expo
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
 | 001 | — (crea el mundo con `createWorld`; los CA se prueban en el motor) | CA-005 (generación de población, M1) |
-| 002 | CA-005 desde la CLI (`world:advance --days 365` en < 2 s, 365 `DAY_STARTED`) | — |
+| 002 | CA-005 desde la CLI: 365 `DAY_STARTED` en `cli.test.ts`; el límite de < 2 s, con `pnpm bench --check` en un paso propio de la CI | — |
 | 023 | CA-001 entre dos procesos, con un mundo vacío | CA-001 con 100 personas (M1) |
 | 027 | — (usa persistence; sus CA se prueban allí) | — |
 
@@ -31,7 +31,7 @@ Desde la raíz, `pnpm cli <comando>` (`src/main.ts`). Base por defecto: `data/wo
 | `world:advance --days N [--db RUTA]` | Toma el cerrojo de escritor (falla si el worker está en marcha), avanza con `WorldSession` (flush cada `FLUSH_TICKS`, instantánea diaria) y muestra el progreso cada 5 % por stderr |
 | `world:info [--json] [--db RUTA]` | Abre en solo lectura; carga el mundo (verifica el hash) y muestra fecha, estado, capacidades, eventos, instantáneas, hash, tamaño y escritor |
 | `control pause\|resume\|step\|stop\|speed <v> [--db RUTA]` | Encola una orden en `control_commands` para el worker. En M0 solo la CLI encola órdenes (decisión del usuario) |
-| `bench [--days N] [--json]` | También `pnpm bench`. Ticks/s y memoria de un mundo vacío, solo con el motor y con el motor + SQLite |
+| `bench [--days N] [--json] [--check]` | También `pnpm bench`. Ticks/s y memoria de un mundo vacío, solo con el motor y con el motor + SQLite. Con `--check` (solo con 365 días) termina con código 1 si no se cumple la 002 CA-005 |
 
 Código de salida: 0 bien, 1 error de ejecución, 2 uso incorrecto. Desde `src/index.ts`, para pruebas y reutilización: `run(argv, io)` con `io = { out, err, now }`, `bench(args, io)`, `DEFAULT_DB`, `USAGE` y el tipo `Io`.
 
@@ -54,7 +54,7 @@ No contiene reglas de simulación.
 `src/cli.test.ts` (9 pruebas):
 - `world:new`: creación y protección contra pisar un mundo; opciones inválidas; ayuda.
 - `world:advance`:
-  - 002 CA-005, medida en la prueba;
+  - 002 CA-005: 365 `DAY_STARTED` (el tiempo lo mide `pnpm bench --check`);
   - 10 + 5 días = 15 días;
   - rechazo con otro escritor vivo.
 - `control`: órdenes válidas e inválidas.
@@ -75,3 +75,4 @@ Sustituye a los scripts headless usados para calibrar el prototipo.
 | 2026-09-24 | m0/e-cli-worker (E1, E3) | 002, 023, 027 | Comandos `world:new`, `world:advance`, `world:info`, `control` y `bench`; scripts `pnpm cli` y `pnpm bench`. 9 pruebas |
 | 2026-09-24 | m0/cierre (sincronizar-docs) | 023 | Solo documentación: exportaciones de `index.ts` completas; 023 CA-001 marcada como parcial (mundo vacío) |
 | 2026-09-24 | chore/renombrar-datas-world-2 | — | Renombrado de los paquetes `@mundo-social/*` → `@datas-world/*` (imports y `package.json`). Sin cambios de comportamiento |
+| 2026-09-24 | fix/bench-ci | 002 | La medición de < 2 s de la 002 CA-005 sale de `cli.test.ts` (falso fallo de 2,08 s en la CI, con 15 archivos en paralelo) y pasa a `pnpm bench --check`, en un paso propio de la CI. 1 prueba nueva |

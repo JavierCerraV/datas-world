@@ -52,12 +52,18 @@ describe('world:new', () => {
 });
 
 describe('world:advance', () => {
-  it('002 CA-005: 365 días desde la CLI en < 2 s con 365 DAY_STARTED', () => {
+  // El límite de 2 s de la 002 CA-005 lo comprueba `pnpm bench --check` en un paso propio de la CI:
+  // medido aquí, en paralelo con el resto de la suite, daba falsos fallos (2,08 s en GitHub Actions).
+  it('002 CA-005: 365 días desde la CLI emiten 365 DAY_STARTED y una instantánea por día', () => {
     cli('world:new', '--seed', '482917', '--db', db);
-    const t0 = performance.now();
     expect(cli('world:advance', '--days', '365', '--db', db).code).toBe(0);
-    expect(performance.now() - t0).toBeLessThan(2000);
     expect(info()).toMatchObject({ now: 365 * 1440, daysStarted: 365, snapshots: 366, writerPid: null });
+  });
+
+  it('bench --check falla con --days distinto de 365', () => {
+    const r = cli('bench', '--days', '1', '--check');
+    expect(r.code).toBe(1);
+    expect(r.err[0]).toMatch(/--days 365/);
   });
 
   it('avanzar 10 + 5 días da lo mismo que 15 seguidos', () => {
