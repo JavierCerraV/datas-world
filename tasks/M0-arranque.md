@@ -27,13 +27,13 @@ Cada bloque se hace en una rama (`m0/a-tooling`, `m0/b-rng`…) y termina con un
 - [x] B3. Prueba CA-005: el linter falla con `Math.random` en engine (fixture).
 
 ## Bloque C — Mundo y reloj (specs 001, 002)
-- [ ] C1. Tipos `WorldMinute`, `EntityId`, `WorldConfig`, `World`; generador de ids (CA-002 de 001).
-- [ ] C2. Calendario `toCalendar(minute, epoch)` con festivos (CA-001 de 002).
-- [ ] C3. Scheduler (cola de prioridad por `(at, id)`) (CA-003 de 002).
-- [ ] C4. Serialización canónica y `stateHash` (CA-001, CA-003 de 001).
-- [ ] C5. Tipo `WorldEvent` y catálogo mínimo de eventos (spec 014: `WORLD_CREATED`, `DAY_STARTED`, `SPEED_CHANGED`, `EXTERNAL_INPUT_APPLIED`).
-- [ ] C5b. `tick(world, rng)` mínimo: avanza reloj, emite `DAY_STARTED`, procesa scheduler.
-- [ ] C6. Velocidad y controles (pausa, paso, avanzar N días) en una clase `Runner` que no depende del reloj real salvo en el worker (CA-002, CA-004 de 002).
+- [x] C1. Tipos `WorldMinute`, `EntityId`, `WorldConfig`, `World`; generador de ids (CA-002 de 001).
+- [x] C2. Calendario `toCalendar(minute, epoch)` con festivos (CA-001 de 002).
+- [x] C3. Scheduler (cola de prioridad por `(at, id)`) (CA-003 de 002).
+- [x] C4. Serialización canónica y `stateHash` (CA-001, CA-003 de 001).
+- [x] C5. Tipo `WorldEvent` y catálogo mínimo de eventos (spec 014: `WORLD_CREATED`, `DAY_STARTED`, `SPEED_CHANGED`, `EXTERNAL_INPUT_APPLIED`).
+- [x] C5b. `tick(world, rng)` mínimo: avanza reloj, emite `DAY_STARTED`, procesa scheduler.
+- [x] C6. Velocidad y controles (pausa, paso, avanzar N días) en una clase `Runner` que no depende del reloj real salvo en el worker (CA-002, CA-004 de 002).
 
 ## Bloque D — Persistencia (spec 027)
 - [ ] D1. Esquema SQLite y migración 001; pragmas WAL.

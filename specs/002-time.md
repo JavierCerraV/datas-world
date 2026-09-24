@@ -44,6 +44,8 @@ interface ScheduledItem {
 - **R-004** — El scheduler es una cola de prioridad por `(at, id)`; nunca por orden de inserción implícito.
 - **R-005** — "Avanzar N días" ejecuta los ticks sin pausas de tiempo real y sin emitir notificaciones intermedias salvo progreso cada 5 %.
 - **R-006** — "Paso" ejecuta exactamente un tick y deja el mundo en pausa.
+- **R-007** — `epoch` empieza a las 00:00 y `tickMinutes` divide 1440, de modo que cada medianoche cae en un tick. `DAY_STARTED` se emite en el tick que llega a una medianoche; el día 0 lo abre `WORLD_CREATED`.
+- **R-008** — El motor no lee el reloj real: el worker le pasa el tiempo real transcurrido y el motor calcula cuántos ticks tocan, acumulando la fracción sobrante.
 
 ## 5. Eventos
 | Tipo | Cuándo | Payload |
@@ -64,7 +66,7 @@ interface ScheduledItem {
 ## 8. Parámetros
 | Parámetro | Defecto |
 |---|---|
-| `tickMinutes` | 5 |
+| `tickMinutes` | 5 (divisor de 1440) |
 | Velocidades | 0, 1, 10, 100, 1000 |
 
 ## 10. Preguntas abiertas
@@ -75,3 +77,4 @@ interface ScheduledItem {
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial |
 | 2026-09-24 | 0.1 | Estado → aprobada |
+| 2026-09-23 | 0.1 | Precisiones de la implementación (bloque C): R-007 (epoch a medianoche, tick divisor de 1440, cuándo se emite `DAY_STARTED`) y R-008 (el motor recibe el tiempo real, no lo lee). Sin cambios en CA |

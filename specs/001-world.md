@@ -20,7 +20,8 @@ Definir la entidad raíz que contiene toda la simulación: su identidad, semilla
 ```ts
 type WorldId = `WLD-${string}`;          // WLD-0001
 type EntityKind = 'CIT' | 'HOU' | 'ORG' | 'PLC' | 'OBJ' | 'EVT' | 'MEM' | 'BEL'
-                | 'SCH' | 'CHP';                 // esquemas y capítulos de memoria (spec 013)
+                | 'SCH' | 'CHP'                  // esquemas y capítulos de memoria (spec 013)
+                | 'TSK';                         // elementos del scheduler (spec 002)
 type EntityId = `${EntityKind}-${string}`; // CIT-000123, EVT-00000000042
 
 interface WorldConfig {
@@ -32,6 +33,7 @@ interface WorldConfig {
   population: { target: number };                // 100–500 en MVP
   engineVersion: string;      // semver del motor; forma parte de la reproducibilidad
   params: Record<string, number>; // parámetros de calibración con nombre
+  holidays: string[];         // festivos "AAAA-MM-DD" (spec 002 R-001)
   initialCapabilities: Capability[]; // capacidades con las que nace el mundo (R-007)
 }
 
@@ -79,7 +81,7 @@ interface CitizenComponents {
 Cada spec que añade un valor numérico por persona declara su columna (nombre, tipo, rango y valor inicial) en su *Modelo de datos*. Las columnas se registran en orden alfabético de nombre.
 
 ## 4. Reglas
-- **R-001** — Los identificadores se generan con contadores por tipo, con relleno de ceros (6 dígitos para CIT/OBJ, 4 para ORG/PLC/HOU, 11 para EVT). Nunca se reutilizan, aunque la entidad desaparezca.
+- **R-001** — Los identificadores se generan con contadores por tipo, con relleno de ceros (6 dígitos para CIT/OBJ, 4 para ORG/PLC/HOU, 9 para MEM/BEL/SCH/CHP/TSK, 11 para EVT). Nunca se reutilizan, aunque la entidad desaparezca.
 - **R-002** — Toda iteración sobre colecciones del mundo se hace en orden de id ascendente.
 - **R-003** — Una entidad eliminada (p. ej. persona fallecida, objeto destruido) no se borra: pasa a estado `inactive` con el evento correspondiente.
 - **R-004** — `stateHash(world)` es un hash estable (p. ej. xxhash64 o SHA-256) de la serialización canónica (claves ordenadas, sin campos derivados ni cachés).
@@ -117,7 +119,7 @@ Cada spec que añade un valor numérico por persona declara su columna (nombre, 
 ## 8. Parámetros
 | Parámetro | Defecto | Rango |
 |---|---|---|
-| `tickMinutes` | 5 | 1–60 |
+| `tickMinutes` | 5 | 1–60, divisor de 1440 (spec 002 R-007) |
 | `population.target` | 200 | 10–500 (MVP); hasta 10 000 en el peldaño 5 |
 | `components.capacity` inicial | `population.target` redondeado a potencia de 2 | — |
 | `initialCapabilities` | `['clock']` en M0 | ver tabla |
@@ -158,3 +160,4 @@ Número de entidades por tipo y estado; hash de estado en cada instantánea.
 | 2026-09-23 | 0.1 | Borrador inicial |
 | 2026-09-23 | 0.2 | Capacidades del mundo (R-007, R-008, tabla de dependencias) y almacenamiento por componentes con índice denso (§3.1, R-009, R-010). ADR-005 |
 | 2026-09-24 | 0.2 | Estado → aprobada |
+| 2026-09-23 | 0.2 | Precisiones de la implementación (bloque C): `WorldConfig.holidays` (lo exigía la spec 002 R-001), tipo de id `TSK` para el scheduler, rellenos de MEM/BEL/SCH/CHP/TSK = 9 dígitos, `tickMinutes` divisor de 1440. Sin cambios en reglas ni CA |
