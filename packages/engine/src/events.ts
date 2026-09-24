@@ -115,6 +115,45 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { citizenId: str, kind: str, text: str }),
     text: (e) => `Infancia de ${e.payload.citizenId}: ${e.payload.text}.`,
   }),
+  // Ocupación (spec 006) y objetos (spec 005). En la generación llevan fecha anterior al presente.
+  JOB_HIRED: def<{ citizenId: string; orgId: string; positionId: string; orgName: string }>({
+    baseImportance: 0.7,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, orgId: str, positionId: str, orgName: str }),
+    text: (e) => `${e.payload.citizenId} empieza a trabajar en ${e.payload.orgName}.`,
+  }),
+  INFORMAL_WORK_STARTED: def<{ citizenId: string; kind: string; trade: string; tradeName: string }>({
+    baseImportance: 0.5,
+    spontaneous: false,
+    check: (p) =>
+      needObj(p, { citizenId: str, kind: (v) => v === 'informal' || v === 'independent', trade: str, tradeName: str }),
+    text: (e) =>
+      `${e.payload.citizenId} empieza a trabajar por su cuenta (${e.payload.tradeName}${e.payload.kind === 'informal' ? ', informal' : ''}).`,
+  }),
+  JOB_LOST: def<{ citizenId: string; reason: string }>({
+    baseImportance: 0.8,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, reason: str }),
+    text: (e) => `${e.payload.citizenId} pierde su empleo (${e.payload.reason}).`,
+  }),
+  RETIRED: def<{ citizenId: string }>({
+    baseImportance: 0.6,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str }),
+    text: (e) => `${e.payload.citizenId} empieza a recibir su pensión.`,
+  }),
+  OBJECT_ACQUIRED: def<{ objectId: string; ownerId: string; price: number; name: string }>({
+    baseImportance: 0.2,
+    spontaneous: false,
+    check: (p) => needObj(p, { objectId: str, ownerId: str, price: int, name: str }),
+    text: (e) => `${e.payload.ownerId} adquiere ${e.payload.name}.`,
+  }),
+  OBJECT_INHERITED: def<{ objectId: string; to: string; name: string }>({
+    baseImportance: 0.6,
+    spontaneous: false,
+    check: (p) => needObj(p, { objectId: str, to: str, name: str }),
+    text: (e) => `${e.payload.to} hereda ${e.payload.name}.`,
+  }),
   CAPABILITY_ENABLED: def<{ capability: Capability }>({
     baseImportance: 0.8,
     spontaneous: false,

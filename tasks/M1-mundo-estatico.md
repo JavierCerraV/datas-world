@@ -41,8 +41,8 @@ Cada bloque se hace en su rama (`m1/a-catalogos`, `m1/b-geografia`…) y termina
 - [x] F3. **Apariencia** de cada ciudadano para los sprites del concepto visual B (docs/identidad-visual.md): tono de piel (1–5), peinado (8), color de pelo con canas según la edad, accesorios (gafas, barba) y ropa según el oficio. Determinista por persona. Requiere proponer el cambio en la spec 007 (la apariencia no está en su modelo de datos) antes de programarlo.
 
 ## Bloque G — Empleo y objetos (specs 006, 005)
-- [ ] G1. Situación laboral GEIH: ocupados formales e informales, desocupados e inactivos (006 CA-001, CA-002, CA-003, CA-007).
-- [ ] G2. Objetos iniciales de persona y de hogar, con su evento de origen (005 CA-001, CA-002, CA-003).
+- [x] G1. Situación laboral GEIH: ocupados formales e informales, desocupados e inactivos (006 CA-001, CA-002, CA-003, CA-007).
+- [x] G2. Objetos iniciales de persona y de hogar, con su evento de origen (005 CA-001, CA-002, CA-003).
 
 ## Bloque H — Historia generada (spec 030)
 - [ ] H1. Fundación y crecimiento por décadas; `foundedAt` de lugares y organizaciones.

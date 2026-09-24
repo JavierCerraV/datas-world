@@ -34,6 +34,12 @@ export type { PersonalityParams, PersonalityResult } from './personality/generat
 export { generatePopulation } from './population/generate.ts';
 export type { PopulationResult } from './population/generate.ts';
 export { composeHousehold, pickTemplate } from './population/households.ts';
+export { sortBackstories } from './population/backstory.ts';
+
+export { employmentProbability, generateEmployment } from './employment/generate.ts';
+export type { EmploymentResult } from './employment/generate.ts';
+export { generateObjects } from './objects/generate.ts';
+export type { ObjectsResult } from './objects/generate.ts';
 export type { HouseholdSpec, MemberSpec } from './population/households.ts';
 export { TEMPLATES, populationParams } from './population/params.ts';
 export type { PopulationParams, Template } from './population/params.ts';

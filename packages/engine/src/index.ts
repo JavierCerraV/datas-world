@@ -57,6 +57,7 @@ export type {
   NewOrganization,
   NewPerson,
   Occupation,
+  NewObject,
   NewPlace,
   NewPosition,
   OpeningHours,
@@ -66,6 +67,7 @@ export type {
   Shift,
   World,
   WorldConfig,
+  WorldObject,
   WorldStatus,
 } from './world.ts';
 
@@ -89,6 +91,9 @@ export { applyExternalInput, tick } from './tick.ts';
 export type { ExternalInput, InputResult, ScheduledHandler } from './tick.ts';
 
 export { ENGINE_VERSION } from './version.ts';
+
+export { hire, setOccupation } from './employment.ts';
+export { addObject, objectsOf, recordObjectEvent } from './objects.ts';
 
 export { checkProfile, profileEntry, profileNumber, profileValue } from './profile.ts';
 export type { CountryProfile, ProfileEntry, ProfileScope, ProfileStatus, ProfileValue } from './profile.ts';
