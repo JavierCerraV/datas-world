@@ -96,6 +96,21 @@ describe('addPlace y mapa en el mundo (specs 003, 004)', () => {
     expect(() => addPlace(world, { kind: 'Mal.Tipo', name: 'X' })).toThrow(/inválido/);
   });
 
+  it('valida capacidad y horario (spec 004); admite horario privado y 24 h', () => {
+    const { world } = createWorld(testConfig());
+    const ok = { kind: 'ocio.cafe', name: 'Café' };
+    expect(() => addPlace(world, { ...ok, capacity: 0 })).toThrow(/Capacidad/);
+    expect(() => addPlace(world, { ...ok, openingHours: { days: 'all', open: 900, close: 420 } })).toThrow(/Horario/);
+    expect(() => addPlace(world, { ...ok, openingHours: { days: 'all', open: 0, close: 1500 } })).toThrow(/Horario/);
+    const id = addPlace(world, { ...ok, capacity: 12, openingHours: { days: 'mon-sat', open: 420, close: 1260 } });
+    expect(world.places.get(id)).toMatchObject({
+      capacity: 12,
+      openingHours: { days: 'mon-sat', open: 420, close: 1260 },
+    });
+    addPlace(world, { kind: 'salud.hospital', name: 'H', openingHours: '24h' });
+    addPlace(world, { kind: 'vivienda.unidad', name: 'V', openingHours: null });
+  });
+
   it('un mundo sin mapa conserva el hash de M0 (sin clave geo en la instantánea)', () => {
     const { world } = createWorld(testConfig());
     expect('geo' in serializeWorld(world)).toBe(false);

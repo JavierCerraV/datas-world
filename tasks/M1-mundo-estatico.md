@@ -24,8 +24,8 @@ Cada bloque se hace en su rama (`m1/a-catalogos`, `m1/b-geografia`…) y termina
 - [x] B3. Puertas y distancias por BFS, derivadas al cargar (003 CA-002, CA-003); mismo mapa con la misma semilla (003 CA-001).
 
 ## Bloque C — Lugares (spec 004)
-- [ ] C1. Lugares desde `PLACE_LAYOUT` + catálogo; edificios con viviendas; iglesia (004 CA-001, CA-002, CA-003, CA-006).
-- [ ] C2. Horarios y turnos conformes a la jornada vigente (004 R-007).
+- [x] C1. Lugares desde `PLACE_LAYOUT` + catálogo; edificios con viviendas; iglesia (004 CA-001, CA-002, CA-003, CA-006).
+- [x] C2. Horarios y turnos conformes a la jornada vigente (004 R-007).
 
 ## Bloque D — Organizaciones (spec 006, sin empleo)
 - [ ] D1. Una organización por lugar de trabajo, con sector CIIU, puestos con ocupación CIUO y sueldo mensual en múltiplos del salario mínimo (006 CA-007 en su parte de sueldos y turnos).

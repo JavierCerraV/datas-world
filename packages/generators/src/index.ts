@@ -16,6 +16,9 @@ export type { Catalog, CatalogEntry } from './catalogs/schema.ts';
 export { DEFAULT_DEPARTMENT, SAFETY_BY_STRATUM, districtAt, generateGeography } from './geography/generate.ts';
 export type { GeographyOptions, Territory } from './geography/generate.ts';
 export { MAP_TEMPLATES, PROTOTYPE_64X40, isRoadTile, plots } from './geography/template.ts';
+
+export { DWELLING_CAPACITY, generatePlaces } from './places/generate.ts';
+export type { PlacedPlot, PlacesResult } from './places/generate.ts';
 export type { DistrictTemplate, MapTemplate, PlotTemplate } from './geography/template.ts';
 
 export { FIRST_SUPPORTED_YEAR, colombianHolidays, easterSunday, holidayDates } from './country/holidays.ts';

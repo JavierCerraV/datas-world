@@ -36,7 +36,17 @@ export { capacityFor, columns, defineColumn, ensureCapacity } from './components
 export type { CitizenComponents, ColumnType } from './components.ts';
 
 export { addCitizen, addPlace, createWorld, deactivateEntity, validateConfig } from './world.ts';
-export type { BaseEntity, CatalogRef, Citizen, NewPlace, Place, World, WorldConfig, WorldStatus } from './world.ts';
+export type {
+  BaseEntity,
+  CatalogRef,
+  Citizen,
+  NewPlace,
+  OpeningHours,
+  Place,
+  World,
+  WorldConfig,
+  WorldStatus,
+} from './world.ts';
 
 export {
   TILE,
