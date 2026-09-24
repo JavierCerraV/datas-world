@@ -1,0 +1,18 @@
+{
+  "name": "territory_levels",
+  "version": "2026.09.1",
+  "source": "Organización territorial de Colombia: Constitución Política (arts. 286 y 311), Ley 136 de 1994 y Ley 1551 de 2012; codificación DIVIPOLA (DANE). ADR-006 §3.",
+  "entries": [
+    { "key": "nivel0.pais", "name": "País", "since": "M1", "attrs": { "parent": null } },
+    { "key": "nivel1.departamento", "name": "Departamento", "since": "M1", "attrs": { "parent": "nivel0.pais", "placeKind": "territorio.departamento" } },
+    { "key": "nivel2.municipio", "name": "Municipio o distrito", "since": "M1", "attrs": { "parent": "nivel1.departamento", "placeKind": "territorio.municipio" } },
+    { "key": "nivel3.area", "name": "Área (cabecera urbana o rural)", "since": "M1", "attrs": { "parent": "nivel2.municipio" } },
+    { "key": "nivel4.comuna", "name": "Comuna (urbana)", "since": "M1", "attrs": { "parent": "nivel3.area", "placeKind": "territorio.comuna" } },
+    { "key": "nivel4.corregimiento", "name": "Corregimiento (rural)", "since": "P4", "attrs": { "parent": "nivel3.area", "placeKind": "territorio.corregimiento" } },
+    { "key": "nivel5.barrio", "name": "Barrio (urbano)", "since": "M1", "attrs": { "parent": "nivel4.comuna", "placeKind": "territorio.barrio" } },
+    { "key": "nivel5.vereda", "name": "Vereda (rural)", "since": "P4", "attrs": { "parent": "nivel4.corregimiento", "placeKind": "territorio.vereda" } },
+    { "key": "nivel6.manzana", "name": "Manzana", "since": "M1", "attrs": { "parent": "nivel5.barrio" } },
+    { "key": "nivel7.predio", "name": "Predio o edificio", "since": "M1", "attrs": { "parent": "nivel6.manzana" } },
+    { "key": "nivel8.unidad", "name": "Unidad (vivienda o local)", "since": "M1", "attrs": { "parent": "nivel7.predio" } }
+  ]
+}

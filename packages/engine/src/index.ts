@@ -36,7 +36,7 @@ export { capacityFor, columns, defineColumn, ensureCapacity } from './components
 export type { CitizenComponents, ColumnType } from './components.ts';
 
 export { addCitizen, createWorld, deactivateEntity, validateConfig } from './world.ts';
-export type { BaseEntity, Citizen, World, WorldConfig, WorldStatus } from './world.ts';
+export type { BaseEntity, CatalogRef, Citizen, World, WorldConfig, WorldStatus } from './world.ts';
 
 export { canonicalize, hashString } from './hash.ts';
 export { deserializeWorld, serializeWorld, stateHash } from './serialize.ts';
@@ -46,6 +46,9 @@ export { applyExternalInput, tick } from './tick.ts';
 export type { ExternalInput, InputResult, ScheduledHandler } from './tick.ts';
 
 export { ENGINE_VERSION } from './version.ts';
+
+export { checkProfile, profileEntry, profileNumber, profileValue } from './profile.ts';
+export type { CountryProfile, ProfileEntry, ProfileScope, ProfileStatus, ProfileValue } from './profile.ts';
 
 export { Runner } from './runner.ts';
 export type { Speed } from './runner.ts';

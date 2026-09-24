@@ -1,0 +1,26 @@
+{
+  "name": "org_sectors",
+  "version": "2026.09.1",
+  "source": "Clasificación Industrial Internacional Uniforme, CIIU Rev. 4 A.C. (DANE). Nombres abreviados. Pendiente: verificar cada código contra la tabla oficial del DANE antes de cerrar M1.",
+  "entries": [
+    { "key": "ciiu.1081", "name": "Elaboración de productos de panadería", "code": "1081", "since": "M2", "attrs": { "section": "C" } },
+    { "key": "ciiu.1410", "name": "Confección de prendas de vestir, excepto prendas de piel", "code": "1410", "since": "M1", "attrs": { "section": "C" } },
+    { "key": "ciiu.4711", "name": "Comercio al por menor en establecimientos no especializados, principalmente alimentos", "code": "4711", "since": "M1", "attrs": { "section": "G" } },
+    { "key": "ciiu.4773", "name": "Comercio al por menor de productos farmacéuticos", "code": "4773", "since": "M2", "attrs": { "section": "G" } },
+    { "key": "ciiu.5210", "name": "Almacenamiento y depósito", "code": "5210", "since": "M2", "attrs": { "section": "H" } },
+    { "key": "ciiu.5611", "name": "Expendio a la mesa de comidas preparadas", "code": "5611", "since": "M1", "attrs": { "section": "I" } },
+    { "key": "ciiu.5613", "name": "Expendio de comidas preparadas en cafeterías", "code": "5613", "since": "M1", "attrs": { "section": "I" } },
+    { "key": "ciiu.5630", "name": "Expendio de bebidas alcohólicas para consumo en el establecimiento", "code": "5630", "since": "M2", "attrs": { "section": "I" } },
+    { "key": "ciiu.6412", "name": "Bancos comerciales", "code": "6412", "since": "M2", "attrs": { "section": "K" } },
+    { "key": "ciiu.7020", "name": "Actividades de consultoría de gestión", "code": "7020", "since": "M1", "attrs": { "section": "M" } },
+    { "key": "ciiu.8411", "name": "Actividades de la administración pública en general", "code": "8411", "since": "M2", "attrs": { "section": "O" } },
+    { "key": "ciiu.8424", "name": "Orden público y actividades de seguridad", "code": "8424", "since": "M2", "attrs": { "section": "O" } },
+    { "key": "ciiu.8521", "name": "Educación básica secundaria", "code": "8521", "since": "M1", "attrs": { "section": "P" } },
+    { "key": "ciiu.8544", "name": "Educación de universidades", "code": "8544", "since": "M2", "attrs": { "section": "P" } },
+    { "key": "ciiu.8559", "name": "Otros tipos de educación n.c.p.", "code": "8559", "since": "M2", "attrs": { "section": "P" } },
+    { "key": "ciiu.8610", "name": "Actividades de hospitales y clínicas, con internación", "code": "8610", "since": "M1", "attrs": { "section": "Q" } },
+    { "key": "ciiu.8621", "name": "Actividades de la práctica médica, sin internación", "code": "8621", "since": "M2", "attrs": { "section": "Q" } },
+    { "key": "ciiu.9311", "name": "Gestión de instalaciones deportivas", "code": "9311", "since": "M1", "attrs": { "section": "R" } },
+    { "key": "ciiu.9491", "name": "Actividades de asociaciones religiosas", "code": "9491", "since": "M1", "attrs": { "section": "S" } }
+  ]
+}

@@ -4,7 +4,7 @@ nombre: country-profile
 estado: aprobada
 hito: M1 (demografía, territorio, festivos, salario base) · M2 (reglas laborales y de economía)
 depende_de: [001, 002]
-version: 0.2
+version: 0.3
 ---
 
 # 029 — Perfil de país: Colombia
@@ -49,10 +49,10 @@ interface ProfileEntry {
 - **R-004** — El perfil **"prototipo"** reproduce los valores del prototipo para la paridad estadística (docs/prototipo-referencia.md). El perfil por defecto de los mundos nuevos es el colombiano.
 - **R-005 (M1)** — **Festivos.** `world:new` calcula los festivos de Colombia de los años del mundo (Ley 51 de 1983, "Ley Emiliani") y los guarda en `WorldConfig.holidays` (spec 002 R-001):
   - fijos: 1 de enero, 1 de mayo, 20 de julio, 7 de agosto, 8 de diciembre y 25 de diciembre;
-  - trasladables al lunes siguiente: 6 de enero, 19 de marzo, 29 de junio, 15 de agosto, 12 de octubre, 1 de noviembre y 11 de noviembre;
+  - trasladables al lunes siguiente: 6 de enero, 19 de marzo, 29 de junio, 9 de julio (Virgen de Chiquinquirá, Ley 2578 del 1 de junio de 2026, desde 2026), 15 de agosto, 12 de octubre, 1 de noviembre y 11 de noviembre;
   - según la Pascua: Jueves y Viernes Santo, y Ascensión, Corpus Christi y Sagrado Corazón, trasladados a lunes.
 
-  La Pascua se calcula con aritmética entera, sin `Date`.
+  La Pascua se calcula con aritmética entera, sin `Date`. Los festivos solo se calculan desde 1984 (primer año con la Ley Emiliani vigente): la historia anterior (spec 030) no los necesita. La Ley 2578 de 2026 tiene una demanda de inconstitucionalidad en curso; si la Corte la tumba, se añade una entrada con su fecha.
 - **R-006 (M1)** — **Territorio.** La jerarquía y los niveles siguen el ADR-006 §3. El estrato va de 1 a 6 (Ley 142 de 1994, arts. 101–102).
 
 ## 5. Eventos
@@ -63,7 +63,7 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 - **INV-002** — Para cada clave hay como mucho una entrada por `validFrom`.
 
 ## 7. Criterios de aceptación
-- **CA-001 (M1)** — *Dado* el año 2027, *entonces* los festivos calculados coinciden con el calendario oficial. Se prueba con los años 2026 y 2027 completos.
+- **CA-001 (M1)** — *Dado* los años 2026 y 2027, *entonces* los festivos calculados coinciden con el calendario oficial: 19 cada año desde 2026 (18 en 2025).
 - **CA-002 (M1)** — *Dado* `worldDate = 2026-07-14` y `2026-07-15`, *entonces* `labor.maxWeeklyHours` vale 44 y 42.
 - **CA-003 (M1)** — *Dado* el perfil por defecto, *entonces* todas sus entradas cumplen INV-001 e INV-002, y las `por_confirmar` aparecen listadas en `world:info`.
 - **CA-004 (M1)** — *Dado* el perfil "prototipo", *entonces* reproduce exactamente los parámetros de paridad de las specs 004 a 009.
@@ -132,3 +132,4 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 | 2026-09-24 | 0.1 | Estado → aprobada |
 | 2026-09-24 | 0.2 | "Lo más real posible" (usuario): alcance territorial por entrada (`scope`) para las variaciones urbano, rural y 13 ciudades; informalidad del rural disperso (0,825) y tamaño del hogar rural (2,99); cobertura pensional (0,24) y nivel educativo de la fuerza laboral (GEIH 2024) como `estimado`; subsidios por estrato | Series históricas por década (`demo.*.byDecade`) para la spec 030; presente del mundo el 2026-01-01.
 | 2026-09-24 | 0.2 | Nombre (usuario): el mundo y su municipio se llaman **Data's World**, en lugar de Villa Cordillera. Inspirado en el androide Data: ciudadanos autónomos, curiosos y capaces de aprender. Solo cambia el nombre; la información sigue siendo de Colombia |
+| 2026-09-24 | 0.3 | Implementación del bloque A: festivo de la Virgen de Chiquinquirá (Ley 2578 del 1 de junio de 2026, trasladable, desde 2026); los festivos se calculan desde 1984; CA-001 con 19 festivos por año desde 2026 |

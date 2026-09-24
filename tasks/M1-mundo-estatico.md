@@ -10,18 +10,13 @@ Resultado esperado: `pnpm cli world:new --seed N` crea Data's World con unas 200
 Cada bloque se hace en su rama (`m1/a-catalogos`, `m1/b-geografia`…) y termina con un PR que el usuario aprueba. Solo se prueban los criterios marcados **(M1)**.
 
 ## Bloque A — Catálogos y perfil de país (ADR-006, spec 029)
-- [ ] A1. Formato de los catálogos (`packages/generators/catalogs/*.json`) y cargador con validación Zod en el borde. Versión y hash de cada catálogo en `WorldConfig`.
-- [ ] A2. Catálogos iniciales:
+- [x] A1. Formato de los catálogos (`packages/generators/catalogs/*.json`) y cargador con validación Zod en el borde. Versión y hash de cada catálogo en `WorldConfig`.
+- [x] A2. Catálogos iniciales:
   - `place_kinds`: con las entradas de M1 y las previstas, cada una con su `desde`;
   - `object_kinds`, `org_sectors` (CIIU), `occupations` (CIUO), `education_levels` (CINE), `territory_levels`, `trades_informal`, `historical_events`.
-- [ ] A3. Perfil `CO-2026.09` y perfil `prototipo`; `profileValue(key, date, scope)` pura, con sus pruebas (029 CA-002, CA-003, CA-004).
-- [ ] A4. Festivos de Colombia (Ley Emiliani, Pascua con aritmética entera) para los años del mundo (029 CA-001).
-- [ ] A5. Tipos del dominio en el motor:
-  - `Citizen`, `Place`, `Organization`, `Household` y `WorldObject` amplían `BaseEntity`;
-  - columnas nuevas de 007, 009 y 030;
-  - `WorldConfig` con catálogos y perfil.
-
-  Se revisa el impacto en la serialización y en la persistencia (027).
+- [x] A3. Perfil `CO-2026.09` y perfil `prototipo`; `profileValue(key, date, scope)` pura, con sus pruebas (029 CA-002, CA-003, CA-004).
+- [x] A4. Festivos de Colombia (Ley Emiliani, Pascua con aritmética entera) para los años del mundo (029 CA-001).
+- [x] A5. `WorldConfig` con `profile` y `catalogs` (validados y dentro del hash) y `ENGINE_VERSION` 0.2.0. → Los tipos de cada entidad (`Citizen`, `Place`, `Organization`, `Household`, `WorldObject`) y sus columnas se amplían en el bloque que los genera (B a H), para no declarar campos sin usar.
 
 ## Bloque B — Geografía y territorio (spec 003)
 - [ ] B1. Plantilla `prototipo-64x40`: tiles, calles y manzanas (003 CA-004).

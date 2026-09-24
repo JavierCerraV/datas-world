@@ -1,0 +1,17 @@
+{
+  "name": "education_levels",
+  "version": "2026.09.1",
+  "source": "Clasificación Internacional Normalizada de la Educación, CINE 2011 A.C. (DANE). `column` es el valor de la columna demo.education (spec 007 v0.3).",
+  "entries": [
+    { "key": "n0.ninguno", "name": "Ninguno", "since": "M1", "attrs": { "column": 0 } },
+    { "key": "n1.primaria", "name": "Básica primaria", "code": "1", "since": "M1", "attrs": { "column": 1 } },
+    { "key": "n2.basica_secundaria", "name": "Básica secundaria", "code": "2", "since": "M1", "attrs": { "column": 2 } },
+    { "key": "n3.media", "name": "Media (bachiller)", "code": "3", "since": "M1", "attrs": { "column": 3 } },
+    { "key": "n4.tecnica_profesional", "name": "Técnica profesional", "code": "5", "since": "M1", "attrs": { "column": 4 } },
+    { "key": "n5.tecnologica", "name": "Tecnológica", "code": "5", "since": "M1", "attrs": { "column": 5 } },
+    { "key": "n6.universitaria", "name": "Universitaria", "code": "6", "since": "M1", "attrs": { "column": 6 } },
+    { "key": "n7.especializacion", "name": "Especialización", "code": "7", "since": "M1", "attrs": { "column": 7 } },
+    { "key": "n8.maestria", "name": "Maestría", "code": "7", "since": "M1", "attrs": { "column": 8 } },
+    { "key": "n9.doctorado", "name": "Doctorado", "code": "8", "since": "M1", "attrs": { "column": 9 } }
+  ]
+}
