@@ -113,6 +113,9 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 | `education.levels` | CINE 2011 A.C.: ninguno, primaria, básica secundaria, media, técnica profesional, tecnológica, universitaria, especialización, maestría, doctorado | — | DANE | oficial |
 | `education.attainment.workforce` | ninguno 0,108 · primaria 0,179 · básica secundaria 0,047 · media 0,367 · técnica o tecnológica 0,121 · universitaria ≈ 0,127 (resto hasta 1) · posgrado 0,051 | 2024 | DANE, GEIH 2024, citado en fuentes secundarias. Es la fuerza laboral, no toda la población; universitaria sale por diferencia | estimado |
 | `stratum.share` | estratos 1–3 ≈ 0,80 de la población; estrato 1 ≈ 0,159; estrato 6 ≈ 0,027 | 2018 | DANE, CNPV 2018 (citado en fuentes secundarias). Falta el reparto completo del 2 al 5 | por_confirmar |
+| `demo.lifeTable.byDecade` | esperanza de vida y mortalidad por edad, sexo y década, de 1900 a 2026 | — | DANE y CEPAL (series históricas) | por_confirmar |
+| `demo.urbanization.byDecade` | proporción de población en cabeceras por década | — | DANE, censos de 1938 a 2018 | por_confirmar |
+| `demo.parentAgeAtBirth.byDecade` | edad de la madre y del padre al nacer un hijo, por década | — | DANE, estadísticas vitales | por_confirmar |
 | `stratum.utilitySubsidy` | estrato 1 hasta 0,60 · estrato 2 hasta 0,50 · estrato 3 hasta 0,15 del costo de la energía, en el consumo de subsistencia | 2026 | Ley 142 de 1994; regulación CREG (vía fuentes secundarias) | estimado |
 
 ## 9. Métricas y observabilidad
@@ -120,11 +123,11 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 
 ## 10. Preguntas abiertas
 - [ ] Completar con fuente oficial: la distribución por estrato (por_confirmar), y confirmar la cobertura pensional y el nivel educativo (hoy `estimado`, de fuentes secundarias).
-- [ ] ¿El mundo empieza en 2027 (como el prototipo) o en 2026? Con 2027, el salario mínimo y otros valores anuales se prolongan como `estimado` hasta que se decreten (R-003).
+- [x] ¿El mundo empieza en 2027 o en 2026? → El presente del mundo es el 2026-01-01, y el mundo existe desde 1900 con historia generada (spec 030). Decisión del usuario, 2026-09-24.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-24 | 0.1 | Borrador inicial a partir de la petición del usuario de ajustar el proyecto a los indicadores, las leyes y la organización de Colombia (ADR-006) |
 | 2026-09-24 | 0.1 | Estado → aprobada |
-| 2026-09-24 | 0.2 | "Lo más real posible" (usuario): alcance territorial por entrada (`scope`) para las variaciones urbano, rural y 13 ciudades; informalidad del rural disperso (0,825) y tamaño del hogar rural (2,99); cobertura pensional (0,24) y nivel educativo de la fuerza laboral (GEIH 2024) como `estimado`; subsidios por estrato |
+| 2026-09-24 | 0.2 | "Lo más real posible" (usuario): alcance territorial por entrada (`scope`) para las variaciones urbano, rural y 13 ciudades; informalidad del rural disperso (0,825) y tamaño del hogar rural (2,99); cobertura pensional (0,24) y nivel educativo de la fuerza laboral (GEIH 2024) como `estimado`; subsidios por estrato | Series históricas por década (`demo.*.byDecade`) para la spec 030; presente del mundo el 2026-01-01.
