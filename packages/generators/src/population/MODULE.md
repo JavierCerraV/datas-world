@@ -16,8 +16,8 @@ Genera los hogares y las personas del presente del mundo (specs 008 y 007): comp
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 007 | CA-001 y CA-007 (sobre el agregado de 20 mundos, propuesta v0.5 pendiente de aprobación), CA-002, CA-004; R-001 a R-006 (sin la ocupación), R-009; INV-002, INV-003 | CA-003 (situación laboral explicada por la trayectoria: bloque G), CA-005 y CA-006 (bloque I) |
-| 008 | CA-001, CA-003; CA-002 y CA-006 (sobre el agregado, propuesta v0.4 pendiente de aprobación); R-001 a R-004 | CA-004 (M2), CA-005 (M3) |
+| 007 | CA-001 y CA-007 (sobre el agregado de 20 mundos, spec v0.5), CA-002, CA-004; R-001 a R-006 (sin la ocupación), R-009; INV-002, INV-003 | CA-003 (situación laboral explicada por la trayectoria: bloque G), CA-005 y CA-006 (bloque I) |
+| 008 | CA-001, CA-003; CA-002 y CA-006 (sobre el agregado, spec v0.4); R-001 a R-004 | CA-004 (M2), CA-005 (M3) |
 | 001 | CA-005 (semillas distintas dan hashes distintos) | — |
 
 ## 3. API pública
@@ -44,7 +44,7 @@ Desde `@datas-world/generators`:
   - `uniform` (prototipo): U(0, min(17, edad del progenitor − 20 o 19));
   - `birthAge` (Colombia): edad del progenitor menos la que tenía al tenerlo (21–36), lo que permite hijos adultos que viven en casa.
 - **Calibración con el DANE.** Las edades y los hijos del perfil colombiano se ajustaron por simulación para acercarse al DANE 2026. Agregado de 20 mundos: menores de 12 17,5 %, de 12 a 17 8,6 % y 60+ 14,3 %, frente a 17,1 / 9,4 / 15,3 %. Tamaño medio ≈ 2,80.
-- **Efecto de conglomerado.** Un pueblo de 200 personas varía unos ±5 puntos respecto al país (menores de 12, entre 8,5 % y 22,6 % según la semilla), porque las personas vienen en hogares. Por eso los criterios estadísticos se comprueban sobre el agregado de 20 mundos. Es una propuesta de cambio en las specs 007 v0.5 y 008 v0.4, **pendiente de aprobación**.
+- **Efecto de conglomerado.** Un pueblo de 200 personas varía unos ±5 puntos respecto al país (menores de 12, entre 8,5 % y 22,6 % según la semilla), porque las personas vienen en hogares. Por eso los criterios estadísticos se comprueban sobre el agregado de 20 mundos. Así lo dicen las specs 007 v0.5 y 008 v0.4, con la revisión aprobada por el usuario.
 - **Personas:**
   - nombre del catálogo según el sexo;
   - apellidos colombianos: los hijos llevan el primero del padre y el primero de la madre (008 R-002);
@@ -93,7 +93,7 @@ Con el perfil `prototipo` porta `genPopulation` (plantillas, edades, sexos, apel
 - la trayectoria como eventos con causa, en lugar del texto `bio`.
 
 ## 8. Pendientes y deuda
-- [ ] Aprobación del usuario de la revisión de CA (007 v0.5, 008 v0.4).
+- [x] Aprobación del usuario de la revisión de CA (007 v0.5, 008 v0.4), el 2026-09-24.
 - [ ] Educación por estrato con cifras oficiales cuando las haya (hoy, la tabla del prototipo traducida a CINE).
 - [ ] Ocupación y su trayectoria (bloque G); historia de las familias antes del presente (bloque H).
 
@@ -102,3 +102,4 @@ Con el perfil `prototipo` porta `genPopulation` (plantillas, edades, sexos, apel
 |---|---|---|---|
 | 2026-09-24 | m1/f-poblacion | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/f-poblacion (F1–F3) | 001, 007, 008, 009 | Generación de hogares y personas con parámetros del perfil (calibrados con el DANE), personalidad, apariencia y trayectoria previa. 15 pruebas |
+| 2026-09-24 | m1/f-poblacion | 007, 008 | El usuario aprueba la revisión de los CA estadísticos (agregado de 20 mundos) |
