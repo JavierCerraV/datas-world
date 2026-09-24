@@ -4,6 +4,14 @@
   "private": true,
   "type": "module",
   "description": "Persistencia SQLite del mundo",
-  "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@mundo-social/engine": "workspace:*" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mundo-social/engine": "workspace:*",
+    "better-sqlite3": "^13.0.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0"
+  }
 }

@@ -36,9 +36,9 @@ Cada bloque se hace en una rama (`m0/a-tooling`, `m0/b-rng`…) y termina con un
 - [x] C6. Velocidad y controles (pausa, paso, avanzar N días) en una clase `Runner` que no depende del reloj real salvo en el worker (CA-002, CA-004 de 002).
 
 ## Bloque D — Persistencia (spec 027)
-- [ ] D1. Esquema SQLite y migración 001; pragmas WAL.
-- [ ] D2. Repositorio: guardar/cargar mundo, añadir eventos por lote, instantánea comprimida.
-- [ ] D3. CA-001 (guardar, cerrar, cargar, continuar = mismo hash) y CA-003 (SIGTERM).
+- [x] D1. Esquema SQLite y migración 001; pragmas WAL.
+- [x] D2. Repositorio: guardar/cargar mundo, añadir eventos por lote, instantánea comprimida.
+- [x] D3. CA-001 (guardar, cerrar, cargar, continuar = mismo hash) y CA-003 (SIGTERM).
 
 ## Bloque E — CLI y worker mínimos
 - [ ] E1. `pnpm cli world:new --seed N`, `world:advance --days N`, `world:info`.

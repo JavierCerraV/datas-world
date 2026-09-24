@@ -1,5 +1,7 @@
 packages:
   - packages/*
   - apps/*
+allowBuilds:
+  better-sqlite3: false
 minimumReleaseAgeExclude:
   - prettier@3.9.9
