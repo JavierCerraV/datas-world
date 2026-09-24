@@ -1,8 +1,8 @@
 // Proceso hijo de la prueba CA-003: avanza el mundo con flush cada FLUSH_TICKS ticks hasta el día indicado.
 // Tras cada flush escribe `flush <now> <lastSeq>` en stdout y espera 1 ms, para dar tiempo a que lo maten.
 // Uso: node crash-child.fixture.ts <ruta.db> <días>
-import { Runner, createRng, createWorld } from '@mundo-social/engine';
-import type { World, WorldEvent } from '@mundo-social/engine';
+import { Runner, createRng, createWorld } from '@datas-world/engine';
+import type { World, WorldEvent } from '@datas-world/engine';
 import { closeDb, openWorldDb } from './db.ts';
 import { FLUSH_TICKS } from './params.ts';
 import { WorldRepository } from './repository.ts';

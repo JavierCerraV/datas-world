@@ -1,7 +1,7 @@
 // Worker de un mundo (specs 002, 027): avanza según el tiempo real, atiende órdenes y persiste por lotes.
 // No lee el reloj: `pump` recibe los milisegundos transcurridos (lo mide main.ts). Así se prueba sin esperas.
-import { Runner, createRng } from '@mundo-social/engine';
-import type { Speed, World } from '@mundo-social/engine';
+import { Runner, createRng } from '@datas-world/engine';
+import type { Speed, World } from '@datas-world/engine';
 import {
   FLUSH_TICKS,
   WorldRepository,
@@ -12,8 +12,8 @@ import {
   openWorldDb,
   pendingCommands,
   releaseWriterLock,
-} from '@mundo-social/persistence';
-import type { ControlCommand, Db } from '@mundo-social/persistence';
+} from '@datas-world/persistence';
+import type { ControlCommand, Db } from '@datas-world/persistence';
 
 export interface WorkerOptions {
   /** Velocidad con que arranca. Si difiere de la del Runner (1x), se aplica como entrada externa. */

@@ -1,4 +1,4 @@
-# Mundo Social Autónomo Simulado
+# Datas World
 
 Laboratorio de simulación social: una población artificial que vive de forma autónoma, construida con Spec Driven Development y Claude Code. Desarrollo **local** con repositorio en GitHub. El prototipo HTML (`prototipo/index.html`) es la referencia de comportamiento.
 
@@ -34,7 +34,7 @@ Necesitas: Node.js 24 LTS, Git, [GitHub CLI](https://cli.github.com/) (`gh`) y C
 
 ```bash
 # 1. Descomprime el kit y entra en la carpeta
-cd mundo-social
+cd datas-world
 
 # 2. Git con los guardarraíles activados
 git init -b main
@@ -43,7 +43,7 @@ git add -A && git commit -m "chore: kit de arranque"
 
 # 3. Repositorio privado en tu cuenta personal de GitHub
 gh auth login                 # si aún no lo has hecho
-gh repo create mundo-social --private --source=. --push
+gh repo create datas-world --private --source=. --push
 
 # 4. Aprueba las specs de M0 después de leerlas (ajústalas antes si algo no te convence)
 node scripts/aprobar-spec.mjs 001 002 014 023 027

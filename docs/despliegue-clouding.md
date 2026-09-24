@@ -73,7 +73,7 @@ apt update && apt install -y caddy
 
 ```ini
 [Unit]
-Description=Mundo Social - worker de simulación
+Description=Datas World - worker de simulación
 After=network.target
 
 [Service]
@@ -94,7 +94,7 @@ WantedBy=multi-user.target
 
 ```ini
 [Unit]
-Description=Mundo Social - API
+Description=Datas World - API
 After=network.target mundo-worker.service
 
 [Service]

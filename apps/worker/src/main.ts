@@ -1,7 +1,7 @@
 // Proceso del worker: `node apps/worker/src/main.ts [--db data/world.db] [--speed 1]`.
 // Es el único sitio que lee el reloj real (spec 002 R-008) y atiende señales (spec 027 R-007).
 import { parseArgs } from 'node:util';
-import type { Speed } from '@mundo-social/engine';
+import type { Speed } from '@datas-world/engine';
 import { WorldWorker } from './worker.ts';
 
 const LOOP_MS = 100;

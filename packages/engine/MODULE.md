@@ -23,7 +23,7 @@ Núcleo puro de la simulación: tipos del dominio, RNG, reloj, scheduler, evento
 
 
 ## 3. API pública
-Desde `@mundo-social/engine` (`src/index.ts`; pasará a `@datas-world/engine` con el PR del renombrado). Todo lo público se reexporta desde ahí:
+Desde `@datas-world/engine` (`src/index.ts`). Todo lo público se reexporta desde ahí:
 
 | Símbolo | Archivo | Descripción |
 |---|---|---|
@@ -104,3 +104,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-23 | m0/c-mundo (C1–C6) | 001, 002, 014, 023 | Mundo (ids, configuración validada e inmutable, capacidades, componentes por columnas), calendario entero, scheduler por (at, id), catálogo de eventos validados e inmutables, `tick` mínimo, entradas externas con causalidad, `Runner` (velocidad, pausa, paso, N días, tiempo real → ticks, replay), `serializeWorld`/`stateHash`. 45 pruebas nuevas |
 | 2026-09-24 | m0/e-cli-worker (E1–E3) | 001, 014, 023 | Evento `WORLD_CLOSED` y entrada externa `close` (sin cambiar `status`), `Runner.continueInputsAfter` para no repetir `(at, seq)` al retomar un mundo, `ENGINE_VERSION`. 2 pruebas nuevas |
 | 2026-09-24 | m0/cierre (sincronizar-docs) | 002, 023 | Solo documentación: tabla de API completa (tipos y constantes que faltaban), paquete `@mundo-social/engine` (el nombre actual), 002 CA-005 cubierta también desde la CLI, 023 CA-001 marcada como parcial (probada con un mundo vacío; la spec pide 100 personas) |
+| 2026-09-24 | chore/renombrar-datas-world-2 | — | Renombrado de los paquetes `@mundo-social/*` → `@datas-world/*` (imports y `package.json`). Sin cambios de comportamiento |

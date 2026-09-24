@@ -12,8 +12,8 @@ import {
   formatDate,
   stateHash,
   toCalendar,
-} from '@mundo-social/engine';
-import type { WorldConfig } from '@mundo-social/engine';
+} from '@datas-world/engine';
+import type { WorldConfig } from '@datas-world/engine';
 import {
   CONTROL_COMMANDS,
   WorldRepository,
@@ -25,8 +25,8 @@ import {
   openWorldDb,
   releaseWriterLock,
   writerLock,
-} from '@mundo-social/persistence';
-import type { ControlCommandName, Db } from '@mundo-social/persistence';
+} from '@datas-world/persistence';
+import type { ControlCommandName, Db } from '@datas-world/persistence';
 import { bench } from './bench.ts';
 
 export interface Io {

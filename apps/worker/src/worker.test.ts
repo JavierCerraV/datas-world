@@ -2,8 +2,8 @@ import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createWorld, stateHash } from '@mundo-social/engine';
-import type { WorldConfig } from '@mundo-social/engine';
+import { createWorld, stateHash } from '@datas-world/engine';
+import type { WorldConfig } from '@datas-world/engine';
 import {
   FLUSH_TICKS,
   WorldRepository,
@@ -13,7 +13,7 @@ import {
   openWorldDb,
   releaseWriterLock,
   writerLock,
-} from '@mundo-social/persistence';
+} from '@datas-world/persistence';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { WorldWorker } from './worker.ts';
 

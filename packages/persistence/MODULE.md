@@ -20,7 +20,7 @@ Guarda y carga el mundo en SQLite: estado, registro de eventos append-only, inst
 
 
 ## 3. API pública
-Desde `@mundo-social/persistence` (`src/index.ts`):
+Desde `@datas-world/persistence` (`src/index.ts`):
 
 | Símbolo | Archivo | Descripción |
 |---|---|---|
@@ -89,3 +89,4 @@ No aplica (el prototipo no persiste).
 | 2026-09-23 | m0/a-tooling (A5) | — | Esqueleto del paquete: `package.json` (workspace, ESM, `exports` → `src/index.ts`) y `src/index.ts` vacío. Sin API todavía |
 | 2026-09-24 | m0/d-persistencia (D1–D3) | 027 | Migración 001 (esquema §3 v0.3 con triggers de INV-001), pragmas WAL, migraciones con copia `.backup`, `WorldRepository` (flush transaccional, reescritura solo de lo cambiado, carga verificada por hash, instantáneas zstd con columnas binarias LE). Dependencias: `better-sqlite3`, `@types/better-sqlite3`. 21 pruebas: CA-001, CA-003, CA-004, CA-006 |
 | 2026-09-24 | m0/e-cli-worker (E1–E3) | 027 | `WorldSession` (flush e instantáneas compartidos por el worker y la CLI), órdenes de control, cerrojo de escritor, `lastInput`/`countEvents`/`countSnapshots`. Sentencias preparadas una vez: 365 días pasan de 483 MB a 66 MB y de 2,3 s a 0,75 s. 5 pruebas nuevas |
+| 2026-09-24 | chore/renombrar-datas-world-2 | — | Renombrado de los paquetes `@mundo-social/*` → `@datas-world/*` (imports y `package.json`). Sin cambios de comportamiento |
