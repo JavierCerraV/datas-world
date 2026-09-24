@@ -1,12 +1,14 @@
 // Instantánea serializable del mundo y stateHash (spec 001 R-004, R-010; CA-003).
 import { COLUMN_TYPES, columns, defineColumn, ensureCapacity } from './components.ts';
 import type { ColumnType } from './components.ts';
+import { geoFromData, geoToData } from './geo.ts';
+import type { GeoMapData } from './geo.ts';
 import { canonicalize, hashString } from './hash.ts';
 import type { Counters, EntityId, WorldId } from './ids.ts';
 import { schedulerFrom, sortedItems } from './scheduler.ts';
 import type { ScheduledItem } from './scheduler.ts';
 import { emptyWorld } from './world.ts';
-import type { BaseEntity, World, WorldConfig, WorldStatus } from './world.ts';
+import type { BaseEntity, Place, World, WorldConfig, WorldStatus } from './world.ts';
 import type { Capability } from './capabilities.ts';
 
 /** Forma plana y JSON-compatible del mundo. No incluye la capacidad reservada ni cachés (R-010). */
@@ -20,13 +22,17 @@ export interface WorldSnapshot {
   citizens: BaseEntity[];
   households: BaseEntity[];
   organizations: BaseEntity[];
-  places: BaseEntity[];
+  places: Place[];
   objects: BaseEntity[];
   components: { type: ColumnType; name: string; initial: number; rows: number[] }[];
   scheduler: ScheduledItem[];
+  /** Solo si el mundo tiene mapa (spec 003); los mundos de M0 no lo llevan y su hash no cambia. */
+  geo?: GeoMapData;
 }
 
-const byId = (m: Map<EntityId, BaseEntity>) => [...m.values()].sort((a, b) => (a.id < b.id ? -1 : 1)).map((e) => ({ ...e }));
+// Copia profunda: las entidades de M1 tienen objetos anidados (rect, door…).
+const byId = <T extends BaseEntity>(m: Map<EntityId, T>): T[] =>
+  [...m.values()].sort((a, b) => (a.id < b.id ? -1 : 1)).map((e) => structuredClone(e));
 
 export function serializeWorld(world: World): WorldSnapshot {
   const used = world.counters.CIT + 1; // filas 0..CIT
@@ -49,6 +55,7 @@ export function serializeWorld(world: World): WorldSnapshot {
       rows: Array.from(data.subarray(0, used)),
     })),
     scheduler: sortedItems(world.scheduler).map((i) => structuredClone(i)),
+    ...(world.geo ? { geo: geoToData(world.geo) } : {}),
   };
 }
 
@@ -58,7 +65,8 @@ export function deserializeWorld(s: WorldSnapshot): World {
   world.status = s.status;
   world.counters = { ...s.counters };
   world.capabilities = [...s.capabilities];
-  const load = (m: Map<EntityId, BaseEntity>, list: BaseEntity[]) => list.forEach((e) => m.set(e.id, { ...e }));
+  const load = <T extends BaseEntity>(m: Map<EntityId, T>, list: T[]) =>
+    list.forEach((e) => m.set(e.id, structuredClone(e)));
   load(world.citizens, s.citizens);
   load(world.households, s.households);
   load(world.organizations, s.organizations);
@@ -71,6 +79,7 @@ export function deserializeWorld(s: WorldSnapshot): World {
     world.components[col.type][col.name]!.set(col.rows);
   }
   world.scheduler = schedulerFrom(s.scheduler);
+  if (s.geo) world.geo = geoFromData(s.geo);
   return world;
 }
 

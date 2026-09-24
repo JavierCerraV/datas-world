@@ -4,7 +4,7 @@ nombre: geography
 estado: aprobada
 hito: M1
 depende_de: [001, 023, 029]
-version: 0.3
+version: 0.4
 ---
 
 # 003 — Geografía
@@ -94,3 +94,4 @@ Número de puertas, longitud media de las rutas y la ruta más larga. Alerta si 
 | 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): jerarquía territorial del ADR-006 (departamento → municipio → comuna → barrio), códigos DIVIPOLA ficticios, estrato según la Ley 142 de 1994 y cifras del perfil de país (029); R-005 y CA-005 |
 | 2026-09-24 | 0.3 | Estado → aprobada |
 | 2026-09-24 | 0.3 | Nombre (usuario): el mundo y su municipio se llaman **Data's World**, en lugar de Villa Cordillera. Inspirado en el androide Data: ciudadanos autónomos, curiosos y capaces de aprender. Solo cambia el nombre; la información sigue siendo de Colombia |
+| 2026-09-24 | 0.4 | Implementación del bloque B: la plantilla es fija y no consume azar (el flujo `gen:geography` queda para plantillas procedurales); los barrios son franjas de filas que parten el mapa (La Esperanza y 0–14, Centro 15–24, San Martín 25–39); DIVIPOLA ficticio con prefijo `00` (comuna y barrio siguen la jerarquía, no son códigos oficiales); seguridad por estrato para los estratos 1 a 6; el municipio se llama como el mundo. Sin cambios en CA |

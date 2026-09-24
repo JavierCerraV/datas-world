@@ -49,3 +49,4 @@ Porta `genWorld`, `buildPlaces`, `genPopulation`, `newAgent`, `genJobs`, `genRel
 | 2026-09-23 | kit de arranque | — | Documento creado (sin código) |
 | 2026-09-23 | m0/a-tooling (A5) | — | Esqueleto del paquete: `package.json` (workspace, ESM, `exports` → `src/index.ts`) y `src/index.ts` vacío. Sin API todavía |
 | 2026-09-24 | m1/a-catalogos | ADR-006, 029 | Submódulos `catalogs` y `country` con su MODULE.md; dependencia `zod`; datos en `catalogs/` y `profiles/` |
+| 2026-09-24 | m1/b-geografia | 003 | Submódulo `geography` (plantilla del prototipo, mapa y jerarquía territorial) |
