@@ -46,8 +46,41 @@ export interface BaseEntity {
 }
 export type Citizen = BaseEntity;
 export type Household = BaseEntity;
-export type Organization = BaseEntity;
 export type WorldObject = BaseEntity;
+
+/** Turno de un puesto (spec 006): minutos del día; `lunch` no cuenta como jornada (Ley 2101). */
+export interface Shift {
+  days: 'mon-fri' | 'mon-sat';
+  start: number;
+  end: number;
+  lunch: number;
+}
+
+export interface Position {
+  id: string; // "ORG-0001/P01"
+  title: string;
+  level: number; // 0 = base; el jefe tiene 1
+  occupation: string; // clave del catálogo occupations (CIUO-08 A.C.)
+  /** Sueldo en la unidad mínima de la moneda; `wagePeriod` dice si es mensual (Colombia) o diario (perfil prototipo). */
+  wage: number;
+  wagePeriod: 'month' | 'day';
+  shift: Shift;
+  holderId?: EntityId;
+  supervisorPositionId?: string;
+}
+
+/** Organización empleadora (spec 006). `sector` es una clave de org_sectors (CIIU Rev. 4 A.C.). */
+export interface Organization extends BaseEntity {
+  name: string;
+  sector: string;
+  placeIds: EntityId[];
+  positions: Position[];
+  culture: { strictness: number; warmth: number; stability: number };
+}
+
+/** Puesto nuevo: el id lo asigna `addOrganization`; `supervisor` es el índice de otro puesto de la lista. */
+export type NewPosition = Omit<Position, 'id' | 'supervisorPositionId' | 'holderId'> & { supervisor?: number };
+export type NewOrganization = Omit<Organization, 'id' | 'status' | 'positions'> & { positions: NewPosition[] };
 
 /** Lugar (spec 004) o unidad territorial (spec 003, ADR-006 §3). `kind` es una clave de `place_kinds`. */
 export interface Place extends BaseEntity {
@@ -202,6 +235,45 @@ export function addPlace(world: World, data: NewPlace): EntityId {
   }
   const id = allocateId(world.counters, 'PLC');
   world.places.set(id, { ...structuredClone(data), id, status: 'active' });
+  return id;
+}
+
+const KEY_RE = /^[a-z0-9_]+(\.[a-z0-9_]+)*$/;
+const unit = (v: number) => v >= 0 && v <= 1;
+
+/**
+ * Alta de una organización con sus puestos (spec 006). Valida lugares, claves de sector y ocupación,
+ * sueldos enteros ≥ 0, turnos dentro del día (con almuerzo menor que el turno), niveles, supervisores
+ * y cultura en [0,1]. Asigna los ids de los puestos ("ORG-0001/P01"…).
+ */
+export function addOrganization(world: World, data: NewOrganization): EntityId {
+  if (!data.name.trim()) throw new Error('Una organización necesita nombre');
+  if (!KEY_RE.test(data.sector)) throw new Error(`Sector inválido: ${data.sector}`);
+  if (data.placeIds.length === 0) throw new Error(`${data.name}: una organización necesita al menos un lugar`);
+  for (const p of data.placeIds) if (!world.places.has(p)) throw new Error(`No existe el lugar ${p}`);
+  const c = data.culture;
+  if (!unit(c.strictness) || !unit(c.warmth) || !unit(c.stability)) throw new RangeError('Cultura fuera de [0,1]');
+  data.positions.forEach((p, i) => {
+    const s = p.shift;
+    const where = `${data.name}, puesto ${i + 1}`;
+    if (!KEY_RE.test(p.occupation) || !p.title.trim()) throw new Error(`${where}: ocupación o título inválidos`);
+    if (!Number.isSafeInteger(p.wage) || p.wage < 0) throw new RangeError(`${where}: sueldo inválido (${p.wage})`);
+    if (!Number.isInteger(p.level) || p.level < 0) throw new RangeError(`${where}: nivel inválido`);
+    const shiftOk =
+      s.start >= 0 && s.end <= MINUTES_PER_DAY && s.start < s.end && s.lunch >= 0 && s.lunch < s.end - s.start;
+    if (!shiftOk || (s.days !== 'mon-fri' && s.days !== 'mon-sat')) throw new RangeError(`${where}: turno inválido`);
+    if (p.supervisor !== undefined && (p.supervisor === i || !data.positions[p.supervisor])) {
+      throw new RangeError(`${where}: supervisor inválido`);
+    }
+  });
+  const id = allocateId(world.counters, 'ORG');
+  const posId = (i: number) => `${id}/P${String(i + 1).padStart(2, '0')}`;
+  const positions: Position[] = data.positions.map(({ supervisor, ...p }, i) => ({
+    ...structuredClone(p),
+    id: posId(i),
+    ...(supervisor !== undefined ? { supervisorPositionId: posId(supervisor) } : {}),
+  }));
+  world.organizations.set(id, { ...structuredClone({ ...data, positions: [] }), positions, id, status: 'active' });
   return id;
 }
 

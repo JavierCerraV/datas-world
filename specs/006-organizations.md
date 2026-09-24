@@ -4,7 +4,7 @@ nombre: organizations
 estado: aprobada
 hito: M1 (generación y empleo inicial) · M2 (desempeño, despidos, contratación)
 depende_de: [004, 023, 029]
-version: 0.3
+version: 0.4
 ---
 
 # 006 — Organizaciones y ocupación
@@ -113,3 +113,4 @@ Ocupación por tipo y por estrato, puestos libres y sueldo medio por organizaci�
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: ocupación formal, informal, independiente o ninguna; empleo inicial portado de `genJobs`/`hire` (R-001 a R-004); eventos de trayectoria previa con fecha anterior al epoch; sueldo diario como en el prototipo; reglas y criterios marcados por hito |
 | 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): sectores CIIU y ocupaciones CIUO por catálogo (ADR-006); sueldo mensual en múltiplos del salario mínimo, nunca por debajo en un puesto formal; ocupación, desempleo e inactividad según la GEIH julio 2026 (R-008); informalidad 0,45; jornada de la Ley 2101 (R-009); CA-001 recalibrado y CA-007. El perfil "prototipo" conserva la paridad |
 | 2026-09-24 | 0.3 | Estado → aprobada |
+| 2026-09-24 | 0.4 | Implementación del bloque D: el sueldo es `wage` con `wagePeriod` (`month` en el perfil colombiano; `day` en el perfil prototipo, por paridad con `hire`); el turno incluye `lunch`, que no cuenta como jornada (Ley 2101); el sueldo se fija por puesto al generar, con la misma distribución que el prototipo al contratar; ocupaciones del jefe y del personal en el catálogo `place_kinds`; cultura con normal 0,5 ± 0,15 (estimada); la caja llega en M2. Sin cambios en CA |

@@ -51,3 +51,4 @@ Porta `genWorld`, `buildPlaces`, `genPopulation`, `newAgent`, `genJobs`, `genRel
 | 2026-09-24 | m1/a-catalogos | ADR-006, 029 | Submódulos `catalogs` y `country` con su MODULE.md; dependencia `zod`; datos en `catalogs/` y `profiles/` |
 | 2026-09-24 | m1/b-geografia | 003 | Submódulo `geography` (plantilla del prototipo, mapa y jerarquía territorial) |
 | 2026-09-24 | m1/c-lugares | 004 | Submódulo `places` (lugares de las parcelas y viviendas) |
+| 2026-09-24 | m1/d-organizaciones | 006 | Submódulo `organizations` (organizaciones y puestos) |
