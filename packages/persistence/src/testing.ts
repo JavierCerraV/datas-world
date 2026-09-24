@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import type { WorldConfig } from '@datas-world/engine';
 
 export const testConfig = (over: Partial<WorldConfig> = {}): WorldConfig => ({
-  name: 'Villa Cordillera',
+  name: "Data's World",
   seed: 482917,
   epoch: '2027-01-04T00:00',
   tickMinutes: 5,

@@ -68,7 +68,7 @@ function worldNew(args: string[], io: Io): void {
     options: {
       seed: { type: 'string' },
       population: { type: 'string', default: '200' },
-      name: { type: 'string', default: 'Villa Cordillera' },
+      name: { type: 'string', default: "Data's World" },
       epoch: { type: 'string', default: '2027-01-04T00:00' },
       tick: { type: 'string', default: '5' },
       db: { type: 'string', default: DEFAULT_DB },

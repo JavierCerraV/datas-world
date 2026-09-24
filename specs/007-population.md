@@ -45,7 +45,7 @@ Coste en memoria: ≈ 300 B de objeto y 18 B de columnas por persona.
 
 ## 4. Reglas
 - **R-001 (M1)** — La población se genera **por hogares** (008), no persona a persona, para que edades, apellidos y estratos sean coherentes. Orden del generador: geografía (003) → lugares (004) → organizaciones (006) → hogares con sus personas (008 + 007, con la personalidad de 009) → empleo (006) → objetos (005). Cada paso usa su flujo `gen:<paso>`.
-- **R-002 (M1)** — Nombres de `GIVEN_NAMES_F`, `GIVEN_NAMES_M` y `FAMILY_NAMES` (español colombiano, del prototipo), y lugar de nacimiento de `BIRTHPLACES`. Los menores nacen en Villa Cordillera.
+- **R-002 (M1)** — Nombres de `GIVEN_NAMES_F`, `GIVEN_NAMES_M` y `FAMILY_NAMES` (español colombiano, del prototipo), y lugar de nacimiento de `BIRTHPLACES`. Los menores nacen en Data's World.
 - **R-003 (M1)** — La fecha de nacimiento es el epoch menos la edad de la plantilla (008) menos `U(0, 364)` días.
 - **R-008 (M1)** — Con el perfil colombiano, la estructura por edades sigue `demo.share.*` y la educación sigue `education.attainment.*` por estrato (spec 029). Mientras esas entradas estén `por_confirmar`, se usa la tabla de R-004 traducida a niveles CINE, marcada `estimado`.
 - **R-004 (M1)** — Educación de los adultos según el estrato:
@@ -117,3 +117,4 @@ Pirámide de edades, educación por estrato, ahorro por estrato y edad, y ocupac
 | 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): educación en niveles CINE 2011 A.C. (0–9); pensión por edad según el sexo (57/62, Ley 100 de 1993 y Ley 2381 de 2024) y cobertura del perfil, en lugar de jubilación a los 65; estructura por edades del DANE 2026 (R-008, CA-007) |
 | 2026-09-24 | 0.3 | Estado → aprobada |
 | 2026-09-24 | 0.3 | Aclaración por la spec 030 (usuario): los nacimientos y las muertes **anteriores al presente** (desde 1900) los genera la historia; R-007 (peldaño 4) se refiere solo a los del presente simulado. El presente del mundo es el 2026-01-01 |
+| 2026-09-24 | 0.3 | Nombre (usuario): el mundo y su municipio se llaman **Data's World**, en lugar de Villa Cordillera. Inspirado en el androide Data: ciudadanos autónomos, curiosos y capaces de aprender. Solo cambia el nombre; la información sigue siendo de Colombia |

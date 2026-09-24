@@ -2,7 +2,7 @@
 
 Specs: 003, 004, 005, 006, 007, 008, 009, 029 y 030 (aprobadas). ADR-006 aceptado.
 
-Resultado esperado: `pnpm cli world:new --seed N` crea Villa Cordillera con unas 200 personas coherentes con el perfil colombiano y una historia consultable desde 1900. El presente del mundo es el 2026-01-01.
+Resultado esperado: `pnpm cli world:new --seed N` crea Data's World con unas 200 personas coherentes con el perfil colombiano y una historia consultable desde 1900. El presente del mundo es el 2026-01-01.
 - El mundo se guarda en SQLite y da el mismo hash con la misma semilla.
 - `world:report` compara la población generada con el DANE, `world:map` dibuja el mapa en la terminal y `world:history` y `citizen:report` consultan la historia.
 - Con el perfil "prototipo" se mantiene la paridad estadística.

@@ -49,7 +49,7 @@ País → Departamento → Municipio o distrito
      → Manzana → Predio o edificio → Unidad (vivienda, local)
 ```
 - Cada nivel es un lugar (`PLC`) de tipo `territorio.<nivel>`, con su padre, su código DIVIPOLA ficticio y, en los barrios, su **estrato** (Ley 142 de 1994, arts. 101–102).
-- M1 instancia un departamento ficticio, un municipio (Villa Cordillera), una comuna y los barrios del mapa. La estructura ya admite varias comunas, municipios y conexiones intermunicipales (terminal, aeropuerto) sin rediseño.
+- M1 instancia un departamento ficticio, un municipio (Data's World), una comuna y los barrios del mapa. La estructura ya admite varias comunas, municipios y conexiones intermunicipales (terminal, aeropuerto) sin rediseño.
 
 ### 4. Los catálogos forman parte del mundo
 - Al crear un mundo se copian en `WorldConfig` la versión y el hash de cada catálogo. Así el `stateHash` los cubre.

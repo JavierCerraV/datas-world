@@ -18,7 +18,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { WorldWorker } from './worker.ts';
 
 const config: WorldConfig = {
-  name: 'Villa Cordillera',
+  name: "Data's World",
   seed: 482917,
   epoch: '2027-01-04T00:00',
   tickMinutes: 5,
