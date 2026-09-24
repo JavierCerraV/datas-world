@@ -63,7 +63,7 @@ Cada paquete, cada app y cada sistema del motor o de los generadores (`packages/
 
 1. Elegir la siguiente tarea en `tasks/` según `docs/roadmap.md` (el hook de inicio de sesión muestra cuál es).
 2. Trabajar en una rama corta: `git switch -c m0/rng`.
-3. Leer las specs que la tarea cita, el `MODULE.md` del módulo y su fila en `docs/prototipo-referencia.md`. Si hay ambigüedad, proponer cambio en la spec (*Preguntas abiertas*) y pedir aprobación antes de codificar. **Nunca cambies tú el `estado` de una spec a `aprobada`**: lo hace el usuario con `node scripts/aprobar-spec.mjs`.
+3. Leer las specs que la tarea cita, el `MODULE.md` del módulo y su fila en `docs/prototipo-referencia.md`. Si hay ambigüedad, proponer cambio en la spec (*Preguntas abiertas*) y pedir aprobación antes de codificar. **Nunca cambies el `estado` de una spec sin la aprobación explícita del usuario en la conversación.** Con su "sí", lo ejecuta Claude con `node scripts/aprobar-spec.mjs` (decisión del usuario, 2026-09-24). Lo mismo vale para los demás pasos que antes eran manuales (fusionar PRs, etc.): Claude propone, el usuario aprueba y Claude ejecuta. Cuando un paso solo pueda hacerlo el usuario, dale instrucciones numeradas y concretas.
 4. Si el módulo no existe, crear su `MODULE.md` desde `docs/modulos/_plantilla-MODULE.md` antes que cualquier código.
 5. Escribir primero las pruebas de los criterios de aceptación (`CA-xxx`).
 6. Implementar lo mínimo para que pasen.
@@ -117,7 +117,7 @@ pnpm bench              # memoria y ticks/s del motor
 pnpm cli validate:parity   # (desde M2) comparación con la línea base del prototipo
 node scripts/guardrails/check.mjs     # guardarraíles (también en hooks, pre-commit y CI)
 node scripts/guardrails/indice.mjs    # regenerar specs/000-indice.md y docs/modulos.md
-node scripts/aprobar-spec.mjs 012     # (solo el usuario) aprobar una spec
+node scripts/aprobar-spec.mjs 012     # aprobar una spec (Claude, solo con el "sí" del usuario)
 node scripts/prototipo/linea-base.mjs # regenerar la línea base del prototipo
 ```
 

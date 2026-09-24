@@ -9,7 +9,7 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | Spec | Título | Hito | Depende de | Estado | Módulos que la implementan |
 |---|---|---|---|---|---|
 | [001](001-world.md) | Mundo | M0 | 002, 023 | aprobada | `apps/cli`, `packages/engine`, `packages/generators` |
-| [002](002-time.md) | Tiempo | M0 |  | aprobada | `apps/cli`, `apps/worker`, `packages/engine` |
+| [002](002-time.md) | Tiempo | M0 |  | implementada | `apps/cli`, `apps/worker`, `packages/engine` |
 | [003](003-geography.md) | Geografía | M1 | 001 | borrador | — |
 | [004](004-places.md) | Lugares | M1 | 003, 006 | borrador | — |
 | [005](005-objects.md) | Objetos con historia | M1 | 001, 014 | borrador | — |
@@ -21,7 +21,7 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [011](011-routines.md) | Rutinas | M2 | 010, 006, 004, 002 | borrador | — |
 | [012](012-relationships.md) | Relaciones asimétricas | M3 | 007, 009, 013 | borrador | — |
 | [013](013-memory.md) | Memoria autobiográfica | M3 (episódica) · M5 (consolidación) | 014, 010, 021 | borrador | — |
-| [014](014-events.md) | Eventos | M2 | 001, 002 | aprobada | `packages/engine` |
+| [014](014-events.md) | Eventos | M2 | 001, 002 | implementada | `packages/engine` |
 | [015](015-economy.md) | Economía | M2 | 006, 008, 007 | borrador | — |
 | [016](016-mobility.md) | Movilidad | M2 | 003, 004 | borrador | — |
 | [017](017-decision-engine.md) | Motor de decisiones | M2 | 010, 011, 012, 015 | borrador | — |

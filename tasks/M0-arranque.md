@@ -48,6 +48,6 @@ Cada bloque se hace en una rama (`m0/a-tooling`, `m0/b-rng`…) y termina con un
 ## Cierre de M0
 - [x] Prueba de determinismo en CI (dos procesos, mismo hash).
 - [x] `/sincronizar-docs all` sin discrepancias.
-- [ ] Proponer al usuario pasar 001, 002, 014, 023 y 027 a `implementada` (lo hace él con `node scripts/aprobar-spec.mjs --estado implementada …`) si todos sus CA están cubiertos. Si no, listar los CA pendientes en cada `MODULE.md`.
+- [x] Proponer al usuario pasar 001, 002, 014, 023 y 027 a `implementada` (→ 002 y 014 implementadas; 001, 023 y 027 siguen aprobadas con CA pendientes listados en sus `MODULE.md`; lo ejecuta Claude con `node scripts/aprobar-spec.mjs --estado implementada …`) si todos sus CA están cubiertos. Si no, listar los CA pendientes en cada `MODULE.md`.
 - [x] Nota breve en `docs/validaciones/` con los números del bench.
 - [ ] Revisar y aprobar las specs de M1 antes de crear `tasks/M1-mundo-estatico.md` (pedir a Claude Code que la redacte).
