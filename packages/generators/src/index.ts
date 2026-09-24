@@ -20,6 +20,16 @@ export { MAP_TEMPLATES, PROTOTYPE_64X40, isRoadTile, plots } from './geography/t
 export { DWELLING_CAPACITY, generatePlaces } from './places/generate.ts';
 
 export { generateOrganizations, worldDate } from './organizations/generate.ts';
+
+export {
+  COPING,
+  COPING_COLUMN,
+  copingFor,
+  definePersonalityColumns,
+  generatePersonality,
+  topValues,
+} from './personality/generate.ts';
+export type { PersonalityParams, PersonalityResult } from './personality/generate.ts';
 export type { OrganizationsOptions } from './organizations/generate.ts';
 export type { PlacedPlot, PlacesResult } from './places/generate.ts';
 export type { DistrictTemplate, MapTemplate, PlotTemplate } from './geography/template.ts';

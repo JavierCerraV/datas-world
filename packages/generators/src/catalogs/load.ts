@@ -15,6 +15,8 @@ export const CATALOG_NAMES = [
   'object_kinds',
   'occupations',
   'org_sectors',
+  'personal_values',
+  'personality_traits',
   'place_kinds',
   'territory_levels',
   'trades_informal',

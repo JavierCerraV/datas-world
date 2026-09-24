@@ -1,0 +1,17 @@
+{
+  "name": "personality_traits",
+  "version": "2026.09.1",
+  "source": "Spec 009 v0.2: Big Five + extras (decisión del usuario, 2026-09-24), provisional hasta la tabla de rasgos elaborada con expertos en psicología. `column` es la columna f32 del ciudadano; `proto` es el rasgo equivalente del prototipo (`invert`: el prototipo mide el polo opuesto); `correlations` son correlaciones con rasgos anteriores en este orden (estimado).",
+  "entries": [
+    { "key": "big5.agreeableness", "name": "Amabilidad", "since": "M1", "attrs": { "column": "pers.agreeableness", "proto": "amabilidad" } },
+    { "key": "big5.conscientiousness", "name": "Responsabilidad", "since": "M1", "attrs": { "column": "pers.conscientiousness", "proto": "responsabilidad" } },
+    { "key": "big5.extraversion", "name": "Extraversión", "since": "M1", "attrs": { "column": "pers.extraversion", "proto": "extraversion" } },
+    { "key": "big5.neuroticism", "name": "Neuroticismo", "since": "M1", "attrs": { "column": "pers.neuroticism", "proto": "estabilidad", "invert": true } },
+    { "key": "big5.openness", "name": "Apertura", "since": "M1", "attrs": { "column": "pers.openness", "proto": "apertura" } },
+    { "key": "extra.approval_need", "name": "Necesidad de aprobación", "since": "M1", "attrs": { "column": "pers.approvalNeed", "proto": "aprobacion" } },
+    { "key": "extra.honesty", "name": "Honestidad", "since": "M1", "attrs": { "column": "pers.honesty" } },
+    { "key": "extra.impulsivity", "name": "Impulsividad", "since": "M1", "attrs": { "column": "pers.impulsivity", "proto": "impulsividad" } },
+    { "key": "extra.resilience", "name": "Resiliencia", "since": "M1", "attrs": { "column": "pers.resilience", "correlations": { "big5.neuroticism": -0.4 } } },
+    { "key": "extra.social_sensitivity", "name": "Sensibilidad social", "since": "M1", "attrs": { "column": "pers.socialSensitivity", "proto": "sensibilidad" } }
+  ]
+}

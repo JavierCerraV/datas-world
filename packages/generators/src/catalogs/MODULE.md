@@ -2,7 +2,7 @@
 modulo: catalogs
 ruta: packages/generators/src/catalogs
 estado: en-desarrollo
-specs: [003, 004, 005, 006, 007, 030]
+specs: [003, 004, 005, 006, 007, 009, 030]
 actualizado: 2026-09-24
 ---
 
@@ -23,7 +23,7 @@ Desde `@datas-world/generators`:
 
 | Símbolo | Descripción |
 |---|---|
-| `CATALOG_NAMES`, tipo `CatalogName` | Los 8 catálogos de M1, en orden canónico |
+| `CATALOG_NAMES`, tipo `CatalogName` | Los 10 catálogos de M1, en orden canónico |
 | `loadCatalog(name, dir?)`, `loadCatalogs(dir?)` → `Catalogs` | Lee `packages/generators/catalogs/<nombre>.json` y lo valida. Lanza con todos los problemas |
 | `parseCatalog(data, label?)` | Valida un catálogo ya leído (Zod + orden de claves) |
 | `catalogRef(c)`, `catalogRefs(cs)` | `{ version, hash }` para `WorldConfig.catalogs` (ADR-006 §4). El hash es el `hashString` del motor sobre el JSON canónico |
@@ -40,7 +40,8 @@ Desde `@datas-world/generators`:
   - educación: `column`;
   - territorio: `parent`, `placeKind`;
   - oficios: `occupation`, `kind`;
-  - hechos históricos: `start`, `end`, `effects`.
+  - hechos históricos: `start`, `end`, `effects`;
+  - rasgos: `column`, `proto`, `invert`, `correlations`; valores: `column`, `proto`.
 - **Turnos colombianos** (`shiftCO`). Cumplen 42 h semanales sin almuerzo, por la Ley 2101. Por ejemplo, la oficina trabaja de lunes a viernes de 07:00 a 16:24 con 60 min de almuerzo: 8 h 24 min × 5 = 42 h. `shiftProto` conserva el turno del prototipo para la paridad.
 - **Códigos CIIU y CIUO.** Se escribieron desde la clasificación publicada, con nombres abreviados. Queda pendiente verificarlos uno a uno contra la tabla oficial del DANE (lo dice el `source` de cada catálogo).
 
@@ -71,3 +72,4 @@ Las entradas de M1 de `place_kinds` llevan `proto` (el tipo del prototipo), `def
 | 2026-09-24 | m1/a-catalogos | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/a-catalogos (A1, A2) | ADR-006, 004, 005, 006, 007, 030 | Esquema Zod, cargador con hash y los 8 catálogos iniciales (lugares con entradas hasta P4, objetos, sectores CIIU, ocupaciones CIUO, niveles CINE, territorio, oficios informales, hechos históricos). 8 pruebas |
 | 2026-09-24 | m1/d-organizaciones | 006 | `place_kinds` 2026.09.2: atributo `occupations` (`{ boss, staff[] }`, códigos CIUO) en los 8 lugares de trabajo de M1 |
+| 2026-09-24 | m1/e-personalidad | 009 | Catálogos nuevos `personality_traits` (10 rasgos: Big Five + 5 extras, con columna, rasgo del prototipo y correlaciones) y `personal_values` (12 valores del prototipo). `CATALOG_NAMES` pasa a 10 |
