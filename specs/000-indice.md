@@ -8,34 +8,34 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 <!-- INDICE:INICIO (generado por scripts/guardrails/indice.mjs, no editar a mano) -->
 | Spec | Título | Hito | Depende de | Estado | Módulos que la implementan |
 |---|---|---|---|---|---|
-| [001](001-world.md) | Mundo |  |  |  | — |
-| [002](002-time.md) | Tiempo |  |  |  | — |
-| [003](003-geography.md) | Geografía |  |  |  | — |
-| [004](004-places.md) | Lugares |  |  |  | — |
-| [005](005-objects.md) | Objetos con historia |  |  |  | — |
-| [006](006-organizations.md) | Organizaciones |  |  |  | — |
-| [007](007-population.md) | Población |  |  |  | — |
-| [008](008-households.md) | Hogares |  |  |  | — |
-| [009](009-personality.md) | Personalidad y valores |  |  |  | — |
-| [010](010-needs.md) | Necesidades, emociones y salud |  |  |  | — |
-| [011](011-routines.md) | Rutinas |  |  |  | — |
-| [012](012-relationships.md) | Relaciones asimétricas |  |  |  | — |
-| [013](013-memory.md) | Memoria autobiográfica |  |  |  | — |
-| [014](014-events.md) | Eventos |  |  |  | — |
-| [015](015-economy.md) | Economía |  |  |  | — |
-| [016](016-mobility.md) | Movilidad |  |  |  | — |
-| [017](017-decision-engine.md) | Motor de decisiones |  |  |  | — |
-| [018](018-learning.md) | Aprendizaje y hábitos |  |  |  | — |
-| [019](019-causality.md) | Causalidad |  |  |  | — |
-| [020](020-history.md) | Historia e informe de vida |  |  |  | — |
-| [021](021-simulation.md) | Bucle de simulación, registro de sistemas y niveles de detalle |  |  |  | — |
-| [022](022-observability.md) | Observación, API y métricas |  |  |  | — |
-| [023](023-reproducibility.md) | Reproducibilidad y azar |  |  |  | — |
-| [024](024-visualization.md) | Visualización pixel art |  |  |  | — |
-| [025](025-knowledge.md) | Conocimiento, creencias y rumores |  |  |  | — |
-| [026](026-llm-gateway.md) | Pasarela LLM |  |  |  | — |
-| [027](027-persistence.md) | Persistencia |  |  |  | — |
-| [028](028-experiments.md) | Experimentos y ramas |  |  |  | — |
+| [001](001-world.md) | Mundo | M0 | 002, 023 | aprobada | `apps/cli`, `packages/engine`, `packages/generators` |
+| [002](002-time.md) | Tiempo | M0 |  | aprobada | `apps/cli`, `apps/worker`, `packages/engine` |
+| [003](003-geography.md) | Geografía | M1 | 001 | borrador | — |
+| [004](004-places.md) | Lugares | M1 | 003, 006 | borrador | — |
+| [005](005-objects.md) | Objetos con historia | M1 | 001, 014 | borrador | — |
+| [006](006-organizations.md) | Organizaciones | M1 | 004 | borrador | — |
+| [007](007-population.md) | Población | M1 | 001, 008, 009 | borrador | — |
+| [008](008-households.md) | Hogares | M1 | 007, 004, 015 | borrador | — |
+| [009](009-personality.md) | Personalidad y valores | M1 | 007 | borrador | — |
+| [010](010-needs.md) | Necesidades, emociones y salud | M2 | 007, 009 | borrador | — |
+| [011](011-routines.md) | Rutinas | M2 | 010, 006, 004, 002 | borrador | — |
+| [012](012-relationships.md) | Relaciones asimétricas | M3 | 007, 009, 013 | borrador | — |
+| [013](013-memory.md) | Memoria autobiográfica | M3 (episódica) · M5 (consolidación) | 014, 010, 021 | borrador | — |
+| [014](014-events.md) | Eventos | M2 | 001, 002 | aprobada | `packages/engine` |
+| [015](015-economy.md) | Economía | M2 | 006, 008, 007 | borrador | — |
+| [016](016-mobility.md) | Movilidad | M2 | 003, 004 | borrador | — |
+| [017](017-decision-engine.md) | Motor de decisiones | M2 | 010, 011, 012, 015 | borrador | — |
+| [018](018-learning.md) | Aprendizaje y hábitos | M5 | 017, 013 | borrador | — |
+| [019](019-causality.md) | Causalidad | M3 | 014 | borrador | — |
+| [020](020-history.md) | Historia e informe de vida | M3 | 014, 019, 013 | borrador | — |
+| [021](021-simulation.md) | Bucle de simulación, registro de sistemas y niveles de detalle | M2 | 001, 002, 017, 014 | borrador | — |
+| [022](022-observability.md) | Observación, API y métricas | M4 | 027, 019, 020 | borrador | `apps/api` |
+| [023](023-reproducibility.md) | Reproducibilidad y azar | M0 (base) · M5 (rewind/replay y ramas) | 001, 002 | aprobada | `packages/engine`, `packages/generators` |
+| [024](024-visualization.md) | Visualización pixel art | M4 | 022, 003, 004 | borrador | `apps/web` |
+| [025](025-knowledge.md) | Conocimiento, creencias y rumores | M3 | 012, 013, 014 | borrador | — |
+| [026](026-llm-gateway.md) | Pasarela LLM | M6 | 017, 025, 021 | borrador | `packages/llm-gateway` |
+| [027](027-persistence.md) | Persistencia | M0 (base) · M4 (retención) | 001, 002, 014 | aprobada | `apps/cli`, `apps/worker`, `packages/persistence` |
+| [028](028-experiments.md) | Experimentos y ramas | M5 | 023, 027, 022 | borrador | — |
 <!-- INDICE:FIN -->
 
 ## Orden sugerido de revisión
