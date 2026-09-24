@@ -1,6 +1,6 @@
 # ADR-006 — Catálogos de datos, clasificaciones oficiales y jerarquía territorial colombiana
 
-- **Estado:** propuesta (pendiente de revisión del usuario)
+- **Estado:** aceptada (usuario, 2026-09-24)
 - **Fecha:** 2026-09-24
 
 ## Contexto

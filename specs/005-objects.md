@@ -1,7 +1,7 @@
 ---
 id: 005
 nombre: objects
-estado: borrador
+estado: aprobada
 hito: M1 (objetos iniciales) · M2–M3 (transferencias, valor emocional, pérdidas)
 depende_de: [001, 007, 008, 014, 023, 029]
 version: 0.3
@@ -91,3 +91,4 @@ Objetos por persona y hogar, por tipo y estrato; valor emocional medio. Alerta s
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: propiedad personal o del hogar; `fate` separado de `status` (001); objetos iniciales portados de `genObjects`; eventos de origen con fecha anterior al epoch; dependencias con 007 y 008 (se generan después de la población); criterios marcados por hito |
 | 2026-09-24 | 0.3 | Orden para crecer (usuario): `kind` pasa al catálogo `object_kinds` (ADR-006); precios en el catálogo, en pesos y marcados `estimado` (R-008) |
+| 2026-09-24 | 0.3 | Estado → aprobada |

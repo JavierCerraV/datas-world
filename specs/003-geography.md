@@ -1,7 +1,7 @@
 ---
 id: 003
 nombre: geography
-estado: borrador
+estado: aprobada
 hito: M1
 depende_de: [001, 023, 029]
 version: 0.3
@@ -92,3 +92,4 @@ Número de puertas, longitud media de las rutas y la ruta más larga. Alerta si 
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: ciudad ficticia; estrato colombiano 1–6 (`stratum`) en lugar de 0–5; plantilla del prototipo (R-001, R-004, CA-004); distancias por BFS entre puertas, derivadas y no persistidas; criterios marcados por hito |
 | 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): jerarquía territorial del ADR-006 (departamento → municipio → comuna → barrio), códigos DIVIPOLA ficticios, estrato según la Ley 142 de 1994 y cifras del perfil de país (029); R-005 y CA-005 |
+| 2026-09-24 | 0.3 | Estado → aprobada |

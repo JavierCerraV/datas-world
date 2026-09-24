@@ -1,7 +1,7 @@
 ---
 id: 009
 nombre: personality
-estado: borrador
+estado: aprobada
 hito: M1 (generación) · M2–M3 (efectos y cambio lento)
 depende_de: [001, 023]
 version: 0.2
@@ -93,3 +93,4 @@ Media, desviación típica y porcentaje de extremos por rasgo; matriz de correla
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: Big Five + extras (con los extras del prototipo, más honestidad y resiliencia), en listas configurables a la espera de la tabla de expertos; rasgos y valores como columnas (ADR-005); 12 valores del prototipo; generación portada de `newAgent` con flujo por persona; afrontamiento derivado de los rasgos; sin dependencia de 007; criterios marcados por hito |
+| 2026-09-24 | 0.2 | Estado → aprobada |

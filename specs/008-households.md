@@ -1,7 +1,7 @@
 ---
 id: 008
 nombre: households
-estado: borrador
+estado: aprobada
 hito: M1 (plantillas y composición) · M2–M3 (economía del hogar, clima, mudanzas)
 depende_de: [001, 004, 023, 029]
 version: 0.3
@@ -96,3 +96,4 @@ Distribución de plantillas y tamaño medio del hogar (≈ 2,8 en el prototipo);
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: sin dependencias con 007 ni con 015 (el dinero y el arriendo pasan a M2); plantillas y edades portadas de `genPopulation`; apellidos colombianos; abuelos cuidadores (`caregiverIds`); parentesco dirigido y estructural (el afecto va en 012); vivienda `dwelling` (004); criterios marcados por hito |
 | 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): pesos de plantilla del perfil colombiano según las tipologías de hogar del DANE (ECV 2024–2025), con la plantilla `roommates` como hogar no familiar; el perfil "prototipo" conserva los pesos anteriores; CA-006 con tamaño medio de 2,82 |
+| 2026-09-24 | 0.3 | Estado → aprobada |

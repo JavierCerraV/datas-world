@@ -1,7 +1,7 @@
 ---
 id: 029
 nombre: country-profile
-estado: borrador
+estado: aprobada
 hito: M1 (demografía, territorio, festivos, salario base) · M2 (reglas laborales y de economía)
 depende_de: [001, 002]
 version: 0.1
@@ -121,3 +121,4 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-24 | 0.1 | Borrador inicial a partir de la petición del usuario de ajustar el proyecto a los indicadores, las leyes y la organización de Colombia (ADR-006) |
+| 2026-09-24 | 0.1 | Estado → aprobada |

@@ -10,13 +10,13 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 |---|---|---|---|---|---|
 | [001](001-world.md) | Mundo | M0 | 002, 023 | aprobada | `apps/cli`, `packages/engine`, `packages/generators` |
 | [002](002-time.md) | Tiempo | M0 |  | implementada | `apps/cli`, `apps/worker`, `packages/engine` |
-| [003](003-geography.md) | Geografía | M1 | 001, 023, 029 | borrador | — |
-| [004](004-places.md) | Lugares | M1 (generación) · M2 (ocupación y horarios) | 003, 029 | borrador | — |
-| [005](005-objects.md) | Objetos con historia | M1 (objetos iniciales) · M2–M3 (transferencias, valor emocional, pérdidas) | 001, 007, 008, 014, 023, 029 | borrador | — |
-| [006](006-organizations.md) | Organizaciones y ocupación | M1 (generación y empleo inicial) · M2 (desempeño, despidos, contratación) | 004, 023, 029 | borrador | — |
-| [007](007-population.md) | Población | M1 (generación) · peldaño 4 (nacimientos y muertes) | 001, 003, 004, 006, 008, 009, 014, 023, 029 | borrador | — |
-| [008](008-households.md) | Hogares | M1 (plantillas y composición) · M2–M3 (economía del hogar, clima, mudanzas) | 001, 004, 023, 029 | borrador | — |
-| [009](009-personality.md) | Personalidad y valores | M1 (generación) · M2–M3 (efectos y cambio lento) | 001, 023 | borrador | — |
+| [003](003-geography.md) | Geografía | M1 | 001, 023, 029 | aprobada | — |
+| [004](004-places.md) | Lugares | M1 (generación) · M2 (ocupación y horarios) | 003, 029 | aprobada | — |
+| [005](005-objects.md) | Objetos con historia | M1 (objetos iniciales) · M2–M3 (transferencias, valor emocional, pérdidas) | 001, 007, 008, 014, 023, 029 | aprobada | — |
+| [006](006-organizations.md) | Organizaciones y ocupación | M1 (generación y empleo inicial) · M2 (desempeño, despidos, contratación) | 004, 023, 029 | aprobada | — |
+| [007](007-population.md) | Población | M1 (generación) · peldaño 4 (nacimientos y muertes) | 001, 003, 004, 006, 008, 009, 014, 023, 029 | aprobada | — |
+| [008](008-households.md) | Hogares | M1 (plantillas y composición) · M2–M3 (economía del hogar, clima, mudanzas) | 001, 004, 023, 029 | aprobada | — |
+| [009](009-personality.md) | Personalidad y valores | M1 (generación) · M2–M3 (efectos y cambio lento) | 001, 023 | aprobada | — |
 | [010](010-needs.md) | Necesidades, emociones y salud | M2 | 007, 009 | borrador | — |
 | [011](011-routines.md) | Rutinas | M2 | 010, 006, 004, 002 | borrador | — |
 | [012](012-relationships.md) | Relaciones asimétricas | M3 | 007, 009, 013 | borrador | — |
@@ -36,7 +36,7 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [026](026-llm-gateway.md) | Pasarela LLM | M6 | 017, 025, 021 | borrador | `packages/llm-gateway` |
 | [027](027-persistence.md) | Persistencia | M0 (base) · M4 (retención) | 001, 002, 014 | aprobada | `apps/cli`, `apps/worker`, `packages/persistence` |
 | [028](028-experiments.md) | Experimentos y ramas | M5 | 023, 027, 022 | borrador | — |
-| [029](029-country-profile.md) | Perfil de país: Colombia | M1 (demografía, territorio, festivos, salario base) · M2 (reglas laborales y de economía) | 001, 002 | borrador | — |
+| [029](029-country-profile.md) | Perfil de país: Colombia | M1 (demografía, territorio, festivos, salario base) · M2 (reglas laborales y de economía) | 001, 002 | aprobada | — |
 <!-- INDICE:FIN -->
 
 ## Orden sugerido de revisión

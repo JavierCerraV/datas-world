@@ -1,7 +1,7 @@
 ---
 id: 004
 nombre: places
-estado: borrador
+estado: aprobada
 hito: M1 (generación) · M2 (ocupación y horarios)
 depende_de: [003, 029]
 version: 0.3
@@ -104,3 +104,4 @@ Lugares por tipo y barrio, viviendas libres y ocupadas tras la generación, y, d
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: sin dependencia circular con 006 (`organizationId` sale del lugar, ahora lo guarda la organización); viviendas `dwelling` dentro de edificios `residential`; iglesia; `district` como tipo de lugar; plantilla del prototipo; reglas y criterios marcados por hito (generación en M1; ocupación, horarios y entrada en M2) |
 | 2026-09-24 | 0.3 | Ajuste a Colombia y orden para crecer (usuario): `PlaceKind` pasa al catálogo `place_kinds` (ADR-006), con claves jerárquicas y las entradas futuras previstas (supermercado, cajero, banco, bodega, paradero, metro, BRT, terminal, aeropuerto…); turnos conformes a la jornada del perfil de país (R-007); CA-006 |
+| 2026-09-24 | 0.3 | Estado → aprobada |

@@ -1,7 +1,7 @@
 ---
 id: 007
 nombre: population
-estado: borrador
+estado: aprobada
 hito: M1 (generación) · peldaño 4 (nacimientos y muertes)
 depende_de: [001, 003, 004, 006, 008, 009, 014, 023, 029]
 version: 0.3
@@ -115,3 +115,4 @@ Pirámide de edades, educación por estrato, ahorro por estrato y edad, y ocupac
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: datos numéricos como columnas (ADR-005); personalidad, estado y nivel de simulación fuera del objeto `Citizen` (009, 010, 021); orden del generador y flujos por paso; tablas de nombres, educación y ahorro portadas de `newAgent`; trayectoria previa con eventos de fecha anterior al epoch; nacimientos y muertes en el peldaño 4; incluye la 001 CA-005; criterios marcados por hito |
 | 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): educación en niveles CINE 2011 A.C. (0–9); pensión por edad según el sexo (57/62, Ley 100 de 1993 y Ley 2381 de 2024) y cobertura del perfil, en lugar de jubilación a los 65; estructura por edades del DANE 2026 (R-008, CA-007) |
+| 2026-09-24 | 0.3 | Estado → aprobada |
