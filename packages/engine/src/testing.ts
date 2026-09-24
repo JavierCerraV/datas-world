@@ -3,7 +3,7 @@ import type { WorldConfig } from './world.ts';
 
 /** Configuración mínima válida (peldaño 0: solo el reloj). */
 export const testConfig = (over: Partial<WorldConfig> = {}): WorldConfig => ({
-  name: 'Villa Cordillera',
+  name: "Data's World",
   seed: 482917,
   epoch: '2027-01-04T00:00',
   tickMinutes: 5,

@@ -16,9 +16,9 @@ Espacio físico del mundo: mapa de tiles, barrios con estrato, calles y distanci
 **Incluye:** mapa en rejilla, barrios, tipos de terreno, red de calles, distancias entre puertas.
 **Fuera de alcance:** lugares concretos (004), transporte y desplazamiento (016).
 
-**Decisión (v0.2):** la ciudad es **ficticia, con sabor colombiano**: Villa Cordillera, con estratos, nombres de barrios locales y una rejilla de manzanas. No copia el mapa de una ciudad real.
+**Decisión (v0.2):** la ciudad es **ficticia, con sabor colombiano**: Data's World, con estratos, nombres de barrios locales y una rejilla de manzanas. No copia el mapa de una ciudad real.
 
-**Decisión (v0.3):** la organización del territorio sigue la jerarquía colombiana del ADR-006 §3 (departamento → municipio → comuna → barrio → manzana → predio). Villa Cordillera es un municipio de un departamento ficticio, con códigos DIVIPOLA ficticios. El estrato y las cifras salen del perfil de país (spec 029).
+**Decisión (v0.3):** la organización del territorio sigue la jerarquía colombiana del ADR-006 §3 (departamento → municipio → comuna → barrio → manzana → predio). Data's World es un municipio de un departamento ficticio, con códigos DIVIPOLA ficticios. El estrato y las cifras salen del perfil de país (spec 029).
 
 ## 3. Modelo de datos
 ```ts
@@ -49,7 +49,7 @@ Coste en memoria: mapa ≈ 2,5 KB. Distancias entre N puertas: N² × 2 B (con �
   - un barrio por fila.
 - **R-002** — La distancia entre dos lugares es la del camino más corto por las calles, entre sus puertas (BFS sobre tiles de calle). Se calcula una vez al cargar, para todos los pares de puertas.
 - **R-003** — Cada lugar pertenece exactamente a un barrio. El estrato del barrio condiciona la composición de hogares (008), la educación y el ahorro iniciales (007), la contratación (006) y, desde M2, los precios (015).
-- **R-005 (M1)** — La generación crea la cadena territorial completa: un departamento ficticio ("Departamento de la Cordillera"), el municipio Villa Cordillera (cabecera urbana), una comuna ("Comuna 1") y los barrios del mapa. Más comunas, zona rural con veredas o varios municipios se añaden como entradas nuevas, sin cambiar la estructura.
+- **R-005 (M1)** — La generación crea la cadena territorial completa: un departamento ficticio ("Departamento de la Cordillera"), el municipio Data's World (cabecera urbana), una comuna ("Comuna 1") y los barrios del mapa. Más comunas, zona rural con veredas o varios municipios se añaden como entradas nuevas, sin cambiar la estructura.
 - **R-004** — Barrios iniciales, de arriba abajo:
   - La Esperanza, estrato 3;
   - Centro, estrato 4;
@@ -93,3 +93,4 @@ Número de puertas, longitud media de las rutas y la ruta más larga. Alerta si 
 | 2026-09-24 | 0.2 | Revisión de M1 aprobada por el usuario: ciudad ficticia; estrato colombiano 1–6 (`stratum`) en lugar de 0–5; plantilla del prototipo (R-001, R-004, CA-004); distancias por BFS entre puertas, derivadas y no persistidas; criterios marcados por hito |
 | 2026-09-24 | 0.3 | Ajuste a Colombia (usuario): jerarquía territorial del ADR-006 (departamento → municipio → comuna → barrio), códigos DIVIPOLA ficticios, estrato según la Ley 142 de 1994 y cifras del perfil de país (029); R-005 y CA-005 |
 | 2026-09-24 | 0.3 | Estado → aprobada |
+| 2026-09-24 | 0.3 | Nombre (usuario): el mundo y su municipio se llaman **Data's World**, en lugar de Villa Cordillera. Inspirado en el androide Data: ciudadanos autónomos, curiosos y capaces de aprender. Solo cambia el nombre; la información sigue siendo de Colombia |

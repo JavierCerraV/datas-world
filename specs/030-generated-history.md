@@ -11,7 +11,7 @@ version: 0.1
 
 ## 1. Propósito
 Que el mundo **exista desde 1900** y tenga una historia consultable:
-- cómo se fundó Villa Cordillera y cómo crecieron sus barrios;
+- cómo se fundó Data's World y cómo crecieron sus barrios;
 - de dónde viene cada familia, con 3 o 4 generaciones;
 - quién migró del campo y por qué;
 - qué vivió cada persona de los grandes hechos de Colombia.
@@ -61,7 +61,7 @@ Coste en memoria: ≈ 3 antepasados por persona viva de media, con ramas compart
   5. trayectorias de los antepasados y de los vivos;
   6. lugares y organizaciones con su fecha de fundación.
 - **R-002 (anclaje en el presente)** — La historia se genera **hacia atrás desde el presente**. Los hogares y personas de 2026 salen del perfil de país (029), y el pasado se construye para que sea coherente con ellos. Así el presente siempre coincide con el DANE, aunque la historia sea aproximada.
-- **R-003 (fundación)** — Villa Cordillera se funda en `FOUNDING_YEAR`. Primero existe el barrio fundacional, alrededor de la plaza y la iglesia. Los demás aparecen por décadas: `DISTRICT_FOUNDING_DECADES`. En 2026 son los tres del mapa (003).
+- **R-003 (fundación)** — Data's World se funda en `FOUNDING_YEAR`. Primero existe el barrio fundacional, alrededor de la plaza y la iglesia. Los demás aparecen por décadas: `DISTRICT_FOUNDING_DECADES`. En 2026 son los tres del mapa (003).
 - **R-004 (genealogía)** — Para cada persona viva se generan hacia atrás hasta 3 generaciones:
   - la edad de los padres al nacer el hijo sale de `PARENT_AGE_AT_BIRTH` por década;
   - la muerte, de las tablas de mortalidad por década `LIFE_TABLE` (029);
@@ -144,7 +144,7 @@ Alerta si alguna invariante vital se incumple o si una década queda vacía.
 
 ## 10. Preguntas abiertas
 - [ ] Series históricas oficiales (DANE, censos 1938–2018, estadísticas vitales) para `PARENT_AGE_AT_BIRTH`, `LIFE_TABLE` y `URBANIZATION_BY_DECADE`. Mientras falten, se usan valores `estimado` con la fuente de la aproximación.
-- [ ] ¿Incluir la región de origen de las migraciones (departamentos reales) o solo "campo" y "otra ciudad"? Propuesta: departamentos reales del catálogo DIVIPOLA para el origen; Villa Cordillera sigue siendo ficticia.
+- [ ] ¿Incluir la región de origen de las migraciones (departamentos reales) o solo "campo" y "otra ciudad"? Propuesta: departamentos reales del catálogo DIVIPOLA para el origen; Data's World sigue siendo ficticia.
 - [ ] ¿Se siembran memorias (013) desde los eventos históricos vividos cuando llegue M3? Propuesta: sí, con la importancia del evento.
 
 ## 11. Historial de cambios
@@ -152,3 +152,4 @@ Alerta si alguna invariante vital se incumple o si una década queda vacía.
 |---|---|---|
 | 2026-09-24 | 0.1 | Borrador inicial: el mundo existe desde 1900 con historia generada y consultable; la vida detallada empieza el 2026-01-01 (decisiones del usuario) |
 | 2026-09-24 | 0.1 | Estado → aprobada |
+| 2026-09-24 | 0.1 | Nombre (usuario): el mundo y su municipio se llaman **Data's World**, en lugar de Villa Cordillera. Inspirado en el androide Data: ciudadanos autónomos, curiosos y capaces de aprender. Solo cambia el nombre; la información sigue siendo de Colombia |

@@ -92,7 +92,7 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 | `labor.informality.national` | 0,545 | 2026-07 | DANE, GEIH julio 2026 | oficial |
 | `labor.informality.13cities` | 0,405 | 2026-07 | DANE, GEIH julio 2026 | oficial |
 | `labor.informality.ruralDisperso` | 0,825 | 2026-07 | DANE, GEIH julio 2026 | oficial |
-| `labor.informality.world` | 0,45 | — | Villa Cordillera es una ciudad intermedia: entre 13 ciudades (0,405) y el total nacional (0,545) | estimado |
+| `labor.informality.world` | 0,45 | — | Data's World es una ciudad intermedia: entre 13 ciudades (0,405) y el total nacional (0,545) | estimado |
 
 **Leyes laborales y pensión**
 | Clave | Valor | Vigencia | Fuente | Estado |
@@ -131,3 +131,4 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 | 2026-09-24 | 0.1 | Borrador inicial a partir de la petición del usuario de ajustar el proyecto a los indicadores, las leyes y la organización de Colombia (ADR-006) |
 | 2026-09-24 | 0.1 | Estado → aprobada |
 | 2026-09-24 | 0.2 | "Lo más real posible" (usuario): alcance territorial por entrada (`scope`) para las variaciones urbano, rural y 13 ciudades; informalidad del rural disperso (0,825) y tamaño del hogar rural (2,99); cobertura pensional (0,24) y nivel educativo de la fuerza laboral (GEIH 2024) como `estimado`; subsidios por estrato | Series históricas por década (`demo.*.byDecade`) para la spec 030; presente del mundo el 2026-01-01.
+| 2026-09-24 | 0.2 | Nombre (usuario): el mundo y su municipio se llaman **Data's World**, en lugar de Villa Cordillera. Inspirado en el androide Data: ciudadanos autónomos, curiosos y capaces de aprender. Solo cambia el nombre; la información sigue siendo de Colombia |
