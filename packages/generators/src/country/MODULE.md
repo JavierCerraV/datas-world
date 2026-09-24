@@ -65,3 +65,4 @@ El perfil `prototipo` reproduce los parámetros de paridad (029 R-004): pesos de
 |---|---|---|---|
 | 2026-09-24 | m1/a-catalogos | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/a-catalogos (A3, A4) | 029 | Perfiles `CO-2026.09` (46 entradas con fuente) y `prototipo`; carga con Zod y `checkProfile`; festivos de Colombia desde 1984 con la Ley 2578 de 2026. Dependencia nueva: `zod` 4 (ADR-001). 12 pruebas |
+| 2026-09-24 | m1/d-organizaciones | 029 | Nueva entrada `gen.jobs.bossWageFactor` = 1,6 en `CO-2026.09` (estimado, del prototipo): ya son 47 entradas |

@@ -35,7 +35,7 @@ Desde `@datas-world/generators`:
 - **Formato.** JSON en `packages/generators/catalogs/`, fuera de `src/`, porque son datos. Zod valida en el borde (ADR-001): clave jerárquica `^[a-z0-9_]+(\.[a-z0-9_]+)*$`, `since` = `M0–M9` o `P0–P9`, campos desconocidos rechazados (`strict`), versión `AAAA.MM.n`.
 - **Orden obligatorio.** Las entradas van en orden estricto de clave. Así el catálogo ya es canónico y un duplicado se detecta al validar.
 - **`attrs` libre** (`Record<string, unknown>`). Cada generador valida los atributos que usa. En M1:
-  - lugares: `defaultName`, `open`, `openDays`, `slots`, `payProtoDaily`, `shiftProto`, `shiftCO`, `wageMultiple`, `factor`, `unitsPerBuilding`, `capacity`;
+  - lugares: `defaultName`, `open`, `openDays`, `slots`, `payProtoDaily`, `shiftProto`, `shiftCO`, `wageMultiple`, `occupations` (`{ boss, staff[] }`), `factor`, `unitsPerBuilding`, `capacity`;
   - objetos: `price`, `priceStatus`, `sentimental`, `ownedBy`;
   - educación: `column`;
   - territorio: `parent`, `placeKind`;
@@ -70,3 +70,4 @@ Las entradas de M1 de `place_kinds` llevan `proto` (el tipo del prototipo), `def
 |---|---|---|---|
 | 2026-09-24 | m1/a-catalogos | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/a-catalogos (A1, A2) | ADR-006, 004, 005, 006, 007, 030 | Esquema Zod, cargador con hash y los 8 catálogos iniciales (lugares con entradas hasta P4, objetos, sectores CIIU, ocupaciones CIUO, niveles CINE, territorio, oficios informales, hechos históricos). 8 pruebas |
+| 2026-09-24 | m1/d-organizaciones | 006 | `place_kinds` 2026.09.2: atributo `occupations` (`{ boss, staff[] }`, códigos CIUO) en los 8 lugares de trabajo de M1 |

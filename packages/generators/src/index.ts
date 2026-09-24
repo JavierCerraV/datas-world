@@ -18,6 +18,9 @@ export type { GeographyOptions, Territory } from './geography/generate.ts';
 export { MAP_TEMPLATES, PROTOTYPE_64X40, isRoadTile, plots } from './geography/template.ts';
 
 export { DWELLING_CAPACITY, generatePlaces } from './places/generate.ts';
+
+export { generateOrganizations, worldDate } from './organizations/generate.ts';
+export type { OrganizationsOptions } from './organizations/generate.ts';
 export type { PlacedPlot, PlacesResult } from './places/generate.ts';
 export type { DistrictTemplate, MapTemplate, PlotTemplate } from './geography/template.ts';
 
