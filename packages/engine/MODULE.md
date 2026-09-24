@@ -19,7 +19,7 @@ Núcleo puro de la simulación: tipos del dominio, RNG, reloj, scheduler, evento
 | 001 | CA-001, CA-002, CA-003, CA-004, CA-006, CA-007, CA-008 | CA-005 (necesita generación de población, M1) |
 | 002 | CA-001, CA-002, CA-003, CA-004, CA-005 (a nivel de motor; desde la CLI en el bloque E) | — |
 | 014 | CA-001, CA-002, CA-003 | — |
-| 023 | CA-003, CA-004, CA-005, CA-006; CA-001 en un mismo proceso | CA-001 entre dos procesos (bloque E, CLI); CA-002 (necesita personas, M1–M2) |
+| 023 | CA-001 (también entre dos procesos, prueba en `apps/cli`), CA-003, CA-004, CA-005, CA-006 | CA-002 (necesita personas, M1–M2) |
 
 
 ## 3. API pública
@@ -40,7 +40,8 @@ Desde `@datas-world/engine` (`src/index.ts`). Todo lo público se reexporta desd
 | `createWorld`, `addCitizen`, `deactivateEntity`, `validateConfig`, tipos `World`/`WorldConfig` | `src/world.ts` | Mundo raíz (001) |
 | `serializeWorld`, `deserializeWorld`, `stateHash`, `canonicalize`, `hashString` | `src/serialize.ts`, `src/hash.ts` | Instantánea JSON y hash canónico de 64 bits (001 R-004, R-010) |
 | `tick`, `applyExternalInput`, tipos `ExternalInput`/`ScheduledHandler` | `src/tick.ts` | Tick mínimo y entradas externas (002, 023 R-004) |
-| `Runner` | `src/runner.ts` | Velocidad, pausa, paso, avanzar N días, tiempo real → ticks, replay (002, 023) |
+| `Runner` | `src/runner.ts` | Velocidad, pausa, paso, avanzar N días, tiempo real → ticks, replay (002, 023). `continueInputsAfter(última)` continúa la numeración `seq` al retomar un mundo guardado |
+| `ENGINE_VERSION` | `src/version.ts` | Versión del motor para `WorldConfig.engineVersion` y `meta.engine_version` (027 R-009) |
 
 ## 4. Diseño interno y decisiones
 Funciones puras `(state, input, rng) => { patches, events }`. Sistemas en carpetas propias con su MODULE.md y sus specs.
@@ -50,7 +51,8 @@ Funciones puras `(state, input, rng) => { patches, events }`. Sistemas en carpet
 - **Sistemas enchufables (spec 021)**: todavía no. La spec 021 está en borrador; el `tick` de M0 solo avanza el reloj, emite `DAY_STARTED` y atiende el scheduler con manejadores por tipo.
 - **El azar no tiene estado persistente.** El flujo raíz nunca se consume directamente: todo se deriva con `fork` (p. ej. `fork('sched').fork(item.id)`). Por eso el estado del RNG no se guarda y cargar un mundo da el mismo resultado que no haberlo cerrado.
 - **Mutación controlada.** `tick`, `applyExternalInput`, `addCitizen` y `deactivateEntity` modifican el `World` recibido y devuelven los eventos. Es el paso de "aplicar" del motor (CLAUDE.md regla 4). Los parches por sistema llegan con la 021.
-- **Entradas externas.** Pausa, reanudación, velocidad y activar capacidades son `ExternalInput` `(at, seq)`. Cada una emite `EXTERNAL_INPUT_APPLIED` y el evento específico con esa causa. Una entrada rechazada no cambia el mundo. La velocidad no forma parte del `World` (vive en el `Runner`), así que 1x y 1000x dan el mismo hash (002 CA-002).
+- **Cierre.** La entrada `close` emite `WORLD_CLOSED` con el minuto, el hash del estado justo antes y el motivo. No cambia `status`: marca el apagado del proceso (worker), y al reiniciar el mundo sigue en `running` o `paused` (precisión en la spec 001).
+- **Entradas externas.** Pausa, reanudación, velocidad, cierre y activar capacidades son `ExternalInput` `(at, seq)`. Cada una emite `EXTERNAL_INPUT_APPLIED` y el evento específico con esa causa. Una entrada rechazada no cambia el mundo. La velocidad no forma parte del `World` (vive en el `Runner`), así que 1x y 1000x dan el mismo hash (002 CA-002).
 - **Tiempo real.** El `Runner` recibe milisegundos transcurridos y acumula la fracción en enteros (minutos × 1000). Nunca lee el reloj (002 R-008).
 - **Hash** de 64 bits con dos carriles de 32 bits y mezcla tipo murmur3, sobre JSON canónico (claves ordenadas, `Map` por clave, arreglos tipados como arreglos). No es criptográfico: sirve para comparar estados.
 - **RNG: xoshiro128\*\*** (decisión B0 del usuario, registrada en la spec 023).
@@ -76,7 +78,7 @@ Vitest con las pruebas junto al código (`src/**/*.test.ts`), desde la raíz: `p
   - CA-003 y ausencia de colisiones en 73 000 flujos persona × día;
   - distribuciones: media y varianza de `next`, chi-cuadrado de `int`, `chance`, `pick`, `weighted` y `normal`.
 - `src/lint.test.ts` (2 pruebas): CA-005 mediante la API de ESLint sobre un archivo virtual del motor, más un control fuera del motor.
-- `src/ids.test.ts`, `calendar.test.ts`, `scheduler.test.ts`, `events.test.ts`, `world.test.ts` y `runner.test.ts` (45 pruebas): los CA de las specs 001, 002 y 014, y de la 023 CA-004 y CA-006.
+- `src/ids.test.ts`, `calendar.test.ts`, `scheduler.test.ts`, `events.test.ts`, `world.test.ts` y `runner.test.ts` (47 pruebas): los CA de las specs 001, 002 y 014, y de la 023 CA-004 y CA-006; también `close` → `WORLD_CLOSED` y `continueInputsAfter`.
   - Las pruebas cuyo nombre contiene "determinismo" (1x frente a 1000x, dos ejecuciones de 30 días, replay con entradas) corren también con `pnpm test:determinism`.
   - La 002 CA-005 (365 días en < 2 s) se impone con el `timeout` de la prueba, porque en el motor no se puede leer el reloj.
 - `src/testing.ts`: `testConfig()` compartido por las pruebas; no se exporta.
@@ -88,8 +90,7 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 - **Diferencias deliberadas.** El generador es xoshiro128\*\* y no `sm32` directamente, así que las secuencias no coinciden número a número; la paridad es estadística, como pide `docs/prototipo-referencia.md`. `int` no tiene sesgo de módulo. Hay flujos con nombre (`fork`) que el prototipo no tiene.
 
 ## 8. Pendientes y deuda
-- [ ] `WORLD_CLOSED` (spec 001): lo emite el worker al cerrar (bloques D3 y E2).
-- [ ] Spec 023 CA-001 entre dos procesos (CLI, bloque E) y CA-002 (necesita personas).
+- [ ] Spec 023 CA-002 (necesita personas).
 - [ ] Spec 001 CA-005 (semillas distintas → hashes distintos tras la generación, M1).
 - [ ] Registro de sistemas y bucle por fases (spec 021, cuando se apruebe).
 - [ ] Si `#replay` crece mucho, pasar a un índice por minuto (hoy es un arreglo ordenado).
@@ -101,3 +102,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-23 | m0/a-tooling (A5) | — | Esqueleto del paquete: `package.json` (workspace, ESM, `exports` → `src/index.ts`) y `src/index.ts` vacío. Sin API todavía |
 | 2026-09-23 | m0/b-rng (B0–B3) | 023 | `Rng` xoshiro128\*\* con `fork` por clave de 64 bits, `state`/`restoreRng`, `int` sin sesgo, `weighted`, `normal`. Pruebas de CA-003 y CA-005 más distribución y vector de referencia. Excepción de determinismo aprobada para el ejemplo de `lint.test.ts` |
 | 2026-09-23 | m0/c-mundo (C1–C6) | 001, 002, 014, 023 | Mundo (ids, configuración validada e inmutable, capacidades, componentes por columnas), calendario entero, scheduler por (at, id), catálogo de eventos validados e inmutables, `tick` mínimo, entradas externas con causalidad, `Runner` (velocidad, pausa, paso, N días, tiempo real → ticks, replay), `serializeWorld`/`stateHash`. 45 pruebas nuevas |
+| 2026-09-24 | m0/e-cli-worker (E1–E3) | 001, 014, 023 | Evento `WORLD_CLOSED` y entrada externa `close` (sin cambiar `status`), `Runner.continueInputsAfter` para no repetir `(at, seq)` al retomar un mundo, `ENGINE_VERSION`. 2 pruebas nuevas |

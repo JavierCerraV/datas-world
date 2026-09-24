@@ -8,6 +8,7 @@ import type { WorldEvent } from './events.ts';
 import type { Rng } from './rng.ts';
 import { popDue } from './scheduler.ts';
 import type { ScheduledItem } from './scheduler.ts';
+import { stateHash } from './serialize.ts';
 import type { World } from './world.ts';
 
 export type ScheduledHandler = (world: World, item: ScheduledItem, rng: Rng) => WorldEvent[];
@@ -55,8 +56,12 @@ const SPEEDS: readonly number[] = [0, 1, 10, 100, 1000];
  * Si se aplica, emite EXTERNAL_INPUT_APPLIED y, según el tipo, el evento específico con esa causa.
  */
 export function applyExternalInput(world: World, input: ExternalInput): InputResult {
-  if (input.at !== world.now) return { ok: false, reason: `la entrada es del minuto ${input.at} y el mundo está en ${world.now}` };
-  const p = (typeof input.payload === 'object' && input.payload !== null ? input.payload : {}) as Record<string, unknown>;
+  if (input.at !== world.now)
+    return { ok: false, reason: `la entrada es del minuto ${input.at} y el mundo está en ${world.now}` };
+  const p = (typeof input.payload === 'object' && input.payload !== null ? input.payload : {}) as Record<
+    string,
+    unknown
+  >;
 
   let specific: { type: keyof typeof EVENT_TYPES; payload: unknown; apply: () => void } | undefined;
   switch (input.kind) {
@@ -64,11 +69,16 @@ export function applyExternalInput(world: World, input: ExternalInput): InputRes
       const cap = p.capability as Parameters<typeof canEnable>[1];
       const why = canEnable(world.capabilities, cap);
       if (why) return { ok: false, reason: why };
-      specific = { type: 'CAPABILITY_ENABLED', payload: { capability: cap }, apply: () => (world.capabilities = withCapability(world.capabilities, cap)) };
+      specific = {
+        type: 'CAPABILITY_ENABLED',
+        payload: { capability: cap },
+        apply: () => (world.capabilities = withCapability(world.capabilities, cap)),
+      };
       break;
     }
     case 'set_speed':
-      if (!SPEEDS.includes(p.from as number) || !SPEEDS.includes(p.to as number)) return { ok: false, reason: 'velocidad inválida' };
+      if (!SPEEDS.includes(p.from as number) || !SPEEDS.includes(p.to as number))
+        return { ok: false, reason: 'velocidad inválida' };
       specific = { type: 'SPEED_CHANGED', payload: { from: p.from, to: p.to }, apply: () => {} };
       break;
     case 'pause':
@@ -81,6 +91,17 @@ export function applyExternalInput(world: World, input: ExternalInput): InputRes
         payload: { reason: typeof p.reason === 'string' ? p.reason : '' },
         apply: () => (world.status = target),
       };
+      break;
+    }
+    case 'close': {
+      // Apagado del proceso (spec 001 §5). No cambia `status`: al reiniciar, el mundo sigue como estaba.
+      // El hash es el del estado justo antes de esta entrada.
+      const payload = {
+        minute: world.now,
+        hash: stateHash(world),
+        reason: typeof p.reason === 'string' ? p.reason : '',
+      };
+      specific = { type: 'WORLD_CLOSED', payload, apply: () => {} };
       break;
     }
     default:

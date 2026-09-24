@@ -6,8 +6,7 @@ import { allocateId } from './ids.ts';
 import type { Counters, EntityId } from './ids.ts';
 
 export type CauseRef =
-  | { event: EntityId; weight: number }
-  | { state: string; entity?: EntityId; value?: number; weight: number };
+  { event: EntityId; weight: number } | { state: string; entity?: EntityId; value?: number; weight: number };
 
 export type EventOrigin = 'engine' | 'external' | 'llm';
 
@@ -85,6 +84,13 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { reason: (v) => typeof v === 'string' }),
     text: (e) => `El mundo se reanuda${e.payload.reason ? ` (${e.payload.reason})` : ''}.`,
   }),
+  WORLD_CLOSED: def<{ minute: number; hash: string; reason: string }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { minute: int, hash: str, reason: (v) => typeof v === 'string' }),
+    text: (e) =>
+      `El proceso del mundo se detiene en el minuto ${e.payload.minute}${e.payload.reason ? ` (${e.payload.reason})` : ''}.`,
+  }),
   CAPABILITY_ENABLED: def<{ capability: Capability }>({
     baseImportance: 0.8,
     spontaneous: false,
@@ -117,11 +123,13 @@ const deepFreeze = <T>(v: T): T => {
 export function makeEvent(counters: Counters, at: WorldMinute, input: NewEvent): WorldEvent {
   const d = EVENT_TYPES[input.type] as Def<unknown> | undefined;
   if (!d) throw new Error(`Tipo de evento desconocido: ${input.type}`);
-  if (!d.spontaneous && input.causes.length === 0) throw new Error(`${input.type}: un evento no espontáneo necesita ≥ 1 causa`);
+  if (!d.spontaneous && input.causes.length === 0)
+    throw new Error(`${input.type}: un evento no espontáneo necesita ≥ 1 causa`);
   const bad = d.check(input.payload);
   if (bad) throw new Error(`${input.type}: payload inválido (${bad})`);
   for (const c of input.causes) {
-    if (!Number.isFinite(c.weight) || c.weight < 0 || c.weight > 1) throw new RangeError(`${input.type}: peso de causa inválido`);
+    if (!Number.isFinite(c.weight) || c.weight < 0 || c.weight > 1)
+      throw new RangeError(`${input.type}: peso de causa inválido`);
   }
   const importance = input.importance ?? d.baseImportance;
   if (!(importance >= 0 && importance <= 1)) throw new RangeError(`${input.type}: importancia fuera de [0,1]`);
