@@ -4,7 +4,7 @@ nombre: country-profile
 estado: aprobada
 hito: M1 (demografía, territorio, festivos, salario base) · M2 (reglas laborales y de economía)
 depende_de: [001, 002]
-version: 0.1
+version: 0.2
 ---
 
 # 029 — Perfil de país: Colombia
@@ -35,8 +35,10 @@ interface ProfileEntry {
   validFrom: string;                 // 'AAAA-MM-DD' (fecha del mundo desde la que rige)
   source: string;                    // norma o publicación y fecha
   status: 'oficial' | 'estimado' | 'por_confirmar';
+  scope?: 'nacional' | '13ciudades' | 'cabecera' | 'rural' | 'rural_disperso'; // alcance territorial
 }
 ```
+- **Variaciones de la vida en Colombia (v0.2).** Una misma clave puede tener entradas con distinto `scope`. `profileValue(key, date, scope)` busca primero el alcance del lugar (por ejemplo, `cabecera` para un barrio urbano) y, si no existe, usa `nacional`. Así el campo, las grandes ciudades y las ciudades intermedias se diferencian con cifras oficiales, sin ramas en el código.
 - El perfil se copia en `WorldConfig` al crear el mundo (versión y hash), como los catálogos del ADR-006.
 - `profileValue(key, worldDate)` devuelve la entrada vigente más reciente con `validFrom ≤ worldDate`. Es una función pura y determinista.
 
@@ -74,7 +76,7 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 | `demo.share.age0to11` | 0,171 | 2026 | DANE, proyecciones de población 2026 (vía UNFPA/ICBF) | oficial |
 | `demo.share.age12to17` | 0,094 | 2026 | ídem | oficial |
 | `demo.share.age60plus` | 0,153 | 2026 | ídem | oficial |
-| `household.meanSize` | 2,82 | 2025 | DANE, ECV 2025 | oficial |
+| `household.meanSize` | 2,82 (cabecera) · 2,99 (rural) | 2025 | DANE, ECV 2025 | oficial |
 | `household.share.unipersonal` | 0,202 | 2025 | DANE, ECV 2025 | oficial |
 | `household.share.biparental` | 0,516 | 2024 | DANE, ECV 2024 | oficial |
 | `household.share.monoparental` | 0,243 | 2024 | DANE, ECV 2024 | oficial |
@@ -89,6 +91,7 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 | `labor.unemploymentRate` | 0,081 | 2026-07 | DANE, GEIH julio 2026 | oficial |
 | `labor.informality.national` | 0,545 | 2026-07 | DANE, GEIH julio 2026 | oficial |
 | `labor.informality.13cities` | 0,405 | 2026-07 | DANE, GEIH julio 2026 | oficial |
+| `labor.informality.ruralDisperso` | 0,825 | 2026-07 | DANE, GEIH julio 2026 | oficial |
 | `labor.informality.world` | 0,45 | — | Villa Cordillera es una ciudad intermedia: entre 13 ciudades (0,405) y el total nacional (0,545) | estimado |
 
 **Leyes laborales y pensión**
@@ -101,24 +104,30 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 | `labor.nightSurcharge` | 0,35 | — | Código Sustantivo del Trabajo, Ley 2466 de 2025 | oficial |
 | `labor.sundaySurcharge` | 0,80 · 0,90 · 1,00 | 2025-07-01 · 2026-07-01 · 2027-07-01 | Ley 2466 de 2025 | oficial |
 | `pension.age` | mujeres 57, hombres 62 | — | Ley 100 de 1993; se mantiene en la Ley 2381 de 2024, que rige desde el 2027-04-01 según la Corte Constitucional | oficial |
-| `pension.coverage` (mayores con pensión) | — | — | pendiente de fuente | por_confirmar |
+| `pension.coverage` (mayores en edad de pensión que reciben pensión contributiva) | 0,24 | 2025 | fuentes secundarias (entre 0,23 y 0,25; unos 2,16 millones de pensionados, el 82,7 % en Colpensiones). Pendiente de cifra oficial de Colpensiones o la Superfinanciera | estimado |
+| `pension.solidarityPillar` | unos 3 millones de adultos mayores vulnerables reciben el pago solidario | 2025 | fuentes secundarias sobre la Ley 2381 de 2024 | estimado |
 
 **Educación y estratos**
 | Clave | Valor | Vigencia | Fuente | Estado |
 |---|---|---|---|---|
 | `education.levels` | CINE 2011 A.C.: ninguno, primaria, básica secundaria, media, técnica profesional, tecnológica, universitaria, especialización, maestría, doctorado | — | DANE | oficial |
-| `education.attainment.25to64` | — | — | GEIH 2024 (microdatos DANE) | por_confirmar |
-| `stratum.share` | estratos 1–3 ≈ 0,80 de la población; estrato 1 ≈ 0,159; estrato 6 ≈ 0,027 | 2018 | DANE, CNPV 2018 (citado en fuentes secundarias) | por_confirmar |
+| `education.attainment.workforce` | ninguno 0,108 · primaria 0,179 · básica secundaria 0,047 · media 0,367 · técnica o tecnológica 0,121 · universitaria ≈ 0,127 (resto hasta 1) · posgrado 0,051 | 2024 | DANE, GEIH 2024, citado en fuentes secundarias. Es la fuerza laboral, no toda la población; universitaria sale por diferencia | estimado |
+| `stratum.share` | estratos 1–3 ≈ 0,80 de la población; estrato 1 ≈ 0,159; estrato 6 ≈ 0,027 | 2018 | DANE, CNPV 2018 (citado en fuentes secundarias). Falta el reparto completo del 2 al 5 | por_confirmar |
+| `demo.lifeTable.byDecade` | esperanza de vida y mortalidad por edad, sexo y década, de 1900 a 2026 | — | DANE y CEPAL (series históricas) | por_confirmar |
+| `demo.urbanization.byDecade` | proporción de población en cabeceras por década | — | DANE, censos de 1938 a 2018 | por_confirmar |
+| `demo.parentAgeAtBirth.byDecade` | edad de la madre y del padre al nacer un hijo, por década | — | DANE, estadísticas vitales | por_confirmar |
+| `stratum.utilitySubsidy` | estrato 1 hasta 0,60 · estrato 2 hasta 0,50 · estrato 3 hasta 0,15 del costo de la energía, en el consumo de subsistencia | 2026 | Ley 142 de 1994; regulación CREG (vía fuentes secundarias) | estimado |
 
 ## 9. Métricas y observabilidad
 `world:report` compara cada indicador generado con su valor del perfil y marca las desviaciones fuera de tolerancia. `world:info` lista las entradas `por_confirmar`.
 
 ## 10. Preguntas abiertas
-- [ ] Completar las entradas `por_confirmar` con fuente oficial: cobertura pensional, nivel educativo y distribución por estrato.
-- [ ] ¿El mundo empieza en 2027 (como el prototipo) o en 2026? Con 2027, el salario mínimo y otros valores anuales se prolongan como `estimado` hasta que se decreten (R-003).
+- [ ] Completar con fuente oficial: la distribución por estrato (por_confirmar), y confirmar la cobertura pensional y el nivel educativo (hoy `estimado`, de fuentes secundarias).
+- [x] ¿El mundo empieza en 2027 o en 2026? → El presente del mundo es el 2026-01-01, y el mundo existe desde 1900 con historia generada (spec 030). Decisión del usuario, 2026-09-24.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-24 | 0.1 | Borrador inicial a partir de la petición del usuario de ajustar el proyecto a los indicadores, las leyes y la organización de Colombia (ADR-006) |
 | 2026-09-24 | 0.1 | Estado → aprobada |
+| 2026-09-24 | 0.2 | "Lo más real posible" (usuario): alcance territorial por entrada (`scope`) para las variaciones urbano, rural y 13 ciudades; informalidad del rural disperso (0,825) y tamaño del hogar rural (2,99); cobertura pensional (0,24) y nivel educativo de la fuerza laboral (GEIH 2024) como `estimado`; subsidios por estrato | Series históricas por década (`demo.*.byDecade`) para la spec 030; presente del mundo el 2026-01-01.
