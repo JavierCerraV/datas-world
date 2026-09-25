@@ -50,7 +50,7 @@ Código de salida: 0 bien, 1 error de ejecución, 2 uso incorrecto. Desde `src/i
 - Un archivo por comando o grupo: `commands.ts` (despacho, `world:advance`, `world:info`, `control`), `world-new.ts`, `report.ts`, `map.ts`, `history.ts`; utilidades en `common.ts`.
 
 ### Mundo de M1 (I, 2026-09-24, semilla 482917)
-`world:new` genera 199 personas, 1 106 antepasados y 3 363 eventos en ≈ 0,25 s; la base ocupa 1,75 MB. Avanzar 30 días tarda ≈ 12 s, por el hash de cada flush (ver §8).
+`world:new` genera 199 personas, 1 106 antepasados y 3 363 eventos en ≈ 0,25 s; la base ocupa 1,75 MB. Avanzar 30 días tarda ≈ 2,4 s, con el hash solo en los puntos de control (027 R-012); antes eran 12 s.
 
 ### Bench (E3, 2026-09-24, Windows 11, Node 24.18)
 | Modo | 365 días (105 120 ticks) | ticks/s | RSS | Base |
@@ -84,7 +84,6 @@ Sustituye a los scripts headless usados para calibrar el prototipo.
 
 ## 8. Pendientes y deuda
 - [ ] Exportar, comparar semillas y `validate:parity` (M1–M2).
-- [ ] Avanzar un mundo poblado es lento: ≈ 12 s por 30 días con 1 300 personas (vivas y antepasados). Casi todo es el `stateHash` de cada flush (≈ 15 ms). Hay que decidirlo en la 027 antes de M2, por ejemplo calculando el hash solo en las instantáneas y al cerrar.
 - [ ] 023 CA-002 completo (el 50 % de las personas con un evento distinto el día 30) necesita la vida diaria de M2. Hoy solo se comprueba que el hash difiere (001 CA-005).
 
 ## 9. Bitácora de cambios

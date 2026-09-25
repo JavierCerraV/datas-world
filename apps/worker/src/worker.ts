@@ -89,7 +89,8 @@ export class WorldWorker {
       changed ||= ok;
       if (ok && c.cmd === 'stop') return { ticks: 0, stop: true };
     }
-    if (changed) this.session.flush(); // "o al pausar": cualquier cambio de control se persiste enseguida
+    // "o al pausar": cualquier cambio de control se persiste enseguida, como punto de control (027 R-012)
+    if (changed) this.session.flush(true);
 
     let ticks = 0;
     if (this.world.status === 'running' && this.runner.speed > 0) {
