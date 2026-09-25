@@ -5,6 +5,7 @@
   "entries": [
     {"key": "gen.household.templateWeights", "value": {"single": 0.18, "couple": 0.2, "couple_kids": 0.4, "extended": 0.1, "single_parent": 0.12, "roommates": 0}, "validFrom": "1900-01-01", "source": "prototipo/index.html (genPopulation)", "status": "oficial"},
     {"key": "gen.jobs.bossWageFactor", "value": 1.6, "validFrom": "1900-01-01", "source": "prototipo/index.html (hire)", "status": "oficial"},
+    {"key": "gen.map.template", "value": "prototipo-64x40", "validFrom": "1900-01-01", "source": "prototipo/index.html (genWorld): el mapa del prototipo, sin dotación (spec 033 CA-004)", "status": "oficial"},
     {"key": "gen.labor.employmentRate18to64", "value": 0.86, "validFrom": "1900-01-01", "source": "prototipo/index.html (genJobs)", "status": "oficial"},
     {"key": "gen.labor.informalShare", "value": 0, "validFrom": "1900-01-01", "source": "prototipo/index.html (no tiene trabajo informal)", "status": "oficial"},
     {"key": "gen.objects.carP", "value": {"2": 0, "3": 0, "4": 0}, "validFrom": "1900-01-01", "source": "prototipo/index.html (no tiene carros)", "status": "oficial"},

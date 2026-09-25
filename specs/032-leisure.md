@@ -1,7 +1,7 @@
 ---
 id: 032
 nombre: leisure
-estado: borrador
+estado: aprobada
 hito: M1 (ficha inicial) · M2 (actividades en la rutina y gasto) · M3 (con amigos) · M5 (hábitos que cambian)
 depende_de: [004, 007, 009, 010, 011, 012, 015, 023, 029, 031, 033]
 version: 0.2
@@ -144,3 +144,4 @@ Alerta si una actividad no la practica nadie o si todos practican lo mismo.
 |---|---|---|
 | 2026-09-24 | 0.1 | Borrador inicial a petición del usuario: ficha de esparcimiento de cada persona (arte, bailar, salir con amigos, voluntariado, salir a cenar y otras), con catálogo de actividades, generación coherente con personalidad, estrato, salud y oferta de lugares, y uso en la rutina desde M2 |
 | 2026-09-24 | 0.2 | Decisiones del usuario (§10) y cifras verificadas (§8): ECC 2016 y 2020 (cine, bibliotecas, lectura), ENUT 2024–2025 (participación en vida social, cultural y deportiva) y ENPH 2016–2017 (recreación y cultura, 3,1 % del gasto) |
+| 2026-09-25 | 0.2 | Estado → aprobada |

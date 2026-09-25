@@ -101,7 +101,13 @@ describe('addPlace y mapa en el mundo (specs 003, 004)', () => {
     const ok = { kind: 'ocio.cafe', name: 'Café' };
     expect(() => addPlace(world, { ...ok, capacity: 0 })).toThrow(/Capacidad/);
     expect(() => addPlace(world, { ...ok, openingHours: { days: 'all', open: 900, close: 420 } })).toThrow(/Horario/);
-    expect(() => addPlace(world, { ...ok, openingHours: { days: 'all', open: 0, close: 1500 } })).toThrow(/Horario/);
+    expect(() => addPlace(world, { ...ok, openingHours: { days: 'all', open: 0, close: 1900 } })).toThrow(/Horario/);
+    expect(() => addPlace(world, { ...ok, openingHours: { days: 'all', open: 1440, close: 1500 } })).toThrow(/Horario/);
+    // 033 R-004: un bar puede cerrar después de medianoche (1560 = 02:00 del día siguiente).
+    addPlace(world, { kind: 'ocio.bar', name: 'Bar', openingHours: { days: 'all', open: 960, close: 1560 } });
+    // Lugar regional (033): con viaje y sin rectángulo.
+    addPlace(world, { kind: 'ocio.cine', name: 'Cine', travel: { minutes: 60, cost: 12000 } });
+    expect(() => addPlace(world, { kind: 'ocio.cine', name: 'C', travel: { minutes: 0, cost: 1 } })).toThrow(/Viaje/);
     const id = addPlace(world, { ...ok, capacity: 12, openingHours: { days: 'mon-sat', open: 420, close: 1260 } });
     expect(world.places.get(id)).toMatchObject({
       capacity: 12,

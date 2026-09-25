@@ -37,6 +37,7 @@ export { capacityFor, columns, defineColumn, ensureCapacity } from './components
 export type { CitizenComponents, ColumnType } from './components.ts';
 
 export {
+  LATE_CLOSE_LIMIT,
   addCitizen,
   addHousehold,
   addOrganization,

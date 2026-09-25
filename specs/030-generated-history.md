@@ -1,7 +1,7 @@
 ---
 id: 030
 nombre: generated-history
-estado: aprobada
+estado: implementada
 hito: M1
 depende_de: [001, 003, 004, 006, 007, 008, 014, 023, 029]
 version: 0.2
@@ -155,3 +155,4 @@ Alerta si alguna invariante vital se incumple o si una década queda vacía.
 | 2026-09-24 | 0.1 | Nombre (usuario): el mundo y su municipio se llaman **Data's World**, en lugar de Villa Cordillera. Inspirado en el androide Data: ciudadanos autónomos, curiosos y capaces de aprender. Solo cambia el nombre; la información sigue siendo de Colombia |
 | 2026-09-24 | 0.2 | Implementación del bloque H. Precisión aprobada por el usuario: un antepasado puede seguir vivo fuera del mundo (`deathMinute = 0`, no se simula). Precisiones: `lineage` se guarda como `motherId`/`fatherId` en cada ciudadano (con `lineageOf`); la edad de muerte sigue la esperanza de vida del año de nacimiento más una sobrevida adulta (`gen.history.*`), sin tablas por edad y sexo; las muertes de un periodo con efecto de muerte se atribuyen al hecho con probabilidad 1 − 1/efecto. Las uniones solo se generan cuando uno de los dos es antepasado (las parejas vivas ya tienen `HOUSEHOLD_FORMED`). CA-005 se comprueba sobre el agregado de 20 mundos, con los nacidos de 1900 a 1999; desde 2000 hay menores, que nacen siempre en el municipio. CA-003 y CA-006 se cubren con datos en el bloque H y con la CLI en el bloque I. CA-007: tiempo y tamaño medidos (§3); la comprobación en disco llega con la persistencia del bloque I. El coste de §3 se corrige a ≈ 5,5 antepasados por persona viva |
 | 2026-09-24 | 0.2 | Bloque I: CA-003 (`citizen:report`), CA-006 (`world:history`) y CA-007 (`bench --check`: `world:new` en ≈ 0,25 s, base entera de 1,75 MB) cubiertos desde la CLI. Corrección de R-006 que reveló `world:history`: un efecto de muerte violenta k multiplica solo el riesgo de muerte violenta, una parte `gen.history.violentDeathShare` (0,1, estimado) del total. Se atribuye al hecho una fracción s·(k − 1)/(1 + s·(k − 1)) de las muertes (≈ 9 % en La Violencia) en lugar de 1 − 1/k (la mitad), que sigue valiendo para los efectos sobre la mortalidad total (pandemia). Sin cambios en CA |
+| 2026-09-25 | 0.2 | Estado → implementada |

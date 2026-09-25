@@ -167,9 +167,17 @@ export interface Place extends BaseEntity {
   capacity?: number;
   /** Horario público (spec 004): minutos del día; `null` = privado (viviendas); '24h' = siempre abierto. */
   openingHours?: OpeningHours;
+  /** Lugar regional, fuera del mapa (spec 033): viaje de ida desde el municipio, en minutos y en dinero. */
+  travel?: { minutes: number; cost: number };
 }
 
+/**
+ * `close` puede pasar de la medianoche hasta `LATE_CLOSE_LIMIT` (p. ej. 1560 = 02:00 del día siguiente),
+ * para bares y discotecas (033 R-004).
+ */
 export type OpeningHours = { days: 'all' | 'mon-fri' | 'mon-sat'; open: number; close: number } | '24h' | null;
+/** Cierre más tardío admitido: las 06:00 del día siguiente. */
+export const LATE_CLOSE_LIMIT = MINUTES_PER_DAY + 360;
 
 export type NewPlace = Omit<Place, 'id' | 'status'>;
 
@@ -293,8 +301,14 @@ export function addPlace(world: World, data: NewPlace): EntityId {
   const h = data.openingHours;
   if (h !== undefined && h !== null && h !== '24h') {
     const okDays = h.days === 'all' || h.days === 'mon-fri' || h.days === 'mon-sat';
-    const okRange = Number.isInteger(h.open) && Number.isInteger(h.close) && h.open >= 0 && h.close <= MINUTES_PER_DAY;
+    const okRange =
+      Number.isInteger(h.open) && Number.isInteger(h.close) && h.open >= 0 && h.open < MINUTES_PER_DAY && h.close <= LATE_CLOSE_LIMIT;
     if (!okDays || !okRange || h.open >= h.close) throw new RangeError(`Horario inválido: ${JSON.stringify(h)}`);
+  }
+  if (data.travel !== undefined) {
+    const t = data.travel;
+    if (!(Number.isInteger(t.minutes) && t.minutes > 0 && Number.isInteger(t.cost) && t.cost >= 0) || data.rect)
+      throw new RangeError(`Viaje inválido (solo lugares fuera del mapa): ${JSON.stringify(t)}`);
   }
   const id = allocateId(world.counters, 'PLC');
   world.places.set(id, { ...structuredClone(data), id, status: 'active' });

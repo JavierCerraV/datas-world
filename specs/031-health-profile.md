@@ -1,7 +1,7 @@
 ---
 id: 031
 nombre: health-profile
-estado: borrador
+estado: aprobada
 hito: M1 (ficha inicial) · M2 (efectos en necesidades, rutinas y economía) · peldaño 4 (evolución de las condiciones)
 depende_de: [006, 007, 008, 009, 010, 014, 023, 029, 030]
 version: 0.2
@@ -156,3 +156,4 @@ Alerta si una prevalencia sale del intervalo o si hay beneficiarios sin cotizant
 |---|---|---|
 | 2026-09-24 | 0.1 | Borrador inicial a petición del usuario: ficha de salud de cada persona (afiliación al SGSSS, condiciones crónicas con CIE-10, hábitos, peso y discapacidad), complementaria de la salud dinámica de la 010 |
 | 2026-09-24 | 0.2 | Decisiones del usuario (§10) y cifras verificadas (§8): afiliación (subsidiado 50,3 %, cobertura 98,3 %, marzo de 2024), ENSIN 2015, ENCSPA 2019, CNPV 2018 y Cuenta de Alto Costo 2024 (hipertensión 11,91 %, diabetes 4,43 %) |
+| 2026-09-25 | 0.2 | Estado → aprobada |

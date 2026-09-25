@@ -1,6 +1,10 @@
 // API pública de los generadores (M1).
 export { DEFAULT_EPOCH, HOLIDAY_YEARS, generateWorld } from './generate.ts';
 export type { GeneratedWorld, WorldOptions } from './generate.ts';
+export { amenityPlan, resolvePlots } from './amenities/plan.ts';
+export type { AmenityPlan, AmenityRule, ResolvedPlots } from './amenities/plan.ts';
+export { REFERENCE_CITY, generateRegional } from './amenities/regional.ts';
+export type { RegionalResult } from './amenities/regional.ts';
 export {
   CATALOGS_DIR,
   CATALOG_NAMES,
