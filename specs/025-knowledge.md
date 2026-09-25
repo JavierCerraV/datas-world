@@ -62,8 +62,10 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 
 ## 10. Preguntas abiertas
 - [ ] Revisar parámetros con los resultados de la primera validación.
+- [ ] Enganche de la capa clínica (034 R-002): la `PersonView` (lo que la persona sabe y cree) debe poder construirse para cualquier persona y momento, y es la única entrada del LLM. Propuesta: definirla aquí y reutilizarla en la 026 y la 034.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
+| 2026-09-24 | 0.1 | Pregunta abierta: `PersonView` como única entrada del LLM (spec 034) |

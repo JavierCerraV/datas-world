@@ -4,7 +4,7 @@ nombre: urban-amenities
 estado: borrador
 hito: M1 (dotación inicial y nueva plantilla de mapa) · M2 (uso: horarios, capacidad, viajes a la ciudad) · peldaño 4+ (crecimiento)
 depende_de: [003, 004, 006, 016, 023, 029, 030]
-version: 0.1
+version: 0.2
 ---
 
 # 033 — Dotación urbana
@@ -132,7 +132,7 @@ No hay eventos nuevos.
 | `minPopulation` del cine y el centro comercial | ≈ 100 000 habitantes | estimado: las salas de cine se concentran en ciudades grandes e intermedias (Proimágenes Colombia, anuario estadístico) | por_confirmar |
 | `minPopulation` del museo | ≈ 30 000 | estimado; muchos municipios medianos tienen museo o casa museo (Red Nacional de Museos) | por_confirmar |
 | `minPopulation` del coliseo | ≈ 20 000 | estimado; los pequeños tienen polideportivo o cancha múltiple | estimado |
-| `perInhabitants` de las tiendas de barrio | ≈ 1 cada 60 habitantes | estimado; Colombia tiene del orden de 500 000 tiendas de barrio (Fenalco) para ≈ 52 millones de habitantes, ≈ 1 cada 100, más en estratos bajos | por_confirmar |
+| `perInhabitants` de las tiendas de barrio | 1 cada 105 habitantes de media nacional; ≈ 1 cada 60 en estratos 1–2 | Fenalco (2024): ≈ 500 000 tiendas de barrio, el 40 % de los comercios, para ≈ 52 millones de habitantes. El reparto por estrato es estimado | oficial (total) · estimado (por estrato) |
 | `perInhabitants` de los bares | ≈ 1 cada 150 | estimado | estimado |
 | `amenity.nightlifeClose` | 02:00 | decretos municipales ("horario de rumba"); varía por municipio | estimado |
 | `travel` a la ciudad de referencia | 60 min; pasaje intermunicipal en COP del perfil | estimado; municipio a una hora de una ciudad intermedia | estimado |
@@ -148,13 +148,15 @@ No hay eventos nuevos.
 
 ## 10. Preguntas abiertas
 - [x] **Escala (la decisión principal).** ¿Cine, centro comercial, museo y parque de diversiones en una "ciudad de referencia" fuera del mapa, a una hora en bus, mientras Data's World tenga pocos habitantes? → **Sí** (usuario, 2026-09-24). Con una precisión: la idea es **expandir primero el territorio y después la población**. Para simular una vida cotidiana, la ciudad debe llegar a tener todo lo que una ciudad tiene, construido por entregas. Por eso la dotación es un catálogo que crece: cada actualización añade tipos de lugar, parcelas o barrios, y R-008 los pasa de "regional" a "local" cuando el territorio y la población lo permiten.
-- [ ] ¿Nueva plantilla de mapa para el perfil colombiano (80 × 50, con plaza central)? Toca la spec 003 y el visor (M4). Propuesta: sí; el prototipo conserva la suya para la paridad.
-- [ ] "Escuela": ¿sede de primaria aparte del colegio, o una misma institución educativa con dos sedes (la organización habitual en Colombia)? Propuesta: una institución educativa (una organización) con dos sedes (dos lugares).
-- [ ] ¿En qué hito? Propuesta: en M1, como bloque J junto con la 031 y la 032, antes de cerrar el hito, porque cambia el mapa, el empleo y la historia. Alternativa: al empezar M2.
-- [ ] Revisar la calibración del empleo (006) con los puestos nuevos. Hoy la informalidad sale 0,53 porque hay pocos puestos formales; con más lugares podría acercarse al 0,405 de las 13 ciudades.
+- [x] ¿Nueva plantilla de mapa (80 × 50, con plaza central)? → Sí. El perfil `prototipo` conserva la suya para la paridad (usuario, 2026-09-24). Requiere una fila de historial en la 003.
+- [x] "Escuela" → Una institución educativa (una organización) con dos sedes (dos lugares), como en Colombia (usuario, 2026-09-24).
+- [x] ¿En qué hito? → En M1, bloque J, junto con la 031 y la 032 (usuario, 2026-09-24).
+- [x] Revisar la calibración del empleo (006) con los puestos nuevos → sí, dentro del bloque J (usuario, 2026-09-24).
+- [x] Cifras de §8 → tiendas de barrio: ≈ 500 000 en Colombia (Fenalco, 2024), el 40 % de los comercios del país. Con ≈ 52 millones de habitantes, sale ≈ 1 cada 105; en estratos bajos hay más. Los demás umbrales siguen estimados.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-24 | 0.1 | Borrador inicial a petición del usuario: cines, centros comerciales, bares, museos, bibliotecas, restaurantes, parques de diversiones, coliseos, escuelas, bancos, tiendas de barrio y estaciones de policía, con dotación por población y ley, lugares regionales fuera del mapa y una plantilla de mapa nueva |
 | 2026-09-24 | 0.1 | Decisión del usuario sobre la escala: lugares regionales en la ciudad de referencia mientras la población sea pequeña; el territorio se expande primero y la población después, por entregas, hasta tener todo lo que tiene una ciudad |
+| 2026-09-24 | 0.2 | Decisiones del usuario (§10): plantilla nueva de 80 × 50, escuela como sede de la institución educativa, bloque J en M1 y revisión del empleo. Cifra verificada de tiendas de barrio (Fenalco, 2024) |

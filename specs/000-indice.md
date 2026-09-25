@@ -41,6 +41,7 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [031](031-health-profile.md) | Ficha de salud | M1 (ficha inicial) · M2 (efectos en necesidades, rutinas y economía) · peldaño 4 (evolución de las condiciones) | 006, 007, 008, 009, 010, 014, 023, 029, 030 | borrador | — |
 | [032](032-leisure.md) | Esparcimiento | M1 (ficha inicial) · M2 (actividades en la rutina y gasto) · M3 (con amigos) · M5 (hábitos que cambian) | 004, 007, 009, 010, 011, 012, 015, 023, 029, 031, 033 | borrador | — |
 | [033](033-urban-amenities.md) | Dotación urbana | M1 (dotación inicial y nueva plantilla de mapa) · M2 (uso: horarios, capacidad, viajes a la ciudad) · peldaño 4+ (crecimiento) | 003, 004, 006, 016, 023, 029, 030 | borrador | — |
+| [034](034-clinical-sessions.md) | Sesiones e intervenciones | Después (capa clínica, tras M7; ver docs/roadmap.md) · enganches en M3–M6 (ver §2) | 010, 012, 013, 017, 019, 020, 023, 025, 026, 028, 031 | borrador | — |
 <!-- INDICE:FIN -->
 
 ## Orden sugerido de revisión

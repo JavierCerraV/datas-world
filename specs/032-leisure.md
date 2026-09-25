@@ -4,7 +4,7 @@ nombre: leisure
 estado: borrador
 hito: M1 (ficha inicial) · M2 (actividades en la rutina y gasto) · M3 (con amigos) · M5 (hábitos que cambian)
 depende_de: [004, 007, 009, 010, 011, 012, 015, 023, 029, 031, 033]
-version: 0.1
+version: 0.2
 ---
 
 # 032 — Esparcimiento
@@ -118,9 +118,9 @@ Coste estimado: 4 actividades de media × ≈ 40 B = 160 B por persona. Para 200
 ## 8. Parámetros y calibración
 | Parámetro | Valor inicial | Fuente / justificación | Estado |
 |---|---|---|---|
-| `leisure.popularity` (por actividad) | asistencia a cine, bibliotecas, museos, conciertos, lectura, práctica deportiva | DANE, Encuesta de Consumo Cultural (ECC) 2020 y 2022 | por_confirmar |
-| `leisure.freeTime` | horas semanales de tiempo libre por edad, sexo y ocupación | DANE, Encuesta Nacional de Uso del Tiempo (ENUT) 2020–2021 | por_confirmar |
-| `LEISURE_BUDGET_SHARE` | gasto en recreación y cultura por estrato | DANE, Encuesta Nacional de Presupuestos de los Hogares (ENPH) 2016–2017 | por_confirmar |
+| `leisure.popularity` (por actividad) | personas de 12 años o más en los últimos 12 meses: cine 0,40 (2016; 0,33 en 2020, año de pandemia); bibliotecas 0,196 (2016; 0,126 en 2020); leer libros 0,50 (2020, 3,9 libros de media). Museos, conciertos y práctica deportiva: estimado | DANE, Encuesta de Consumo Cultural (ECC) 2016 y 2020 | oficial (cine, bibliotecas, lectura) · estimado (resto) |
+| `leisure.freeTime` | participación en vida social 0,749 (hombres) y 0,726 (mujeres); en vida cultural y deportiva 0,334 y 0,271, con 1 h 38 min al día de media entre quienes participan. Horas por edad y ocupación: estimado | DANE, Encuesta Nacional de Uso del Tiempo (ENUT) 2024–2025 (citada en prensa) | oficial (participación) · estimado (horas por edad) |
+| `LEISURE_BUDGET_SHARE` | recreación y cultura = 3,1 % del gasto de los hogares (total nacional); por estrato, estimado | DANE, Encuesta Nacional de Presupuestos de los Hogares (ENPH) 2016–2017 | oficial (total) · estimado (por estrato) |
 | `LEISURE_MIN`, `LEISURE_MAX` | 2 y 6 | estimado | estimado |
 | pesos de rasgos y valores | por actividad | estimado; para revisar con expertos en psicología (como la tabla de rasgos de la 009) | estimado |
 
@@ -133,12 +133,14 @@ Coste estimado: 4 actividades de media × ≈ 40 B = 160 B por persona. Para 200
 Alerta si una actividad no la practica nadie o si todos practican lo mismo.
 
 ## 10. Preguntas abiertas
-- [ ] ¿La lista inicial de actividades (§3) es la correcta? Es fácil de ampliar porque es un catálogo. Propuesta: empezar con esas 22, que incluyen las que pediste (arte, bailar, salir con amigos, voluntariado, salir a cenar) y otras muy colombianas (tejo, parqués, paseo de olla, ver el partido).
-- [ ] ¿En qué hito se genera la ficha? Propuesta: la ficha inicial en M1, junto con la 031 y la 033, y su uso diario en M2.
-- [ ] Los pesos de personalidad por actividad son estimados. ¿Se revisan con la misma tabla de expertos en psicología que la 009? Propuesta: sí, cuando exista esa tabla.
-- [ ] Las cifras de §8 están `por_confirmar`: hay que verificarlas con el DANE antes de aprobar.
+- [x] ¿Lista inicial de actividades? → Las 22 de §3; el catálogo crece por entregas (usuario, 2026-09-24).
+- [x] ¿En qué hito? → La ficha inicial en M1, bloque J, junto con la 031 y la 033; el uso diario en M2 (usuario, 2026-09-24).
+- [x] ¿Pesos de personalidad? → Estimados por ahora; se revisan con la tabla de expertos en psicología de la 009 cuando exista (usuario, 2026-09-24).
+- [x] Cifras de §8 → verificadas el 2026-09-24 donde hay dato oficial (ECC, ENUT, ENPH). El resto queda como estimado.
+- [ ] La ECC 2020 fue un año de pandemia. Propuesta: calibrar con 2016 (cine 0,40) hasta tener la ECC 2022 o 2024.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-24 | 0.1 | Borrador inicial a petición del usuario: ficha de esparcimiento de cada persona (arte, bailar, salir con amigos, voluntariado, salir a cenar y otras), con catálogo de actividades, generación coherente con personalidad, estrato, salud y oferta de lugares, y uso en la rutina desde M2 |
+| 2026-09-24 | 0.2 | Decisiones del usuario (§10) y cifras verificadas (§8): ECC 2016 y 2020 (cine, bibliotecas, lectura), ENUT 2024–2025 (participación en vida social, cultural y deportiva) y ENPH 2016–2017 (recreación y cultura, 3,1 % del gasto) |

@@ -4,7 +4,7 @@ nombre: health-profile
 estado: borrador
 hito: M1 (ficha inicial) · M2 (efectos en necesidades, rutinas y economía) · peldaño 4 (evolución de las condiciones)
 depende_de: [006, 007, 008, 009, 010, 014, 023, 029, 030]
-version: 0.1
+version: 0.2
 ---
 
 # 031 — Ficha de salud
@@ -126,13 +126,13 @@ Todos van en el perfil de país (029), con fuente y estado.
 
 | Parámetro | Valor inicial | Fuente / justificación | Estado |
 |---|---|---|---|
-| `health.insurance.share` | contributivo ≈ 0,47 · subsidiado ≈ 0,49 · especial ≈ 0,04 · sin afiliación ≈ 0,02 (sobre el total) | MinSalud y ADRES, cifras de afiliación 2024–2025 | por_confirmar |
-| `health.bmi.adult` | exceso de peso (sobrepeso + obesidad) ≈ 0,56 en adultos de 18 a 64; obesidad ≈ 0,19 | ENSIN 2015 (MinSalud, ICBF) | por_confirmar |
-| `health.activity.meetsGuideline` | ≈ 0,51 de los adultos | ENSIN 2015 | por_confirmar |
-| `health.tobacco.current` | ≈ 0,08 de la población de 12 a 65 años | Estudio Nacional de Consumo de Sustancias Psicoactivas (ENCSPA) 2019, DANE | por_confirmar |
-| `health.alcohol.lastMonth` | ≈ 0,30 de la población de 12 a 65 años | ENCSPA 2019 | por_confirmar |
-| `health.disability.byAge` | ≈ 0,07 del total, con fuerte aumento desde los 60 | DANE, CNPV 2018 (dificultades para actividades diarias) | por_confirmar |
-| `health.conditions.prevalence` | hipertensión y diabetes por edad y sexo | Cuenta de Alto Costo (CAC), informes anuales; ENS | por_confirmar |
+| `health.insurance.share` | subsidiado 0,503 · sin afiliación 0,017 (cobertura 98,3 %) · especial o de excepción ≈ 0,04 · contributivo, el resto (≈ 0,44) | Así Vamos en Salud, con datos de MinSalud, corte de marzo de 2024 (subsidiado y cobertura). El reparto entre contributivo y especial es estimado | oficial (subsidiado, cobertura) · estimado (especial) |
+| `health.bmi.adult` | exceso de peso (sobrepeso + obesidad) 0,564 en adultos de 18 a 64; obesidad 0,187 (mujeres 0,224, hombres 0,144) | ENSIN 2015 (MinSalud, ICBF) | oficial |
+| `health.activity.meetsGuideline` | 0,511 de los adultos de 18 a 64 | ENSIN 2015 | oficial |
+| `health.tobacco.current` | ≈ 0,10 de la población de 12 a 65 años (último mes); 0,333 alguna vez (hombres 0,430, mujeres 0,243) | ENCSPA 2019, DANE (citado en fuentes secundarias para el último mes) | oficial |
+| `health.alcohol.lastMonth` | 0,301 de la población de 12 a 65 años; 0,840 alguna vez | ENCSPA 2019, DANE | oficial |
+| `health.disability.byAge` | 0,071 del total (3 134 036 personas), con fuerte aumento desde los 60; otras encuestas dan entre 0,045 y 0,06 | DANE, CNPV 2018 | oficial (total) · estimado (por edad) |
+| `health.conditions.prevalence` | hipertensión 11,91 y diabetes 4,43 por cada 100 habitantes (diagnosticados); por edad y sexo, estimado | Cuenta de Alto Costo, 2024 | oficial (total) · estimado (por edad) |
 | efectos de las condiciones | multiplicadores sobre energía, gasto y actividades | estimado, para calibrar en M2 | estimado |
 
 ## 9. Métricas y observabilidad
@@ -145,13 +145,14 @@ Todos van en el perfil de país (029), con fuente y estado.
 Alerta si una prevalencia sale del intervalo o si hay beneficiarios sin cotizante.
 
 ## 10. Preguntas abiertas
-- [ ] ¿Se genera la ficha en M1 (un bloque J, antes de cerrar el hito) o al empezar M2? Propuesta: en M1, porque es parte del "mundo estático" y cambia la calibración del empleo (discapacidad).
-- [ ] ¿Salud mental? Propuesta: no en esta spec. La ansiedad y la depresión como diagnósticos pertenecen a la capa clínica posterior; el malestar psicológico del día a día ya lo cubren el estrés y el ánimo (010).
-- [ ] ¿Nombres de EPS? Propuesta: no usar marcas reales. Solo el régimen; si hace falta, EPS ficticias en un catálogo.
-- [ ] ¿La herencia familiar (padres con hipertensión o diabetes, de la 030) sube el riesgo? Propuesta: sí, con un multiplicador estimado; hace falta dar condición a los antepasados, solo esas dos.
-- [ ] Las cifras de §8 están `por_confirmar`: hay que verificarlas con las fuentes oficiales antes de aprobar.
+- [x] ¿Se genera la ficha en M1 o al empezar M2? → En M1, bloque J (usuario, 2026-09-24).
+- [x] ¿Salud mental? → No en esta spec: pertenece a la capa clínica (spec 034). El malestar del día a día lo cubren el estrés y el ánimo (010) (usuario, 2026-09-24).
+- [x] ¿Nombres de EPS? → Sin marcas reales: solo el régimen (usuario, 2026-09-24).
+- [x] ¿La herencia familiar sube el riesgo? → Sí, con un multiplicador estimado. Los antepasados (030) reciben solo hipertensión y diabetes (usuario, 2026-09-24).
+- [x] Cifras de §8 → verificadas el 2026-09-24 con fuentes oficiales o secundarias que las citan. Quedan estimados el reparto contributivo y especial, las prevalencias por edad y los efectos.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-24 | 0.1 | Borrador inicial a petición del usuario: ficha de salud de cada persona (afiliación al SGSSS, condiciones crónicas con CIE-10, hábitos, peso y discapacidad), complementaria de la salud dinámica de la 010 |
+| 2026-09-24 | 0.2 | Decisiones del usuario (§10) y cifras verificadas (§8): afiliación (subsidiado 50,3 %, cobertura 98,3 %, marzo de 2024), ENSIN 2015, ENCSPA 2019, CNPV 2018 y Cuenta de Alto Costo 2024 (hipertensión 11,91 %, diabetes 4,43 %) |

@@ -138,9 +138,11 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 - [ ] ¿La consolidación entra en M3 junto con la episódica o en M5 con el aprendizaje? (Propuesta: episódica y recuperación en M3; esquemas y capítulos en M5, peldaño 3.)
 - [ ] ¿Los esquemas deben alimentar también las creencias (025)? (Propuesta: no directamente; un esquema es una expectativa, no un hecho. Revisar en M5.)
 - [ ] ¿Separar la consolidación en una spec propia si crece? (Propuesta: sí, si esta spec supera ~250 líneas.)
+- [ ] Enganche de la capa clínica (034 R-003): origen `session` en los recuerdos y compromisos ("quedé en…") recordables. Propuesta: añadir `source: 'lived' | 'told' | 'session'` al modelo al aprobar esta spec.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-23 | 0.2 | Memoria en tres capas (ADR-005, idea B): esquemas, capítulos autobiográficos, consolidación nocturna, recuperación puntuada determinista, límites de RAM y CA-004 a CA-008 |
+| 2026-09-24 | 0.2 | Pregunta abierta: enganche de la capa clínica (spec 034), recuerdos con origen `session` |

@@ -5,7 +5,7 @@ Cada hito termina con una **demostración** y una **prueba de validación**. No 
 | Hito | Objetivo | Specs | Demostración / validación |
 |---|---|---|---|
 | **M0 — Arranque** | Repo en GitHub, guardarraíles activos, tooling, CI, RNG, reloj, eventos base, persistencia base | 001, 002, 014, 023, 027 | `pnpm check` y CI verdes; misma semilla → mismo hash; reloj avanza 1 año en CLI |
-| **M1 — Mundo estático** | Generar geografía, lugares, objetos, organizaciones, población, hogares, personalidad, con el perfil de Colombia, catálogos (ADR-006) e historia generada desde 1900 | 003–009, 029, 030 | `world:new` crea 200 personas coherentes con el perfil colombiano; informe de población comparado con el DANE (`world:report`); mapa en la CLI (`world:map`). El visor web llega en M4 |
+| **M1 — Mundo estático** | Generar geografía, lugares, objetos, organizaciones, población, hogares, personalidad, con el perfil de Colombia, catálogos (ADR-006) e historia generada desde 1900; ficha de salud, esparcimiento y dotación urbana (bloque J, decisión del usuario del 2026-09-24) | 003–009, 029, 030, 031–033 | `world:new` crea 200 personas coherentes con el perfil colombiano; informe de población comparado con el DANE (`world:report`); mapa en la CLI (`world:map`). El visor web llega en M4 |
 | **M2 — Vida diaria** | Necesidades, rutinas, economía, movilidad, motor de decisiones, niveles de simulación; comando `validate:parity` | 010, 011, 015, 016, 017, 021 | Personas van a trabajar, comen, duermen, cobran, gastan; ánimo, estrés, empleo y dinero dentro de la tolerancia del prototipo |
 | **M3 — Vida social** | Relaciones asimétricas, memoria, causalidad, historia, conocimiento/creencias | 012, 013, 019, 020, 025 | **Prueba: 100 ciudadanos × 1 año**; paridad completa con el prototipo (corrigiendo sus desviaciones conocidas); informes de vida explicables; rumores con verdad ≠ creencia |
 | **M4 — Observación local** | API, SSE, visor pixel art (portado del prototipo), inspector, línea temporal | 022, 024 | `pnpm dev`: el mundo corre en local y se observa desde el navegador igual o mejor que el prototipo |
@@ -13,7 +13,7 @@ Cada hito termina con una **demostración** y una **prueba de validación**. No 
 | **M6 — LLM nivel 4** | Gateway LLM, diálogos y diarios, propuestas validadas | 026 | Persona observada escribe diario coherente con sus memorias; replay sin llamadas |
 | **M7 — Escala** | 1 000–10 000 personas, perfiles de rendimiento, posible cambio de plan | 021, 027 | Benchmark publicado; decisión sobre servidor |
 | **Publicación (diferida)** | Despliegue en Clouding según `docs/despliegue-clouding.md` | — | Cuando se decida; la arquitectura no cambia |
-| **Después** | Capa clínica (terapeuta entra al mundo), poblaciones con características específicas | nuevas | — |
+| **Después** | Capa clínica: el terapeuta entra al mundo, tiene sesiones con una persona interpretada por un LLM configurable y prueba intervenciones con ramas contrafactuales; poblaciones con características específicas. Crecimiento del territorio y después de la población, por entregas (033 R-008) | 034 y nuevas | Un caso con dos brazos (con y sin intervención) desde la misma instantánea, explicable por eventos con causas |
 
 ## Escalera de complejidad (ADR-005)
 
