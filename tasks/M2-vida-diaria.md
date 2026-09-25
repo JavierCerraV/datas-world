@@ -49,8 +49,8 @@ Cada cosa que les pasa queda como evento con sus causas. Ánimo, estrés, empleo
 - [x] F6. Criterios: 015 CA-001 a CA-005; 008 CA-004.
 
 ## Bloque G — Trabajo y objetos en la vida diaria (specs 006, 005)
-- [ ] G1. Retrasos, advertencias y despido (006 CA-004); vacantes y contratación (006 CA-005); organizaciones con caja negativa reducen personal (006 CA-006).
-- [ ] G2. Objetos en la vida diaria: regalos con valor sentimental y objetos que nunca desaparecen de la base (005 CA-004, CA-005).
+- [x] G1. Retrasos, advertencias y despido (006 CA-004); vacantes y contratación (006 CA-005); organizaciones con caja negativa reducen personal (006 CA-006).
+- [x] G2. Objetos en la vida diaria: regalos con valor sentimental y objetos que nunca desaparecen de la base (005 CA-004, CA-005).
 
 ## Bloque H — Integración, paridad y cierre de M2
 - [ ] H1. `pnpm cli validate:parity`: 10 semillas × 365 días del perfil prototipo frente a la línea base; resultado en `docs/validaciones/`.

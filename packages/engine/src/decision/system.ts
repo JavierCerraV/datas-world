@@ -91,7 +91,9 @@ export function createDecisionSystem(table: LeisureTable): System {
         drop();
         continue;
       }
-      const cap = freeUntil(view, row, now, day);
+      // El tiempo libre termina `lookahead` minutos antes de la próxima obligación: así la movilidad (016 R-004) ve el
+      // turno o el colegio a tiempo de salir. Sin ese margen, lo elegido duraba hasta la hora de entrada y se llegaba tarde.
+      const cap = freeUntil(view, row, now, day) - P.habits.lookahead!;
       if (cap <= now + view.config.tickMinutes) continue;
       occ ??= occupancy(view, ctx.citizens);
       const id = formatId('CIT', row);

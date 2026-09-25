@@ -6,6 +6,7 @@ import {
   createWorld,
   idNumber,
   defineDecisionColumns,
+  defineWorkColumns,
   initMobility,
   initNeeds,
   initRoutines,
@@ -137,6 +138,7 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
   // 016: todos empiezan en su vivienda; 017: sin decisiones en curso.
   initMobility(world);
   defineDecisionColumns(world);
+  defineWorkColumns(world); // 006: retrasos al trabajo (bloque G de M2)
   // 015: tenencia, arriendo, ahorro del hogar, caja de las organizaciones y resto del país (con el empleo ya hecho).
   generateEconomy(world, pop.householdIds, orgIds, rng);
   const events = [...created, ...prior, ...hist.events, ...healthEvents].sort((a, b) => idNumber(a.id) - idNumber(b.id));

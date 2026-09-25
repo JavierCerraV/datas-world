@@ -55,3 +55,4 @@ El prototipo no tiene tenencia ni ahorro del hogar: solo ahorro por persona (007
 |---|---|---|---|
 | 2026-09-25 | m2/f-economia | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m2/f-economia (F2, F6) | 015, 008 | `generate.ts` (tenencia, cuota, ahorro del hogar, caja, resto del país) y 4 pruebas sobre el mundo generado |
+| 2026-09-25 | m2/g-trabajo-objetos | 015, 006 | La prueba de 30 días con toda la vida diaria incluye los sistemas del trabajo y comprueba que casi nadie llega tarde por el viaje y que se cubren las vacantes iniciales |

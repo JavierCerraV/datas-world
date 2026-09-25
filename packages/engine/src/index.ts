@@ -123,7 +123,8 @@ export { ENGINE_VERSION } from './version.ts';
 export { hire, setOccupation } from './employment.ts';
 export { addAncestor, setFoundedAt, setParents } from './history.ts';
 export type { NewAncestor } from './history.ts';
-export { addObject, objectsOf, recordObjectEvent } from './objects.ts';
+export { GIFT_SENTIMENTAL, addObject, loseObject, objectsOf, recordObjectEvent, transferObject } from './objects.ts';
+export type { ObjectTransfer } from './objects.ts';
 
 export { checkProfile, profileEntry, profileNumber, profileValue } from './profile.ts';
 export type { CountryProfile, ProfileEntry, ProfileScope, ProfileStatus, ProfileValue } from './profile.ts';
@@ -225,6 +226,9 @@ export {
 } from './economy/index.ts';
 export type { EconomyParams } from './economy/index.ts';
 export { balanceOf } from './simulation/patches.ts';
+
+export { JobChanges, WORK_COLUMNS, WORK_SYSTEMS, defineWorkColumns, workLateSystem, workMarketSystem, workParams } from './work/index.ts';
+export type { WorkParams } from './work/index.ts';
 
 export { FORBIDDEN_TERMS, MECHANISMS, isMechanism } from './temperament/mechanisms.ts';
 export type { MechanismId } from './temperament/mechanisms.ts';
