@@ -44,7 +44,7 @@ Desde `@datas-world/engine`:
   - la enfermedad aguda se decide a medianoche: base del perfil × edad × estrés × deuda de sueño × salud física; dura los días del perfil y termina con `RECOVERED`;
   - las enfermedades y su duración están en el perfil (`health.acute.*`), no en un catálogo, porque son tasas del país.
 - **Comer:** con la actividad `eat`, el hambre sube `eatRate` por hora (1,3), así que un desayuno de 30 min sacia ≈ 0,4 y un almuerzo de 45 min ≈ 0,65, como el prototipo.
-- **Sueño (R-004):** `state.sleptToday` suma los minutos dormidos; a medianoche, la deuda suma lo que faltó respecto a `health.sleepHours` de la ficha. `OVERSLEPT` lo emite la rutina (módulo `routines`), con la deuda como causa.
+- **Sueño (R-004):** `state.sleptToday` suma los minutos dormidos (y el reposo del enfermo); a medianoche, la deuda suma lo que faltó respecto a `health.sleepHours` de la ficha. `OVERSLEPT` lo emite la rutina (módulo `routines`), con la deuda como causa.
 - **Compañía:** sin posiciones todavía (016, bloque D), se aproxima por la actividad (trabajo, estudio, socializar, ocio, cuidado).
 - **Rendimiento:** los sistemas devuelven un parche `setMany` por columna. Con el mundo de M1 (199 personas), 30 días de necesidades tardan ≈ 1,7 s.
 - **Coste:** 21 columnas ≈ 64 B por persona.
@@ -78,3 +78,4 @@ Porta `updateNeeds` (tasas de energía, hambre y soledad; objetivos de estrés y
 | 2026-09-25 | m2/b-necesidades | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m2/b-necesidades (B1–B4) | 010, 009, 031, 021 | `columns.ts`, `params.ts`, `system.ts`, `illness.ts`, `emotions.ts` e `index.ts`; `src/activity.ts`. 6 pruebas |
 | 2026-09-25 | m2/c-rutinas | 010 | Comer sacia: con `eat`, el hambre sube `eatRate` por hora (1,3; prototipo: desayuno −0,4, comida −0,65). Las pruebas usan `TEST_PROFILE` de `testing.ts` |
+| 2026-09-25 | m2/d-movilidad | 010 | El reposo del enfermo cuenta como sueño: antes, cada día de enfermedad sumaba una noche entera de deuda y, al curarse, la persona se quedaba dormida horas durante días (visto en una semana del mundo generado) |

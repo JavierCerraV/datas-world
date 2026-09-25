@@ -16,14 +16,14 @@ Crea los lugares de uso del mundo (viviendas, trabajos, colegio, hospital, comer
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 004 | CA-001, CA-002, CA-003, CA-006; R-001, R-002; R-007 sobre el catálogo; INV-002 | CA-004 y CA-005 (horario y capacidad al entrar), R-003 a R-006: M2–M3 |
+| 004 | CA-001, CA-002, CA-003, CA-006; R-001, R-002; R-007 sobre el catálogo; INV-002 | CA-004, CA-005, R-003 a R-005: los cubre el módulo `mobility` del motor (M2); R-006: M3 |
 
 ## 3. API pública
 Desde `@datas-world/generators`:
 
 | Símbolo | Descripción |
 |---|---|
-| `generatePlaces(world, territory, placeKinds, plotList?)` → `PlacesResult` | Un lugar por parcela: por defecto, las de la plantilla; con dotación (033), las resueltas por `resolvePlots`. Nombre, horario y capacidad salen del catálogo; el barrio, de la fila del mapa (`districtAt`). Las instancias repetidas de un tipo toman `names[n]` del catálogo (o "Nombre 2"…), y la primera, el nombre propio de la plantilla si lo tiene. Los lugares `nightlife` cierran como tarde a `amenity.nightlifeClose` del perfil. Pinta `building`, `park` o `plaza` en el mapa. Divide cada edificio residencial en viviendas según `unitsPerBuilding[estrato]`. Lanza si el mundo no tiene mapa, si un tipo no está en el catálogo o no es de M1, o si falta el número de viviendas de un estrato |
+| `generatePlaces(world, territory, placeKinds, plotList?)` → `PlacesResult` | Un lugar por parcela: por defecto, las de la plantilla; con dotación (033), las resueltas por `resolvePlots`. Nombre, horario y capacidad salen del catálogo; el barrio, de la fila del mapa (`districtAt`). Las instancias repetidas de un tipo toman `names[n]` del catálogo (o "Nombre 2"…), y la primera, el nombre propio de la plantilla si lo tiene. Los lugares `nightlife` cierran como tarde a `amenity.nightlifeClose` del perfil. Pinta `building`, `park` o `plaza` en el mapa. Divide cada edificio residencial en viviendas según `unitsPerBuilding[estrato]`. En la plaza crea el paradero intermunicipal (016), si el catálogo lo tiene en M1. Lanza si el mundo no tiene mapa, si un tipo no está en el catálogo o no es de M1, o si falta el número de viviendas de un estrato |
 | `PlacesResult` | `{ plots: { plot, placeId, dwellingIds }[], dwellingIds, workplaceIds }`. `workplaceIds` son los lugares con `slots`, para el generador de organizaciones |
 | `DWELLING_CAPACITY` | 6 residentes por vivienda: cabe el hogar más grande de las plantillas de la spec 008 |
 
@@ -63,3 +63,4 @@ Porta `buildPlaces`, `PDEF` y `LAYOUT`. Diferencias deliberadas:
 | 2026-09-24 | m1/c-lugares | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/c-lugares (C1, C2) | 004 | `generatePlaces`: 23 lugares de la plantilla, 13 edificios con 82 viviendas, horario y capacidad del catálogo, tiles pintados. 8 pruebas: 004 CA-001, CA-002, CA-003, CA-006, INV-002, R-007 |
 | 2026-09-24 | m1/j-dotacion | 004, 033 | Lista de parcelas opcional (dotación), barrio por fila del mapa, nombres por instancia y por plantilla, cierre nocturno limitado por el perfil y tile `plaza`. Con `datas-world-v1` y 200 habitantes: 23 lugares de uso, 15 edificios y 92 viviendas. Las pruebas del prototipo no cambian |
+| 2026-09-25 | m2/d-movilidad | 016, 004 | Paradero intermunicipal (`transporte.paradero`, catálogo `place_kinds` 2026.09.4, pasa a M1) dentro de la plaza, con la puerta sobre la calle al este de la entrada |

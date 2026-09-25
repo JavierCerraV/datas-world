@@ -127,6 +127,26 @@ export function generatePlaces(
     }
     if (attrs.slots) result.workplaceIds.push(placeId);
     result.plots.push({ plot, placeId, dwellingIds });
+    if (plot.kind === 'espacio_publico.plaza') addBusStop(world, placeKinds, placeId, districtId, plot);
   }
   return result;
+}
+
+/**
+ * Paradero intermunicipal en la plaza (016 §3): un lugar dentro de ella, sin edificio, con la puerta sobre la
+ * misma calle, unos tiles al este de la entrada de la plaza. Solo si el catálogo lo tiene en M1.
+ */
+function addBusStop(world: World, placeKinds: Catalog, plazaId: EntityId, districtId: EntityId, plot: PlotTemplate): void {
+  const entry = placeKinds.entries.find((e) => e.key === 'transporte.paradero');
+  if (entry?.since !== 'M1') return;
+  const attrs = (entry.attrs ?? {}) as PlaceAttrs;
+  const hours = hoursOf(attrs);
+  addPlace(world, {
+    kind: entry.key,
+    name: attrs.defaultName ?? entry.name,
+    parentId: plazaId,
+    districtId,
+    door: { x: plot.door.x + 3, y: plot.door.y },
+    ...(hours !== undefined ? { openingHours: hours } : {}),
+  });
 }

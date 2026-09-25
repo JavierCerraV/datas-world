@@ -1,10 +1,9 @@
 // Sistema `routines` (spec 011; 010 R-004): escribe la actividad por defecto de cada persona en cada tick.
 // Mientras no exista el motor de decisiones (017, bloque E), la persona sigue su rutina.
 import { ACTIVITY, ACTIVITY_COLUMN } from '../activity.ts';
-import type { NewEvent } from '../events.ts';
 import { formatId } from '../ids.ts';
 import { needsParams } from '../needs/params.ts';
-import type { Patch, System, SystemOutput, TickCtx, WorldView } from '../simulation/system.ts';
+import type { Patch, System, SystemEvent, SystemOutput, TickCtx, WorldView } from '../simulation/system.ts';
 import type { Rng } from '../rng.ts';
 import { dayInfo } from './day.ts';
 import { isEarlyDay, planAt } from './plan.ts';
@@ -28,7 +27,7 @@ function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
   const wakeRows: number[] = [];
   const wakeAt: number[] = [];
   const planned: number[] = [];
-  const events: NewEvent[] = [];
+  const events: SystemEvent[] = [];
 
   for (const row of ctx.citizens) {
     const id = formatId('CIT', row);
@@ -63,6 +62,7 @@ function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
         type: 'OVERSLEPT',
         payload: { citizenId: id, minutes: late },
         participants: [{ id, role: 'persona' }],
+        recordAs: { column: 'routine.oversleptEvt', row }, // la llegada tarde lo citará como causa (016 R-004)
         causes: [
           { state: 'deuda_de_sueno', entity: id, value: i['state.sleepDebt']![row]!, weight: 0.5 },
           { state: 'energia', entity: id, value: Math.round(f['need.energy']![row]! * 100) / 100, weight: 0.3 },

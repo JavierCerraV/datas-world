@@ -20,7 +20,7 @@ export const testConfig = (over: Partial<WorldConfig> = {}): WorldConfig => ({
 const entry = (key: string, value: CountryProfile['entries'][number]['value']) =>
   ({ key, value, validFrom: '1900-01-01', source: 'prueba', status: 'estimado' }) as const;
 
-/** Perfil mínimo con los parámetros de la vida diaria (010, 011): los mismos valores que el perfil colombiano. */
+/** Perfil mínimo con los parámetros de la vida diaria (010, 011, 016): los mismos valores que el perfil colombiano. */
 export const TEST_PROFILE: CountryProfile = {
   id: 'TEST',
   country: 'CO',
@@ -41,5 +41,10 @@ export const TEST_PROFILE: CountryProfile = {
     entry('health.acute.days', { gripa: 5, gastroenteritis: 3 }),
     entry('routine.school', { start: 390, end: 750, decFrom: 1201, janTo: 125, midFrom: 616, midTo: 706 }),
     entry('routine.meals', { washLen: 15, breakfastLen: 30, lunchStart: 720, lunchLen: 45, dinnerStart: 1140, dinnerLen: 30 }),
+    entry('mobility.speeds', { walk: 4.5, bike: 12, moto: 25, car: 25, noise: 0.1 }),
+    entry('mobility.fuelPerKm', { moto: 170, car: 420 }),
+    entry('mobility.bus', { headway: 60, first: 300, last: 1200 }),
+    entry('mobility.intercity', { km: 45, privateFactor: 0.8 }),
+    entry('mobility.habits', { margin: 5, bikeMinMeters: 400, lookahead: 30 }),
   ],
 };

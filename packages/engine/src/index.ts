@@ -104,6 +104,7 @@ export type {
   Phase,
   SimLevel,
   System,
+  SystemEvent,
   SystemOutput,
   TickCtx,
   WorldView,
@@ -162,3 +163,30 @@ export {
   worksShiftToday,
 } from './routines/index.ts';
 export type { DayInfo, Planned } from './routines/index.ts';
+
+export {
+  MOBILITY_COLUMNS,
+  MODES,
+  busWait,
+  defineMobilityColumns,
+  enterRefusal,
+  firstOfKind,
+  homeOf,
+  initMobility,
+  isOpen,
+  metersBetween,
+  mobilityParams,
+  mobilitySystem,
+  modeCode,
+  networkOf,
+  occupancy,
+  placeFor,
+  planTrip,
+  schoolOf,
+  travelMinutes,
+  travelTo,
+  vehiclesOf,
+  workplaceOf,
+  worksAt,
+} from './mobility/index.ts';
+export type { MobilityParams, Mode, TripPlan } from './mobility/index.ts';

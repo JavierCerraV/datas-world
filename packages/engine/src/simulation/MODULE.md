@@ -23,12 +23,14 @@ Desde `@datas-world/engine`:
 
 | Símbolo | Archivo | Descripción |
 |---|---|---|
-| `System`, `SystemOutput`, `TickCtx`, `Patch`, `Phase`, `Cadence`, `SimLevel`, `WorldView`, `DeepReadonly`, `ActionRequest`, `ActionOutcome`, `ActionValidator`, `PHASES` | `system.ts` | Tipos de la spec 021 §3 |
+| `System`, `SystemOutput`, `SystemEvent`, `TickCtx`, `Patch`, `Phase`, `Cadence`, `SimLevel`, `WorldView`, `DeepReadonly`, `ActionRequest`, `ActionOutcome`, `ActionValidator`, `PHASES` | `system.ts` | Tipos de la spec 021 §3 |
 | `createRegistry(systems)`, `activeSystems(registry, capabilities)`, `EMPTY_REGISTRY`, tipo `SystemRegistry` | `registry.ts` | Registro validado (ids únicos, fase, capacidad, cadencia) y ordenado por fase, `order` e `id` |
 | `runSystems(world, rng, registry, { guard?, validate? })` | `loop.ts` | Corre los sistemas activos del minuto actual. Lo llama `tick` después del scheduler |
 | `levelOf(world, row)` | `loop.ts` | Nivel de una persona; en M2, siempre 2 (R-011) |
 | `applyPatches(world, patches, source)` | `patches.ts` | La única vía de cambio para un sistema: celdas de columnas (`set`, `add`) y campos de entidades (`entity`) |
 | `viewOf(world, guard)` | `view.ts` | Vista de solo lectura; con `guard`, un Proxy que lanza ante cualquier escritura |
+
+`SystemEvent` es un `NewEvent` con `recordAs?: { column, row }`: el bucle anota el número del id asignado en esa columna i32 de la persona, para que otro sistema lo cite después como causa (`{ event }`). Lo usa la rutina con `OVERSLEPT` y lo cita `ARRIVED_LATE`.
 
 `tick(world, rng, handlers?, systems?, loop?)` y `new Runner(world, rng, handlers?, { systems?, loop? })` aceptan el registro y las opciones. Por defecto se usa el registro vacío: los mundos de M0 y M1 no cambian.
 
@@ -71,3 +73,4 @@ Porta el orden de `tick` del prototipo (necesidades → decisiones → acciones 
 | 2026-09-25 | m2/a-bucle | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m2/a-bucle (A1–A4) | 021, 001, 023 | `system.ts`, `registry.ts`, `loop.ts`, `patches.ts` y `view.ts`; `tick` y `Runner` recorren el registro. 8 pruebas |
 | 2026-09-25 | m2/b-necesidades | 021 | Parche `setMany` (muchas filas de una columna en un solo parche), la forma rápida para sistemas por persona. La vista congelada devuelve tal cual lo que ya está congelado (la configuración del mundo), como exige el invariante de Proxy |
+| 2026-09-25 | m2/d-movilidad | 021, 014 | `SystemEvent` con `recordAs`: el bucle anota el id asignado a un evento en una columna de la persona, para citarlo como causa desde otro sistema (016 CA-002). Sin cambios para los sistemas que no lo usan |

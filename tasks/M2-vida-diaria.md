@@ -29,10 +29,10 @@ Cada cosa que les pasa queda como evento con sus causas. Ánimo, estrés, empleo
 - [x] C3. Criterios: 011 CA-001 a CA-005; 010 CA-001 (`OVERSLEPT` tras dos noches sin dormir, con la hora de despertar de la rutina).
 
 ## Bloque D — Movilidad y uso de los lugares (specs 016, 004)
-- [ ] D1. Paradero intermunicipal en la plaza (`transporte.paradero` pasa a M1 en el catálogo y a la plantilla `datas-world-v1`).
-- [ ] D2. Viajes: modos según objetos, dinero y salud; tiempos por calle; bus a La Capital con espera y costo; persona en tránsito (004 R-003).
-- [ ] D3. Horarios y capacidad de los lugares: entrar a un lugar cerrado o lleno es una acción inválida (004 R-004, R-005).
-- [ ] D4. Criterios: 016 CA-001 a CA-004; 004 CA-004 y CA-005; 033 CA-006.
+- [x] D1. Paradero intermunicipal en la plaza (`transporte.paradero` pasa a M1 en el catálogo y a la plantilla `datas-world-v1`).
+- [x] D2. Viajes: modos según objetos, dinero y salud; tiempos por calle; bus a La Capital con espera y costo; persona en tránsito (004 R-003).
+- [x] D3. Horarios y capacidad de los lugares: entrar a un lugar cerrado o lleno es una acción inválida (004 R-004, R-005).
+- [x] D4. Criterios: 016 CA-001 a CA-004; 004 CA-004 y CA-005; 033 CA-006.
 
 ## Bloque E — Motor de decisiones y acciones (spec 017)
 - [ ] E1. Opciones (rutina, necesidades urgentes, eventos recientes, ficha de esparcimiento), utilidad y softmax con temperatura por impulsividad.

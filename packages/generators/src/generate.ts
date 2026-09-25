@@ -5,6 +5,7 @@ import {
   createRng,
   createWorld,
   idNumber,
+  initMobility,
   initNeeds,
   initRoutines,
   parseEpoch,
@@ -131,6 +132,8 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
   if (leisure) healthEvents.push(...generateLeisure(world, pop.citizenIds, catalogs.leisure_activities, leisure, rng));
   // 011: horarios de rutina, con el turno (empleo) y las horas de sueño (ficha de salud) ya asignados.
   initRoutines(world, rng);
+  // 016: todos empiezan en su vivienda.
+  initMobility(world);
   const events = [...created, ...prior, ...hist.events, ...healthEvents].sort((a, b) => idNumber(a.id) - idNumber(b.id));
   sortBackstories(world, events);
   return {

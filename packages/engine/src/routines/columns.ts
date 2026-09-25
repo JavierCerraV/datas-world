@@ -5,8 +5,18 @@ import type { Rng } from '../rng.ts';
 import type { WorldView } from '../simulation/system.ts';
 import type { World } from '../world.ts';
 
-/** Minutos del día: `wakeW` (día de trabajo o estudio), `wakeE` (día libre), `bed` (hora de acostarse). */
-export const ROUTINE_COLUMNS = ['routine.wakeW', 'routine.wakeE', 'routine.bed', 'routine.wakeAt', 'routine.plannedWake'] as const;
+/**
+ * Minutos del día: `wakeW` (día de trabajo o estudio), `wakeE` (día libre), `bed` (hora de acostarse). Minutos del
+ * mundo: `wakeAt` (despertar real) y `plannedWake` (previsto). `oversleptEvt`: número del último `OVERSLEPT`.
+ */
+export const ROUTINE_COLUMNS = [
+  'routine.wakeW',
+  'routine.wakeE',
+  'routine.bed',
+  'routine.wakeAt',
+  'routine.plannedWake',
+  'routine.oversleptEvt',
+] as const;
 
 export function defineRoutineColumns(world: World): void {
   for (const name of ROUTINE_COLUMNS) if (!(name in world.components.i32)) defineColumn(world.components, 'i32', name, 0);

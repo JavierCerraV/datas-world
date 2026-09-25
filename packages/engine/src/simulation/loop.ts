@@ -2,6 +2,7 @@
 import { MINUTES_PER_DAY } from '../calendar.ts';
 import { makeEvent } from '../events.ts';
 import type { WorldEvent } from '../events.ts';
+import { idNumber } from '../ids.ts';
 import type { Rng } from '../rng.ts';
 import type { World } from '../world.ts';
 import { applyPatches } from './patches.ts';
@@ -60,7 +61,11 @@ export function runSystems(world: World, rng: Rng, registry: SystemRegistry, opt
     }
     for (const [s, out] of outputs) {
       applyPatches(world, out.patches ?? [], s.id);
-      for (const e of out.events ?? []) events.push(makeEvent(world.counters, now, e));
+      for (const { recordAs, ...e } of out.events ?? []) {
+        const made = makeEvent(world.counters, now, e);
+        events.push(made);
+        if (recordAs) applyPatches(world, [{ op: 'set', type: 'i32', column: recordAs.column, row: recordAs.row, value: idNumber(made.id) }], s.id);
+      }
       for (const action of out.actions ?? []) {
         if (!opts.validate) throw new Error(`${s.id}: devolvió acciones y no hay validador (spec 017)`);
         const result = opts.validate(viewOf(world, opts.guard ?? false), action);

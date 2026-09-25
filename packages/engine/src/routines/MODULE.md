@@ -32,7 +32,7 @@ Desde `@datas-world/engine`:
 | `isEarlyDay`, `worksShiftToday`, `shiftOf` | Ayudas: si hoy toca madrugar, si hoy hay turno, turno formal de una persona |
 
 ## 4. Diseño interno y decisiones
-- **Columnas (i32):** `routine.wakeW` y `routine.wakeE` (minuto del día de levantarse en día con obligación y en día libre), `routine.bed` (acostarse), `routine.wakeAt` (minuto del mundo del próximo despertar real) y `routine.plannedWake` (el previsto). La rutina se deriva de estas columnas y del día; no se guarda un horario (011 v0.2).
+- **Columnas (i32):** `routine.wakeW` y `routine.wakeE` (minuto del día de levantarse en día con obligación y en día libre), `routine.bed` (acostarse), `routine.wakeAt` (minuto del mundo del próximo despertar real) y `routine.plannedWake` (el previsto) y `routine.oversleptEvt` (número del último `OVERSLEPT`, anotado por el bucle con `recordAs`, para que la llegada tarde lo cite como causa). La rutina se deriva de estas columnas y del día; no se guarda un horario (011 v0.2).
 - **Plan por capas (`plan.ts`):** sueño → aseo → desayuno → almuerzo (el del turno a las 12:00; estudiantes al salir; resto 12:30) → comida de la noche → obligación (turno formal; colegio 6:30–12:30 y tareas 14–16; informal e independiente 7–17 de lunes a sábado; búsqueda de empleo 8–12 días hábiles; oficios del hogar 8–12; diligencias de pensionados 9–11) → cuidado 14–17 si cuida → siesta de menores de 5 → libre.
 - **Despertar (prototipo `sleepUntil`):** en el tick de acostarse se fija el despertar: la hora del día siguiente (madrugar u hora libre) más un retraso si la energía proyectada al despertar queda por debajo de 0,72 (menos si es responsable), más el 10 % de la deuda de sueño y un ruido de −5 a +8 min (`rng.fork(id)`). Hasta ese minuto la persona duerme. Si el retraso llega a 10 min, al llegar la hora prevista se emite `OVERSLEPT` con causas (deuda de sueño, energía, responsabilidad).
 - **Hambre (CA-002):** en un bloque con flexibilidad ≥ 0,2, hambre < 0,1 cambia la actividad a `eat`. Comer sacia en el sistema de necesidades (`eatRate`).
@@ -69,3 +69,4 @@ Porta `setRoutine` (horarios), `wakeFor` e `inSleep` (tipo de día, madrugar) y 
 |---|---|---|---|
 | 2026-09-25 | m2/c-rutinas | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m2/c-rutinas (C1–C3) | 011, 010, 021, 029 | `columns.ts`, `day.ts`, `plan.ts`, `system.ts` e `index.ts`; evento `OVERSLEPT`. 7 pruebas |
+| 2026-09-25 | m2/d-movilidad | 011, 016 | Columna `routine.oversleptEvt`: `OVERSLEPT` se emite con `recordAs` para que `ARRIVED_LATE` (movilidad) lo cite como causa |
