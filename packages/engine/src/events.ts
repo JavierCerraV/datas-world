@@ -130,6 +130,12 @@ export const EVENT_TYPES = Object.freeze({
     text: (e) =>
       `${e.payload.citizenId} empieza a trabajar por su cuenta (${e.payload.tradeName}${e.payload.kind === 'informal' ? ', informal' : ''}).`,
   }),
+  JOB_WARNING: def<{ citizenId: string; orgId: string; reason: string; count: number }>({
+    baseImportance: 0.5,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, orgId: str, reason: str, count: int }),
+    text: (e) => `${e.payload.citizenId} recibe una llamada de atención (${e.payload.reason}, ${e.payload.count}.ª en 30 días).`,
+  }),
   JOB_LOST: def<{ citizenId: string; reason: string }>({
     baseImportance: 0.8,
     spontaneous: false,
@@ -147,6 +153,24 @@ export const EVENT_TYPES = Object.freeze({
     spontaneous: false,
     check: (p) => needObj(p, { objectId: str, ownerId: str, price: int, name: str }),
     text: (e) => `${e.payload.ownerId} adquiere ${e.payload.name}.`,
+  }),
+  OBJECT_GIFTED: def<{ objectId: string; from: string; to: string; name: string; occasion: string }>({
+    baseImportance: 0.4,
+    spontaneous: false,
+    check: (p) => needObj(p, { objectId: str, from: str, to: str, name: str, occasion: str }),
+    text: (e) => `${e.payload.from} le regala ${e.payload.name} a ${e.payload.to} (${e.payload.occasion}).`,
+  }),
+  OBJECT_SOLD: def<{ objectId: string; from: string; to: string; name: string; price: number }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { objectId: str, from: str, to: str, name: str, price: int }),
+    text: (e) => `${e.payload.from} vende ${e.payload.name} por $${e.payload.price}.`,
+  }),
+  OBJECT_LOST: def<{ objectId: string; ownerId: string; name: string }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { objectId: str, ownerId: str, name: str }),
+    text: (e) => `${e.payload.ownerId} pierde ${e.payload.name}.`,
   }),
   OBJECT_INHERITED: def<{ objectId: string; to: string; name: string }>({
     baseImportance: 0.6,

@@ -136,12 +136,16 @@ function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
         const causes: CauseRef[] = overslept
           ? [{ event: formatId('EVT', evt), weight: 0.7 }, { state: 'duracion_viaje', entity: id, value: travel, weight: 0.3 }]
           : [{ state: 'duracion_viaje', entity: id, value: travel, weight: 1 }];
+        // A su trabajo, el retraso lo anota la organización (006 R-005): el evento queda en `work.lastLateEvt`.
+        const atWork = dest === workplaceOf(view, row) && i['work.lastLateEvt'] !== undefined;
+        if (atWork) out.set('i32', 'work.lastLateMin', row, late);
         events.push({
           type: 'ARRIVED_LATE',
           payload: { citizenId: id, placeId: formatId('PLC', dest), minutes: late },
           participants: [{ id, role: 'persona' }],
           placeId: formatId('PLC', dest),
           causes,
+          ...(atWork ? { recordAs: { column: 'work.lastLateEvt', row } } : {}),
         });
       }
       continue;

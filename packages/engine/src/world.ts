@@ -93,6 +93,8 @@ export interface Citizen extends BaseEntity {
   leisure?: LeisureInterest[];
   /** Deudas vigentes (015 §3), en orden de creación. */
   debts?: Debt[];
+  /** Llegadas tarde a su trabajo en la ventana de advertencias (006 R-005), con el evento de cada una. */
+  jobRecord?: { lates: { eventId: EntityId; at: WorldMinute; minutes: number }[] };
 }
 
 /** Afición de la ficha de esparcimiento (spec 032): clave de `leisure_activities`, afinidad y frecuencia. */
@@ -187,6 +189,8 @@ export interface Organization extends BaseEntity {
   foundedAt?: WorldMinute;
   /** Caja en COP enteros (015 R-007). Solo cambia con transferencias (parche `transfer`). */
   cash?: number;
+  /** Días seguidos con la caja en negativo (006 R-006); con `crisisDays` del perfil, despide. */
+  crisisDays?: number;
 }
 
 /** Puesto nuevo: el id lo asigna `addOrganization`; `supervisor` es el índice de otro puesto de la lista. */

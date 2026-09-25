@@ -3,6 +3,7 @@
 import {
   NEEDS_SYSTEMS,
   Runner,
+  WORK_SYSTEMS,
   createActionValidator,
   createDecisionSystem,
   createRegistry,
@@ -71,11 +72,18 @@ describe('015 sobre el mundo generado (perfil colombiano, 200 habitantes)', () =
     w2.capabilities = ['clock', 'needs', 'routines', 'mobility', 'economy'];
     const table = leisureTable(catalogs.leisure_activities, w2.config.profile!, w2.config.epoch.slice(0, 10));
     const start = totalMoney(w2);
-    new Runner(w2, createRng(1), {}, {
-      systems: createRegistry([...NEEDS_SYSTEMS, routinesSystem, createDecisionSystem(table), mobilitySystem, economySystem]),
+    const full = new Runner(w2, createRng(1), {}, {
+      systems: createRegistry([...NEEDS_SYSTEMS, routinesSystem, createDecisionSystem(table), mobilitySystem, economySystem, ...WORK_SYSTEMS]),
       loop: { validate: createActionValidator(table) },
-    }).advanceDays(30);
+    });
+    full.advanceDays(30);
     expect(totalMoney(w2)).toBe(start);
+    const ev = full.drainEvents();
+    // Regresión (bloque G): el tiempo libre termina antes de la próxima obligación, así que casi nadie llega tarde
+    // por el viaje (antes, ≈ 960 retrasos de 2–5 min en 30 días); los que quedan se explican por quedarse dormido.
+    const late = ev.filter((e) => e.type === 'ARRIVED_LATE');
+    expect(late.length).toBeLessThan(30);
+    expect(ev.some((e) => e.type === 'JOB_HIRED')).toBe(true); // las vacantes iniciales se cubren
   }, 180_000);
 
   it('CA-003: tras 90 días, la mediana del patrimonio de los adultos (saldo − deudas) sube con el estrato', () => {
