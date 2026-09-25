@@ -35,10 +35,10 @@ Cada cosa que les pasa queda como evento con sus causas. Ánimo, estrés, empleo
 - [x] D4. Criterios: 016 CA-001 a CA-004; 004 CA-004 y CA-005; 033 CA-006.
 
 ## Bloque E — Motor de decisiones y acciones (spec 017)
-- [ ] E1. Opciones (rutina, necesidades urgentes, eventos recientes, ficha de esparcimiento), utilidad y softmax con temperatura por impulsividad.
-- [ ] E2. Acciones validadas (`follow_routine`, `eat`, `sleep`, `go_to`, `work`, `study`, `leisure`, `job_search`…) y `explain` como causa (R-005).
-- [ ] E3. Esparcimiento en la vida diaria (032 R-006): `LEISURE_DONE` satisface `fun`.
-- [ ] E4. Criterios: 017 CA-001, CA-003, CA-004, CA-005; 032 CA-006.
+- [x] E1. Opciones (rutina, necesidades urgentes, eventos recientes, ficha de esparcimiento), utilidad y softmax con temperatura por impulsividad.
+- [x] E2. Acciones validadas (`follow_routine`, `eat`, `sleep`, `go_to`, `work`, `study`, `leisure`, `job_search`…) y `explain` como causa (R-005).
+- [x] E3. Esparcimiento en la vida diaria (032 R-006): `LEISURE_DONE` satisface `fun`.
+- [x] E4. Criterios: 017 CA-001, CA-003, CA-004, CA-005; 032 CA-006.
 
 ## Bloque F — Economía (spec 015)
 - [ ] F1. Cuentas: saldos de personas y hogares, caja de las organizaciones y "resto del país"; conservación exacta (R-006).

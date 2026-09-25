@@ -1,6 +1,7 @@
 // Parámetros de la ficha de esparcimiento (spec 032 §8), leídos del perfil de país (spec 029).
 import { profileEntry, profileNumber, profileValue } from '@datas-world/engine';
-import type { CountryProfile } from '@datas-world/engine';
+import type { CountryProfile, LeisureActivity, LeisureTable } from '@datas-world/engine';
+import type { Catalog } from '../catalogs/schema.ts';
 
 type Rec = Record<string, number>;
 
@@ -51,4 +52,30 @@ export interface ActivityAttrs {
   ageCurve?: Rec;
   traits?: Rec;
   values?: Rec;
+}
+
+/**
+ * Tabla de actividades para el motor de decisiones (017, 032 R-006): dónde, cuánto cuesta cada vez (la mensualidad
+ * del gimnasio, repartida entre las veces del mes), cuánto dura, con quién y la exigencia física. Sin perfil de
+ * esparcimiento (prototipo), vacía.
+ */
+export function leisureTable(catalog: Catalog, profile: CountryProfile, date: string): LeisureTable {
+  const P = leisureParams(profile, date);
+  if (!P) return {};
+  const table: Record<string, LeisureActivity> = {};
+  for (const e of catalog.entries) {
+    const a = e.attrs as unknown as ActivityAttrs | undefined;
+    if (!a) continue;
+    const level = P.costByLevel[a.cost] ?? 0;
+    table[e.key] = {
+      name: e.name,
+      placeKinds: a.placeKinds,
+      atHome: a.home === true,
+      cost: Math.round(a.costPer === 'month' ? level / a.freq : level),
+      hours: a.hours,
+      group: a.group,
+      physical: a.physical,
+    };
+  }
+  return table;
 }

@@ -101,6 +101,8 @@ export interface LeisureInterest {
   /** Veces al mes, de media (0–30). */
   perMonth: number;
   since: WorldMinute;
+  /** Última vez que la hizo (017, 032 R-006): regula la frecuencia en la vida diaria. */
+  lastDone?: WorldMinute;
 }
 
 /** Condición crónica de la ficha de salud (spec 031): clave de `health_conditions`, fecha y control. */

@@ -12,7 +12,7 @@ const clamp = (v: number) => Math.min(1, Math.max(0, v));
 const WORK = new Set<number>([ACTIVITY.work, ACTIVITY.study]);
 // Sin posiciones aún (016): la compañía se aproxima por la actividad (en M2, bloque D, pasa a ocupación real).
 const COMPANY = new Set<number>([ACTIVITY.work, ACTIVITY.study, ACTIVITY.socialize, ACTIVITY.leisure, ACTIVITY.care]);
-const FUN = new Set<number>([ACTIVITY.leisure, ACTIVITY.socialize]);
+const FUN = new Set<number>([ACTIVITY.leisure, ACTIVITY.socialize, ACTIVITY.exercise]);
 
 // Fecha en que se leen los parámetros del perfil: el presente del mundo (no cambian con el tiempo en M2).
 const dateOf = (view: WorldView) => view.config.epoch.slice(0, 10);

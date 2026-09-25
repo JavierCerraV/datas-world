@@ -27,7 +27,7 @@ Desde `@datas-world/engine`:
 |---|---|
 | `mobilitySystem` | Sistema de la fase `actions` (orden 0, capacidad `mobility`, cada tick): sale, viaja, llega y entra; emite `ARRIVED_LATE` y `TRIP_TAKEN` |
 | `initMobility(world)`, `defineMobilityColumns(world)`, `MOBILITY_COLUMNS`, `MODES`, `modeCode`, tipo `Mode` | Columnas y estado inicial (todos en su vivienda); lo llama `generateWorld` |
-| `planTrip(view, row, from, to, now, rng \| null, P)`, tipo `TripPlan` | Viaje entre dos lugares: modo, minutos, coste, paradero; con `rng = null`, la estimación sin ruido |
+| `planTrip(view, row, from, to, now, rng \| null, P)`, tipo `TripPlan` | Viaje entre dos lugares: modo, minutos, coste, paradero; con `rng = null`, la estimación sin ruido y sin mirar el dinero |
 | `travelMinutes`, `busWait`, `vehiclesOf` | Tiempo por distancia y velocidad con ruido; espera del bus; vehículos de la persona y de su hogar |
 | `enterRefusal(view, row, place, at, occupancy)`, `isOpen`, `worksAt`, `occupancy` | Entrada a un lugar: `'cerrado'`, `'lleno'` o `null` (004 R-004, R-005) |
 | `placeFor(view, row, activity)`, `workplaceOf`, `schoolOf`, `homeOf` | Dónde se hace cada actividad de la rutina |
@@ -47,6 +47,7 @@ Desde `@datas-world/engine`:
   - dentro del pueblo, a pie; en bicicleta desde 400 m si la tiene; en carro solo si tiene dificultad para caminar y carro en el hogar (y camina a la mitad de velocidad si no tiene carro);
   - a La Capital, en carro o moto del hogar si es adulto y alcanza el combustible; si no, en bus desde el paradero, con espera hasta la próxima salida y el pasaje de `travel.cost`;
   - sin paradero o sin dinero, no hay viaje.
+- **Decisión en curso (017):** mientras `now < act.until`, el destino es `act.place` (si lo hay) y no se mira adelante antes de que termine; si el lugar elegido está cerrado o lleno, se deja la decisión (`act.until = now`) para que se elija otra cosa.
 - **Salida a tiempo (R-004):** si la actividad de ahora se hace aquí, se mira hasta 30 min adelante la siguiente que se hace en otro lugar. Se sale cuando la estimación sin ruido del viaje de la persona, más el 10 % y 5 min de margen, alcanza ese momento. Quien duerme o está enfermo en casa no sale.
 - **Llegada:** se entra si el lugar está abierto y cabe; si no, se vuelve a casa (el motor de decisiones reprogramará, 017). Quien trabaja ahí con turno siempre entra.
 - **Llegar tarde (R-004):** si llega a su turno o al colegio después de la hora de inicio, `ARRIVED_LATE` con la duración del viaje como causa y, si hoy se quedó dormido, el evento `OVERSLEPT` (que la rutina anota en `routine.oversleptEvt` con `recordAs`, 021).
@@ -83,3 +84,4 @@ El prototipo mueve a las personas tile a tile por la calle; aquí el viaje es un
 |---|---|---|---|
 | 2026-09-25 | m2/d-movilidad | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m2/d-movilidad (D2–D4) | 016, 004, 005, 021, 033 | `columns.ts`, `params.ts`, `network.ts`, `where.ts`, `enter.ts`, `trip.ts`, `system.ts` e `index.ts`. 8 pruebas |
+| 2026-09-25 | m2/e-decisiones | 016, 017 | La movilidad lleva al lugar de la decisión en curso (`act.place` hasta `act.until`) y la cancela si el lugar está cerrado o lleno. `planTrip` con `rng = null` no mira el dinero (la estimación de una opción que después valida el motor de decisiones) |

@@ -79,3 +79,4 @@ Porta `updateNeeds` (tasas de energía, hambre y soledad; objetivos de estrés y
 | 2026-09-25 | m2/b-necesidades (B1–B4) | 010, 009, 031, 021 | `columns.ts`, `params.ts`, `system.ts`, `illness.ts`, `emotions.ts` e `index.ts`; `src/activity.ts`. 6 pruebas |
 | 2026-09-25 | m2/c-rutinas | 010 | Comer sacia: con `eat`, el hambre sube `eatRate` por hora (1,3; prototipo: desayuno −0,4, comida −0,65). Las pruebas usan `TEST_PROFILE` de `testing.ts` |
 | 2026-09-25 | m2/d-movilidad | 010 | El reposo del enfermo cuenta como sueño: antes, cada día de enfermedad sumaba una noche entera de deuda y, al curarse, la persona se quedaba dormida horas durante días (visto en una semana del mundo generado) |
+| 2026-09-25 | m2/e-decisiones | 010, 032 | El ejercicio (`exercise`) también sube la diversión, como `leisure` y `socialize` |

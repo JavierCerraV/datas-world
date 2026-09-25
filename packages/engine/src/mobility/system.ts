@@ -106,8 +106,12 @@ function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
         out.set('u8', ACTIVITY_COLUMN, row, ACTIVITY.commute);
         continue;
       }
-      // Llegada (R-001): entra si está abierto y cabe (004 R-004, R-005); si no, vuelve a casa.
-      if (dest !== home && enterRefusal(view, row, dest, now, occ) !== null && home && depart(row, dest, home, r)) continue;
+      // Llegada (R-001): entra si está abierto y cabe (004 R-004, R-005); si no, vuelve a casa y deja lo que había
+      // elegido (el motor de decisiones elegirá otra cosa, 017 R-006).
+      if (dest !== home && enterRefusal(view, row, dest, now, occ) !== null && home && depart(row, dest, home, r)) {
+        if (i['act.until']) out.set('i32', 'act.until', row, now);
+        continue;
+      }
       out.set('i32', 'loc.place', row, dest);
       out.set('i32', 'trip.to', row, 0);
       out.set('i32', 'trip.from', row, 0);
@@ -139,12 +143,16 @@ function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
     const here = loc[row]!;
     const act = u[ACTIVITY_COLUMN]![row]!;
     if ((act === ACTIVITY.sleep || act === ACTIVITY.sick) && here === home) continue; // dormido o enfermo en casa
-    // La actividad de ahora; si se hace aquí, la próxima que se haga en otro lugar, a tiempo de llegar (R-004).
-    let target = placeFor(view, row, NAME[act] ?? 'idle');
+    // La actividad de ahora, en el lugar elegido si hay una decisión en curso (017); si se hace aquí, la próxima
+    // que se haga en otro lugar después de lo elegido, a tiempo de llegar (R-004).
+    const until = i['act.until']?.[row] ?? 0;
+    const chosen = now < until ? (i['act.place']?.[row] ?? 0) : 0;
+    let target = chosen || placeFor(view, row, NAME[act] ?? 'idle');
     if (target === 0 || target === here) {
       target = 0;
       for (let k = 1; k <= lookahead; k++) {
         const at = now + k * tick;
+        if (at < until) continue;
         const next = placeFor(view, row, planAt(view, row, dayOf(at), minuteOf(at)).activity);
         if (next === 0 || next === here) continue;
         const est = estimate(row, here, next);
@@ -154,7 +162,10 @@ function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
     }
     if (target === 0 || target === here) continue;
     const eta = now + Math.ceil(estimate(row, here, target) ?? 0);
-    if (target !== home && enterRefusal(view, row, target, eta, occ) !== null) continue; // cerrado o lleno: no va
+    if (target !== home && enterRefusal(view, row, target, eta, occ) !== null) {
+      if (target === chosen) out.set('i32', 'act.until', row, now); // cerrado o lleno: no va y deja lo elegido
+      continue;
+    }
     depart(row, here, target, r);
   }
   return { patches: [...out.patches(), ...patches], events };

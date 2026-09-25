@@ -16,15 +16,16 @@ Ficha de esparcimiento inicial de cada persona viva (spec 032): qué hace para d
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 032 | CA-001 a CA-005; R-001 a R-005; INV-001 a INV-003 | CA-006 y R-006 (rutina, M2); R-007 (compañía, M3); R-008 (cambio de aficiones, M5) |
+| 032 | CA-001 a CA-005; R-001 a R-005; INV-001 a INV-003 | CA-006 y R-006: los cubre el módulo `decision` del motor (bloque E de M2), con la prueba de una semana en `vida.test.ts`; R-007 (compañía, M3); R-008 (cambio de aficiones, M5) |
 
 ## 3. API pública
-Interna al paquete: la usa `generateWorld`.
+La usa `generateWorld`; `leisureParams` y `leisureTable` se exportan desde `@datas-world/generators`.
 
 | Símbolo | Descripción |
 |---|---|
 | `leisureParams(profile, date)` → `LeisureParams \| null` | Parámetros del perfil. `null` si no tiene ficha de esparcimiento (perfil prototipo) |
-| `generateLeisure(world, livingIds, catalog, P, rng)` → eventos | Genera la ficha de cada persona de 3 años o más (`Citizen.leisure`) y sus `LEISURE_TAKEN_UP` |
+| `generateLeisure(world, livingIds, catalog, P, rng)` → eventos | Genera la ficha de cada persona de 3 años o más (`Citizen.leisure`) y sus `LEISURE_TAKEN_UP`. Cada afición lleva `lastDone`, un momento al azar de su intervalo (30 días / `perMonth`), para que el motor de decisiones no las haga todas el primer día |
+| `leisureTable(catalog, profile, date)` → `LeisureTable` | Tabla para el motor de decisiones (017): lugares, si se puede en casa, coste por vez (la mensualidad repartida), horas, grupo y exigencia física. Vacía sin ficha de esparcimiento |
 | `selectActivities`, `offerOf`, `reachOf` | Elección de actividades (R-001) y oferta de lugares, local o regional (R-004) |
 | `expectedSpend(world, id, catalog, P)`, `leisureBudget(world, id, P)` | Gasto mensual esperado y presupuesto de una persona (R-002), para informes y pruebas |
 | tipo `ActivityAttrs` | Atributos del catálogo `leisure_activities` |
@@ -75,3 +76,4 @@ No aplica: el perfil `prototipo` no tiene ficha de esparcimiento. El prototipo e
 |---|---|---|---|
 | 2026-09-25 | m1/j-ocio | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m1/j-ocio (J5) | 032, 029, 031, 033 | Primera implementación: `params.ts`, `select.ts` y `generate.ts`. 7 pruebas |
+| 2026-09-25 | m2/e-decisiones | 032, 017 | `leisureTable` para el motor de decisiones; `lastDone` inicial de cada afición. Prueba nueva `vida.test.ts`: una semana del mundo generado con decisiones (frecuencia de la ficha y diversión) |

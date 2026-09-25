@@ -64,6 +64,9 @@ export { FIRST_SUPPORTED_YEAR, colombianHolidays, easterSunday, holidayDates } f
 export type { Holiday } from './country/holidays.ts';
 export { seriesAt } from './country/series.ts';
 
+export { leisureParams, leisureTable } from './leisure/params.ts';
+export type { LeisureParams } from './leisure/params.ts';
+
 export { generateHistory } from './history/generate.ts';
 export type { HistoryResult } from './history/generate.ts';
 export { HISTORY_COLUMNS, lineageOf } from './history/genealogy.ts';
