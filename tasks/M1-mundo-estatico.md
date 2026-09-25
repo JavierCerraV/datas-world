@@ -45,10 +45,10 @@ Cada bloque se hace en su rama (`m1/a-catalogos`, `m1/b-geografia`…) y termina
 - [x] G2. Objetos iniciales de persona y de hogar, con su evento de origen (005 CA-001, CA-002, CA-003).
 
 ## Bloque H — Historia generada (spec 030)
-- [ ] H1. Fundación y crecimiento por décadas; `foundedAt` de lugares y organizaciones.
-- [ ] H2. Genealogía hacia atrás con antepasados fallecidos (`demo.deathMinute`, `demo.generation`).
-- [ ] H3. Trayectorias previas con hechos históricos como causas (007 CA-003, 030 CA-001 a CA-006).
-- [ ] H4. Coste: `world:new` en < 5 s y < 2 MB de historia (030 CA-007).
+- [x] H1. Fundación y crecimiento por décadas; `foundedAt` de lugares y organizaciones.
+- [x] H2. Genealogía hacia atrás con antepasados fallecidos o vivos fuera del mundo (`demo.deathMinute`, `demo.generation`).
+- [x] H3. Trayectorias previas con hechos históricos como causas (007 CA-003, 030 CA-001 a CA-006; CA-003 y CA-006 desde la CLI en el bloque I).
+- [ ] H4. Coste: `world:new` en < 5 s y < 2 MB de historia (030 CA-007). Generación medida: ≈ 0,15 s y ≈ 750 KB de eventos en JSON; falta el tamaño en disco, que llega con la persistencia del bloque I.
 
 ## Bloque I — CLI y persistencia
 - [ ] I1. `world:new` con perfil, catálogos, festivos, epoch 2026-01-01 y la opción `--profile prototipo`.

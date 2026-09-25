@@ -43,6 +43,14 @@
     {"key": "gen.labor.unemployedP", "value": 1, "validFrom": "1900-01-01", "source": "prototipo/index.html (genJobs: 86 % de los adultos de 18 a 64 años; el resto, desempleado)", "status": "oficial"},
     {"key": "gen.labor.adultStudentP", "value": 0, "validFrom": "1900-01-01", "source": "prototipo/index.html (genJobs: 86 % de los adultos de 18 a 64 años; el resto, desempleado)", "status": "oficial"},
     {"key": "gen.labor.homeDutiesP.F", "value": 0, "validFrom": "1900-01-01", "source": "prototipo/index.html (genJobs: 86 % de los adultos de 18 a 64 años; el resto, desempleado)", "status": "oficial"},
-    {"key": "gen.labor.homeDutiesP.M", "value": 0, "validFrom": "1900-01-01", "source": "prototipo/index.html (genJobs: 86 % de los adultos de 18 a 64 años; el resto, desempleado)", "status": "oficial"}
+    {"key": "gen.labor.homeDutiesP.M", "value": 0, "validFrom": "1900-01-01", "source": "prototipo/index.html (genJobs: 86 % de los adultos de 18 a 64 años; el resto, desempleado)", "status": "oficial"},
+    {"key": "demo.lifeExpectancy.byYear", "value": {"1908": 38, "1950": 49.7, "1955": 52.6, "1960": 55.2, "1965": 57.3, "1970": 59.5, "1975": 61.5, "1980": 64.0, "1985": 66.4, "1990": 67.2, "1995": 68.6, "2000": 71.0, "2005": 73.0, "2010": 74.3, "2015": 75.4, "2018": 76.5, "2022": 76.9}, "validFrom": "1900-01-01", "source": "El prototipo no tiene historia: se usa la serie de Colombia", "status": "oficial"},
+    {"key": "demo.urbanization.byYear", "value": {"1938": 0.31, "1951": 0.39, "1973": 0.59, "1993": 0.69, "2005": 0.74}, "validFrom": "1900-01-01", "source": "El prototipo no tiene historia: se usa la serie de Colombia", "status": "oficial"},
+    {"key": "gen.history.foundingYear", "value": 1900, "validFrom": "1900-01-01", "source": "spec 030", "status": "oficial"},
+    {"key": "gen.history.motherAgeAtBirth", "value": [18, 40], "validFrom": "1900-01-01", "source": "Como el perfil colombiano", "status": "estimado"},
+    {"key": "gen.history.fatherAgeGap", "value": [0, 8], "validFrom": "1900-01-01", "source": "Como el perfil colombiano", "status": "estimado"},
+    {"key": "gen.history.adultDeathBonusFactor", "value": 0.45, "validFrom": "1900-01-01", "source": "Como el perfil colombiano", "status": "estimado"},
+    {"key": "gen.history.deathAgeSd", "value": 12, "validFrom": "1900-01-01", "source": "Como el perfil colombiano", "status": "estimado"},
+    {"key": "gen.history.greatGrandparentP", "value": 0.35, "validFrom": "1900-01-01", "source": "Como el perfil colombiano", "status": "estimado"}
   ]
 }

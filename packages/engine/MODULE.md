@@ -2,8 +2,8 @@
 modulo: engine
 ruta: packages/engine
 estado: en-desarrollo
-specs: [001, 002, 003, 004, 005, 006, 007, 008, 014, 023, 029]
-actualizado: 2026-09-23
+specs: [001, 002, 003, 004, 005, 006, 007, 008, 014, 023, 029, 030]
+actualizado: 2026-09-24
 ---
 
 # Módulo: engine
@@ -26,6 +26,7 @@ Núcleo puro de la simulación: tipos del dominio, RNG, reloj, scheduler, evento
 | 007, 008 | Tipos `Citizen`, `Household`, `Kinship` y `Occupation`; `addPerson`, `addHousehold`, `completeHousehold`; `ageInYears`; eventos `HOUSEHOLD_FORMED`, `STUDIES_COMPLETED`, `CHILDHOOD_EVENT`. Los CA se prueban en el generador de población | — |
 | 005 | `WorldObject`, `addObject`, `objectsOf`; eventos `OBJECT_ACQUIRED` y `OBJECT_INHERITED`. Los CA se prueban en el generador de objetos | — |
 | 029 | Consulta del perfil (R-002, R-003 con `profileValue`); INV-001 e INV-002 (`checkProfile`). Los CA se prueban en `generators/src/country` | — |
+| 030 | Antepasados, padres y fechas de fundación validados (`history.ts`); 9 eventos de la historia. Los CA se prueban en `generators/src/history` | — |
 
 
 ## 3. API pública
@@ -53,6 +54,7 @@ Desde `@datas-world/engine` (`src/index.ts`). Todo lo público se reexporta desd
 | `profileValue`, `profileNumber`, `profileEntry`, `checkProfile`, tipos `CountryProfile`/`ProfileEntry`/`ProfileScope`/`ProfileStatus`/`ProfileValue` | `src/profile.ts` | Perfil de país (029): valor vigente por clave, fecha ("AAAA-MM-DD") y alcance territorial, con respaldo en el nacional. Lanza si falta la cifra. `checkProfile` comprueba INV-001 e INV-002 |
 | `TILE`, `createGeoMap`, `tileAt`, `setTile`, `roadDistances`, `doorDistanceMatrix`, `geoToData`, `geoFromData`, tipos `GeoMap`/`GeoMapData`/`TileKind`/`TilePoint` | `src/geo.ts` | Mapa de tiles (u8) y distancias por calle (BFS, 4 vecinos en orden fijo). La matriz entre puertas es derivada: no se guarda (003 R-002) |
 | tipo `CatalogRef` | `src/world.ts` | `{ version, hash }` de un catálogo (ADR-006 §4) |
+| `addAncestor`, `setParents`, `setFoundedAt`, tipo `NewAncestor` | `src/history.ts` | Historia generada (030). `addAncestor` crea un antepasado fuera del mundo (`active = 0`, `status: 'inactive'`, `ancestor: true`, sin hogar); `setParents` fija madre (F) y padre (M) existentes y distintos del hijo; `setFoundedAt` fija la fundación de un `PLC` u `ORG`, siempre antes del presente. `Citizen` gana `motherId`, `fatherId` y `ancestor`; `Place` y `Organization`, `foundedAt` |
 
 ## 4. Diseño interno y decisiones
 Funciones puras `(state, input, rng) => { patches, events }`. Sistemas en carpetas propias con su MODULE.md y sus specs.
@@ -132,3 +134,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-24 | m1/d-organizaciones | 006 | Tipos `Organization`, `Position`, `Shift`, `NewOrganization`, `NewPosition` y `addOrganization` validado (ids de puesto `ORG-0001/P01`, supervisor por índice). 2 pruebas |
 | 2026-09-24 | m1/f-poblacion | 007, 008, 014 | `Citizen` (nombre, sexo, lugar de nacimiento, hogar, ocupación, trayectoria; campos opcionales por compatibilidad con `addCitizen`), `Household`, `Kinship`, `Occupation`; `addPerson`, `addHousehold`, `completeHousehold`; `ageInYears` por calendario (también antes del epoch y con bisiestos); eventos `HOUSEHOLD_FORMED`, `STUDIES_COMPLETED` y `CHILDHOOD_EVENT`. 4 pruebas |
 | 2026-09-24 | m1/g-empleo-objetos | 005, 006, 014 | `employment.ts` (`hire`, `setOccupation`) y `objects.ts` (`addObject`, `recordObjectEvent`, `objectsOf`) en archivos propios, porque `world.ts` pasaba de 300 líneas; tipo `WorldObject`; 6 eventos nuevos en el catálogo. 5 pruebas |
+| 2026-09-24 | m1/h-historia | 014, 030 | `history.ts` (`addAncestor`, `setParents`, `setFoundedAt`); `Citizen.motherId`/`fatherId`/`ancestor`; `foundedAt` en lugares y organizaciones; 9 eventos de la historia generada (`HISTORICAL_CONTEXT` es espontáneo). 3 pruebas |

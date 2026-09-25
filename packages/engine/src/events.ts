@@ -154,6 +154,61 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { objectId: str, to: str, name: str }),
     text: (e) => `${e.payload.to} hereda ${e.payload.name}.`,
   }),
+  // Historia generada (spec 030), de 1900 al presente.
+  TOWN_FOUNDED: def<{ placeId: string; name: string; year: number }>({
+    baseImportance: 1,
+    spontaneous: false,
+    check: (p) => needObj(p, { placeId: str, name: str, year: int }),
+    text: (e) => `Se funda ${e.payload.name} (${e.payload.year}).`,
+  }),
+  DISTRICT_FOUNDED: def<{ placeId: string; name: string }>({
+    baseImportance: 0.7,
+    spontaneous: false,
+    check: (p) => needObj(p, { placeId: str, name: str }),
+    text: (e) => `Nace el barrio ${e.payload.name}.`,
+  }),
+  PLACE_BUILT: def<{ placeId: string; name: string; kind: string }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { placeId: str, name: str, kind: str }),
+    text: (e) => `Se construye ${e.payload.name}.`,
+  }),
+  ORG_FOUNDED: def<{ orgId: string; name: string }>({
+    baseImportance: 0.4,
+    spontaneous: false,
+    check: (p) => needObj(p, { orgId: str, name: str }),
+    text: (e) => `Se funda ${e.payload.name}.`,
+  }),
+  CITIZEN_BORN: def<{ citizenId: string; placeName: string }>({
+    baseImportance: 0.6,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, placeName: str }),
+    text: (e) => `Nace ${e.payload.citizenId} en ${e.payload.placeName}.`,
+  }),
+  UNION_FORMED: def<{ a: string; b: string }>({
+    baseImportance: 0.6,
+    spontaneous: false,
+    check: (p) => needObj(p, { a: str, b: str }),
+    text: (e) => `${e.payload.a} y ${e.payload.b} forman pareja.`,
+  }),
+  MIGRATED: def<{ citizenId: string; from: string; to: string }>({
+    baseImportance: 0.7,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, from: str, to: str }),
+    text: (e) => `${e.payload.citizenId} llega a ${e.payload.to} desde ${e.payload.from}.`,
+  }),
+  CITIZEN_DIED: def<{ citizenId: string; age: number; cause: string }>({
+    baseImportance: 0.8,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, age: int, cause: str }),
+    text: (e) => `Muere ${e.payload.citizenId} a los ${e.payload.age} años (${e.payload.cause}).`,
+  }),
+  HISTORICAL_CONTEXT: def<{ key: string; name: string; start: string; end: string }>({
+    baseImportance: 0.9,
+    spontaneous: true, // hecho externo: su causa está fuera del mundo (fuente citada en el catálogo)
+    check: (p) => needObj(p, { key: str, name: str, start: str, end: str }),
+    text: (e) => `${e.payload.name} (${e.payload.start}${e.payload.end !== e.payload.start ? ` a ${e.payload.end}` : ''}).`,
+  }),
   CAPABILITY_ENABLED: def<{ capability: Capability }>({
     baseImportance: 0.8,
     spontaneous: false,

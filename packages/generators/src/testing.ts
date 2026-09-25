@@ -6,6 +6,7 @@ import { loadCatalogs } from './catalogs/load.ts';
 import { PROTOTYPE_PROFILE, loadProfile } from './country/profile.ts';
 import { generateEmployment } from './employment/generate.ts';
 import { generateGeography } from './geography/generate.ts';
+import { generateHistory } from './history/generate.ts';
 import { generateObjects } from './objects/generate.ts';
 import { generateOrganizations } from './organizations/generate.ts';
 import { generatePlaces } from './places/generate.ts';
@@ -40,9 +41,11 @@ export function buildWorld(profileId: string, seed: number) {
   const pop = generatePopulation(world, territory, places, catalogs, rng);
   const emp = generateEmployment(world, pop.citizenIds, orgIds, catalogs, rng);
   const objs = generateObjects(world, pop.citizenIds, pop.householdIds, catalogs.object_kinds, rng);
-  const events: WorldEvent[] = [...pop.events, ...emp.events, ...objs.events];
+  const prior: WorldEvent[] = [...pop.events, ...emp.events, ...objs.events];
+  const hist = generateHistory(world, territory, places, orgIds, pop.citizenIds, prior, catalogs, rng);
+  const events = [...prior, ...hist.events];
   sortBackstories(world, events);
-  return { world, territory, places, orgIds, pop, events, objectIds: objs.objectIds, profile };
+  return { world, territory, places, orgIds, pop, events, objectIds: objs.objectIds, profile, hist };
 }
 
 export const ageOf = (w: World, id: EntityId): number =>

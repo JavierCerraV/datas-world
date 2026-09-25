@@ -10,11 +10,11 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 |---|---|---|---|---|---|
 | [001](001-world.md) | Mundo | M0 | 002, 023 | aprobada | `apps/cli`, `packages/engine`, `packages/generators`, `packages/generators/src/population` |
 | [002](002-time.md) | Tiempo | M0 |  | implementada | `apps/cli`, `apps/worker`, `packages/engine` |
-| [003](003-geography.md) | Geografía | M1 | 001, 023, 029 | aprobada | `packages/engine`, `packages/generators/src/catalogs`, `packages/generators/src/geography` |
-| [004](004-places.md) | Lugares | M1 (generación) · M2 (ocupación y horarios) | 003, 029 | aprobada | `packages/engine`, `packages/generators/src/catalogs`, `packages/generators/src/places` |
+| [003](003-geography.md) | Geografía | M1 | 001, 023, 029 | aprobada | `packages/engine`, `packages/generators/src/catalogs`, `packages/generators/src/geography`, `packages/generators/src/history` |
+| [004](004-places.md) | Lugares | M1 (generación) · M2 (ocupación y horarios) | 003, 029 | aprobada | `packages/engine`, `packages/generators/src/catalogs`, `packages/generators/src/history`, `packages/generators/src/places` |
 | [005](005-objects.md) | Objetos con historia | M1 (objetos iniciales) · M2–M3 (transferencias, valor emocional, pérdidas) | 001, 007, 008, 014, 023, 029 | aprobada | `packages/engine`, `packages/generators/src/catalogs`, `packages/generators/src/objects` |
-| [006](006-organizations.md) | Organizaciones y ocupación | M1 (generación y empleo inicial) · M2 (desempeño, despidos, contratación) | 004, 023, 029 | aprobada | `packages/engine`, `packages/generators/src/catalogs`, `packages/generators/src/employment`, `packages/generators/src/organizations` |
-| [007](007-population.md) | Población | M1 (generación) · peldaño 4 (nacimientos y muertes) | 001, 003, 004, 006, 008, 009, 014, 023, 029 | aprobada | `packages/engine`, `packages/generators/src/catalogs`, `packages/generators/src/employment`, `packages/generators/src/population` |
+| [006](006-organizations.md) | Organizaciones y ocupación | M1 (generación y empleo inicial) · M2 (desempeño, despidos, contratación) | 004, 023, 029 | aprobada | `packages/engine`, `packages/generators/src/catalogs`, `packages/generators/src/employment`, `packages/generators/src/history`, `packages/generators/src/organizations` |
+| [007](007-population.md) | Población | M1 (generación) · peldaño 4 (nacimientos y muertes) | 001, 003, 004, 006, 008, 009, 014, 023, 029 | aprobada | `packages/engine`, `packages/generators/src/catalogs`, `packages/generators/src/employment`, `packages/generators/src/history`, `packages/generators/src/population` |
 | [008](008-households.md) | Hogares | M1 (plantillas y composición) · M2–M3 (economía del hogar, clima, mudanzas) | 001, 004, 023, 029 | aprobada | `packages/engine`, `packages/generators/src/catalogs`, `packages/generators/src/population` |
 | [009](009-personality.md) | Personalidad y valores | M1 (generación) · M2–M3 (efectos y cambio lento) | 001, 023 | aprobada | `packages/generators/src/catalogs`, `packages/generators/src/personality`, `packages/generators/src/population` |
 | [010](010-needs.md) | Necesidades, emociones y salud | M2 | 007, 009 | borrador | — |
@@ -36,8 +36,8 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [026](026-llm-gateway.md) | Pasarela LLM | M6 | 017, 025, 021 | borrador | `packages/llm-gateway` |
 | [027](027-persistence.md) | Persistencia | M0 (base) · M4 (retención) | 001, 002, 014 | aprobada | `apps/cli`, `apps/worker`, `packages/persistence` |
 | [028](028-experiments.md) | Experimentos y ramas | M5 | 023, 027, 022 | borrador | — |
-| [029](029-country-profile.md) | Perfil de país: Colombia | M1 (demografía, territorio, festivos, salario base) · M2 (reglas laborales y de economía) | 001, 002 | aprobada | `packages/engine`, `packages/generators/src/country`, `packages/generators/src/employment`, `packages/generators/src/geography`, `packages/generators/src/objects`, `packages/generators/src/organizations`, `packages/generators/src/personality`, `packages/generators/src/places`, `packages/generators/src/population` |
-| [030](030-generated-history.md) | Historia generada (1900 → presente) | M1 | 001, 003, 004, 006, 007, 008, 014, 023, 029 | aprobada | `packages/generators/src/catalogs` |
+| [029](029-country-profile.md) | Perfil de país: Colombia | M1 (demografía, territorio, festivos, salario base) · M2 (reglas laborales y de economía) | 001, 002 | aprobada | `packages/engine`, `packages/generators/src/country`, `packages/generators/src/employment`, `packages/generators/src/geography`, `packages/generators/src/history`, `packages/generators/src/objects`, `packages/generators/src/organizations`, `packages/generators/src/personality`, `packages/generators/src/places`, `packages/generators/src/population` |
+| [030](030-generated-history.md) | Historia generada (1900 → presente) | M1 | 001, 003, 004, 006, 007, 008, 014, 023, 029 | aprobada | `packages/engine`, `packages/generators/src/catalogs`, `packages/generators/src/history` |
 <!-- INDICE:FIN -->
 
 ## Orden sugerido de revisión

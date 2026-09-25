@@ -3,12 +3,10 @@
   "country": "CO",
   "currency": { "code": "COP", "minorUnit": 1 },
   "entries": [
-    {"key": "demo.lifeTable.byDecade", "value": {}, "validFrom": "1900-01-01", "source": "DANE y CEPAL, series históricas de mortalidad (pendiente)", "status": "por_confirmar"},
     {"key": "demo.parentAgeAtBirth.byDecade", "value": {}, "validFrom": "1900-01-01", "source": "DANE, estadísticas vitales (pendiente)", "status": "por_confirmar"},
     {"key": "demo.share.age0to11", "value": 0.171, "validFrom": "2026-01-01", "source": "DANE, proyecciones de población 2026 (citado por UNFPA e ICBF)", "status": "oficial"},
     {"key": "demo.share.age12to17", "value": 0.094, "validFrom": "2026-01-01", "source": "DANE, proyecciones de población 2026 (citado por UNFPA e ICBF)", "status": "oficial"},
     {"key": "demo.share.age60plus", "value": 0.153, "validFrom": "2026-01-01", "source": "DANE, proyecciones de población 2026 (citado por UNFPA e ICBF)", "status": "oficial"},
-    {"key": "demo.urbanization.byDecade", "value": {}, "validFrom": "1900-01-01", "source": "DANE, censos de 1938 a 2018 (pendiente)", "status": "por_confirmar"},
     {"key": "education.attainment.workforce", "value": {"ninguno": 0.108, "primaria": 0.179, "basica_secundaria": 0.047, "media": 0.367, "tecnica_tecnologica": 0.121, "universitaria": 0.127, "posgrado": 0.051}, "validFrom": "2024-01-01", "source": "DANE, GEIH 2024, citado en fuentes secundarias; fuerza laboral; universitaria por diferencia hasta 1", "status": "estimado"},
     {"key": "gen.household.templateWeights", "value": {"single": 0.202, "couple": 0.14, "couple_kids": 0.31, "extended": 0.1, "single_parent": 0.205, "roommates": 0.043}, "validFrom": "2025-01-01", "source": "Derivado de DANE ECV 2024–2025 (spec 008 v0.3); reparto interno de biparental y monoparental estimado", "status": "estimado"},
     {"key": "gen.jobs.bossWageFactor", "value": 1.6, "validFrom": "1900-01-01", "source": "prototipo (hire), a falta de una fuente colombiana sobre la brecha de sueldo entre jefes y personal", "status": "estimado"},
@@ -80,6 +78,14 @@
     {"key": "gen.labor.unemployedP", "value": 0.3, "validFrom": "2026-01-01", "source": "Perfil de ocupación por edad y sexo, estimado y ajustado por simulación para acercar la tasa de ocupación (15+) a DANE GEIH julio 2026 (0,595) y la de desempleo a 0,081 (spec 006 R-008): probabilidad de que un adulto de 18 a 64 años sin empleo, que no estudia ni está pensionado, busque trabajo (medición de referencia para el año 2026)", "status": "estimado"},
     {"key": "gen.labor.adultStudentP", "value": 0.55, "validFrom": "2026-01-01", "source": "Estimado: probabilidad de que una persona de 18 a 24 años sin empleo estudie", "status": "estimado"},
     {"key": "gen.labor.homeDutiesP.F", "value": 0.7, "validFrom": "2026-01-01", "source": "Estimado: entre las mujeres inactivas de 18 a 64 años que no estudian ni tienen pensión, proporción dedicada a oficios del hogar (GEIH, por confirmar)", "status": "estimado"},
-    {"key": "gen.labor.homeDutiesP.M", "value": 0.2, "validFrom": "2026-01-01", "source": "Estimado: ídem para los hombres (GEIH, por confirmar)", "status": "estimado"}
+    {"key": "gen.labor.homeDutiesP.M", "value": 0.2, "validFrom": "2026-01-01", "source": "Estimado: ídem para los hombres (GEIH, por confirmar)", "status": "estimado"},
+    {"key": "demo.lifeExpectancy.byYear", "value": {"1908": 38, "1950": 49.7, "1955": 52.6, "1960": 55.2, "1965": 57.3, "1970": 59.5, "1975": 61.5, "1980": 64.0, "1985": 66.4, "1990": 67.2, "1995": 68.6, "2000": 71.0, "2005": 73.0, "2010": 74.3, "2015": 75.4, "2018": 76.5, "2022": 76.9}, "validFrom": "1900-01-01", "source": "Esperanza de vida al nacer: 38 años en 1905–1912 (Biomédica, citando series del DANE); CEPAL 1950–2022. Entre puntos se interpola linealmente; antes de 1908 y después de 2022 se mantiene el valor extremo", "status": "oficial"},
+    {"key": "demo.urbanization.byYear", "value": {"1938": 0.31, "1951": 0.39, "1973": 0.59, "1993": 0.69, "2005": 0.74}, "validFrom": "1900-01-01", "source": "Población urbana según los censos: 31 % (1938), 39 % (1951), 59 % (1973), 69 % (1993), 74 % (2005) (DANE, atlas estadístico; CEPAL). Entre censos se interpola; antes de 1938 y después de 2005 se mantiene el valor extremo", "status": "oficial"},
+    {"key": "gen.history.foundingYear", "value": 1900, "validFrom": "1900-01-01", "source": "Decisión del usuario: el mundo existe desde 1900 (spec 030)", "status": "estimado"},
+    {"key": "gen.history.motherAgeAtBirth", "value": [18, 40], "validFrom": "1900-01-01", "source": "Estimado a la espera de las estadísticas vitales del DANE (demo.parentAgeAtBirth.byDecade)", "status": "estimado"},
+    {"key": "gen.history.fatherAgeGap", "value": [0, 8], "validFrom": "1900-01-01", "source": "Estimado: el padre es de 0 a 8 años mayor que la madre", "status": "estimado"},
+    {"key": "gen.history.adultDeathBonusFactor", "value": 0.45, "validFrom": "1900-01-01", "source": "Estimado: la edad media de muerte de quien llega a adulto es e0 + 0,45·(80 − e0), porque la esperanza de vida al nacer incluye la mortalidad infantil", "status": "estimado"},
+    {"key": "gen.history.deathAgeSd", "value": 12, "validFrom": "1900-01-01", "source": "Estimado: dispersión de la edad de muerte", "status": "estimado"},
+    {"key": "gen.history.greatGrandparentP", "value": 0.35, "validFrom": "1900-01-01", "source": "Estimado: probabilidad de registrar a los bisabuelos de una rama (la genealogía puede omitirlos, spec 030 CA-003); mantiene la historia por debajo de 2 MB", "status": "estimado"}
   ]
 }

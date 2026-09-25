@@ -27,6 +27,8 @@ export interface PopulationParams {
   education: Record<'s2' | 's3' | 's4', number[]>;
   pension: { age: { F: number; M: number }; coverage: number };
   personality: { traitSd: number; extremeP: number };
+  /** Proporción urbana por año (029): la probabilidad de haber nacido en el campo es 1 − urbanización. */
+  urbanization: Record<string, number>;
 }
 
 const range = (p: CountryProfile, key: string, date: string): Range => {
@@ -95,5 +97,6 @@ export function populationParams(p: CountryProfile, date: string): PopulationPar
     },
     pension: { age: { F: pa.F!, M: pa.M! }, coverage: n('pension.coverage') },
     personality: { traitSd: n('gen.personality.traitSd'), extremeP: n('gen.personality.extremeP') },
+    urbanization: profileValue(p, 'demo.urbanization.byYear', date) as Record<string, number>,
   };
 }

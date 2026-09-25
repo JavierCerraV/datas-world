@@ -56,6 +56,11 @@ export type { DistrictTemplate, MapTemplate, PlotTemplate } from './geography/te
 
 export { FIRST_SUPPORTED_YEAR, colombianHolidays, easterSunday, holidayDates } from './country/holidays.ts';
 export type { Holiday } from './country/holidays.ts';
+export { seriesAt } from './country/series.ts';
+
+export { generateHistory } from './history/generate.ts';
+export type { HistoryResult } from './history/generate.ts';
+export { HISTORY_COLUMNS, lineageOf } from './history/genealogy.ts';
 export {
   DEFAULT_PROFILE,
   PROFILES_DIR,

@@ -82,6 +82,11 @@ export interface Citizen extends BaseEntity {
   occupation?: Occupation;
   /** Eventos anteriores al presente del mundo, en orden de fecha (007 R-006, INV-003). */
   backstory?: EntityId[];
+  /** Genealogía (spec 030): la madre y el padre, vivan o no en el mundo. */
+  motherId?: EntityId;
+  fatherId?: EntityId;
+  /** Antepasado fuera del mundo (spec 030): no vive en el municipio y no se simula. */
+  ancestor?: boolean;
 }
 
 export type KinshipKind = 'parent' | 'partner' | 'sibling' | 'grandparent';
@@ -130,6 +135,8 @@ export interface Organization extends BaseEntity {
   placeIds: EntityId[];
   positions: Position[];
   culture: { strictness: number; warmth: number; stability: number };
+  /** Minuto de fundación (spec 030); los mundos sin historia no lo tienen. */
+  foundedAt?: WorldMinute;
 }
 
 /** Puesto nuevo: el id lo asigna `addOrganization`; `supervisor` es el índice de otro puesto de la lista. */
@@ -152,6 +159,8 @@ export interface Place extends BaseEntity {
   divipola?: string;
   /** Estrato 1–6 (Ley 142 de 1994); solo en barrios. */
   stratum?: number;
+  /** Minuto de fundación o construcción (spec 030); los mundos sin historia no lo tienen. */
+  foundedAt?: WorldMinute;
   /** [0,1]; solo en barrios. */
   safety?: number;
   /** Personas a la vez; en una vivienda, residentes máximos (spec 004). */
