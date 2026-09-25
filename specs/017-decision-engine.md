@@ -2,60 +2,83 @@
 id: 017
 nombre: decision-engine
 estado: borrador
-hito: M2
-depende_de: [010, 011, 012, 015]
-version: 0.1
+hito: M2 (decisión con estado propio e información pública) · M3 (con creencias, 025)
+depende_de: [009, 010, 011, 015, 016, 021, 032]
+version: 0.2
 ---
 
 # 017 — Motor de decisiones
 
 ## 1. Propósito
-Cómo una persona elige qué hacer: opciones disponibles, utilidad subjetiva según necesidades, valores, personalidad, creencias y contexto; con azar acotado. Toda decisión se convierte en una acción que el motor valida.
+Cómo una persona elige qué hacer en cada momento. Compara opciones (seguir la rutina, comer, descansar, salir con amigos, ir a La Capital, buscar trabajo) según:
+- sus necesidades y sus valores;
+- su personalidad;
+- su dinero y su energía;
+- el contexto.
+
+Elige con azar acotado. Toda decisión se convierte en una **acción** que el motor valida (CLAUDE.md regla 4). Cada decisión guarda **por qué** se tomó (`explain`), y eso responde, por ejemplo, "¿por qué no fue a la sesión?" en la capa clínica (034).
 
 ## 2. Alcance
-**Incluye:** generación de opciones, función de utilidad, selección softmax, acciones y validación.
-**Fuera de alcance:** LLM (026).
+**Incluye:** generación de opciones, función de utilidad, selección, acciones, validación y explicación.
+**Fuera de alcance:** LLM (026); creencias sobre otros (025, M3).
 
 ## 3. Modelo de datos
 ```ts
 interface ActionRequest { actor: EntityId; kind: ActionKind; target?: EntityId; params?: unknown; reason: CauseRef[]; }
 interface ActionResult { ok: boolean; rejected?: string; patches: Patch[]; events: WorldEvent[]; }
 interface Option { action: ActionRequest; utility: number; explain: { factor: string; contribution: number }[]; }
+type ActionKind = 'follow_routine' | 'eat' | 'sleep' | 'rest' | 'wash' | 'go_to' | 'work' | 'study'
+                | 'leisure' | 'socialize' | 'shop' | 'job_search' | 'seek_care' | 'borrow';
 ```
+Las opciones se calculan y se descartan en el tick; solo se guarda la elegida, como causa del evento resultante. Coste en RAM: transitorio.
 
 ## 4. Reglas
-- **R-001** — Opciones = actividad de la rutina + alternativas que satisfacen necesidades urgentes + reacciones a eventos recientes.
-- **R-002** — utilidad = Σ (peso_necesidad × mejora esperada) + afinidad de valores + sesgo de personalidad + hábito (018) − costo (dinero, energía, riesgo percibido).
-- **R-003** — Selección por softmax con temperatura dependiente de impulsividad; ruido desde el flujo RNG de la persona.
-- **R-004** — La persona decide con sus **creencias** (025), no con la verdad.
-- **R-005** — Cada acción aplicada guarda `explain` resumido como causa del evento resultante.
+- **R-001 (opciones)** — Opciones = la actividad de la rutina (011) + alternativas que satisfacen necesidades urgentes (010) + reacciones a eventos recientes + en bloques libres, las actividades de la ficha de esparcimiento (032 R-006) posibles a esa hora (lugar abierto, 004; dinero, 015; tiempo de viaje, 016).
+- **R-002 (utilidad)** — utilidad =
+  - Σ (peso de la necesidad × mejora esperada);
+  - \+ afinidad de la actividad (032) y de los valores (009);
+  - \+ sesgo de personalidad;
+  - \+ hábito (018, desde M5);
+  - − coste en dinero, energía, tiempo y riesgo percibido.
+- **R-003 (selección)** — Softmax con temperatura base 0,3 (prototipo), mayor con más impulsividad. El azar sale del flujo de la persona (`sys:decision/<id>`, 021 R-008).
+- **R-004 (información)** — **En M2**, la persona decide con su propio estado y con información pública (horarios, precios, lugares), sin saber lo que otros ocultan. **Desde M3**, decide con sus creencias (025), no con la verdad.
+- **R-005 (explicación)** — La acción aplicada guarda un `explain` resumido (los 3 factores de mayor contribución) como causa del evento que produce. El informe de vida (020) y la capa clínica (034) lo leen.
+- **R-006 (validación)** — Una acción imposible (sin dinero, lugar cerrado, sin fuerzas) se rechaza y se elige la siguiente opción. El rechazo solo se registra como evento en depuración o en nivel ≥ 3.
 
 ## 5. Eventos
 | Tipo | Cuándo | Payload | Causas esperadas |
 |---|---|---|---|
-| `ACTION_REJECTED` | acción inválida (solo debug o nivel ≥3) | motivo |  |
+| `ACTION_REJECTED` | acción inválida (depuración o nivel ≥ 3) | actor, acción, motivo | precondición incumplida |
+
+Las demás acciones producen los eventos de su spec (`LEISURE_DONE`, 032; `ARRIVED_LATE`, 016; `DEBT_TAKEN`, 015…), con el `explain` como causa.
 
 ## 6. Invariantes
-- **INV-001** — Todos los valores normalizados permanecen en su rango y sin NaN.
-- **INV-002** — Ningún cambio se aplica fuera del flujo de acciones validadas (CLAUDE.md, regla 4).
+- **INV-001** — Utilidades finitas; probabilidades de la softmax en [0,1] que suman 1.
+- **INV-002** — Ningún cambio de estado fuera de la validación de acciones.
+- **INV-003** — Mismo estado + misma semilla = misma decisión (023).
 
 ## 7. Criterios de aceptación
-- **CA-001** — *Dado* hambre crítica y comida disponible, *entonces* se elige comer en > 95 % de los casos.
-- **CA-002** — *Dado* una persona que cree (falsamente) que un amigo la traicionó, *entonces* reduce la probabilidad de buscarlo aunque la verdad sea otra.
-- **CA-003** — *Dado* una acción imposible (sin dinero), *entonces* se rechaza y se elige otra.
+- **CA-001 (M2)** — *Dado* hambre crítica y comida disponible, *entonces* se elige comer en > 95 % de los casos.
+- **CA-002 (M3)** — *Dado* una persona que cree (falsamente) que un amigo la traicionó, *entonces* baja la probabilidad de buscarlo, aunque la verdad sea otra (con la 025).
+- **CA-003 (M2)** — *Dado* una acción imposible (sin dinero), *entonces* se rechaza y se elige otra.
+- **CA-004 (M2)** — *Dado* un bloque libre con `fun` baja, dinero y un bar abierto, *entonces* la persona elige una actividad de su ficha (032 CA-006), y la de mayor afinidad es la más frecuente.
+- **CA-005 (M2)** — *Dado* cualquier acción aplicada, *entonces* su evento tiene entre las causas el `explain` de la decisión.
 
 ## 8. Parámetros y calibración
-| Parámetro | Valor por defecto |
-|---|---|
-| temperatura base | 0.3 (prototipo v=.3) |
+| Parámetro | Valor inicial | Fuente | Estado |
+|---|---|---|---|
+| temperatura base | 0,3; ruido 0,12 | prototipo | estimado |
+| peso de las necesidades | por necesidad, del prototipo | prototipo | estimado |
 
 ## 9. Métricas
-Distribuciones de los valores que introduce esta spec en la prueba de 100 personas × 1 año; alertas de degeneración (varianza ≈ 0, saturación en 0 o 1, crecimiento sin límite).
+Distribución de actividades por hora y por situación (comparable con la ENUT), rechazos por motivo, factores más frecuentes en `explain`.
 
 ## 10. Preguntas abiertas
-- [ ] Revisar parámetros con los resultados de la primera validación.
+- [x] ¿Creencias en M2? → No: estado propio e información pública; creencias en M3 (usuario, 2026-09-25).
+- [x] ¿Ocio desde la ficha de esparcimiento? → Sí (usuario, 2026-09-25).
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
+| 2026-09-25 | 0.2 | Revisión de M2 con las decisiones del usuario: en M2 decide con su estado e información pública, y con creencias desde M3 (CA-002 pasa a M3); opciones de esparcimiento desde la ficha 032; `explain` como causa (enganche de la capa clínica, 034); tipos de acción de M2; CA-004 y CA-005 nuevos |
