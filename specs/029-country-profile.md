@@ -1,7 +1,7 @@
 ---
 id: 029
 nombre: country-profile
-estado: aprobada
+estado: implementada
 hito: M1 (demografía, territorio, festivos, salario base) · M2 (reglas laborales y de economía)
 depende_de: [001, 002]
 version: 0.3
@@ -138,3 +138,4 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 | 2026-09-24 | 0.3 | Bloque H: las series `demo.*.byDecade` pasan a series por año con interpolación lineal y extremos planos (`seriesAt`). Son `demo.lifeExpectancy.byYear` (1908: 38 años; CEPAL 1950–2022) y `demo.urbanization.byYear` (censos 1938, 1951, 1973, 1993, 2005), ambas `oficial`. Nuevas entradas estimadas `gen.history.*` (año de fundación, edad de la madre y diferencia con el padre, sobrevida adulta, desviación de la edad de muerte, probabilidad de bisabuelos). `demo.parentAgeAtBirth.byDecade` sigue `por_confirmar` |
 | 2026-09-24 | 0.3 | Bloque I: nueva entrada estimada `gen.history.violentDeathShare` = 0,1 (030 R-006). `world:report` muestra el mundo frente al perfil y las entradas `por_confirmar` (§9) |
 | 2026-09-24 | 0.3 | Cierre de M1: CA-003 completo; `world:info` lista las entradas `por_confirmar` del perfil |
+| 2026-09-25 | 0.3 | Estado → implementada |

@@ -1,7 +1,7 @@
 ---
 id: 007
 nombre: population
-estado: aprobada
+estado: implementada
 hito: M1 (generación) · peldaño 4 (nacimientos y muertes)
 depende_de: [001, 003, 004, 006, 008, 009, 014, 023, 029]
 version: 0.5
@@ -134,3 +134,4 @@ Pirámide de edades, educación por estrato, ahorro por estrato y edad, y ocupac
 | 2026-09-24 | 0.5 | Bloque G: CA-003 cubierto. Explican la situación de cada adulto: `JOB_HIRED` o `INFORMAL_WORK_STARTED` si está ocupado, `JOB_LOST` si está desocupado y `RETIRED` si está pensionado. A los inactivos por estudio u oficios del hogar los explican su trayectoria de estudios y la de su hogar |
 | 2026-09-24 | 0.5 | Bloque H (030 R-005): un adulto nace en el campo con probabilidad 1 − urbanización de su año de nacimiento (`demo.urbanization.byYear`); si no, en una ciudad del catálogo `birthplaces` (v2026.09.2, con la marca `rural`). Cada persona viva gana `CITIZEN_BORN` y, si nació fuera, `MIGRATED` en su trayectoria. Sin cambios en CA |
 | 2026-09-24 | 0.5 | Cierre de M1: CA-006 se comprueba contra el propio `genWorld` del prototipo, porque la línea base solo tiene métricas tras un año. Tolerancias sobre 10 semillas: edad media ±2 años, menores ±0,03 y ahorro medio de los adultos ±15 %. Medido: 30,7 frente a 30,1 años, 0,377 frente a 0,386 y 1,95 M frente a 2,18 M COP |
+| 2026-09-25 | 0.5 | Estado → implementada |

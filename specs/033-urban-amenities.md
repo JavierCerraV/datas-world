@@ -1,7 +1,7 @@
 ---
 id: 033
 nombre: urban-amenities
-estado: borrador
+estado: aprobada
 hito: M1 (dotación inicial y nueva plantilla de mapa) · M2 (uso: horarios, capacidad, viajes a la ciudad) · peldaño 4+ (crecimiento)
 depende_de: [003, 004, 006, 016, 023, 029, 030]
 version: 0.2
@@ -160,3 +160,4 @@ No hay eventos nuevos.
 | 2026-09-24 | 0.1 | Borrador inicial a petición del usuario: cines, centros comerciales, bares, museos, bibliotecas, restaurantes, parques de diversiones, coliseos, escuelas, bancos, tiendas de barrio y estaciones de policía, con dotación por población y ley, lugares regionales fuera del mapa y una plantilla de mapa nueva |
 | 2026-09-24 | 0.1 | Decisión del usuario sobre la escala: lugares regionales en la ciudad de referencia mientras la población sea pequeña; el territorio se expande primero y la población después, por entregas, hasta tener todo lo que tiene una ciudad |
 | 2026-09-24 | 0.2 | Decisiones del usuario (§10): plantilla nueva de 80 × 50, escuela como sede de la institución educativa, bloque J en M1 y revisión del empleo. Cifra verificada de tiendas de barrio (Fenalco, 2024) |
+| 2026-09-25 | 0.2 | Estado → aprobada |
