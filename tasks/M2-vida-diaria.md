@@ -18,15 +18,15 @@ Cada cosa que les pasa queda como evento con sus causas. Ánimo, estrés, empleo
 - [x] A4. Criterios: 021 CA-004, CA-005 y CA-006. El `tick` de M0 recorre el registro sin cambiar el hash de un mundo sin sistemas.
 
 ## Bloque B — Necesidades, emociones y salud del día a día (spec 010)
-- [ ] B1. Columnas de necesidades, emociones, estrés, ánimo, deuda de sueño y enfermedad aguda; valores iniciales al crear el mundo desde la personalidad y la ficha de salud.
-- [ ] B2. Sistema `needs`: decaimiento por hora (R-001), estrés con neuroticismo y resiliencia (R-002), ánimo con retorno a la línea base (R-003), sueño y `OVERSLEPT` (R-004), emociones disparadas por eventos (R-005).
-- [ ] B3. Efectos de la ficha de salud (031 R-007) y enfermedades agudas con catálogo `acute_illnesses` (R-007): `FELL_ILL` y `RECOVERED`.
-- [ ] B4. Criterios: 010 CA-001, CA-003, CA-004, CA-005; 031 CA-006; 009 CA-004. (CA-002 y CA-006 de la 010 se miden en el bloque H con un año).
+- [x] B1. Columnas de necesidades, emociones, estrés, ánimo, deuda de sueño y enfermedad aguda; valores iniciales al crear el mundo desde la personalidad y la ficha de salud.
+- [x] B2. Sistema `needs`: decaimiento por hora (R-001), estrés con neuroticismo y resiliencia (R-002), ánimo con retorno a la línea base (R-003), deuda de sueño (R-004), emociones disparadas por eventos (R-005). `OVERSLEPT` pasa al bloque C (necesita la hora de despertar).
+- [x] B3. Efectos de la ficha de salud (031 R-007) y enfermedades agudas del perfil (`health.acute.*`, R-007): `FELL_ILL` y `RECOVERED`.
+- [x] B4. Criterios: 010 CA-003, CA-004, CA-005; 031 CA-006; 009 CA-004. (010 CA-001 en el bloque C; CA-002 y CA-006 en el bloque H con un año).
 
 ## Bloque C — Rutinas (spec 011)
 - [ ] C1. Rutinas derivadas por situación (R-001): turno del puesto, colegio en calendario A, informal, desempleado, cuidado, pensionado, niño pequeño.
 - [ ] C2. Comidas colombianas (R-002), calendario con domingos, festivos y vacaciones escolares (R-003), bloques libres para esparcimiento (R-004).
-- [ ] C3. Criterios: 011 CA-001 a CA-005.
+- [ ] C3. Criterios: 011 CA-001 a CA-005; 010 CA-001 (`OVERSLEPT` tras dos noches sin dormir, con la hora de despertar de la rutina).
 
 ## Bloque D — Movilidad y uso de los lugares (specs 016, 004)
 - [ ] D1. Paradero intermunicipal en la plaza (`transporte.paradero` pasa a M1 en el catálogo y a la plantilla `datas-world-v1`).

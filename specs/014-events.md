@@ -70,3 +70,4 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 | 2026-09-24 | 0.1 | Catálogo: `HOUSEHOLD_FORMED` (008), `STUDIES_COMPLETED` y `CHILDHOOD_EVENT` (007), para la trayectoria previa de M1. Sin cambios en reglas ni CA |
 | 2026-09-24 | 0.1 | Catálogo: `JOB_HIRED`, `INFORMAL_WORK_STARTED`, `JOB_LOST`, `RETIRED` (006, 007), `OBJECT_ACQUIRED` y `OBJECT_INHERITED` (005). Sin cambios en reglas ni CA |
 | 2026-09-24 | 0.1 | Catálogo de la historia generada (030 §5): `TOWN_FOUNDED`, `DISTRICT_FOUNDED`, `PLACE_BUILT`, `ORG_FOUNDED`, `CITIZEN_BORN`, `UNION_FORMED`, `MIGRATED`, `CITIZEN_DIED` y `HISTORICAL_CONTEXT`, que es espontáneo porque su causa es externa. Sin cambios en reglas ni CA |
+| 2026-09-25 | 0.1 | Catálogo: `HEALTH_INSURANCE_SET` y `CONDITION_DIAGNOSED` (031), `LEISURE_TAKEN_UP` (032), `FELL_ILL`, `RECOVERED` y `STRESS_PEAK` (010). Sin cambios en reglas ni CA |

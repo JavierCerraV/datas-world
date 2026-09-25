@@ -19,6 +19,18 @@ export function applyPatches(world: World, patches: readonly Patch[], source: st
     }
     const col = c[p.type][p.column];
     if (!col) throw new Error(`${source}: columna ${p.type} desconocida (${p.column})`);
+    if (p.op === 'setMany') {
+      if (p.rows.length !== p.values.length) throw new Error(`${source}: setMany con filas y valores de distinto largo`);
+      for (let k = 0; k < p.rows.length; k++) {
+        const row = p.rows[k]!;
+        const value = p.values[k]!;
+        if (!Number.isInteger(row) || row < 1 || row >= col.length) throw new Error(`${source}: fila fuera de rango (${row})`);
+        if (!Number.isFinite(value)) throw new RangeError(`${source}: valor no finito en ${p.column}[${row}]`);
+        if (p.type !== 'f32' && !Number.isInteger(value)) throw new RangeError(`${source}: ${p.column} es entera (${value})`);
+        col[row] = value;
+      }
+      continue;
+    }
     if (!Number.isInteger(p.row) || p.row < 1 || p.row >= col.length) throw new Error(`${source}: fila fuera de rango (${p.row})`);
     const value = p.op === 'set' ? p.value : col[p.row]! + p.delta;
     if (!Number.isFinite(value)) throw new RangeError(`${source}: valor no finito en ${p.column}[${p.row}]`);

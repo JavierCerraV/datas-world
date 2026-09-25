@@ -14,6 +14,11 @@ function guarded<T extends object>(target: T, path: string): T {
   const proxy = new Proxy(target, {
     get(t, key, receiver) {
       const value = Reflect.get(t, key, receiver === proxy ? t : receiver) as unknown;
+      // Lo ya congelado (p. ej. la configuración del mundo) no se puede modificar: se devuelve tal cual, como exige
+      // el invariante de Proxy para las propiedades no configurables y no escribibles.
+      const desc = Reflect.getOwnPropertyDescriptor(t, key);
+      if ((desc && !desc.configurable && !desc.writable) || (value !== null && typeof value === 'object' && Object.isFrozen(value)))
+        return value;
       if (typeof value === 'function') {
         // Métodos de Map y de arreglos tipados: se llaman sobre el objeto real, pero los mutadores se bloquean.
         const name = String(key);

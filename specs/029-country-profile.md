@@ -140,3 +140,4 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 | 2026-09-24 | 0.3 | Cierre de M1: CA-003 completo; `world:info` lista las entradas `por_confirmar` del perfil |
 | 2026-09-25 | 0.3 | Estado → implementada |
 | 2026-09-25 | 0.3 | Spec 033 (bloque J): `gen.map.template` en ambos perfiles, y en `CO-2026.09` las estimadas `amenity.nightlifeClose` (02:00), `amenity.travel.minutes` (60) y `amenity.travel.cost` (12 000 COP). Sin cambios en CA |
+| 2026-09-25 | 0.3 | Spec 010 (bloque B de M2): `needs.rates`, `needs.stress`, `needs.mood` y `health.acute.*` en ambos perfiles; `health.acute.weights` por confirmar con el INS en `CO-2026.09`. Sin cambios en CA |

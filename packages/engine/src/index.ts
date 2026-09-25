@@ -127,3 +127,24 @@ export type { CountryProfile, ProfileEntry, ProfileScope, ProfileStatus, Profile
 
 export { Runner } from './runner.ts';
 export type { Speed } from './runner.ts';
+
+export { ACTIVITY, ACTIVITY_COLUMN } from './activity.ts';
+export type { ActivityKind } from './activity.ts';
+
+export {
+  EMOTIONS,
+  EVENT_EMOTIONS,
+  NEEDS,
+  NEEDS_COLUMNS,
+  NEEDS_SYSTEMS,
+  acuteKeys,
+  defineNeedsColumns,
+  emotionPatches,
+  illnessSystem,
+  initNeeds,
+  needsParams,
+  needsSystem,
+  sleepSystem,
+  stability,
+} from './needs/index.ts';
+export type { NeedsParams } from './needs/index.ts';

@@ -154,6 +154,25 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { objectId: str, to: str, name: str }),
     text: (e) => `${e.payload.to} hereda ${e.payload.name}.`,
   }),
+  // Necesidades y salud del día a día (spec 010).
+  FELL_ILL: def<{ citizenId: string; illness: string; days: number }>({
+    baseImportance: 0.5,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, illness: str, days: int }),
+    text: (e) => `${e.payload.citizenId} se enferma (${e.payload.illness}, ${e.payload.days} días).`,
+  }),
+  RECOVERED: def<{ citizenId: string; illness: string }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, illness: str }),
+    text: (e) => `${e.payload.citizenId} se recupera (${e.payload.illness}).`,
+  }),
+  STRESS_PEAK: def<{ citizenId: string; value: number }>({
+    baseImportance: 0.5,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, value: (v) => typeof v === 'number' && v >= 0 && v <= 1 }),
+    text: (e) => `${e.payload.citizenId} llega a un estrés muy alto (${e.payload.value}).`,
+  }),
   // Ficha de salud (spec 031).
   HEALTH_INSURANCE_SET: def<{ citizenId: string; regime: string }>({
     baseImportance: 0.3,

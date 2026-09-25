@@ -52,6 +52,8 @@ export interface TickCtx {
  */
 export type Patch =
   | { op: 'set'; type: ColumnType; column: string; row: number; value: number }
+  /** Muchas celdas de una misma columna: `rows[k]` recibe `values[k]` (la forma rápida para sistemas por persona). */
+  | { op: 'setMany'; type: ColumnType; column: string; rows: readonly number[]; values: readonly number[] }
   | { op: 'add'; type: ColumnType; column: string; row: number; delta: number }
   | { op: 'entity'; id: EntityId; fields: Record<string, unknown> };
 
