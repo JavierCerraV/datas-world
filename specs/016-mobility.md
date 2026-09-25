@@ -1,7 +1,7 @@
 ---
 id: 016
 nombre: mobility
-estado: borrador
+estado: aprobada
 hito: M2
 depende_de: [003, 004, 005, 015, 021, 033]
 version: 0.2
@@ -75,3 +75,4 @@ Viajes por modo y por destino, minutos de retraso por mes, gasto en transporte p
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-25 | 0.2 | Revisión de M2 con las decisiones del usuario: modos a pie, bicicleta, moto, carro y bus intermunicipal; paradero en la plaza; viajes a La Capital (033) con tiempo y coste; el modo según los objetos, el dinero y la salud; CA-003 (viaje a La Capital) y CA-004 nuevos |
+| 2026-09-25 | 0.2 | Estado → aprobada |

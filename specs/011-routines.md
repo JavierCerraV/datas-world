@@ -1,7 +1,7 @@
 ---
 id: 011
 nombre: routines
-estado: borrador
+estado: aprobada
 hito: M2 · M5 (hábitos que la ajustan, 018)
 depende_de: [002, 004, 006, 010, 021, 029, 032]
 version: 0.2
@@ -86,3 +86,4 @@ Tiempo en cada actividad por situación (comparable con la ENUT del DANE: trabaj
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-25 | 0.2 | Revisión de M2 con las decisiones del usuario: horarios colombianos (turnos legales, calendario A, almuerzo como comida principal, domingos y festivos), búsqueda de empleo, esparcimiento de la 032 en los bloques libres, hábitos en M5; rutina derivada y no persistida; CA-004 y CA-005 nuevos |
+| 2026-09-25 | 0.2 | Estado → aprobada |

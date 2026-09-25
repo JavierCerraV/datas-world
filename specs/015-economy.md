@@ -1,7 +1,7 @@
 ---
 id: 015
 nombre: economy
-estado: borrador
+estado: aprobada
 hito: M2
 depende_de: [006, 007, 008, 021, 029, 031, 032, 033]
 version: 0.2
@@ -109,3 +109,4 @@ Todo en enteros de COP (R-001). Coste: ≈ 16 B por persona, más ≈ 40 B por d
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-25 | 0.2 | Revisión de M2 con las decisiones del usuario: quincena y descuentos de ley (salud y pensión 4 %), auxilio de transporte, tenencia de la vivienda (ECV 2024), servicios por estrato (Ley 142), cuotas moderadoras 2026, gasto de esparcimiento (032), gota a gota (20–40 % mensual), resto del país como fuente y sumidero con conservación exacta; CA-004 a CA-006 nuevos |
+| 2026-09-25 | 0.2 | Estado → aprobada |

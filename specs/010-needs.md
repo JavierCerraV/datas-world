@@ -1,7 +1,7 @@
 ---
 id: 010
 nombre: needs
-estado: borrador
+estado: aprobada
 hito: M2 (5 necesidades, emociones, estrés, ánimo, enfermedad aguda) · M3 (seguridad, autonomía, propósito)
 depende_de: [007, 009, 021, 031, 032]
 version: 0.2
@@ -113,3 +113,4 @@ Distribuciones de necesidades, emociones, estrés y ánimo en la prueba de 100 p
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-25 | 0.2 | Revisión de M2 con las decisiones del usuario: 5 necesidades en M2 (seguridad, autonomía y propósito en M3); 5 emociones con nombre, con valencia y activación derivadas; efectos de la ficha de salud (031 R-007); enfermedades agudas con catálogo; CA-002 alineado con la tolerancia del prototipo; columnas (ADR-005); sin diagnósticos (R-008) |
+| 2026-09-25 | 0.2 | Estado → aprobada |
