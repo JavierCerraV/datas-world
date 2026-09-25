@@ -22,11 +22,11 @@ Cada conducta se explica con la cadena del documento rector §12. La batería 04
 - [x] MF0.2 ADR-007 (motor funcional-contextual) y ADR-008 (historia de aprendizaje sintética).
 - [x] MF0.3 009 v1.0 en revisión (`specs/propuestas/`), 035 en revisión, borradores 036–042.
 - [x] MF0.4 Registro de preguntas abiertas; glosario, hoja de ruta, referencia del prototipo y plantilla de specs.
-- [ ] MF0.5 Aprobación del usuario: 009 v1.0, 035 y este plan.
+- [x] MF0.5 Aprobación del usuario: 009 v1.0, 035 y este plan.
 
 ## Bloque MF1 — Temperamento y adaptador (009 v1.0; rama `mf/1-temperamento`)
 Specs: 009 v1.0 (aprobada), 035 (aprobada).
-- [ ] MF1.1 Mover la propuesta a `specs/009-temperament.md`; 009 v0.3 → `obsoleta`; actualizar `specs:` de los `MODULE.md` afectados.
+- [x] MF1.1 Mover la propuesta a `specs/009-temperament.md`; 009 v0.3 → `obsoleta`; actualizar `specs:` de los `MODULE.md` afectados.
 - [ ] MF1.2 Catálogos:
   - `personality_traits` 2026.10.1: solo Big Five;
   - `temperament_params` 2026.10.1: nuevo, con `modula`, mapeo, `residualSd` y `scale`;

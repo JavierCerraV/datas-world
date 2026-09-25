@@ -1,15 +1,15 @@
 ---
 id: 009
 nombre: temperament
-estado: en-revision
-hito: MF (motor funcional, bloque MF1)
+estado: aprobada
+hito: MF (bloque MF1)
 depende_de: [001, 023, 035]
 version: 1.0
 ---
 
 # 009 — Temperamento y predisposiciones
 
-> **Propuesta de versión mayor.** Sustituye a `specs/009-personality.md` v0.3 cuando el usuario la apruebe. Mientras tanto vive en `specs/propuestas/` porque la v0.3 es el contrato de 5 módulos con código (needs, catalogs, leisure, personality, population): pasar el archivo vigente a `en-revision` haría fallar los guardarraíles (regla de oro 1). Al aprobarla, se mueve a `specs/009-temperament.md`, la v0.3 pasa a `obsoleta` y los `MODULE.md` citan la nueva. Ver `docs/investigacion/impacto-motor-funcional.md` §5.
+> Sustituye a la v0.3 "Personalidad y valores" (`specs/obsoletas/009-personality-v0.3.md`). Aprobada por el usuario el 2026-09-25; se implementa en el bloque MF1 (`tasks/MF-motor-funcional.md`).
 
 ## 1. Propósito
 Diferencias individuales relativamente estables que **parametrizan cómo aprende** una persona (documento rector §13; ADR-007). El temperamento no produce conducta: fija la magnitud y la velocidad de los mecanismos de aprendizaje de las capas 2 a 5 (specs 036–039) y los **valores iniciales** de estados aprendidos (descuento temporal, variabilidad). La conducta sale solo de la capa 6 (spec 040), que no puede leer el temperamento (R-006, CA-B).
@@ -153,3 +153,4 @@ Media, desviación típica y extremos por descriptor y parámetro; matriz de cor
 | 2026-09-24 | 0.2 | Big Five + extras, valores, afrontamiento derivado (aprobada) |
 | 2026-09-24 | 0.3 | Implementación del bloque E de M1 (catálogos `personality_traits` y `personal_values`) |
 | 2026-09-25 | 1.0 | Reescritura como "Temperamento y predisposiciones" (reorientación funcional-contextual, ADR-007): el Big Five queda como descriptor y fuente de generación; 8 parámetros de temperamento que solo modulan el aprendizaje, con `modula`; se eliminan impulsividad, sensibilidad social, necesidad de aprobación, honestidad, resiliencia, afrontamiento y valores escalares; guardarraíl anticircularidad verificable; criterios CA-A a CA-H. Estado `en-revision`, en `specs/propuestas/` |
+| 2026-09-25 | 1.0 | Estado → aprobada |
