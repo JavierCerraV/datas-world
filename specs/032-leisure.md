@@ -4,7 +4,7 @@ nombre: leisure
 estado: aprobada
 hito: M1 (ficha inicial) · M2 (actividades en la rutina y gasto) · M3 (con amigos) · M5 (hábitos que cambian)
 depende_de: [004, 007, 009, 010, 011, 012, 015, 023, 029, 031, 033]
-version: 0.2
+version: 0.3
 ---
 
 # 032 — Esparcimiento
@@ -121,7 +121,7 @@ Coste estimado: 4 actividades de media × ≈ 40 B = 160 B por persona. Para 200
 | `leisure.popularity` (por actividad) | personas de 12 años o más en los últimos 12 meses: cine 0,40 (2016; 0,33 en 2020, año de pandemia); bibliotecas 0,196 (2016; 0,126 en 2020); leer libros 0,50 (2020, 3,9 libros de media). Museos, conciertos y práctica deportiva: estimado | DANE, Encuesta de Consumo Cultural (ECC) 2016 y 2020 | oficial (cine, bibliotecas, lectura) · estimado (resto) |
 | `leisure.freeTime` | participación en vida social 0,749 (hombres) y 0,726 (mujeres); en vida cultural y deportiva 0,334 y 0,271, con 1 h 38 min al día de media entre quienes participan. Horas por edad y ocupación: estimado | DANE, Encuesta Nacional de Uso del Tiempo (ENUT) 2024–2025 (citada en prensa) | oficial (participación) · estimado (horas por edad) |
 | `LEISURE_BUDGET_SHARE` | recreación y cultura = 3,1 % del gasto de los hogares (total nacional); por estrato, estimado | DANE, Encuesta Nacional de Presupuestos de los Hogares (ENPH) 2016–2017 | oficial (total) · estimado (por estrato) |
-| `LEISURE_MIN`, `LEISURE_MAX` | 2 y 6 | estimado | estimado |
+| `LEISURE_MIN`, `LEISURE_MAX` | 2 y 8 (v0.3; antes 6) | estimado | estimado |
 | pesos de rasgos y valores | por actividad | estimado; para revisar con expertos en psicología (como la tabla de rasgos de la 009) | estimado |
 
 ## 9. Métricas y observabilidad
@@ -145,3 +145,4 @@ Alerta si una actividad no la practica nadie o si todos practican lo mismo.
 | 2026-09-24 | 0.1 | Borrador inicial a petición del usuario: ficha de esparcimiento de cada persona (arte, bailar, salir con amigos, voluntariado, salir a cenar y otras), con catálogo de actividades, generación coherente con personalidad, estrato, salud y oferta de lugares, y uso en la rutina desde M2 |
 | 2026-09-24 | 0.2 | Decisiones del usuario (§10) y cifras verificadas (§8): ECC 2016 y 2020 (cine, bibliotecas, lectura), ENUT 2024–2025 (participación en vida social, cultural y deportiva) y ENPH 2016–2017 (recreación y cultura, 3,1 % del gasto) |
 | 2026-09-25 | 0.2 | Estado → aprobada |
+| 2026-09-25 | 0.3 | Implementación del bloque J5 y J6. Calibración: `LEISURE_MAX` pasa de 6 a 8 (estimado), porque con 6 el recorte bajaba la práctica de actividades populares por debajo de su popularidad. Precisiones: la probabilidad de cada actividad se normaliza por la media de los factores personales en el mundo (conserva la popularidad del perfil); los costes van por niveles (`leisure.costByLevel`) y el gimnasio es una mensualidad; el ingreso del hogar se aproxima con sueldos formales, informales y pensión en salarios mínimos hasta la 015; las actividades solo regionales cuestan el viaje y tienen el 30 % de la frecuencia; una afición puede quedar en 0 veces al mes si no alcanzan el dinero o el tiempo. Medido en 20 mundos: 6 actividades por persona, cine 0,38 y lectura 0,48 (±0,08 de la ECC), correlaciones de 0,42 (extraversión y compañía) y 0,40 (apertura y cultura). Sin cambios en CA |

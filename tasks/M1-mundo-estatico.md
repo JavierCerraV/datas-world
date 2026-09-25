@@ -63,8 +63,8 @@ Requiere las specs 031, 032 y 033 aprobadas. Orden: primero la dotación (cambia
 - [x] J2. Plantilla de mapa `DATAS_WORLD_V1` (80 × 50, plaza central) para el perfil colombiano, con fila en la spec 003; el prototipo conserva la suya (033 CA-004).
 - [x] J3. Organizaciones de los lugares nuevos (institución educativa con dos sedes) y recalibración del empleo (006 CA-001 con más puestos formales). La informalidad pasa de 0,53 a ≈ 0,46 sin tocar parámetros.
 - [x] J4. Ficha de salud (031): afiliación según el empleo y el hogar, hábitos, peso, discapacidad y condiciones con `CONDITION_DIAGNOSED`; hipertensión y diabetes en los antepasados. 031 CA-001 a CA-005 en verde sobre 20 mundos.
-- [ ] J5. Ficha de esparcimiento (032): catálogo `leisure_activities`, afinidades según personalidad, estrato, salud y oferta, con `LEISURE_TAKEN_UP`.
-- [ ] J6. `world:report --health`, `--leisure` y `--places`; `citizen:report` con las fichas; nuevo mundo de ejemplo si cambia el esquema (027 R-011).
+- [x] J5. Ficha de esparcimiento (032): catálogo `leisure_activities`, afinidades según personalidad, estrato, salud y oferta, con `LEISURE_TAKEN_UP`. 032 CA-001 a CA-005 en verde.
+- [x] J6. `world:report --health`, `--leisure` y `--places`; `citizen:report` con las fichas. El esquema de la base no cambió (las fichas van en entidades y columnas), así que el mundo de ejemplo de M1 sigue siendo válido y su prueba de carga pasa.
 
 ## Cierre de M1
 - [x] 023 CA-001 y CA-002 con población: dos procesos, mismo hash; semillas distintas dan hashes distintos. CA-001 hecho en el bloque I (100 personas, 30 días) y hashes distintos con 001 CA-005. La parte del 50 % de la CA-002 pasa a M2, porque necesita la vida diaria.

@@ -89,6 +89,18 @@ export interface Citizen extends BaseEntity {
   ancestor?: boolean;
   /** Condiciones crónicas (spec 031), en orden de diagnóstico. */
   conditions?: HealthCondition[];
+  /** Ficha de esparcimiento (spec 032), en orden de afinidad. */
+  leisure?: LeisureInterest[];
+}
+
+/** Afición de la ficha de esparcimiento (spec 032): clave de `leisure_activities`, afinidad y frecuencia. */
+export interface LeisureInterest {
+  key: string;
+  /** [0,1] cuánto le gusta. */
+  affinity: number;
+  /** Veces al mes, de media (0–30). */
+  perMonth: number;
+  since: WorldMinute;
 }
 
 /** Condición crónica de la ficha de salud (spec 031): clave de `health_conditions`, fecha y control. */

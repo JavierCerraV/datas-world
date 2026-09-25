@@ -142,8 +142,23 @@ describe('citizen:report (030 CA-003)', () => {
     expect(r.code).toBe(0);
     expect(r.out).toContain('Familia');
     expect(r.out).toContain('Línea de vida');
+    // Fichas de salud (031) y de esparcimiento (032).
+    expect(r.out).toContain('Salud');
+    expect(r.out.some((l) => /^ {2}Afiliación: /.test(l))).toBe(true);
+    expect(r.out).toContain('Esparcimiento');
     expect(cli('citizen:report', 'CIT-999999', '--db', db).code).toBe(2);
     expect(cli('citizen:report', '--db', db).code).toBe(2);
+  });
+});
+
+describe('world:report con las fichas y la dotación (J6)', () => {
+  it('--health, --leisure y --places resumen salud, esparcimiento y lugares', () => {
+    const out = cli('world:report', '--health', '--leisure', '--places', '--db', db).out;
+    expect(out.some((l) => /^ {2}Afiliación: .*subsidiado/.test(l))).toBe(true);
+    expect(out.some((l) => /^ {2}Hipertensión arterial: \d/.test(l))).toBe(true);
+    expect(out.some((l) => /^Ir a cine +\d/.test(l))).toBe(true);
+    expect(out.some((l) => /^ {2}Tienda de barrio +3 de 3/.test(l))).toBe(true);
+    expect(out.some((l) => /En la ciudad de referencia: .*Cine Multiplex/.test(l))).toBe(true);
   });
 });
 

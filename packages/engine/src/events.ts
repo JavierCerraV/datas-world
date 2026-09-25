@@ -167,6 +167,13 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { citizenId: str, condition: str, name: str, cie10: str }),
     text: (e) => `A ${e.payload.citizenId} le diagnostican ${e.payload.name.toLowerCase()} (${e.payload.cie10}).`,
   }),
+  // Ficha de esparcimiento (spec 032).
+  LEISURE_TAKEN_UP: def<{ citizenId: string; activity: string; name: string }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, activity: str, name: str }),
+    text: (e) => `${e.payload.citizenId} empieza a ${e.payload.name.toLowerCase()}.`,
+  }),
   // Historia generada (spec 030), de 1900 al presente.
   TOWN_FOUNDED: def<{ placeId: string; name: string; year: number }>({
     baseImportance: 1,
