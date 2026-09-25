@@ -16,16 +16,22 @@ Genera el mundo inicial a partir de semilla y parámetros. Cada generador (geogr
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 001 | — | todos |
-| 023 | — | todos |
+| 001 | CA-005 (con `world:new`, en `apps/cli`) | — |
+| 023 | CA-001 con población (en `apps/cli`) | CA-002 (M2) |
 
 
 ## 3. API pública
 `src/index.ts` reexporta la API de cada submódulo, cada uno con su `MODULE.md`:
 - `src/catalogs/`: catálogos de datos (ADR-006);
-- `src/country/`: perfil de país y festivos (spec 029).
+- `src/country/`: perfil de país y festivos (spec 029);
+- `src/geography/`, `src/places/`, `src/organizations/`, `src/personality/`, `src/population/`, `src/employment/`, `src/objects/`, `src/history/`: los generadores del mundo.
 
-Los generadores del mundo llegan en los bloques B a H de M1.
+Y en la raíz, `src/generate.ts`:
+
+| Símbolo | Descripción |
+|---|---|
+| `generateWorld({ seed, profileId?, population?, name?, epoch?, tickMinutes?, catalogs? })` → `GeneratedWorld` | La generación completa de M1, en el orden de abajo. Devuelve el mundo, todos los eventos de la creación ordenados por id (`WORLD_CREATED` y el pasado) y los resultados de cada paso |
+| `DEFAULT_EPOCH`, `HOLIDAY_YEARS` | `2026-01-01T00:00` (030 §3) y 10 años de festivos en la configuración |
 
 ## 4. Diseño interno y decisiones
 - **Orden de generación** (spec 007 R-001 y spec 030 R-001): geografía → lugares → organizaciones → personalidad → hogares y población → empleo → objetos → historia. Cada paso usa su flujo `gen:<paso>` o `hist:<paso>`.
@@ -35,7 +41,7 @@ Los generadores del mundo llegan en los bloques B a H de M1.
 Mismo seed → mismo mundo. Generación explicada: cada situación inicial tiene eventos de backstory.
 
 ## 6. Cómo se prueba
-Por definir al implementar.
+Cada submódulo tiene sus pruebas junto al código. `src/testing.ts` (no exportado) monta mundos completos con `generateWorld` y carga los catálogos una sola vez.
 
 ## 7. Paridad con el prototipo
 Porta `genWorld`, `buildPlaces`, `genPopulation`, `newAgent`, `genJobs`, `genRelations`, `genObjects`, `genFacts`.
@@ -56,3 +62,4 @@ Porta `genWorld`, `buildPlaces`, `genPopulation`, `newAgent`, `genJobs`, `genRel
 | 2026-09-24 | m1/f-poblacion | 007, 008 | Submódulo `population` (hogares, personas, apariencia y trayectoria) y 5 catálogos de población |
 | 2026-09-24 | m1/g-empleo-objetos | 005, 006 | Submódulos `employment` y `objects`; `src/testing.ts` monta un mundo de M1 completo para las pruebas |
 | 2026-09-24 | m1/h-historia | 030 | Submódulo `history` (historia desde 1900); `src/testing.ts` añade la historia al final y devuelve `hist`; `src/index.ts` exporta `generateHistory` y `lineageOf` |
+| 2026-09-24 | m1/i-cli | 001, 007, 029, 030 | `src/generate.ts`: `generateWorld({ seed, profileId?, population?, name?, epoch?, tickMinutes?, catalogs? })` hace la generación completa de M1 (configuración con perfil, referencias de catálogos y festivos de `HOLIDAY_YEARS` años desde el epoch `DEFAULT_EPOCH`) y devuelve los eventos ordenados por id, listos para guardar. `src/testing.ts` la usa. La usan `world:new` y `bench` |

@@ -9,12 +9,29 @@ const DAY = 1440;
 const YEAR = 365 * DAY;
 const MAX_AGE = 100;
 const MIGRATION_EFFECTS = ['ruralUrbanMigration', 'forcedDisplacement', 'displacement'] as const;
-/** Efectos de muerte del catálogo, a quién afectan y cómo se nombra la causa. */
-const DEATH_EFFECTS: { effect: string; applies: (age: number, sex: string, rural: boolean) => boolean; cause: string }[] = [
-  { effect: 'violentDeathRural', applies: (_a, _s, rural) => rural, cause: 'violencia' },
-  { effect: 'violentDeathYoungMen', applies: (a, s) => s === 'M' && a >= 15 && a < 40, cause: 'violencia' },
-  { effect: 'deathElderly', applies: (a) => a >= 65, cause: 'enfermedad' },
+/**
+ * Efectos de muerte del catálogo, a quién afectan y cómo se nombra la causa. Un efecto violento multiplica
+ * el riesgo de muerte violenta (una parte `violentDeathShare` del total); uno no violento, el de muerte por
+ * cualquier causa (p. ej. la pandemia en mayores).
+ */
+const DEATH_EFFECTS: {
+  effect: string;
+  violent: boolean;
+  applies: (age: number, sex: string, rural: boolean) => boolean;
+  cause: string;
+}[] = [
+  { effect: 'violentDeathRural', violent: true, applies: (_a, _s, rural) => rural, cause: 'violencia' },
+  { effect: 'violentDeathYoungMen', violent: true, applies: (a, s) => s === 'M' && a >= 15 && a < 40, cause: 'violencia' },
+  { effect: 'deathElderly', violent: false, applies: (a) => a >= 65, cause: 'enfermedad' },
 ];
+
+/** Fracción de las muertes que se atribuye a un hecho con efecto k (exceso de riesgo sobre el total). */
+export function attributableShare(k: number, violent: boolean, violentShare: number): number {
+  if (k <= 1) return 0;
+  if (!violent) return 1 - 1 / k;
+  const excess = violentShare * (k - 1);
+  return excess / (1 + excess);
+}
 
 export interface LivesInput {
   world: World;
@@ -166,8 +183,7 @@ export function generateLives(inp: LivesInput): WorldEvent[] {
       const h = inp.history.find(
         (x) => year >= x.startYear && year <= x.endYear && (x.effects[d.effect] ?? 1) > 1 && (inp.context.get(x.key)?.at ?? 0) <= at,
       );
-      // Si el hecho multiplica el riesgo por k, una fracción 1 − 1/k de las muertes de ese periodo se le atribuye.
-      if (h && r.chance(1 - 1 / h.effects[d.effect]!)) {
+      if (h && r.chance(attributableShare(h.effects[d.effect]!, d.violent, P.violentDeathShare))) {
         cause = d.cause;
         causes.push({ event: inp.context.get(h.key)!.id, weight: 0.8 });
         break;

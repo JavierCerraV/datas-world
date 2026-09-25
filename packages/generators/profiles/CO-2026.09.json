@@ -86,6 +86,7 @@
     {"key": "gen.history.fatherAgeGap", "value": [0, 8], "validFrom": "1900-01-01", "source": "Estimado: el padre es de 0 a 8 años mayor que la madre", "status": "estimado"},
     {"key": "gen.history.adultDeathBonusFactor", "value": 0.45, "validFrom": "1900-01-01", "source": "Estimado: la edad media de muerte de quien llega a adulto es e0 + 0,45·(80 − e0), porque la esperanza de vida al nacer incluye la mortalidad infantil", "status": "estimado"},
     {"key": "gen.history.deathAgeSd", "value": 12, "validFrom": "1900-01-01", "source": "Estimado: dispersión de la edad de muerte", "status": "estimado"},
+    {"key": "gen.history.violentDeathShare", "value": 0.1, "validFrom": "1900-01-01", "source": "Estimado: proporción de muertes violentas que multiplica un efecto de violencia k (se atribuye al hecho una fracción s·(k − 1)/(1 + s·(k − 1)) de las muertes). Con k = 2 da ≈ 9 %, del orden de los ≈ 200 000 muertos de La Violencia frente a ≈ 1,8 millones de muertes en esos años", "status": "estimado"},
     {"key": "gen.history.greatGrandparentP", "value": 0.35, "validFrom": "1900-01-01", "source": "Estimado: probabilidad de registrar a los bisabuelos de una rama (la genealogía puede omitirlos, spec 030 CA-003); mantiene la historia por debajo de 2 MB", "status": "estimado"}
   ]
 }

@@ -51,6 +51,7 @@
     {"key": "gen.history.fatherAgeGap", "value": [0, 8], "validFrom": "1900-01-01", "source": "Como el perfil colombiano", "status": "estimado"},
     {"key": "gen.history.adultDeathBonusFactor", "value": 0.45, "validFrom": "1900-01-01", "source": "Como el perfil colombiano", "status": "estimado"},
     {"key": "gen.history.deathAgeSd", "value": 12, "validFrom": "1900-01-01", "source": "Como el perfil colombiano", "status": "estimado"},
+    {"key": "gen.history.violentDeathShare", "value": 0.1, "validFrom": "1900-01-01", "source": "Como el perfil colombiano", "status": "estimado"},
     {"key": "gen.history.greatGrandparentP", "value": 0.35, "validFrom": "1900-01-01", "source": "Como el perfil colombiano", "status": "estimado"}
   ]
 }

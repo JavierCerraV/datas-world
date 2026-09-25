@@ -1,13 +1,16 @@
 // `pnpm bench` (bloque E3): ticks/s y memoria de un mundo vacío durante N días (spec 002 CA-005),
 // solo con el motor y con el motor más SQLite (flush cada FLUSH_TICKS, instantánea diaria).
+// Bloque I: también el tiempo y el tamaño de `world:new` con el mundo de M1 completo (030 CA-007).
 import { mkdtempSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { ENGINE_VERSION, MINUTES_PER_DAY, Runner, createRng, createWorld } from '@datas-world/engine';
 import type { WorldConfig } from '@datas-world/engine';
+import { generateWorld } from '@datas-world/generators';
 import { WorldRepository, WorldSession, closeDb, openWorldDb } from '@datas-world/persistence';
-import type { Io } from './commands.ts';
+import type { Io } from './common.ts';
+import { saveNewWorld } from './world-new.ts';
 
 const config: WorldConfig = {
   name: 'Bench',
@@ -100,13 +103,48 @@ export function bench(args: string[], io: Io): void {
   }
 
   const results = [engine, sqlite];
+  const creation = measureWorldNew();
   const maxRssMB = +(process.resourceUsage().maxRSS / 1024).toFixed(1);
   const passes = (r: Result) => r.ms < 2000 && r.daysStarted === days;
-  if (v.json) io.out(JSON.stringify({ results, maxRssMB }));
-  else reportText(results, days, maxRssMB, passes, io);
+  const creationOk = creation.ms < WORLD_NEW_MAX_MS && creation.dbMB < WORLD_NEW_MAX_MB;
+  if (v.json) io.out(JSON.stringify({ results, creation, maxRssMB }));
+  else {
+    reportText(results, days, maxRssMB, passes, io);
+    io.out(
+      `world:new       ${creation.citizens} personas, ${creation.ancestors} antepasados, ${creation.events} eventos en ` +
+        `${creation.ms} ms · base ${creation.dbMB} MB · 030 CA-007 ${creationOk ? '✔' : '✘'}`,
+    );
+  }
   const failed = results.filter((r) => !passes(r));
   if (v.check && failed.length > 0) {
     throw new Error(`002 CA-005 no se cumple en: ${failed.map((r) => `${r.mode} (${r.ms} ms)`).join(', ')}`);
+  }
+  if (v.check && !creationOk) {
+    throw new Error(`030 CA-007 no se cumple: world:new en ${creation.ms} ms y base de ${creation.dbMB} MB`);
+  }
+}
+
+/** 030 CA-007: `world:new` con 200 personas en < 5 s, y la base entera (historia incluida) en < 2 MB. */
+const WORLD_NEW_MAX_MS = 5000;
+const WORLD_NEW_MAX_MB = 2;
+
+function measureWorldNew() {
+  const dir = mkdtempSync(join(tmpdir(), 'mundo-bench-'));
+  try {
+    const path = join(dir, 'world.db');
+    const t0 = performance.now();
+    const g = generateWorld({ seed: 482917 });
+    saveNewWorld(path, g.world, g.events);
+    const ms = Math.round(performance.now() - t0);
+    return {
+      ms,
+      citizens: g.pop.citizenIds.length,
+      ancestors: g.hist.ancestorIds.length,
+      events: g.events.length,
+      dbMB: +(statSync(path).size / MB).toFixed(2),
+    };
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
   }
 }
 

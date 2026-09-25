@@ -80,3 +80,4 @@ interface ExternalInput {
 | 2026-09-24 | 0.2 | Estado → aprobada |
 | 2026-09-23 | 0.2 | Decisión B0: xoshiro128** sembrado con splitmix32; claves de flujo de 64 bits en lugar de `hash32` para evitar colisiones entre millones de flujos; tipo `RngState` y `restoreRng`. Sin cambios en reglas ni CA |
 | 2026-09-24 | 0.2 | Precisión de la implementación (bloque E, R-004): al retomar un mundo guardado, `Runner.continueInputsAfter(última entrada)` hace que la numeración `seq` del minuto actual continúe, para que `(at, seq)` no se repita entre sesiones. Sin cambios en CA |
+| 2026-09-24 | 0.2 | Bloque I de M1: CA-001 cubierto tal como está escrito, con un mundo de 100 personas generado y avanzado 30 días en dos procesos. De CA-002 se comprueba por ahora que semillas distintas dan hashes distintos (001 CA-005); la parte del 50 % de personas con un evento distinto el día 30 necesita la vida diaria de M2. Sin cambios en CA |

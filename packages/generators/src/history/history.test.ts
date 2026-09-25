@@ -121,6 +121,7 @@ describe('spec 030: historia generada (perfil colombiano)', () => {
 describe('spec 030 CA-005: origen rural y migraciones (agregado de 20 mundos)', () => {
   const rural = new Map<number, [number, number]>();
   const migrations = new Map<number, number>();
+  const violentDeaths: [number, number] = [0, 0];
   for (const seed of seeds(7000)) {
     const { world, pop, hist } = buildWorld(DEFAULT_PROFILE, seed);
     for (const id of [...pop.citizenIds, ...hist.ancestorIds]) {
@@ -132,9 +133,13 @@ describe('spec 030 CA-005: origen rural y migraciones (agregado de 20 mundos)', 
       const [r, n] = rural.get(d) ?? [0, 0];
       rural.set(d, [r + (isRural(c.birthplace ?? '') ? 1 : 0), n + 1]);
     }
-    for (const e of hist.events as WorldEvent[]) if (e.type === 'MIGRATED') {
+    for (const e of hist.events as WorldEvent[]) {
       const y = clock.yearOf(e.at);
-      migrations.set(y, (migrations.get(y) ?? 0) + 1);
+      if (e.type === 'MIGRATED') migrations.set(y, (migrations.get(y) ?? 0) + 1);
+      if (e.type === 'CITIZEN_DIED' && y >= 1946 && y <= 1958) {
+        violentDeaths[1]++;
+        if ((e.payload as { cause: string }).cause === 'violencia') violentDeaths[0]++;
+      }
     }
   }
 
@@ -154,5 +159,11 @@ describe('spec 030 CA-005: origen rural y migraciones (agregado de 20 mundos)', 
     expect(rate(1946, 1958)).toBeGreaterThan(rate(1934, 1945));
     expect(rate(1998, 2004)).toBeGreaterThan(rate(1990, 1997));
     expect(rate(1998, 2004)).toBeGreaterThan(rate(2005, 2012));
+  });
+
+  it('R-006: en La Violencia, las muertes violentas son una fracción moderada (≈ 200 000 de ≈ 1,8 millones)', () => {
+    const share = violentDeaths[0] / violentDeaths[1];
+    expect(share).toBeGreaterThan(0.02);
+    expect(share).toBeLessThan(0.15);
   });
 });
