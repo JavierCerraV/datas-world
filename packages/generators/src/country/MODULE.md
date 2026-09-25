@@ -16,7 +16,7 @@ Perfil de país (spec 029): carga y valida los perfiles (`CO-2026.09` y `prototi
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 029 | CA-001, CA-002, CA-003 (salvo que `world:info` liste las pendientes, que llega en el bloque I), CA-004 | — |
+| 029 | CA-001, CA-002, CA-003 (la lista en `world:info` se prueba en `apps/cli`), CA-004 | — |
 
 ## 3. API pública
 Desde `@datas-world/generators`:

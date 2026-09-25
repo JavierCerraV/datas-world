@@ -42,6 +42,8 @@ describe('world:new con el perfil colombiano', () => {
   it('guarda el mundo completo y al cargarlo el hash es el generado (027 CA-001 y CA-006 con población)', () => {
     const info = JSON.parse(cli('world:info', '--json', '--db', db).out[0]!) as Record<string, number | string>;
     expect(info).toMatchObject({ profile: 'CO-2026.09', now: 0, organizations: 8 });
+    expect(info.pending).toContain('stratum.share'); // 029 CA-003: world:info lista las cifras por confirmar
+    expect(cli('world:info', '--db', db).out.some((l) => /cifras por confirmar \(\d+\): .*stratum\.share/.test(l))).toBe(true);
     expect(info.citizens).toBeGreaterThanOrEqual(190);
     expect(info.ancestors).toBeGreaterThan(info.citizens as number);
     expect(info.hash).toBe(stateHash(generateWorld({ seed: 482917 }).world));
