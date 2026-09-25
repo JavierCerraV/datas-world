@@ -2,6 +2,8 @@
 
 `prototipo/index.html` es **el camino**: la simulación que se construye en TypeScript debe comportarse, como mínimo, como el prototipo, y mejorarlo donde las specs lo pidan. Este documento fija qué significa eso de forma comprobable.
 
+> **Alcance desde el 2026-09-25 (ADR-007).** El prototipo sigue siendo la referencia de **mundo** (geografía, lugares, población, hogares), **economía** y **parte visual**. Para la **conducta** (decisiones, emociones, estrés, ánimo, afrontamiento) deja de ser la referencia de paridad: su personalidad a utilidad es justo lo que el motor funcional-contextual sustituye. La referencia de conducta es la batería de validación conductual (spec 042). En la línea base, las métricas de ánimo y estrés pasan a ser comprobaciones de cordura (sin NaN, rangos amplios), no tolerancias de paridad. Las filas de `newAgent` (rasgos y valores), `decide`, `updateNeeds` y `bump` del mapa se leen con esta salvedad.
+
 ## Reglas
 
 1. **El prototipo es de solo lectura.** Los guardarraíles bloquean su edición. Si hay que cambiarlo (por ejemplo, para explorar una idea antes de especificarla), el usuario crea `.guardrails/permitir-referencia`, se hace el cambio, se regenera la línea base y se borra el archivo.

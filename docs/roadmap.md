@@ -6,10 +6,11 @@ Cada hito termina con una **demostración** y una **prueba de validación**. No 
 |---|---|---|---|
 | **M0 — Arranque** | Repo en GitHub, guardarraíles activos, tooling, CI, RNG, reloj, eventos base, persistencia base | 001, 002, 014, 023, 027 | `pnpm check` y CI verdes; misma semilla → mismo hash; reloj avanza 1 año en CLI |
 | **M1 — Mundo estático** | Generar geografía, lugares, objetos, organizaciones, población, hogares, personalidad, con el perfil de Colombia, catálogos (ADR-006) e historia generada desde 1900; ficha de salud, esparcimiento y dotación urbana (bloque J, decisión del usuario del 2026-09-24) | 003–009, 029, 030, 031–033 | `world:new` crea 200 personas coherentes con el perfil colombiano; informe de población comparado con el DANE (`world:report`); mapa en la CLI (`world:map`). El visor web llega en M4 |
-| **M2 — Vida diaria** | Necesidades, rutinas, economía, movilidad, motor de decisiones, niveles de simulación; comando `validate:parity` | 010, 011, 015, 016, 017, 021 | Personas van a trabajar, comen, duermen, cobran, gastan; ánimo, estrés, empleo y dinero dentro de la tolerancia del prototipo |
-| **M3 — Vida social** | Relaciones asimétricas, memoria, causalidad, historia, conocimiento/creencias | 012, 013, 019, 020, 025 | **Prueba: 100 ciudadanos × 1 año**; paridad completa con el prototipo (corrigiendo sus desviaciones conocidas); informes de vida explicables; rumores con verdad ≠ creencia |
+| **M2 — Vida diaria** | Necesidades, rutinas, economía, movilidad, motor de decisiones, niveles de simulación; comando `validate:parity` | 010, 011, 015, 016, 017, 021 | Personas van a trabajar, comen, duermen, cobran, gastan; empleo y dinero dentro de la tolerancia del prototipo (ánimo y estrés pasan a comprobación de cordura, ADR-007 §7). Los bloques F–H se cierran con el adaptador de temperamento (MF1) |
+| **MF — Motor funcional-contextual** | La conducta sale de la historia de aprendizaje (ADR-007, ADR-008): temperamento como parámetros de aprendizaje; funciones directas y derivadas; red relacional; reglas y valores; eventos privados, PNR y flexibilidad; selección por fuentes de control; desarrollo sintético | 009 v1.0, 035–042 | Batería de validación conductual (042) completa; cadena funcional §12 reconstruible para cualquier conducta; ≤ 20 KB por persona. MF1 va antes de cerrar M2; MF2–MF8 después. Plan: `tasks/MF-motor-funcional.md` |
+| **M3 — Vida social** | Relaciones asimétricas, memoria, causalidad, historia, conocimiento/creencias, escritas sobre el motor funcional (012 y 025 se reescriben) | 012, 013, 019, 020, 025 | **Prueba: 100 ciudadanos × 1 año**; paridad con el prototipo en mundo y economía; batería 042 en verde; informes de vida con explicación funcional; rumores con verdad ≠ creencia |
 | **M4 — Observación local** | API, SSE, visor pixel art (portado del prototipo), inspector, línea temporal | 022, 024 | `pnpm dev`: el mundo corre en local y se observa desde el navegador igual o mejor que el prototipo |
-| **M5 — Aprendizaje y experimentos** | Hábitos, aprendizaje, experimentos A/B con semillas, rewind/replay completo | 018, 028, 023 | Mismo mundo con y sin un evento (p. ej. JOB_LOST) → trayectorias comparables |
+| **M5 — Experimentos** | Experimentos A/B con semillas, rewind/replay completo (el aprendizaje y los hábitos se adelantan al hito MF; 018 queda obsoleta) | 028, 023 | Mismo mundo con y sin un evento (p. ej. JOB_LOST) → trayectorias comparables |
 | **M6 — LLM nivel 4** | Gateway LLM, diálogos y diarios, propuestas validadas | 026 | Persona observada escribe diario coherente con sus memorias; replay sin llamadas |
 | **M7 — Escala** | 1 000–10 000 personas, perfiles de rendimiento, posible cambio de plan | 021, 027 | Benchmark publicado; decisión sobre servidor |
 | **Publicación (diferida)** | Despliegue en Clouding según `docs/despliegue-clouding.md` | — | Cuando se decida; la arquitectura no cambia |
@@ -24,7 +25,7 @@ Los hitos se agrupan en **peldaños**. Cada peldaño añade capacidades al mundo
 | 0 | M0 | — | `clock` | Mismo hash con la misma semilla; 1 año en CLI |
 | 1 | M1–M2 | 60–100 | `needs`, `routines`, `economy`, `mobility` | `pnpm cli validate:parity` dentro de tolerancia |
 | 2 | M3–M4 | 200 | `relationships`, `memory` (episódica), `beliefs` | 100 × 1 año; 5 informes de vida explicables |
-| 3 | M5 | 500 | `learning`, `consolidation`, `conflict` | Experimento A/B con y sin JOB_LOST; con y sin `consolidation` (spec 028 CA-003) |
+| 3 | M5 | 500 | `consolidation`, `conflict` (`learning` se adelanta al hito MF, entre los peldaños 1 y 2) | Experimento A/B con y sin JOB_LOST; con y sin `consolidation` (spec 028 CA-003) |
 | 4 | M6–M7 | 1 000–2 000 | `lifecourse`, `reputation` (specs por redactar) | `pnpm bench` < 1 GB; 10 años simulados; memoria < 40 KB por persona |
 | 5 | M7+ | 5 000–10 000 | `culture` (spec por redactar), `llm` solo para nivel 4 | Diario coherente con las memorias; replay sin llamadas; spec 021 CA-007 |
 
@@ -38,7 +39,7 @@ La pregunta de la visión: *¿estas personas parecen haber vivido y podemos expl
 
 ## El prototipo como referencia
 
-`prototipo/index.html` es el comportamiento objetivo. De él salen los parámetros por defecto, la línea base estadística y la referencia visual (M4). Todo está en `docs/prototipo-referencia.md`: el mapa de funciones → specs → módulos, las tolerancias y las desviaciones que no deben copiarse.
+`prototipo/index.html` es el comportamiento objetivo de **mundo, economía y parte visual**. De él salen los parámetros por defecto, la línea base estadística y la referencia visual (M4). Para la **conducta** (decisiones, emociones, estrés, ánimo) la referencia pasa a ser la batería de validación conductual (spec 042; ADR-007 §7). Todo está en `docs/prototipo-referencia.md`: el mapa de funciones → specs → módulos, las tolerancias y las desviaciones que no deben copiarse.
 
 ## Desarrollo local
 

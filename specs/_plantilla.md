@@ -23,7 +23,15 @@ Qué problema resuelve y qué parte de la visión implementa (citar secciones de
 Coste estimado de memoria por entidad: … bytes.
 
 ## 4. Reglas
-- **R-001** — Regla verificable, con parámetros nombrados (`PARAM_NAME = valor`).
+- **R-001** [M] — Regla verificable, con parámetros nombrados (`PARAM_NAME = valor`) y su etiqueta de estatus epistémico (§4 bis).
+
+## 4 bis. Estatus epistémico
+Cada regla lleva una etiqueta (obligatoria en las specs de conducta, 035–042 y 009 v1.0; recomendada en las demás):
+- **[E] empírico:** fenómeno replicado en la literatura experimental. Se cita la fuente; si no está en `docs/investigacion/`, con "(referencia a verificar)".
+- **[T] teórico:** afirmación conceptual sostenida por la literatura (TMR, ACT, análisis funcional) sin modelo cuantitativo estándar.
+- **[M] supuesto de modelado:** decisión del proyecto para poder computar algo, con parámetros explícitos.
+
+Lo que dependa de un juicio experto que no tenemos se implementa como [M] parametrizado y se registra en `docs/investigacion/preguntas-abiertas.md` con su ID (`PA-xxx`), que se cita junto a la regla.
 
 ## 5. Eventos
 | Tipo | Cuándo | Payload | Causas esperadas |
