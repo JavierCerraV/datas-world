@@ -38,6 +38,9 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [028](028-experiments.md) | Experimentos y ramas | M5 | 023, 027, 022 | borrador | — |
 | [029](029-country-profile.md) | Perfil de país: Colombia | M1 (demografía, territorio, festivos, salario base) · M2 (reglas laborales y de economía) | 001, 002 | aprobada | `packages/engine`, `packages/generators/src/country`, `packages/generators/src/employment`, `packages/generators/src/geography`, `packages/generators/src/history`, `packages/generators/src/objects`, `packages/generators/src/organizations`, `packages/generators/src/personality`, `packages/generators/src/places`, `packages/generators/src/population` |
 | [030](030-generated-history.md) | Historia generada (1900 → presente) | M1 | 001, 003, 004, 006, 007, 008, 014, 023, 029 | aprobada | `packages/engine`, `packages/generators/src/catalogs`, `packages/generators/src/history` |
+| [031](031-health-profile.md) | Ficha de salud | M1 (ficha inicial) · M2 (efectos en necesidades, rutinas y economía) · peldaño 4 (evolución de las condiciones) | 006, 007, 008, 009, 010, 014, 023, 029, 030 | borrador | — |
+| [032](032-leisure.md) | Esparcimiento | M1 (ficha inicial) · M2 (actividades en la rutina y gasto) · M3 (con amigos) · M5 (hábitos que cambian) | 004, 007, 009, 010, 011, 012, 015, 023, 029, 031, 033 | borrador | — |
+| [033](033-urban-amenities.md) | Dotación urbana | M1 (dotación inicial y nueva plantilla de mapa) · M2 (uso: horarios, capacidad, viajes a la ciudad) · peldaño 4+ (crecimiento) | 003, 004, 006, 016, 023, 029, 030 | borrador | — |
 <!-- INDICE:FIN -->
 
 ## Orden sugerido de revisión
