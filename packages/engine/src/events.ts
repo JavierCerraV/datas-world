@@ -173,6 +173,43 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { citizenId: str, minutes: (v) => Number.isSafeInteger(v) && (v as number) > 0 }),
     text: (e) => `${e.payload.citizenId} se queda dormido ${e.payload.minutes} minutos.`,
   }),
+  SALARY_PAID: def<{ citizenId: string; orgId: string; net: number }>({
+    baseImportance: 0.1,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, orgId: str, net: int }),
+    text: (e) => `${e.payload.citizenId} recibe la quincena: $${e.payload.net}.`,
+  }),
+  RENT_PAID: def<{ householdId: string; amount: number }>({
+    baseImportance: 0.1,
+    spontaneous: false,
+    check: (p) => needObj(p, { householdId: str, amount: int }),
+    text: (e) => `${e.payload.householdId} paga el arriendo: $${e.payload.amount}.`,
+  }),
+  RENT_LATE: def<{ householdId: string; amount: number }>({
+    baseImportance: 0.5,
+    spontaneous: false,
+    check: (p) => needObj(p, { householdId: str, amount: int }),
+    text: (e) => `${e.payload.householdId} no alcanza a pagar el arriendo (faltan $${e.payload.amount}).`,
+  }),
+  DEBT_TAKEN: def<{ citizenId: string; creditor: string; amount: number; monthlyRate: number }>({
+    baseImportance: 0.4,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, creditor: str, amount: int, monthlyRate: (v) => typeof v === 'number' && v >= 0 }),
+    text: (e) =>
+      `${e.payload.citizenId} pide prestados $${e.payload.amount} ${e.payload.creditor === 'gota_a_gota' ? 'al gota a gota' : e.payload.creditor === 'banco' ? 'al banco' : `a ${e.payload.creditor}`}.`,
+  }),
+  DEBT_REPAID: def<{ citizenId: string; debtId: string }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, debtId: str }),
+    text: (e) => `${e.payload.citizenId} termina de pagar una deuda.`,
+  }),
+  PAYMENT_MISSED: def<{ payerId: string; concept: string; amount: number }>({
+    baseImportance: 0.4,
+    spontaneous: false,
+    check: (p) => needObj(p, { payerId: str, concept: str, amount: int }),
+    text: (e) => `${e.payload.payerId} no alcanza a pagar ${e.payload.concept} (faltan $${e.payload.amount}).`,
+  }),
   ARRIVED_LATE: def<{ citizenId: string; placeId: string; minutes: number }>({
     baseImportance: 0.35,
     spontaneous: false,

@@ -55,7 +55,19 @@ export type Patch =
   /** Muchas celdas de una misma columna: `rows[k]` recibe `values[k]` (la forma rápida para sistemas por persona). */
   | { op: 'setMany'; type: ColumnType; column: string; rows: readonly number[]; values: readonly number[] }
   | { op: 'add'; type: ColumnType; column: string; row: number; delta: number }
-  | { op: 'entity'; id: EntityId; fields: Record<string, unknown> };
+  | { op: 'entity'; id: EntityId; fields: Record<string, unknown> }
+  /**
+   * Transferencia de dinero (015 R-006): resta `amount` (entero > 0) de una cuenta y lo suma a otra, en el mismo
+   * paso. Es la única forma de mover dinero, así que la suma de todos los saldos se conserva por construcción.
+   */
+  | { op: 'transfer'; from: Account; to: Account; amount: number };
+
+/** Cuenta de dinero (015 §3): una persona (`money`), un hogar (`savings`), una organización (`cash`) o el resto del país. */
+export type Account =
+  | { kind: 'citizen'; row: number }
+  | { kind: 'household'; id: EntityId }
+  | { kind: 'org'; id: EntityId }
+  | { kind: 'rest' };
 
 /** Petición de acción (017): la valida y aplica el validador que se registre con los sistemas. */
 export interface ActionRequest {

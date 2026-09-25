@@ -74,3 +74,4 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 | 2026-09-25 | 0.1 | Catálogo: `OVERSLEPT` (010 R-004, 011), con causas deuda de sueño, energía y responsabilidad. Sin cambios en reglas ni CA |
 | 2026-09-25 | 0.1 | Catálogo: `ARRIVED_LATE` y `TRIP_TAKEN` (016). Sin cambios en reglas ni CA |
 | 2026-09-25 | 0.1 | Catálogo: `LEISURE_DONE` (032). Sin cambios en reglas ni CA |
+| 2026-09-25 | 0.1 | Catálogo: `SALARY_PAID`, `RENT_PAID`, `RENT_LATE`, `DEBT_TAKEN`, `DEBT_REPAID` y `PAYMENT_MISSED` (015, 008). Sin cambios en reglas ni CA |

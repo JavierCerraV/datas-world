@@ -111,6 +111,8 @@ describe('perfil colombiano (spec 029)', () => {
     // La esperanza de vida y la urbanización históricas ya tienen fuente (bloque H).
     expect(pendingEntries(co).map((e) => e.key)).toEqual([
       'demo.parentAgeAtBirth.byDecade',
+      'economy.informal',
+      'economy.rent',
       'gen.objects.motoP',
       'health.acute.weights',
       'mobility.fuelPerKm',

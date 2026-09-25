@@ -91,6 +91,8 @@ export interface Citizen extends BaseEntity {
   conditions?: HealthCondition[];
   /** Ficha de esparcimiento (spec 032), en orden de afinidad. */
   leisure?: LeisureInterest[];
+  /** Deudas vigentes (015 §3), en orden de creación. */
+  debts?: Debt[];
 }
 
 /** Afición de la ficha de esparcimiento (spec 032): clave de `leisure_activities`, afinidad y frecuencia. */
@@ -128,6 +130,29 @@ export interface Household extends BaseEntity {
   headId?: EntityId;
   kinship: Kinship[];
   caregiverIds: EntityId[];
+  /** Tenencia de la vivienda (015 §3); la pone la generación de la economía. */
+  tenure?: 'propia' | 'pagando' | 'arriendo' | 'usufructo';
+  /** Cuota mensual de la vivienda (arriendo o crédito hipotecario), en COP enteros. */
+  rent?: number;
+  /** Ahorro del hogar en COP enteros (015 §3). Solo cambia con transferencias (021, parche `transfer`). */
+  savings?: number;
+}
+
+/** Deuda de una persona (015 §3). `balance` es lo que falta por pagar, en COP enteros. */
+export interface Debt {
+  id: string; // 'CIT-000012/D03'
+  creditor: EntityId | 'banco' | 'gota_a_gota';
+  principal: number;
+  balance: number;
+  /** Tasa mensual (0,019 = 1,9 % al mes). */
+  monthlyRate: number;
+  /** Cuota: mensual en el banco, diaria en el gota a gota. */
+  installment: number;
+  period: 'month' | 'day';
+  startAt: WorldMinute;
+  /** Día del mes en que se paga la cuota mensual. */
+  dueDay?: number;
+  missed: number;
 }
 
 /** Turno de un puesto (spec 006): minutos del día; `lunch` no cuenta como jornada (Ley 2101). */
@@ -160,6 +185,8 @@ export interface Organization extends BaseEntity {
   culture: { strictness: number; warmth: number; stability: number };
   /** Minuto de fundación (spec 030); los mundos sin historia no lo tienen. */
   foundedAt?: WorldMinute;
+  /** Caja en COP enteros (015 R-007). Solo cambia con transferencias (parche `transfer`). */
+  cash?: number;
 }
 
 /** Puesto nuevo: el id lo asigna `addOrganization`; `supervisor` es el índice de otro puesto de la lista. */
@@ -220,6 +247,11 @@ export interface World {
   scheduler: Scheduler;
   /** Mapa (spec 003). No cambia después de generarse (INV-002). Los mundos de M0 no lo tienen. */
   geo?: GeoMap;
+  /**
+   * Cuentas del sistema (015 §3): el "resto del país", fuente y sumidero de todo el dinero que entra o sale del
+   * mundo (puede ser negativo). Solo existe en los mundos con economía; los anteriores no la tienen y su hash no cambia.
+   */
+  accounts?: { restOfCountry: number };
 }
 
 const deepFreeze = <T>(v: T): T => {

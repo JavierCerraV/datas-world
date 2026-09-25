@@ -52,6 +52,7 @@ export type {
   BaseEntity,
   CatalogRef,
   Citizen,
+  Debt,
   HealthCondition,
   Household,
   Kinship,
@@ -95,6 +96,7 @@ export type { ExternalInput, InputResult, ScheduledHandler } from './tick.ts';
 
 export { PHASES } from './simulation/system.ts';
 export type {
+  Account,
   ActionOutcome,
   ActionRequest,
   ActionValidator,
@@ -206,6 +208,23 @@ export {
   temperatureOf,
 } from './decision/index.ts';
 export type { ActionParams, DecisionCtx, Factor, LeisureActivity, LeisureTable, Option } from './decision/index.ts';
+
+export {
+  ECONOMY_COLUMNS,
+  copay,
+  defineEconomyColumns,
+  economyParams,
+  economySystem,
+  foodDaily,
+  formalWorkers,
+  loanTerms,
+  monthlyWage,
+  quincena,
+  totalMoney,
+  utilityBill,
+} from './economy/index.ts';
+export type { EconomyParams } from './economy/index.ts';
+export { balanceOf } from './simulation/patches.ts';
 
 export { FORBIDDEN_TERMS, MECHANISMS, isMechanism } from './temperament/mechanisms.ts';
 export type { MechanismId } from './temperament/mechanisms.ts';

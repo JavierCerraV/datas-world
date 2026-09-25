@@ -22,6 +22,7 @@ import { catalogRefs, loadCatalogs } from './catalogs/load.ts';
 import type { Catalogs } from './catalogs/load.ts';
 import { holidayDates } from './country/holidays.ts';
 import { DEFAULT_PROFILE, PROTOTYPE_PROFILE, loadProfile } from './country/profile.ts';
+import { generateEconomy } from './economy/generate.ts';
 import { generateEmployment } from './employment/generate.ts';
 import { generateGeography } from './geography/generate.ts';
 import type { Territory } from './geography/generate.ts';
@@ -136,6 +137,8 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
   // 016: todos empiezan en su vivienda; 017: sin decisiones en curso.
   initMobility(world);
   defineDecisionColumns(world);
+  // 015: tenencia, arriendo, ahorro del hogar, caja de las organizaciones y resto del país (con el empleo ya hecho).
+  generateEconomy(world, pop.householdIds, orgIds, rng);
   const events = [...created, ...prior, ...hist.events, ...healthEvents].sort((a, b) => idNumber(a.id) - idNumber(b.id));
   sortBackstories(world, events);
   return {

@@ -82,6 +82,7 @@ function step(view: WorldView, ctx: TickCtx): SystemOutput {
     if (hunger < 0.2) stressors += S.hungry!;
     if (energy < 0.15) stressors += S.exhausted!;
     if (sickNow) stressors += S.sick!;
+    if ((view.components.u8['econ.debtPressure']?.[row] ?? 0) === 1) stressors += S.debt ?? 0; // 015 R-005
     const stab = 1 - neuroticism;
     const target = S.base! + S.instability! * (1 - stab) + stressors * (0.5 + neuroticism) * (1.5 - resilience);
     const newStress = clamp(stress + (clamp(target) - stress) * R.stressRate! * dt);

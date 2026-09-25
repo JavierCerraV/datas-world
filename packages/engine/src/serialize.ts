@@ -38,6 +38,8 @@ export interface WorldSnapshot {
   scheduler: ScheduledItem[];
   /** Solo si el mundo tiene mapa (spec 003); los mundos de M0 no lo llevan y su hash no cambia. */
   geo?: GeoMapData;
+  /** Solo si el mundo tiene economía (015); los anteriores no la llevan y su hash no cambia. */
+  accounts?: { restOfCountry: number };
 }
 
 type Copy = <T>(v: T) => T;
@@ -71,6 +73,7 @@ function snapshotOf(world: World, copy: Copy): WorldSnapshot {
     })),
     scheduler: sortedItems(world.scheduler).map((i) => copy(i)),
     ...(world.geo ? { geo: geoToData(world.geo) } : {}),
+    ...(world.accounts ? { accounts: { ...world.accounts } } : {}),
   };
 }
 
@@ -99,6 +102,7 @@ export function deserializeWorld(s: WorldSnapshot): World {
   }
   world.scheduler = schedulerFrom(s.scheduler);
   if (s.geo) world.geo = geoFromData(s.geo);
+  if (s.accounts) world.accounts = { ...s.accounts };
   return world;
 }
 
