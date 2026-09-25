@@ -121,7 +121,11 @@ export function computePhysical(world: World, livingIds: readonly EntityId[], ca
     const row = idNumber(id);
     const age = ageInYears(c.i32['demo.birthMinute']![row]!, world.now, world.config.epoch);
     let v = 1 - Math.max(0, age - 30) * 0.006;
-    for (const h of world.citizens.get(id)!.conditions ?? []) v -= (effect.get(h.key) ?? 0) * (h.controlled ? 0.5 : 1);
+    let burden = 0;
+    for (const h of world.citizens.get(id)!.conditions ?? []) burden += (effect.get(h.key) ?? 0) * (h.controlled ? 0.5 : 1);
+    v -= burden;
+    // 010 R-006: las condiciones aceleran la caída de energía (EPOC 0,15 → × 1,3).
+    if (c.f32['health.energyFactor']) c.f32['health.energyFactor'][row] = 1 + 2 * burden;
     if (c.u8['health.tobacco']![row] === 2) v -= 0.05;
     if (c.u8['health.bmiClass']![row] === 3) v -= 0.05;
     if (c.u8['health.alcohol']![row] === 3) v -= 0.05;

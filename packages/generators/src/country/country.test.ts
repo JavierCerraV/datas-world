@@ -109,7 +109,7 @@ describe('perfil colombiano (spec 029)', () => {
   it('CA-003: todas las entradas tienen fuente y vigencia válidas; las pendientes se pueden listar', () => {
     expect(co.entries.length).toBeGreaterThan(30);
     // La esperanza de vida y la urbanización históricas ya tienen fuente (bloque H).
-    expect(pendingEntries(co).map((e) => e.key)).toEqual(['demo.parentAgeAtBirth.byDecade', 'stratum.share']);
+    expect(pendingEntries(co).map((e) => e.key)).toEqual(['demo.parentAgeAtBirth.byDecade', 'health.acute.weights', 'stratum.share']);
   });
 
   it('las variaciones territoriales y las leyes escalonadas se resuelven por fecha y alcance', () => {

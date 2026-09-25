@@ -1,6 +1,15 @@
 // Generación completa de un mundo de M1 (specs 007 R-001 y 030 R-001): configuración con perfil, catálogos y
 // festivos, y después geografía → lugares → organizaciones → población → empleo → objetos → historia.
-import { ENGINE_VERSION, createRng, createWorld, idNumber, parseEpoch, profileNumber, profileValue } from '@datas-world/engine';
+import {
+  ENGINE_VERSION,
+  createRng,
+  createWorld,
+  idNumber,
+  initNeeds,
+  parseEpoch,
+  profileNumber,
+  profileValue,
+} from '@datas-world/engine';
 import type { EntityId, World, WorldConfig, WorldEvent } from '@datas-world/engine';
 import { amenityPlan, resolvePlots } from './amenities/plan.ts';
 import type { AmenityPlan, ResolvedPlots } from './amenities/plan.ts';
@@ -100,6 +109,8 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
     prototype: profileId === PROTOTYPE_PROFILE,
   });
   const pop = generatePopulation(world, territory, places, catalogs, rng);
+  // 010: estado interno inicial (necesidades, estrés, ánimo) según la personalidad; lo usa la vida diaria de M2.
+  initNeeds(world, rng);
   // 031: la ficha de salud va en dos fases; la primera antes del empleo (la discapacidad limita el trabajo).
   const health = healthParams(profile, epoch.slice(0, 10), catalogs.health_conditions.entries.map((e) => e.key));
   if (health) generateHabits(world, pop.citizenIds, health, rng);

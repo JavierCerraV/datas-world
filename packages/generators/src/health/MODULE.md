@@ -79,3 +79,4 @@ No aplica: el perfil `prototipo` no tiene ficha de salud y su `health.physical` 
 |---|---|---|---|
 | 2026-09-25 | m1/j-salud | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m1/j-salud (J4) | 031, 029, 030, 006 | Primera implementación: `params.ts`, `habits.ts` (fase 1), `conditions.ts` y `insurance.ts` (fase 2). 8 pruebas |
+| 2026-09-25 | m2/b-necesidades | 031, 010 | `computePhysical` también escribe `health.energyFactor` = 1 + 2 × carga de las condiciones (la mitad si está controlada), que la 010 usa para acelerar la caída de energía (031 R-007) |

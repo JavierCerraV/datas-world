@@ -70,3 +70,4 @@ Porta el orden de `tick` del prototipo (necesidades → decisiones → acciones 
 |---|---|---|---|
 | 2026-09-25 | m2/a-bucle | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m2/a-bucle (A1–A4) | 021, 001, 023 | `system.ts`, `registry.ts`, `loop.ts`, `patches.ts` y `view.ts`; `tick` y `Runner` recorren el registro. 8 pruebas |
+| 2026-09-25 | m2/b-necesidades | 021 | Parche `setMany` (muchas filas de una columna en un solo parche), la forma rápida para sistemas por persona. La vista congelada devuelve tal cual lo que ya está congelado (la configuración del mundo), como exige el invariante de Proxy |
