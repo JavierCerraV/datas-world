@@ -205,6 +205,13 @@ export const EVENT_TYPES = Object.freeze({
     text: (e) => `A ${e.payload.citizenId} le diagnostican ${e.payload.name.toLowerCase()} (${e.payload.cie10}).`,
   }),
   // Ficha de esparcimiento (spec 032).
+  LEISURE_DONE: def<{ citizenId: string; activity: string; name: string; placeId: string; with: string[] }>({
+    baseImportance: 0.2,
+    spontaneous: false,
+    check: (p) =>
+      needObj(p, { citizenId: str, activity: str, name: str, placeId: str, with: (v) => Array.isArray(v) && v.every((x) => typeof x === 'string') }),
+    text: (e) => `${e.payload.citizenId}: ${e.payload.name.toLowerCase()} en ${e.payload.placeId}.`,
+  }),
   LEISURE_TAKEN_UP: def<{ citizenId: string; activity: string; name: string }>({
     baseImportance: 0.3,
     spontaneous: false,

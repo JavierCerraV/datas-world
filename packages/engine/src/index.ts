@@ -190,3 +190,19 @@ export {
   worksAt,
 } from './mobility/index.ts';
 export type { MobilityParams, Mode, TripPlan } from './mobility/index.ts';
+
+export {
+  ACTION_KINDS,
+  DECISION_COLUMNS,
+  activityOf,
+  buildOptions,
+  choose,
+  createActionValidator,
+  createDecisionSystem,
+  defineDecisionColumns,
+  explainCauses,
+  freeUntil,
+  softmax,
+  temperatureOf,
+} from './decision/index.ts';
+export type { ActionParams, DecisionCtx, Factor, LeisureActivity, LeisureTable, Option } from './decision/index.ts';

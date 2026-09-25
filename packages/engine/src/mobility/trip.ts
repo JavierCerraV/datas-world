@@ -54,14 +54,16 @@ const ageOf = (view: WorldView, row: number) => (view.now - (view.components.i32
 
 /**
  * Viaje de `from` a `to` (números de lugar) que sale en `now`, o `undefined` si no se puede (sin camino, sin
- * paradero o sin dinero para el pasaje). El azar es el de la persona en este tick; con `null`, la estimación sin ruido.
+ * paradero o sin dinero para el pasaje). El azar es el de la persona en este tick; con `null`, la estimación sin ruido
+ * y sin mirar el dinero.
  */
 export function planTrip(view: WorldView, row: number, from: number, to: number, now: number, rng: Rng | null, P: MobilityParams): TripPlan | undefined {
   const S = P.speeds;
   const own = vehiclesOf(view, row);
   const adult = ageOf(view, row) >= 18;
   const impaired = ((view.components.u8['health.disability']?.[row] ?? 0) & WALK_IMPAIRED) !== 0;
-  const money = view.components.i32.money?.[row];
+  // La estimación (`rng = null`) dice cuánto tardaría y costaría, alcance o no el dinero; el viaje real, no sale sin él.
+  const money = rng ? view.components.i32.money?.[row] : undefined;
   const fuel = (mode: 'moto' | 'car', km: number) => Math.round(P.fuelPerKm[mode]! * km);
   const outside = travelTo(view, to);
   const back = travelTo(view, from);

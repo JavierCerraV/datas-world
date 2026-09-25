@@ -96,7 +96,10 @@ export function generateLeisure(world: World, livingIds: readonly EntityId[], ca
       events.push(e);
       person.backstory?.push(e.id);
       // Hacia abajo, para no pasar del presupuesto ni del tiempo por el redondeo.
-      return { key: x.key, affinity: x.affinity, perMonth: Math.min(30, Math.floor(x.perMonth * 10) / 10), since };
+      const perMonth = Math.min(30, Math.floor(x.perMonth * 10) / 10);
+      // Última vez (017): un momento al azar de su intervalo, para que no todas "tocan" el primer día del mundo.
+      const lastDone = Math.max(since, -Math.round(r.next() * ((30 * DAY) / Math.max(0.1, perMonth))));
+      return { key: x.key, affinity: x.affinity, perMonth, since, lastDone };
     });
   }
   return events;
