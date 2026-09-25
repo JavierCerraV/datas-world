@@ -69,3 +69,4 @@ Equivale al bucle `requestAnimationFrame` + `tick` del prototipo.
 | 2026-09-24 | m0/e-cli-worker (E2) | 002, 027 | `WorldWorker` (arranque, `pump` con órdenes de control y flush por lotes, cierre con `WORLD_CLOSED`) y `main.ts` (bucle de 100 ms, SIGTERM/SIGINT). Script `pnpm worker`. 9 pruebas |
 | 2026-09-24 | chore/renombrar-datas-world-2 | — | Renombrado de los paquetes `@mundo-social/*` → `@datas-world/*` (imports y `package.json`). Sin cambios de comportamiento |
 | 2026-09-24 | chore/nombre-datas-world | — | El nombre del mundo en las configuraciones de prueba y por defecto pasa de "Villa Cordillera" a "Data's World" (decisión del usuario). Sin cambios de comportamiento |
+| 2026-09-24 | m1/hash-puntos-control | 027 | Una orden de control aplicada (pausa, velocidad…) hace un flush con punto de control (027 R-012). El cierre ya guardaba instantánea, que también lo es |

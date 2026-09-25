@@ -192,9 +192,31 @@ describe('INV-001 y validaciones al cargar', () => {
   it('detecta un estado alterado fuera del repositorio por su hash', () => {
     const a = start();
     const db = openWorldDb(tmp.file('w.db'));
-    new WorldRepository(db).flush({ world: a.world, events: a.events });
+    new WorldRepository(db).flush({ world: a.world, events: a.events, checkpoint: true });
     db.prepare(`UPDATE meta SET value = '60' WHERE key = 'now'`).run();
     expect(() => new WorldRepository(db).loadWorld()).toThrow(/hash/);
+    closeDb(db);
+  });
+
+  it('R-012: el hash solo se guarda en los puntos de control; tras un flush sin él, la carga es "recuperada"', () => {
+    const a = start();
+    const db = openWorldDb(tmp.file('w.db'));
+    const repo = new WorldRepository(db);
+    const meta = (k: string) => (db.prepare('SELECT value FROM meta WHERE key = ?').get(k) as { value: string }).value;
+    repo.flush({ world: a.world, events: a.events, checkpoint: true });
+    const hash0 = meta('state_hash');
+    a.runner.advanceTicks(12);
+    repo.flush({ world: a.world, events: a.runner.drainEvents() });
+    expect(meta('state_hash')).toBe(hash0); // un flush normal no recalcula el hash
+    expect(meta('state_dirty')).toBe('1');
+    const again = new WorldRepository(db);
+    expect(stateHash(again.loadWorld())).toBe(stateHash(a.world)); // se carga igual (cierre en seco)
+    expect(again.recovered).toBe(true);
+    repo.saveSnapshot(a.world); // la instantánea es punto de control
+    const third = new WorldRepository(db);
+    third.loadWorld();
+    expect(third.recovered).toBe(false);
+    expect(meta('state_hash_at')).toBe(String(a.world.now));
     closeDb(db);
   });
 

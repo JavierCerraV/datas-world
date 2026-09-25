@@ -59,7 +59,7 @@ Cada bloque se hace en su rama (`m1/a-catalogos`, `m1/b-geografia`…) y termina
 
 ## Cierre de M1
 - [ ] 023 CA-001 y CA-002 con población: dos procesos, mismo hash; semillas distintas dan hashes distintos. CA-001 hecho en el bloque I (100 personas, 30 días) y hashes distintos con 001 CA-005; la parte del 50 % de la CA-002 espera a M2.
-- [ ] Decidir el coste del `stateHash` en cada flush con población (≈ 15 ms por flush; 30 días en ≈ 12 s): propuesta en la 027 antes de M2.
+- [x] Decidir el coste del `stateHash` en cada flush con población. Decidido por el usuario: puntos de control (027 R-012). 30 días pasan de 12 s a 2,4 s.
 - [ ] `pnpm bench` con 200 personas: memoria por persona y tiempo de `world:new`. Nota en `docs/validaciones/`.
 - [ ] Paridad con el perfil prototipo (60 personas): edades, hogares y empleo frente a la línea base.
 - [ ] `/sincronizar-docs all` sin discrepancias; proponer las specs que pasan a `implementada`.

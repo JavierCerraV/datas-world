@@ -31,6 +31,11 @@ export interface FlushBatch {
   events?: readonly WorldEvent[];
   /** Entradas externas aplicadas desde el último flush. */
   inputs?: readonly ExternalInput[];
+  /**
+   * Punto de control (R-012): guarda también el `stateHash` del estado. Sin él, el flush solo marca el
+   * estado como "posterior al último punto de control". Lo usan el final de un avance, la pausa y el cierre.
+   */
+  checkpoint?: boolean;
 }
 
 const ENTITY_LISTS = ['citizens', 'households', 'organizations', 'places', 'objects'] as const;
@@ -80,12 +85,29 @@ export class WorldRepository {
     this.#flushTx = db.transaction((batch: FlushBatch) => {
       const seq = this.#appendEvents(batch.events ?? []);
       this.#appendInputs(batch.inputs ?? []);
-      return { lastSeq: seq, written: this.#saveState(batch.world) };
+      return { lastSeq: seq, written: this.#saveState(batch.world, batch.checkpoint ?? false) };
     });
   }
 
   get lastSeq(): number {
     return this.#lastSeq;
+  }
+
+  /**
+   * `true` si el último `loadWorld` cargó un estado posterior al último punto de control (p. ej. tras un
+   * cierre en seco), que por tanto no se pudo verificar con el hash (R-012).
+   */
+  get recovered(): boolean {
+    return this.#recovered;
+  }
+
+  #recovered = false;
+
+  /** R-012: el estado guardado es exactamente `world`; su hash queda como referencia para verificar la carga. */
+  #markVerified(world: World, hash: string): void {
+    this.#setMeta('state_hash', hash);
+    this.#setMeta('state_hash_at', String(world.now));
+    this.#setMeta('state_dirty', '0');
   }
 
   hasWorld(): boolean {
@@ -138,7 +160,7 @@ export class WorldRepository {
     for (const i of inputs) this.#st.input.run(i.at, i.seq, i.kind, JSON.stringify(i.payload));
   }
 
-  #saveState(world: World): { entities: [EntityId, string][]; columns: [string, Buffer][] } {
+  #saveState(world: World, checkpoint: boolean): { entities: [EntityId, string][]; columns: [string, Buffer][] } {
     const written = { entities: [] as [EntityId, string][], columns: [] as [string, Buffer][] };
     const storedId = this.#meta('world_id');
     if (storedId !== undefined && storedId !== world.id)
@@ -155,7 +177,9 @@ export class WorldRepository {
     this.#setMeta('counters', JSON.stringify(world.counters));
     this.#setMeta('capabilities', JSON.stringify(world.capabilities)); // ya en orden canónico (R-009)
     this.#setMeta('scheduler', JSON.stringify(sortedItems(world.scheduler))); // sin serializar el mundo entero
-    this.#setMeta('state_hash', stateHash(world));
+    // R-012: el hash (≈ 15 ms con la población de M1) solo en los puntos de control.
+    if (checkpoint) this.#markVerified(world, stateHash(world));
+    else if (this.#meta('state_dirty') !== '1') this.#setMeta('state_dirty', '1');
 
     const upEntity = this.#st.entity;
     for (const list of ENTITY_LISTS) {
@@ -233,19 +257,30 @@ export class WorldRepository {
       this.#columns.set(c.name, Buffer.from(c.data));
     }
     const world = deserializeWorld(snap);
-    const expected = this.#meta('state_hash');
-    const actual = stateHash(world);
-    if (actual !== expected)
-      throw new Error(`El estado cargado no coincide con el guardado (hash ${actual} ≠ ${expected})`);
+    // R-012: tras un punto de control el estado se verifica con su hash. Si hubo flush después (un cierre en
+    // seco), no hay hash de ese estado: se carga igual y se marca como recuperado. Una base anterior a R-012
+    // no tiene `state_hash_at` y guardaba el hash en cada flush: se verifica siempre.
+    this.#recovered = this.#meta('state_dirty') === '1';
+    if (!this.#recovered) {
+      const expected = this.#meta('state_hash');
+      const at = this.#meta('state_hash_at');
+      const actual = stateHash(world);
+      if (actual !== expected || (at !== undefined && Number(at) !== world.now))
+        throw new Error(`El estado cargado no coincide con el guardado (hash ${actual} ≠ ${expected})`);
+    }
     return world;
   }
 
-  /** R-004: instantánea completa comprimida en el minuto actual. Devuelve su hash. */
+  /**
+   * R-004: instantánea completa comprimida en el minuto actual. Devuelve su hash. Es también un punto de
+   * control (R-012): se llama justo después de un flush, cuando el estado guardado es exactamente `world`.
+   */
   saveSnapshot(world: World): string {
     const hash = stateHash(world);
     this.db
       .prepare('INSERT OR REPLACE INTO snapshots (at, hash, data) VALUES (?, ?, ?)')
       .run(world.now, hash, encodeSnapshot(world));
+    this.#markVerified(world, hash);
     return hash;
   }
 

@@ -32,13 +32,17 @@ export class WorldSession {
     if (this.#ticksSinceFlush >= FLUSH_TICKS) this.flush();
   }
 
-  /** Eventos, entradas nuevas y estado en una transacción; instantánea si empezó otro periodo. */
-  flush(): void {
+  /**
+   * Eventos, entradas nuevas y estado en una transacción; instantánea si empezó otro periodo. Con
+   * `checkpoint`, guarda también el hash del estado (R-012): al terminar un avance, al pausar y al cerrar.
+   */
+  flush(checkpoint = false): void {
     const inputs = this.runner.inputs();
     this.repo.flush({
       world: this.world,
       events: this.runner.drainEvents(),
       inputs: inputs.slice(this.#inputsWritten),
+      checkpoint,
     });
     this.#inputsWritten = inputs.length;
     this.#ticksSinceFlush = 0;
@@ -60,6 +64,6 @@ export class WorldSession {
       this.ticked(n);
       if (onProgress && Math.floor(done / every) > Math.floor(before / every)) onProgress(done / ticks);
     }
-    this.flush();
+    this.flush(true);
   }
 }
