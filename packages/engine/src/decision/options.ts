@@ -13,6 +13,7 @@ import type { Rng } from '../rng.ts';
 import type { DayInfo } from '../routines/day.ts';
 import { planAt } from '../routines/plan.ts';
 import type { ActionRequest, WorldView } from '../simulation/system.ts';
+import { legacyTrait } from '../temperament/legacy.ts';
 import { activityOf } from './columns.ts';
 import type { LeisureTable } from './columns.ts';
 
@@ -106,7 +107,7 @@ export function buildOptions(c: DecisionCtx, rng: Rng): Option[] {
   const hunger = f['need.hunger']![row]!;
   const fun = f['need.fun']![row]!;
   const social = f['need.social']![row]!;
-  const conscientiousness = f['pers.conscientiousness']?.[row] ?? 0.5;
+  const conscientiousness = legacyTrait(view, row, 'conscientiousness'); // @deprecated: se retira en MF3 (040)
   const options: Option[] = [];
   const add = (kind: string, params: ActionParams, explain: Factor[], target = 0) =>
     options.push({

@@ -2,6 +2,7 @@
 // porque la discapacidad para caminar o para el autocuidado baja la probabilidad de trabajar (R-004).
 import { ageInYears, defineColumn, idNumber } from '@datas-world/engine';
 import type { EntityId, Rng, World } from '@datas-world/engine';
+import { legacyTraitsOf, legacyValue } from '../personality/legacy.ts';
 import { DISABILITY_BITS, stepAt } from './params.ts';
 import type { HealthParams } from './params.ts';
 
@@ -36,9 +37,10 @@ export function generateHabits(world: World, livingIds: readonly EntityId[], P: 
     const p = world.citizens.get(id)!;
     const sex = p.sex!;
     const age = ageInYears(c.i32['demo.birthMinute']![row]!, world.now, world.config.epoch);
-    const impulsivity = c.f32['pers.impulsivity']?.[row] ?? 0.5;
-    const conscientiousness = c.f32['pers.conscientiousness']?.[row] ?? 0.5;
-    const valuesHealth = (c.f32['val.health']?.[row] ?? 0.5) > 0.7;
+    // @deprecated (035 §9): rasgos vía el adaptador hasta que los hábitos salgan del desarrollo (MF7.3). El valor
+    // "salud" ya no es un escalar (038): el adaptador lo da neutro y no modula.
+    const { impulsivity, conscientiousness } = legacyTraitsOf(world, row);
+    const valuesHealth = legacyValue(world, row, 'health') > 0.7;
     const u8 = c.u8;
 
     // Tabaco y alcohol: prevalencia del perfil × sexo × personalidad (media 1 con la impulsividad de 009).

@@ -1,0 +1,134 @@
+{
+  "name": "temperament_params",
+  "version": "2026.10.1",
+  "source": "Spec 009 v1.0 §3 (ADR-007): parámetros de temperamento que solo modulan mecanismos de aprendizaje (`modula`, registro de 035 §5). `mapping`: pesos [M] desde los descriptores Big Five (R-002), a la espera de la tabla de expertos (PA-101); `residualSd`: ruido propio por persona; `scale`: unidades del mecanismo; `basis`: base teórica.",
+  "entries": [
+    {
+      "key": "tmp.appetitive_sensitivity",
+      "name": "Sensibilidad a la estimulación apetitiva",
+      "since": "M1",
+      "attrs": {
+        "column": "tmp.appetitiveSensitivity", "modula": [ "respondent.appetitive_update", "operant.reinforcement_update" ],
+        "base": 0.5,
+        "mapping": {
+          "pers.extraversion": 0.5,
+          "pers.openness": 0.1
+        },
+        "residualSd": 0.12, "scale": [ 0, 1 ],
+        "status": "estimado",
+        "basis": "[T] sensibilidad a la recompensa (RST; referencia a verificar)"
+      }
+    },
+    {
+      "key": "tmp.arousal_baseline",
+      "name": "Activación basal",
+      "since": "M1",
+      "attrs": {
+        "column": "tmp.arousalBaseline", "modula": [ "respondent.elicitation_gain", "motivation.arousal_baseline" ],
+        "base": 0.5,
+        "mapping": {
+          "pers.neuroticism": 0.4,
+          "pers.extraversion": 0.2
+        },
+        "residualSd": 0.12, "scale": [ 0, 1 ],
+        "status": "estimado",
+        "basis": "[T] reactividad (Rothbart; referencia a verificar)"
+      }
+    },
+    {
+      "key": "tmp.aversive_sensitivity",
+      "name": "Sensibilidad a la estimulación aversiva",
+      "since": "M1",
+      "attrs": {
+        "column": "tmp.aversiveSensitivity", "modula": [ "respondent.aversive_update", "operant.punishment_update" ],
+        "base": 0.5,
+        "mapping": {
+          "pers.neuroticism": 0.6
+        },
+        "residualSd": 0.12, "scale": [ 0, 1 ],
+        "status": "estimado",
+        "basis": "[T] sensibilidad al castigo (Gray, RST; referencia a verificar)"
+      }
+    },
+    {
+      "key": "tmp.discount0",
+      "name": "Pendiente inicial del descuento temporal",
+      "since": "M1",
+      "attrs": {
+        "column": "tmp.discount0", "modula": [ "discounting.initial_k", "discounting.k_plasticity" ],
+        "base": 0.5,
+        "mapping": {
+          "pers.conscientiousness": -0.5,
+          "pers.neuroticism": 0.2
+        },
+        "residualSd": 0.12, "scale": [ 0, 1 ],
+        "status": "estimado",
+        "basis": "[E] descuento hiperbólico; [M] pendiente inicial temperamental"
+      }
+    },
+    {
+      "key": "tmp.habituation_rate",
+      "name": "Velocidad de habituación",
+      "since": "M1",
+      "attrs": {
+        "column": "tmp.habituationRate", "modula": [ "respondent.habituation" ],
+        "base": 0.5,
+        "mapping": {
+          "pers.neuroticism": -0.3,
+          "pers.openness": 0.2
+        },
+        "residualSd": 0.12, "scale": [ 0, 1 ],
+        "status": "estimado",
+        "basis": "[E] habituación; [M] vínculo con el Big Five"
+      }
+    },
+    {
+      "key": "tmp.novelty_sensitivity",
+      "name": "Sensibilidad a la novedad",
+      "since": "M1",
+      "attrs": {
+        "column": "tmp.noveltySensitivity", "modula": [ "operant.novel_initial_value", "generalization.novel_prior" ],
+        "base": 0.5,
+        "mapping": {
+          "pers.openness": 0.6,
+          "pers.extraversion": 0.2
+        },
+        "residualSd": 0.12, "scale": [ 0, 1 ],
+        "status": "estimado",
+        "basis": "[T] búsqueda de novedad (referencia a verificar)"
+      }
+    },
+    {
+      "key": "tmp.social_salience",
+      "name": "Saliencia inicial de los estímulos sociales",
+      "since": "M1",
+      "attrs": {
+        "column": "tmp.socialSalience", "modula": [ "respondent.social_salience" ],
+        "base": 0.5,
+        "mapping": {
+          "pers.extraversion": 0.4,
+          "pers.agreeableness": 0.3
+        },
+        "residualSd": 0.12, "scale": [ 0, 1 ],
+        "status": "estimado",
+        "basis": "[M] pendiente de expertos (PA-102)"
+      }
+    },
+    {
+      "key": "tmp.variability0",
+      "name": "Variabilidad conductual inicial",
+      "since": "M1",
+      "attrs": {
+        "column": "tmp.variability0", "modula": [ "operant.variability_initial" ],
+        "base": 0.5,
+        "mapping": {
+          "pers.openness": 0.3,
+          "pers.conscientiousness": -0.3
+        },
+        "residualSd": 0.12, "scale": [ 0, 1 ],
+        "status": "estimado",
+        "basis": "[E] variabilidad operante (Neuringer; referencia a verificar); [M] valor inicial"
+      }
+    }
+  ]
+}

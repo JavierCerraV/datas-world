@@ -22,21 +22,21 @@ Cada conducta se explica con la cadena del documento rector §12. La batería 04
 - [x] MF0.2 ADR-007 (motor funcional-contextual) y ADR-008 (historia de aprendizaje sintética).
 - [x] MF0.3 009 v1.0 en revisión (`specs/propuestas/`), 035 en revisión, borradores 036–042.
 - [x] MF0.4 Registro de preguntas abiertas; glosario, hoja de ruta, referencia del prototipo y plantilla de specs.
-- [ ] MF0.5 Aprobación del usuario: 009 v1.0, 035 y este plan.
+- [x] MF0.5 Aprobación del usuario: 009 v1.0, 035 y este plan.
 
 ## Bloque MF1 — Temperamento y adaptador (009 v1.0; rama `mf/1-temperamento`)
 Specs: 009 v1.0 (aprobada), 035 (aprobada).
-- [ ] MF1.1 Mover la propuesta a `specs/009-temperament.md`; 009 v0.3 → `obsoleta`; actualizar `specs:` de los `MODULE.md` afectados.
-- [ ] MF1.2 Catálogos:
+- [x] MF1.1 Mover la propuesta a `specs/009-temperament.md`; 009 v0.3 → `obsoleta`; actualizar `specs:` de los `MODULE.md` afectados.
+- [x] MF1.2 Catálogos:
   - `personality_traits` 2026.10.1: solo Big Five;
   - `temperament_params` 2026.10.1: nuevo, con `modula`, mapeo, `residualSd` y `scale`;
   - `life_domains` 2026.10.1: sustituye a `personal_values`.
-- [ ] MF1.3 Generación: descriptores (R-001) y `tmp.*` (R-002, flujo `gen:temperament`). Se eliminan `pers.coping`, los extras y `val.*`.
-- [ ] MF1.4 Adaptadores `@deprecated` (`engine/src/temperament/legacy.ts`, `generators/src/personality/legacy.ts`) usados por needs, routines, decision, habits y leisure; ninguna otra lectura de `pers.*`.
-- [ ] MF1.5 Prueba de arquitectura y regla de ESLint (R-006) con su fixture que viola la regla (CA-B), y la comprobación de caducidad del adaptador (035 §9).
-- [ ] MF1.6 Migración de carga del mundo de ejemplo de M1 (027 R-011) y documentación del cambio de hash.
-- [ ] MF1.7 `citizen:report`: sección de temperamento como descriptor.
-- [ ] MF1.8 Criterios: 009 CA-A, CA-B, CA-C, CA-D y CA-G. CA-E queda para MF2.
+- [x] MF1.3 Generación: descriptores (R-001) y `tmp.*` (R-002, flujo `gen:temperament`). Se eliminan `pers.coping`, los extras y `val.*`.
+- [x] MF1.4 Adaptadores `@deprecated` (`engine/src/temperament/legacy.ts`, `generators/src/personality/legacy.ts`) usados por needs, routines, decision, habits y leisure; ninguna otra lectura de `pers.*`.
+- [x] MF1.5 Prueba de arquitectura y regla de ESLint (R-006) con su fixture que viola la regla (CA-B), y la comprobación de caducidad del adaptador (035 §9).
+- [x] MF1.6 El mundo de ejemplo de M1 se sigue cargando (027 R-011): el motor ignora las columnas que ya no usa, sin migración ni cambio de su hash; documentar que los mundos nuevos tienen otro hash.
+- [x] MF1.7 `citizen:report`: sección de temperamento como descriptor.
+- [x] MF1.8 Criterios: 009 CA-A, CA-B, CA-C, CA-D y CA-G. CA-E queda para MF2.
 
 ## Bloque MF2 — Estímulos, funciones y laboratorio (036, 042 V-1–V-3, V-6; rama `mf/2-funciones`)
 - [ ] MF2.1 Ontología compartida de estímulos (catálogo `stimulus_classes`) con rasgos para la generalización.

@@ -43,5 +43,24 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // 009 R-006 (anticircularidad): la selección de conducta no importa el temperamento. Mientras dure la
+    // migración (035 §9) puede usar el adaptador `temperament/legacy.ts`; la prueba de arquitectura lo caduca.
+    files: ['packages/engine/src/decision/**/*.ts', 'packages/engine/src/selection/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: nonDeterministicImports.map((name) => ({ name, message: 'Motor sin E/S (CLAUDE.md regla 2).' })),
+          patterns: [
+            {
+              group: ['**/temperament/*', '!**/temperament/legacy.ts'],
+              message: 'La selección de conducta no lee el temperamento (spec 009 R-006, ADR-007).',
+            },
+          ],
+        },
+      ],
+    },
+  },
   prettier,
 );

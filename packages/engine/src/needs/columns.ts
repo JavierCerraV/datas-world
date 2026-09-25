@@ -3,6 +3,7 @@ import { ACTIVITY_COLUMN } from '../activity.ts';
 import { defineColumn } from '../components.ts';
 import type { ColumnType } from '../components.ts';
 import type { Rng } from '../rng.ts';
+import { legacyTrait } from '../temperament/legacy.ts';
 import type { World } from '../world.ts';
 
 export const NEEDS = ['need.hunger', 'need.energy', 'need.hygiene', 'need.social', 'need.fun'] as const;
@@ -27,8 +28,8 @@ export function defineNeedsColumns(world: World): void {
   for (const [type, name, initial] of NEEDS_COLUMNS) if (!(name in c[type])) defineColumn(c, type, name, initial);
 }
 
-/** Estabilidad emocional (el "estabilidad" del prototipo) = 1 − neuroticismo (009). */
-export const stability = (world: World, row: number): number => 1 - (world.components.f32['pers.neuroticism']?.[row] ?? 0.5);
+/** Estabilidad emocional (el "estabilidad" del prototipo) = 1 − neuroticismo. Vía el adaptador (@deprecated, MF6). */
+export const stability = (world: World, row: number): number => 1 - legacyTrait(world, row, 'neuroticism');
 
 /**
  * Estado inicial de las personas activas (flujo `init:needs/<fila>`): rangos de `newAgent` del prototipo,

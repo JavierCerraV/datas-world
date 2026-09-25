@@ -139,3 +139,6 @@ Regla de oro 1: los módulos con código necesitan specs aprobadas, y los guarda
 | Poblaciones homogéneas tras el desarrollo | Pocas diferencias individuales | 041 CA-003 (diversidad) y 042 V-12 |
 | El retraso de M3 (vida social) | La hoja de ruta se alarga | M2 F–H sigue en paralelo con el adaptador (roadmap) |
 | Explosión de estado por persona | Memoria | Topes, poda y archivo; `pnpm bench` en cada bloque |
+
+## 8. Aprobación
+El 2026-09-25 el usuario aprobó la 009 v1.0, la 035 y el plan MF. La propuesta pasó a `specs/009-temperament.md` y la v0.3 a `specs/obsoletas/009-personality-v0.3.md` (estado `obsoleta`), fuera de la carpeta que leen los guardarraíles y el script de aprobación, para que no haya dos specs con el id 009.

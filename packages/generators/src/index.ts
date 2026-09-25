@@ -28,14 +28,12 @@ export { DWELLING_CAPACITY, generatePlaces } from './places/generate.ts';
 export { generateOrganizations, worldDate } from './organizations/generate.ts';
 
 export {
-  COPING,
-  COPING_COLUMN,
-  copingFor,
+  checkTemperamentCatalog,
   definePersonalityColumns,
   generatePersonality,
-  topValues,
+  generateTemperament,
 } from './personality/generate.ts';
-export type { PersonalityParams, PersonalityResult } from './personality/generate.ts';
+export type { PersonalityParams, PersonalityResult, TemperamentAttrs } from './personality/generate.ts';
 
 export { generatePopulation } from './population/generate.ts';
 export type { PopulationResult } from './population/generate.ts';

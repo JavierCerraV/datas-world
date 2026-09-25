@@ -2,7 +2,7 @@
 modulo: population
 ruta: packages/generators/src/population
 estado: en-desarrollo
-specs: [001, 007, 008, 009, 014, 029]
+specs: [001, 007, 008, 009, 014, 029, 035]
 actualizado: 2026-09-24
 ---
 
@@ -107,3 +107,4 @@ Con el perfil `prototipo` porta `genPopulation` (plantillas, edades, sexos, apel
 | 2026-09-24 | m1/f-poblacion | 007, 008 | El usuario aprueba la revisión de los CA estadísticos (agregado de 20 mundos) |
 | 2026-09-24 | m1/h-historia | 007, 030 | Lugar de nacimiento según la urbanización del año de nacimiento (entradas con `rural` del catálogo); `PopulationParams.urbanization` |
 | 2026-09-24 | m1/cierre | 007 | `parity.test.ts`: 007 CA-006 frente a `genWorld` del prototipo (edad media, menores y ahorro medio). La tabla de criterios queda completa. 1 prueba nueva |
+| 2026-09-25 | mf/1-temperamento (MF1.3) | 009 v1.0 | Por persona, `generatePersonality` (descriptores) y `generateTemperament` (parámetros `tmp.*`, flujo `gen:temperament`); catálogos `personality_traits` y `temperament_params` en lugar de `personal_values` |

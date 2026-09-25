@@ -8,7 +8,7 @@ import { WorldRepository, eventsById, openReadonly, queryEvents } from '@datas-w
 import type { Db } from '@datas-world/persistence';
 import { DEFAULT_DB, UsageError, dayOf, nameOf, toInt, withDb, withNames } from './common.ts';
 import type { Io } from './common.ts';
-import { fichaLines } from './ficha.ts';
+import { fichaLines, temperamentLines } from './ficha.ts';
 
 /** Minuto del 1 de enero de `year` en el mundo. */
 const yearStart = (world: World, year: number): number => {
@@ -128,6 +128,7 @@ export function citizenLines(world: World, db: Db, c: Citizen): string[] {
     .filter((k) => k.motherId === c.id || k.fatherId === c.id)
     .sort((a, b) => col('demo.birthMinute', a.id) - col('demo.birthMinute', b.id));
   for (const k of children) out.push(`  hijo/a: ${who(k.id)}`);
+  out.push(...temperamentLines(world, c)); // temperamento como descriptor (009 v1.0 R-003)
   out.push(...fichaLines(world, c)); // fichas de salud (031) y esparcimiento (032)
   out.push('', 'Línea de vida');
   for (const e of queryEvents(db, { participant: c.id, limit: 100_000 })) out.push(`  ${line(world, db, e, true)}`);

@@ -51,6 +51,24 @@ export function fichaLines(world: World, c: Citizen): string[] {
   return out;
 }
 
+/**
+ * Temperamento de una persona (009 v1.0 R-003): descriptores Big Five y parámetros de aprendizaje, con la
+ * advertencia de que describen cómo aprende, no explican su conducta. Vacío si el mundo no los tiene.
+ */
+export function temperamentLines(world: World, c: Citizen): string[] {
+  const f32 = world.components.f32;
+  if (c.ancestor) return [];
+  const row = idNumber(c.id);
+  const col = (e: { attrs?: Record<string, unknown> | undefined }) => String(e.attrs?.column ?? '');
+  const traits = loadCatalog('personality_traits').entries.filter((e) => col(e) in f32);
+  const params = loadCatalog('temperament_params').entries.filter((e) => col(e) in f32);
+  if (!traits.length && !params.length) return [];
+  const out = ['', 'Temperamento (describe cómo aprende; no explica su conducta, que sale de su historia)'];
+  if (traits.length) out.push(`  Big Five: ${traits.map((e) => `${e.name.toLowerCase()} ${f32[col(e)]![row]!.toFixed(2)}`).join(' · ')}`);
+  for (const e of params) out.push(`  ${e.name}: ${f32[col(e)]![row]!.toFixed(2)}`);
+  return out;
+}
+
 const living = (world: World) => [...world.citizens.values()].filter((c) => !c.ancestor && c.status === 'active');
 const ageOf = (world: World, id: EntityId) =>
   ageInYears(world.components.i32['demo.birthMinute']![idNumber(id)]!, world.now, world.config.epoch);

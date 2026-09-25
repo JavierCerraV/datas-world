@@ -1,7 +1,7 @@
 ---
 id: 035
 nombre: functional-engine
-estado: en-revision
+estado: aprobada
 hito: MF (motor funcional)
 depende_de: [001, 009, 010, 014, 019, 021, 023, 027]
 version: 0.1
@@ -193,3 +193,4 @@ PA-110, PA-130 y todas las de §11 del documento rector (ver `docs/investigacion
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-25 | 0.1 | Borrador de la Fase A de la reorientación funcional-contextual (ADR-007). En revisión por el usuario |
+| 2026-09-25 | 0.1 | Estado → aprobada |

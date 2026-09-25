@@ -2,7 +2,7 @@
 modulo: leisure
 ruta: packages/generators/src/leisure
 estado: en-desarrollo
-specs: [032, 029, 031, 033, 009]
+specs: [032, 029, 031, 033, 009, 035]
 actualizado: 2026-09-25
 ---
 
@@ -77,3 +77,4 @@ No aplica: el perfil `prototipo` no tiene ficha de esparcimiento. El prototipo e
 | 2026-09-25 | m1/j-ocio | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m1/j-ocio (J5) | 032, 029, 031, 033 | Primera implementación: `params.ts`, `select.ts` y `generate.ts`. 7 pruebas |
 | 2026-09-25 | m2/e-decisiones | 032, 017 | `leisureTable` para el motor de decisiones; `lastDone` inicial de cada afición. Prueba nueva `vida.test.ts`: una semana del mundo generado con decisiones (frecuencia de la ficha y diversión) |
+| 2026-09-25 | mf/1-temperamento (MF1.4) | 032, 035 | La elección de la ficha lee los `traits` y `values` del catálogo por el adaptador @deprecated: los rasgos siguen modulando (la impulsividad desde `tmp.discount0`); los valores dan 0,5 (neutro) y ya no modulan. Caduca en MF7.3 (ficha desde el desarrollo) |

@@ -7,6 +7,7 @@ import { homeOf } from '../mobility/columns.ts';
 import { occupancy } from '../mobility/enter.ts';
 import { mobilityParams } from '../mobility/params.ts';
 import type { Rng } from '../rng.ts';
+import { legacyTrait } from '../temperament/legacy.ts';
 import type { DayInfo } from '../routines/day.ts';
 import { dayInfo } from '../routines/day.ts';
 import { planAt } from '../routines/plan.ts';
@@ -99,7 +100,8 @@ export function createDecisionSystem(table: LeisureTable): System {
         { view, row, now, here: i['loc.place']?.[row] ?? 0, home: homeOf(view, row), cap, day, occ, P, table },
         r,
       );
-      const pick = choose(view, options, temperatureOf(f['pers.impulsivity']?.[row] ?? 0.5), r, validate);
+      // @deprecated: la temperatura saldrá de la variabilidad aprendida (hist.variability) en MF3 (040 R-004).
+      const pick = choose(view, options, temperatureOf(legacyTrait(view, row, 'impulsivity')), r, validate);
       if (pick) actions.push(pick.action);
     }
     return { patches, actions };

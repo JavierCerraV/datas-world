@@ -6,7 +6,7 @@ import type { Catalogs } from '../catalogs/load.ts';
 import { seriesAt } from '../country/series.ts';
 import type { Territory } from '../geography/generate.ts';
 import { worldDate } from '../organizations/generate.ts';
-import { definePersonalityColumns, generatePersonality } from '../personality/generate.ts';
+import { definePersonalityColumns, generatePersonality, generateTemperament } from '../personality/generate.ts';
 import type { PlacesResult } from '../places/generate.ts';
 import { householdBackstory, personBackstory, sortBackstories } from './backstory.ts';
 import { composeHousehold } from './households.ts';
@@ -28,14 +28,14 @@ type PopulationCatalogs = Pick<
   | 'education_levels'
   | 'family_names'
   | 'given_names'
-  | 'personal_values'
   | 'personality_traits'
+  | 'temperament_params'
 >;
 
 /**
  * 007 R-001: la población se genera por hogares. Cada hogar va a una vivienda libre de un barrio sorteado en
  * proporción a sus viviendas libres. Se para al llegar a `population.target` sin partir hogares (008 R-004).
- * Flujos: `gen:households` (composición, por hogar), `gen:people`, `gen:personality`, `gen:appearance`
+ * Flujos: `gen:households` (composición, por hogar), `gen:people`, `gen:personality`, `gen:temperament`, `gen:appearance`
  * y `gen:backstory` (por persona u hogar).
  */
 export function generatePopulation(
@@ -50,7 +50,7 @@ export function generatePopulation(
   const P = populationParams(profile, worldDate(world));
   const target = world.config.population.target;
   definePeopleColumns(world);
-  definePersonalityColumns(world, catalogs.personality_traits, catalogs.personal_values);
+  definePersonalityColumns(world, catalogs.personality_traits, catalogs.temperament_params);
 
   const free = new Map<EntityId, EntityId[]>(territory.districtIds.map((d) => [d, []]));
   for (const id of places.dwellingIds) free.get(world.places.get(id)!.districtId!)!.push(id);
@@ -101,14 +101,8 @@ export function generatePopulation(
         P,
         r,
       );
-      generatePersonality(
-        world,
-        id,
-        catalogs.personality_traits,
-        catalogs.personal_values,
-        P.personality,
-        rng.fork('gen:personality'),
-      );
+      generatePersonality(world, id, catalogs.personality_traits, P.personality, rng.fork('gen:personality'));
+      generateTemperament(world, id, catalogs.temperament_params, rng.fork('gen:temperament'));
       writeAppearance(world, id, m.age, m.sex, catalogs.appearance, rng.fork('gen:appearance').fork(id));
       personBackstory(
         world,
