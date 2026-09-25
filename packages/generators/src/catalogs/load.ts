@@ -16,6 +16,7 @@ export const CATALOG_NAMES = [
   'education_levels',
   'family_names',
   'given_names',
+  'health_conditions',
   'historical_events',
   'object_kinds',
   'occupations',

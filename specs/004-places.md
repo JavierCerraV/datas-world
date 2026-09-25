@@ -106,9 +106,4 @@ Lugares por tipo y barrio, viviendas libres y ocupadas tras la generación, y, d
 | 2026-09-24 | 0.3 | Ajuste a Colombia y orden para crecer (usuario): `PlaceKind` pasa al catálogo `place_kinds` (ADR-006), con claves jerárquicas y las entradas futuras previstas (supermercado, cajero, banco, bodega, paradero, metro, BRT, terminal, aeropuerto…); turnos conformes a la jornada del perfil de país (R-007); CA-006 |
 | 2026-09-24 | 0.3 | Estado → aprobada |
 | 2026-09-24 | 0.4 | Implementación del bloque C: edificios "Edificio NN" con viviendas "Vivienda NN-A…"; capacidad de vivienda `DWELLING_CAPACITY` = 6; la iglesia ocupa la primera parcela de la tercera manzana de San Martín; la atmósfera (`ambience`) no se genera en M1 porque solo la usa la R-006 (M3); la capacidad de los lugares de uso llega con la R-004 (M2). Sin cambios en CA |
-| 2026-09-25 | 0.4 | Spec 033 (bloque J):
-- un horario puede cerrar después de medianoche, hasta las 06:00 del día siguiente (`close` ≤ 1800), para bares y discotecas;
-- un lugar regional, fuera del mapa, lleva `travel` (minutos y coste) y no tiene rectángulo;
-- con la plantilla de Data's World, `PLACE_LAYOUT` sale de la dotación de la 033 y los lugares repetidos llevan nombres distintos.
-
-Sin cambios en CA: CA-002 sigue refiriéndose a la plantilla del prototipo |
+| 2026-09-25 | 0.4 | Spec 033 (bloque J): un horario puede cerrar después de medianoche, hasta las 06:00 del día siguiente (`close` ≤ 1800), para bares y discotecas; un lugar regional, fuera del mapa, lleva `travel` (minutos y coste) y no tiene rectángulo; con la plantilla de Data's World, `PLACE_LAYOUT` sale de la dotación de la 033 y los lugares repetidos llevan nombres distintos. Sin cambios en CA: CA-002 sigue refiriéndose a la plantilla del prototipo |

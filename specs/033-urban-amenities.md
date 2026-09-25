@@ -161,15 +161,4 @@ No hay eventos nuevos.
 | 2026-09-24 | 0.1 | Decisión del usuario sobre la escala: lugares regionales en la ciudad de referencia mientras la población sea pequeña; el territorio se expande primero y la población después, por entregas, hasta tener todo lo que tiene una ciudad |
 | 2026-09-24 | 0.2 | Decisiones del usuario (§10): plantilla nueva de 80 × 50, escuela como sede de la institución educativa, bloque J en M1 y revisión del empleo. Cifra verificada de tiendas de barrio (Fenalco, 2024) |
 | 2026-09-25 | 0.2 | Estado → aprobada |
-| 2026-09-25 | 0.3 | Implementación del bloque J (J1–J3). Correcciones:
-- CA-002 decía 60 000 habitantes, pero el cine tiene un umbral de ≈ 100 000 (§8): la prueba usa 150 000;
-- la casa de la cultura es CIIU 8553 (enseñanza cultural), no 9006 (actividades teatrales).
-
-Precisiones:
-- la regla `amenity` vive en `place_kinds` (2026.09.3), con `placement` (`template`: sitio fijo de la plantilla; `com`: parcela comercial libre) y `spread` (repartir entre barrios);
-- las tiendas se reparten primero;
-- con 200 habitantes, el pueblo tiene 3 tiendas (una por barrio), bar, restaurante, café, panadería, droguería y corresponsal bancario, más los institucionales de la plantilla. La Capital, a 60 min y $12 000, tiene cine, centro comercial, museo, coliseo, banco y parque de diversiones;
-- la parroquia de la plaza toma su nombre de la plantilla;
-- 19 organizaciones y la informalidad pasa a ≈ 0,46.
-
-CA-006 (viaje) queda para M2 |
+| 2026-09-25 | 0.3 | Implementación del bloque J (J1–J3). Correcciones: CA-002 decía 60 000 habitantes, pero el cine tiene un umbral de ≈ 100 000 (§8), así que la prueba usa 150 000; la casa de la cultura es CIIU 8553 (enseñanza cultural), no 9006 (actividades teatrales). Precisiones: la regla `amenity` vive en `place_kinds` (2026.09.3), con `placement` (`template`: sitio fijo de la plantilla; `com`: parcela comercial libre) y `spread` (repartir entre barrios), y las tiendas se reparten primero; con 200 habitantes, el pueblo tiene 3 tiendas (una por barrio), bar, restaurante, café, panadería, droguería y corresponsal bancario, más los institucionales de la plantilla, y La Capital, a 60 min y $12 000, tiene cine, centro comercial, museo, coliseo, banco y parque de diversiones; la parroquia de la plaza toma su nombre de la plantilla; hay 19 organizaciones y la informalidad pasa a ≈ 0,46. CA-006 (viaje) queda para M2 |

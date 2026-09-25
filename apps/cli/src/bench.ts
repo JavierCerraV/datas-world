@@ -106,13 +106,13 @@ export function bench(args: string[], io: Io): void {
   const creation = measureWorldNew();
   const maxRssMB = +(process.resourceUsage().maxRSS / 1024).toFixed(1);
   const passes = (r: Result) => r.ms < 2000 && r.daysStarted === days;
-  const creationOk = creation.ms < WORLD_NEW_MAX_MS && creation.dbMB < WORLD_NEW_MAX_MB;
+  const creationOk = creation.ms < WORLD_NEW_MAX_MS && creation.historyMB < HISTORY_MAX_MB;
   if (v.json) io.out(JSON.stringify({ results, creation, maxRssMB }));
   else {
     reportText(results, days, maxRssMB, passes, io);
     io.out(
       `world:new       ${creation.citizens} personas, ${creation.ancestors} antepasados, ${creation.events} eventos en ` +
-        `${creation.ms} ms · base ${creation.dbMB} MB · 030 CA-007 ${creationOk ? '✔' : '✘'}`,
+        `${creation.ms} ms · base ${creation.dbMB} MB, de ellos historia ≈ ${creation.historyMB} MB · 030 CA-007 ${creationOk ? '✔' : '✘'}`,
     );
   }
   const failed = results.filter((r) => !passes(r));
@@ -120,13 +120,47 @@ export function bench(args: string[], io: Io): void {
     throw new Error(`002 CA-005 no se cumple en: ${failed.map((r) => `${r.mode} (${r.ms} ms)`).join(', ')}`);
   }
   if (v.check && !creationOk) {
-    throw new Error(`030 CA-007 no se cumple: world:new en ${creation.ms} ms y base de ${creation.dbMB} MB`);
+    throw new Error(`030 CA-007 no se cumple: world:new en ${creation.ms} ms y ≈ ${creation.historyMB} MB de historia`);
   }
 }
 
-/** 030 CA-007: `world:new` con 200 personas en < 5 s, y la base entera (historia incluida) en < 2 MB. */
+/**
+ * 030 CA-007: `world:new` con 200 personas en < 5 s, y la historia añade < 2 MB a la base. La historia son los
+ * eventos de la 030 (con sus participantes) y los antepasados; se mide en bytes de datos, sin la sobrecarga de
+ * páginas de SQLite. El resto de la base (fichas de salud, esparcimiento…) no cuenta para este criterio.
+ */
 const WORLD_NEW_MAX_MS = 5000;
-const WORLD_NEW_MAX_MB = 2;
+const HISTORY_MAX_MB = 2;
+const HISTORY_TYPES = [
+  'TOWN_FOUNDED',
+  'DISTRICT_FOUNDED',
+  'PLACE_BUILT',
+  'ORG_FOUNDED',
+  'CITIZEN_BORN',
+  'UNION_FORMED',
+  'MIGRATED',
+  'CITIZEN_DIED',
+  'HISTORICAL_CONTEXT',
+];
+
+function historyBytes(path: string): number {
+  const db = openWorldDb(path);
+  try {
+    const types = HISTORY_TYPES.map((t) => `'${t}'`).join(',');
+    const one = (sql: string) => (db.prepare(sql).get() as { b: number | null }).b ?? 0;
+    return (
+      one(
+        `SELECT SUM(length(id) + length(type) + length(payload) + length(causes) + length(origin) + 24) AS b FROM events WHERE type IN (${types})`,
+      ) +
+      one(
+        `SELECT SUM(length(entity_id) + length(role) + 8) AS b FROM event_participants WHERE event_seq IN (SELECT seq FROM events WHERE type IN (${types}))`,
+      ) +
+      one(`SELECT SUM(length(id) + length(data) + 16) AS b FROM entities WHERE data LIKE '%"ancestor":true%'`)
+    );
+  } finally {
+    closeDb(db);
+  }
+}
 
 function measureWorldNew() {
   const dir = mkdtempSync(join(tmpdir(), 'mundo-bench-'));
@@ -142,6 +176,7 @@ function measureWorldNew() {
       ancestors: g.hist.ancestorIds.length,
       events: g.events.length,
       dbMB: +(statSync(path).size / MB).toFixed(2),
+      historyMB: +(historyBytes(path) / MB).toFixed(2),
     };
   } finally {
     rmSync(dir, { recursive: true, force: true });

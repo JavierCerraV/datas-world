@@ -52,6 +52,7 @@ export type {
   BaseEntity,
   CatalogRef,
   Citizen,
+  HealthCondition,
   Household,
   Kinship,
   KinshipKind,

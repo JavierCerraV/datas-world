@@ -87,6 +87,15 @@ export interface Citizen extends BaseEntity {
   fatherId?: EntityId;
   /** Antepasado fuera del mundo (spec 030): no vive en el municipio y no se simula. */
   ancestor?: boolean;
+  /** Condiciones crónicas (spec 031), en orden de diagnóstico. */
+  conditions?: HealthCondition[];
+}
+
+/** Condición crónica de la ficha de salud (spec 031): clave de `health_conditions`, fecha y control. */
+export interface HealthCondition {
+  key: string;
+  since: WorldMinute;
+  controlled: boolean;
 }
 
 export type KinshipKind = 'parent' | 'partner' | 'sibling' | 'grandparent';
