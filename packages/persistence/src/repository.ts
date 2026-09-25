@@ -172,6 +172,8 @@ export class WorldRepository {
     }
     // El mapa no cambia después de generarse (spec 003 INV-002): se escribe una sola vez.
     if (world.geo && this.#meta('geo') === undefined) this.#setMeta('geo', JSON.stringify(geoToData(world.geo)));
+    // Cuentas del sistema (015): solo en los mundos con economía; cambian cada día.
+    if (world.accounts) this.#setMeta('accounts', JSON.stringify(world.accounts));
     this.#setMeta('now', String(world.now));
     this.#setMeta('status', world.status);
     this.#setMeta('counters', JSON.stringify(world.counters));
@@ -229,6 +231,8 @@ export class WorldRepository {
     };
     const geo = this.#meta('geo');
     if (geo !== undefined) snap.geo = JSON.parse(geo) as GeoMapData;
+    const accounts = this.#meta('accounts');
+    if (accounts !== undefined) snap.accounts = JSON.parse(accounts) as { restOfCountry: number };
     const rows = this.db.prepare('SELECT id, kind, data FROM entities ORDER BY id').all() as {
       id: EntityId;
       kind: string;

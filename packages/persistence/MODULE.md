@@ -2,7 +2,7 @@
 modulo: persistence
 ruta: packages/persistence
 estado: en-desarrollo
-specs: [027]
+specs: [027, 015]
 actualizado: 2026-09-24
 ---
 
@@ -98,3 +98,4 @@ No aplica (el prototipo no persiste).
 | 2026-09-24 | m1/b-geografia | 003, 027 | El mapa del mundo se guarda una vez en `meta.geo` y se carga con el mundo; los lugares con campos anidados se cargan con su tipo. 1 prueba nueva (mundo con mapa y lugares: guardar, cargar e instantánea con el mismo hash) |
 | 2026-09-24 | m1/i-cli | 027, 030 | `queries.ts` (`queryEvents`, `eventsById`, `rowsToEvents`), que también usa `readEvents`. `meta.scheduler` se escribe desde `sortedItems` sin serializar el mundo entero. Junto con el `stateHash` sin copias del motor, avanzar 30 días un mundo poblado pasa de 22 s a 12 s. 1 prueba nueva |
 | 2026-09-24 | m1/hash-puntos-control | 027 | R-012, aprobada por el usuario: `FlushBatch.checkpoint`, `saveSnapshot` como punto de control, `repo.recovered` y `WorldSession.flush(checkpoint)`, con punto de control al final de `advanceTicks`. 30 días con población: de 12 s a 2,4 s, mismo hash. 1 prueba nueva; la de estado alterado usa un punto de control |
+| 2026-09-25 | m2/f-economia | 027, 015 | El repositorio guarda y carga las cuentas del sistema (`World.accounts`, 015) en la clave `accounts` de `meta`, en cada guardado; los mundos sin economía no la tienen |

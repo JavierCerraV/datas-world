@@ -12,6 +12,8 @@ export const EVENT_EMOTIONS: Readonly<Partial<Record<EventType, Partial<Record<E
   JOB_HIRED: { joy: 0.6 },
   FELL_ILL: { sadness: 0.2, fear: 0.1 },
   RECOVERED: { joy: 0.2 },
+  // Solo el gota a gota (015 R-004): la economía pide la emoción cuando el acreedor es informal.
+  DEBT_TAKEN: { fear: 0.4, shame: 0.2 },
 });
 
 /**

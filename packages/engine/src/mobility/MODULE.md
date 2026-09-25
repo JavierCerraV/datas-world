@@ -85,3 +85,4 @@ El prototipo mueve a las personas tile a tile por la calle; aquí el viaje es un
 | 2026-09-25 | m2/d-movilidad | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m2/d-movilidad (D2–D4) | 016, 004, 005, 021, 033 | `columns.ts`, `params.ts`, `network.ts`, `where.ts`, `enter.ts`, `trip.ts`, `system.ts` e `index.ts`. 8 pruebas |
 | 2026-09-25 | m2/e-decisiones | 016, 017 | La movilidad lleva al lugar de la decisión en curso (`act.place` hasta `act.until`) y la cancela si el lugar está cerrado o lleno. `planTrip` con `rng = null` no mira el dinero (la estimación de una opción que después valida el motor de decisiones) |
+| 2026-09-25 | m2/f-economia | 015, 016 | Pasajes y combustible son transferencias al resto del país (015 R-006); en mundos sin cuentas del sistema, se descuentan como antes |

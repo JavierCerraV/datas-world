@@ -81,7 +81,14 @@ function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
     out.set('i32', 'trip.arriveAt', row, now + trip.minutes);
     out.set('u8', 'trip.mode', row, modeCode(trip.mode));
     out.set('u8', ACTIVITY_COLUMN, row, ACTIVITY.commute);
-    if (trip.cost > 0 && i.money) patches.push({ op: 'add', type: 'i32', column: 'money', row, delta: -trip.cost });
+    // Pasaje y combustible salen del mundo (015 R-006): transferencia al resto del país. Los mundos sin economía
+    // (sin cuentas del sistema) solo descuentan del saldo, como antes.
+    if (trip.cost > 0 && i.money)
+      patches.push(
+        view.accounts
+          ? { op: 'transfer', from: { kind: 'citizen', row }, to: { kind: 'rest' }, amount: trip.cost }
+          : { op: 'add', type: 'i32', column: 'money', row, delta: -trip.cost },
+      );
     occ.set(from, (occ.get(from) ?? 1) - 1);
     if (trip.intercity) {
       const id = formatId('CIT', row);

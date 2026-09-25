@@ -46,7 +46,16 @@ export function createActionValidator(table: LeisureTable): ActionValidator {
       if (money !== undefined && money < p.cost + (p.travelCost ?? 0)) return reject('sin dinero');
       const here = i['loc.place']?.[row] ?? 0;
       if (place && place !== here && enterRefusal(view, row, place, view.now, occupancy(view, activeRows(view))) === 'lleno') return reject('lleno');
-      if (p.cost > 0 && money !== undefined) patches.push({ op: 'add', type: 'i32', column: 'money', row, delta: -p.cost });
+      // El gasto va a la organización del lugar (sus ventas, 015 R-007) o, si no hay, al resto del país (R-006).
+      // Sin cuentas del sistema (mundos sin economía), solo se descuenta del saldo, como antes.
+      if (p.cost > 0 && money !== undefined) {
+        const org = action.target ? [...view.organizations.values()].find((o) => o.placeIds.includes(action.target as EntityId)) : undefined;
+        patches.push(
+          view.accounts
+            ? { op: 'transfer', from: { kind: 'citizen', row }, to: org ? { kind: 'org', id: org.id } : { kind: 'rest' }, amount: p.cost }
+            : { op: 'add', type: 'i32', column: 'money', row, delta: -p.cost },
+        );
+      }
       // Última vez que la hizo: regula la frecuencia (032 R-006).
       // Copia simple (la vista congelada devuelve Proxies, que no se pueden clonar al aplicar el parche).
       const leisure: Record<string, unknown>[] = [];

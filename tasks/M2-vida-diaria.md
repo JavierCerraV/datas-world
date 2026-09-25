@@ -41,12 +41,12 @@ Cada cosa que les pasa queda como evento con sus causas. Ánimo, estrés, empleo
 - [x] E4. Criterios: 017 CA-001, CA-003, CA-004, CA-005; 032 CA-006.
 
 ## Bloque F — Economía (spec 015)
-- [ ] F1. Cuentas: saldos de personas y hogares, caja de las organizaciones y "resto del país"; conservación exacta (R-006).
-- [ ] F2. Generación (M1 ampliado): tenencia de la vivienda (ECV 2024) y arriendo por estrato; ahorro del hogar.
-- [ ] F3. Ingresos: quincena con descuentos de salud y pensión y auxilio de transporte; ingreso informal diario; pensión mensual.
-- [ ] F4. Gastos: arriendo, servicios públicos con subsidio y contribución por estrato, alimentación, transporte, cuotas moderadoras, medicamentos y esparcimiento.
-- [ ] F5. Déficit y deudas: ahorro → banco (si hay empleo formal) → gota a gota → impago; estrés por deuda (R-005).
-- [ ] F6. Criterios: 015 CA-001 a CA-005; 008 CA-004.
+- [x] F1. Cuentas: saldos de personas y hogares, caja de las organizaciones y "resto del país"; conservación exacta (R-006).
+- [x] F2. Generación (M1 ampliado): tenencia de la vivienda (ECV 2024) y arriendo por estrato; ahorro del hogar.
+- [x] F3. Ingresos: quincena con descuentos de salud y pensión y auxilio de transporte; ingreso informal diario; pensión mensual.
+- [x] F4. Gastos: arriendo, servicios públicos con subsidio y contribución por estrato, alimentación, transporte, cuotas moderadoras, medicamentos y esparcimiento.
+- [x] F5. Déficit y deudas: ahorro → banco (si hay empleo formal) → gota a gota → impago; estrés por deuda (R-005).
+- [x] F6. Criterios: 015 CA-001 a CA-005; 008 CA-004.
 
 ## Bloque G — Trabajo y objetos en la vida diaria (specs 006, 005)
 - [ ] G1. Retrasos, advertencias y despido (006 CA-004); vacantes y contratación (006 CA-005); organizaciones con caja negativa reducen personal (006 CA-006).
