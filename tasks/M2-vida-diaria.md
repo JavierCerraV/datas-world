@@ -12,10 +12,10 @@ Cada cosa que les pasa queda como evento con sus causas. Ánimo, estrés, empleo
 **Cómo se trabaja:** cada bloque va en su rama (`m2/a-bucle`, `m2/b-necesidades`…) y termina con un PR que el usuario aprueba. Antes de programar cada bloque, se muestran el plan breve y los criterios que se cubrirán.
 
 ## Bloque A — Bucle de simulación y registro de sistemas (spec 021)
-- [ ] A1. Interfaz `System` (fase, orden, capacidad, cadencia, `run` y `runCoarse`), registro estático ordenado y validado (R-005), `WorldView` de solo lectura (congelada en pruebas) y parches aplicados al final de cada fase (R-007).
-- [ ] A2. Flujos RNG por sistema (`sys:<id>`, R-008) y capacidades de M2 (`needs`, `routines`, `mobility`, `decision`, `economy`) en el registro de la spec 001.
-- [ ] A3. Niveles 1 y 2 (R-011) y presupuesto (R-009). La observación no cambia el mundo (R-010).
-- [ ] A4. Criterios: 021 CA-004, CA-005 y CA-006. El `tick` de M0 pasa a recorrer el registro sin cambiar el hash de un mundo sin sistemas.
+- [x] A1. Interfaz `System` (fase, orden, capacidad, cadencia, `run` y `runCoarse`), registro estático ordenado y validado (R-005), `WorldView` de solo lectura (congelada en pruebas) y parches aplicados al final de cada fase (R-007).
+- [x] A2. Flujos RNG por sistema (`sys:<id>`, R-008). Las capacidades de M2 (`needs`, `routines`, `mobility`, `economy`) ya existían en la spec 001; el motor de decisiones usa `routines`, sin capacidad nueva.
+- [x] A3. Niveles de M2 (R-011): todos en nivel 2, con `runCoarse` para quien está por debajo del mínimo de un sistema. El presupuesto (R-009) y la observación (R-010) llegan con los niveles 3 y 4 (M3–M4).
+- [x] A4. Criterios: 021 CA-004, CA-005 y CA-006. El `tick` de M0 recorre el registro sin cambiar el hash de un mundo sin sistemas.
 
 ## Bloque B — Necesidades, emociones y salud del día a día (spec 010)
 - [ ] B1. Columnas de necesidades, emociones, estrés, ánimo, deuda de sueño y enfermedad aguda; valores iniciales al crear el mundo desde la personalidad y la ficha de salud.

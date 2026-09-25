@@ -5,6 +5,9 @@ import type { WorldEvent } from './events.ts';
 import type { Rng } from './rng.ts';
 import { applyExternalInput, tick } from './tick.ts';
 import type { ExternalInput, ScheduledHandler } from './tick.ts';
+import type { LoopOptions } from './simulation/loop.ts';
+import { EMPTY_REGISTRY } from './simulation/registry.ts';
+import type { SystemRegistry } from './simulation/registry.ts';
 import type { World } from './world.ts';
 
 export type Speed = 0 | 1 | 10 | 100 | 1000;
@@ -22,10 +25,20 @@ export class Runner {
   #seqAt = -1;
   #seq = 0;
 
-  constructor(world: World, rng: Rng, handlers: Readonly<Record<string, ScheduledHandler>> = {}) {
+  readonly #systems: SystemRegistry;
+  readonly #loop: LoopOptions;
+
+  constructor(
+    world: World,
+    rng: Rng,
+    handlers: Readonly<Record<string, ScheduledHandler>> = {},
+    opts: { systems?: SystemRegistry; loop?: LoopOptions } = {},
+  ) {
     this.world = world;
     this.#rng = rng;
     this.#handlers = handlers;
+    this.#systems = opts.systems ?? EMPTY_REGISTRY;
+    this.#loop = opts.loop ?? {};
   }
 
   get speed(): Speed {
@@ -88,7 +101,7 @@ export class Runner {
 
   #tick(): void {
     this.flushReplay();
-    this.#outbox.push(...tick(this.world, this.#rng, this.#handlers));
+    this.#outbox.push(...tick(this.world, this.#rng, this.#handlers, this.#systems, this.#loop));
   }
 
   /** Ejecuta n ticks seguidos, sin mirar la velocidad ni el estado (CLI, pruebas, replay). */
