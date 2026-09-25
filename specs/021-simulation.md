@@ -2,9 +2,9 @@
 id: 021
 nombre: simulation
 estado: borrador
-hito: M2
+hito: M2 (registro de sistemas, niveles 1 y 2) · M3–M4 (niveles 3 y 4, observación) · M7 (nivel 0, escala)
 depende_de: [001, 002, 017, 014]
-version: 0.2
+version: 0.3
 ---
 
 # 021 — Bucle de simulación, registro de sistemas y niveles de detalle
@@ -62,6 +62,8 @@ interface SystemOutput { patches: Patch[]; events: WorldEvent[]; actions?: Actio
 - **R-007** — **Aislamiento.** Un sistema solo lee a través de `WorldView` y solo cambia el estado con los parches que devuelve; los parches de una fase se aplican antes de la fase siguiente, en orden de sistema y luego de emisión. Las `ActionRequest` pasan por la validación de la spec 017.
 - **R-008** — **Flujos RNG.** El bucle entrega a cada sistema `rng.fork('sys:' + id)`; el sistema deriva por persona con `fork(citizenId)` (spec 023 R-002). Así, registrar un sistema nuevo no altera el azar de los existentes.
 - **R-009** — **Presupuesto.** Si los candidatos a nivel 3 o 4 superan `maxLevel3`/`maxLevel4`, se eligen por prioridad (observado > evento importante > estado extremo) y luego por id ascendente.
+- **R-010** — **La observación no cambia el mundo.** Observar a una persona (visor, informe o, en el futuro, una sesión clínica, 034) solo sube su nivel de detalle. La distribución de lo que le pasa es la misma que sin observarla. Cualquier efecto real de la observación (una sesión que cambia creencias) entra como entrada externa registrada, nunca como efecto lateral del nivel.
+- **R-011 (M2)** — **Niveles de M2.** Solo existen los niveles 1 (rutina por bloques, con `runCoarse`) y 2 (decisión por tick). Con 200 personas, todas en nivel 2 salvo que el presupuesto de CPU obligue a bajar a nivel 1.
 
 ## 5. Eventos
 | Tipo | Cuándo | Payload | Causas esperadas |
@@ -74,13 +76,13 @@ interface SystemOutput { patches: Patch[]; events: WorldEvent[]; actions?: Actio
 - **INV-003** — El orden de ejecución de sistemas es función pura de `(registro, capabilities)`.
 
 ## 7. Criterios de aceptación
-- **CA-001** — *Dado* 100 personas en nivel 1 vs nivel 2 durante 30 días, *entonces* la diferencia de medias de ánimo y gasto es < 5 %.
-- **CA-002** — *Dado* 500 personas, *entonces* se simulan ≥ 1 año de mundo en < 10 min en el servidor objetivo.
-- **CA-003** — *Dado* que se observa a una persona, *entonces* sube a nivel 4 y el evento de observación se registra como entrada externa.
-- **CA-004** — *Dado* un registro con los sistemas A (fase needs) y B (fase decision), *cuando* se registra C en una fase intermedia, *entonces* la secuencia de números aleatorios que reciben A y B no cambia.
-- **CA-005** — *Dado* un sistema que intenta mutar `WorldView`, *entonces* la prueba falla (la vista es de solo lectura en tipos y en tiempo de ejecución en modo prueba).
-- **CA-006** — *Dado* un mundo sin la capacidad `relationships`, *entonces* ningún sistema con esa capacidad se ejecuta; al activarla, empieza a ejecutarse desde el tick siguiente.
-- **CA-007** — *Dado* 10 000 personas con al menos 95 % en nivel 0–1, *entonces* `pnpm bench` mide RSS < 1 GB y ≥ 1 día de mundo por segundo en local (peldaño 5).
+- **CA-001 (M2)** — *Dado* 100 personas en nivel 1 vs nivel 2 durante 30 días, *entonces* la diferencia de medias de ánimo y gasto es < 5 %.
+- **CA-002 (M2)** — *Dado* 500 personas, *entonces* se simulan ≥ 1 año de mundo en < 10 min en el servidor objetivo (medido en local con `pnpm bench`; en el servidor, al publicar).
+- **CA-003 (M4)** — *Dado* que se observa a una persona, *entonces* sube a nivel 4 y el evento de observación se registra como entrada externa. Lo que le pasa no cambia por observarla (R-010).
+- **CA-004 (M2)** — *Dado* un registro con los sistemas A (fase needs) y B (fase decision), *cuando* se registra C en una fase intermedia, *entonces* la secuencia de números aleatorios que reciben A y B no cambia.
+- **CA-005 (M2)** — *Dado* un sistema que intenta mutar `WorldView`, *entonces* la prueba falla (la vista es de solo lectura en tipos y en tiempo de ejecución en modo prueba).
+- **CA-006 (M2)** — *Dado* un mundo sin la capacidad `relationships`, *entonces* ningún sistema con esa capacidad se ejecuta; al activarla, empieza a ejecutarse desde el tick siguiente.
+- **CA-007 (M7)** — *Dado* 10 000 personas con al menos 95 % en nivel 0–1, *entonces* `pnpm bench` mide RSS < 1 GB y ≥ 1 día de mundo por segundo en local (peldaño 5).
 
 ## 8. Parámetros y calibración
 | Parámetro | Valor por defecto |
@@ -93,12 +95,14 @@ interface SystemOutput { patches: Patch[]; events: WorldEvent[]; actions?: Actio
 Distribuciones de los valores que introduce esta spec en la prueba de 100 personas × 1 año; alertas de degeneración (varianza ≈ 0, saturación en 0 o 1, crecimiento sin límite). Tiempo medio por sistema y por tick (el bench desglosa por `id`).
 
 ## 10. Preguntas abiertas
-- [ ] ¿La observación debe cambiar el mundo? (Propuesta: solo el nivel de detalle, nunca el resultado esperado.)
-- [ ] ¿`WorldView` de solo lectura con `Readonly<>` de TypeScript basta, o también `Object.freeze` en pruebas? (Propuesta: tipos siempre, congelado solo en pruebas por coste.)
-- [ ] ¿Qué sistemas necesitan `runCoarse` desde M2? (Propuesta: needs, routines y economy.)
+- [x] ¿La observación debe cambiar el mundo? → No: solo el nivel de detalle, nunca el resultado esperado (usuario, 2026-09-25). Es clave para que la capa clínica (034) no contamine el mundo.
+- [x] ¿`WorldView` de solo lectura? → Tipos `Readonly<>` siempre; `Object.freeze` solo en pruebas, por coste (usuario, 2026-09-25).
+- [x] ¿Qué sistemas tienen `runCoarse` desde M2? → needs, routines y economy (usuario, 2026-09-25).
+- [x] ¿Qué niveles en M2? → Solo 1 (rutina por bloques) y 2 (decisión por tick); 3 y 4 con M3–M4 y M6; 0 con la escala de M7 (usuario, 2026-09-25).
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-23 | 0.2 | Registro de sistemas enchufables por fases y capacidades, variantes gruesas, flujos RNG por sistema, presupuesto de niveles y CA de escala 10 000 (ADR-005, idea A) |
+| 2026-09-25 | 0.3 | Revisión de M2 con las decisiones del usuario: en M2 solo los niveles 1 y 2; la observación no cambia el mundo (R-010, enganche de la capa clínica); `WorldView` de solo lectura por tipos y congelada en pruebas; `runCoarse` en needs, routines y economy; CA marcados por hito (CA-003 en M4, CA-007 en M7) |
