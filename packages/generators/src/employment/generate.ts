@@ -1,8 +1,9 @@
 // Situación laboral inicial (spec 006 R-002, R-004, R-008): ocupados formales e informales, desocupados e
 // inactivos, con los eventos de trayectoria que la explican (spec 007 R-006, CA-003).
-import { ageInYears, hire, idNumber, makeEvent, profileNumber, profileValue, setOccupation } from '@datas-world/engine';
+import { ageInYears, hire, idNumber, makeEvent, profileEntry, profileNumber, profileValue, setOccupation } from '@datas-world/engine';
 import type { EntityId, Rng, World, WorldEvent } from '@datas-world/engine';
 import type { Catalog } from '../catalogs/schema.ts';
+import { limitsWork } from '../health/habits.ts';
 import { worldDate } from '../organizations/generate.ts';
 
 const CAUSE = [{ state: 'backstory', weight: 1 }];
@@ -46,6 +47,10 @@ export function generateEmployment(
     M: profileValue(profile, 'gen.labor.employmentByAge.M', date),
   } as Record<'F' | 'M', Record<string, number>>;
   const informalShare = profileNumber(profile, 'gen.labor.informalShare', date);
+  // 031 R-004: la discapacidad para caminar o para el autocuidado baja la probabilidad de empleo.
+  const disabilityFactor = profileEntry(profile, 'gen.health.disabilityEmploymentFactor', date)
+    ? profileNumber(profile, 'gen.health.disabilityEmploymentFactor', date)
+    : 1;
   const unemployedP = profileNumber(profile, 'gen.labor.unemployedP', date);
   const adultStudentP = profileNumber(profile, 'gen.labor.adultStudentP', date);
   const homeDutiesP = {
@@ -83,7 +88,8 @@ export function generateEmployment(
     const c = world.citizens.get(id)!;
     const a = age(id);
     const pensioned = world.components.u8['demo.pensioned']![idNumber(id)] === 1;
-    const pEmp = employmentProbability(table[c.sex!], a) * (pensioned ? 0.3 : 1);
+    const pEmp =
+      employmentProbability(table[c.sex!], a) * (pensioned ? 0.3 : 1) * (limitsWork(world, id) ? disabilityFactor : 1);
     if (r.chance(pEmp)) {
       const open = orgIds.filter((o) => freeOf(o).length > 0);
       const formal = a >= 18 && open.length > 0 && !r.chance(informalShare);

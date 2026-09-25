@@ -154,6 +154,19 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { objectId: str, to: str, name: str }),
     text: (e) => `${e.payload.to} hereda ${e.payload.name}.`,
   }),
+  // Ficha de salud (spec 031).
+  HEALTH_INSURANCE_SET: def<{ citizenId: string; regime: string }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, regime: str }),
+    text: (e) => `${e.payload.citizenId} queda afiliado al régimen ${e.payload.regime} de salud.`,
+  }),
+  CONDITION_DIAGNOSED: def<{ citizenId: string; condition: string; name: string; cie10: string }>({
+    baseImportance: 0.6,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, condition: str, name: str, cie10: str }),
+    text: (e) => `A ${e.payload.citizenId} le diagnostican ${e.payload.name.toLowerCase()} (${e.payload.cie10}).`,
+  }),
   // Historia generada (spec 030), de 1900 al presente.
   TOWN_FOUNDED: def<{ placeId: string; name: string; year: number }>({
     baseImportance: 1,

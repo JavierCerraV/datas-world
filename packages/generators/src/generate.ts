@@ -14,6 +14,10 @@ import { generateEmployment } from './employment/generate.ts';
 import { generateGeography } from './geography/generate.ts';
 import type { Territory } from './geography/generate.ts';
 import { COMMERCIAL_LOT, MAP_TEMPLATES, plots } from './geography/template.ts';
+import { computePhysical, generateConditions } from './health/conditions.ts';
+import { generateHabits } from './health/habits.ts';
+import { generateInsurance } from './health/insurance.ts';
+import { healthParams } from './health/params.ts';
 import { generateHistory } from './history/generate.ts';
 import type { HistoryResult } from './history/generate.ts';
 import { generateObjects } from './objects/generate.ts';
@@ -94,11 +98,21 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
     prototype: profileId === PROTOTYPE_PROFILE,
   });
   const pop = generatePopulation(world, territory, places, catalogs, rng);
+  // 031: la ficha de salud va en dos fases; la primera antes del empleo (la discapacidad limita el trabajo).
+  const health = healthParams(profile, epoch.slice(0, 10), catalogs.health_conditions.entries.map((e) => e.key));
+  if (health) generateHabits(world, pop.citizenIds, health, rng);
   const emp = generateEmployment(world, pop.citizenIds, orgIds, catalogs, rng);
   const objs = generateObjects(world, pop.citizenIds, pop.householdIds, catalogs.object_kinds, rng);
   const prior = [...pop.events, ...emp.events, ...objs.events];
   const hist = generateHistory(world, territory, places, orgIds, pop.citizenIds, prior, catalogs, rng);
-  const events = [...created, ...prior, ...hist.events].sort((a, b) => idNumber(a.id) - idNumber(b.id));
+  // Segunda fase: condiciones (con el antecedente de padres y antepasados), afiliación y salud física.
+  const healthEvents: WorldEvent[] = [];
+  if (health) {
+    healthEvents.push(...generateConditions(world, pop.citizenIds, hist.ancestorIds, catalogs.health_conditions, health, rng));
+    healthEvents.push(...generateInsurance(world, pop.citizenIds, prior, health, rng));
+    computePhysical(world, pop.citizenIds, catalogs.health_conditions);
+  }
+  const events = [...created, ...prior, ...hist.events, ...healthEvents].sort((a, b) => idNumber(a.id) - idNumber(b.id));
   sortBackstories(world, events);
   return {
     world,

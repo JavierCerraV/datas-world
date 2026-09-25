@@ -4,7 +4,7 @@ nombre: health-profile
 estado: aprobada
 hito: M1 (ficha inicial) · M2 (efectos en necesidades, rutinas y economía) · peldaño 4 (evolución de las condiciones)
 depende_de: [006, 007, 008, 009, 010, 014, 023, 029, 030]
-version: 0.2
+version: 0.3
 ---
 
 # 031 — Ficha de salud
@@ -157,3 +157,4 @@ Alerta si una prevalencia sale del intervalo o si hay beneficiarios sin cotizant
 | 2026-09-24 | 0.1 | Borrador inicial a petición del usuario: ficha de salud de cada persona (afiliación al SGSSS, condiciones crónicas con CIE-10, hábitos, peso y discapacidad), complementaria de la salud dinámica de la 010 |
 | 2026-09-24 | 0.2 | Decisiones del usuario (§10) y cifras verificadas (§8): afiliación (subsidiado 50,3 %, cobertura 98,3 %, marzo de 2024), ENSIN 2015, ENCSPA 2019, CNPV 2018 y Cuenta de Alto Costo 2024 (hipertensión 11,91 %, diabetes 4,43 %) |
 | 2026-09-25 | 0.2 | Estado → aprobada |
+| 2026-09-25 | 0.3 | Implementación del bloque J4. Precisiones: la ficha se genera en dos fases (hábitos, peso y discapacidad antes del empleo, por R-004; condiciones, afiliación y salud física después de la historia, por el riesgo familiar y el empleo formal); las prevalencias por edad van en el perfil (`gen.health.condition.*`) y los factores de riesgo en el catálogo `health_conditions`, normalizados por su media en el mundo para no inflar la prevalencia; los antepasados solo tienen hipertensión y diabetes (decisión de §10); la policía y los docentes oficiales van al régimen especial; el perfil prototipo no tiene ficha. Medido en 20 mundos: contributivo 0,452, subsidiado 0,465, especial 0,067, sin afiliación 0,016; exceso de peso 0,541; tabaquismo 0,081; discapacidad 0,078; hipertensión 0,139; diabetes 0,047. Sin cambios en CA |
