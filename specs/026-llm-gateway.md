@@ -55,8 +55,15 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 
 ## 10. Preguntas abiertas
 - [ ] ¿Qué modelo y qué límites de coste mensual?
+- [ ] Enganche de la capa clínica (034 R-002, R-003, R-008):
+  - un `purpose: 'session'` con el rol "persona en sesión";
+  - modelo y proveedor configurables por propósito;
+  - el texto de la sesión se guarda fuera del hash y se reutiliza en el replay.
+
+  Decisión del usuario (2026-09-24): el modelo debe ser configurable.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
+| 2026-09-24 | 0.1 | Pregunta abierta: sesiones clínicas con modelo configurable (spec 034) |

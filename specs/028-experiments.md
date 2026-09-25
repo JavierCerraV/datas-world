@@ -53,9 +53,11 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 
 ## 10. Preguntas abiertas
 - [ ] Revisar parámetros con los resultados de la primera validación.
+- [ ] Enganche de la capa clínica (034 R-007): brazos por intervención (un plan de tratamiento por brazo, incluido "sin intervención") sobre la misma persona y la misma instantánea.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-23 | 0.2 | Brazos que activan o desactivan capacidades y experimentos como puerta de cada peldaño (R-004, R-005, CA-003). ADR-005 |
+| 2026-09-24 | 0.2 | Pregunta abierta: brazos por intervención para la capa clínica (spec 034) |
