@@ -56,6 +56,17 @@ CREATE INDEX memory_archive_owner_at ON memory_archive(owner_id, at);
 - **R-009** — **Capacidades.** `meta.capabilities` guarda la lista activa en orden canónico; `meta.engine_version` la versión del motor. Al cargar, el worker rechaza un mundo cuyas capacidades no conoce su versión del motor.
 - **R-010** — **Archivo de memoria.** Cuando un episodio, esquema o capítulo sale de la RAM (spec 013 R-003, R-008, R-010), se escribe en `memory_archive` en el mismo flush. Nunca se borra. La API y el informe de vida (020) lo leen desde ahí.
 - **R-011** — **Compatibilidad entre peldaños.** Un mundo guardado en el peldaño N se debe poder cargar con el motor del peldaño N+1. Si cambia el esquema de datos, la migración (R-006) se prueba con un mundo de ejemplo del peldaño anterior versionado en `docs/validaciones/mundos/`.
+- **R-012** — **Puntos de control.** El `stateHash` no se calcula en cada flush, sino solo en los puntos de control:
+  - cada instantánea (R-004);
+  - el final de un avance de la CLI;
+  - una pausa o un cambio de control;
+  - el cierre (R-007).
+
+  `meta` guarda `state_hash`, `state_hash_at` y `state_dirty`. Un flush normal solo marca `state_dirty = 1`. Al cargar:
+  - si el estado es el de un punto de control, se verifica con su hash; si no coincide, la carga falla;
+  - si hubo flush después (un cierre en seco), no hay hash de ese estado: se carga y se marca como recuperado (`recovered`).
+
+  Una base anterior a esta regla (sin `state_hash_at`) se verifica siempre. Decisión del usuario del 2026-09-24: con la población de M1, el hash de cada flush costaba ≈ 15 ms, y avanzar 30 días tardaba 12 s; con los puntos de control, 2,4 s.
 
 ## 6. Invariantes
 - **INV-001** — `events.seq` estrictamente creciente; nunca `UPDATE` ni `DELETE` sobre eventos salvo el proceso de compactación documentado.
@@ -88,3 +99,5 @@ CREATE INDEX memory_archive_owner_at ON memory_archive(owner_id, at);
 | 2026-09-23 | 0.2 | Tablas `components` y `memory_archive`, capacidades en `meta`, compatibilidad entre peldaños (R-008 a R-011, CA-006 a CA-008). ADR-005 |
 | 2026-09-24 | 0.2 | Estado → aprobada |
 | 2026-09-24 | 0.3 | Implementación M0 (bloque D): `events` gana `origin` y `place_id` (campos de `WorldEvent`, spec 014) y `components` gana `initial` (valor inicial de la columna, necesario para crecer igual tras cargar). Decidido por el usuario |
+| 2026-09-24 | 0.3 | Bloque I de M1: consultas del registro (`queryEvents`, `eventsById`) para la historia (030 R-008); primer mundo de ejemplo versionado en `docs/validaciones/mundos/m1-482917.db` (R-011). Medido: con la población de M1 (≈ 1 300 personas entre vivas y antepasados), el `stateHash` de cada flush cuesta ≈ 15 ms y avanzar 30 días tarda ≈ 12 s. Pendiente de decidir antes de M2 (ver el MODULE.md de persistence). Sin cambios en reglas ni CA |
+| 2026-09-24 | 0.4 | R-012 (puntos de control), aprobada por el usuario: el `stateHash` se guarda solo en instantáneas, al final de un avance, al pausar y al cerrar; la carga verifica los puntos de control y marca como recuperado un estado posterior (cierre en seco). Avanzar 30 días con la población de M1 pasa de 12 s a 2,4 s con el mismo hash final. Sin cambios en CA |

@@ -1,4 +1,6 @@
 // API pública de los generadores (M1).
+export { DEFAULT_EPOCH, HOLIDAY_YEARS, generateWorld } from './generate.ts';
+export type { GeneratedWorld, WorldOptions } from './generate.ts';
 export {
   CATALOGS_DIR,
   CATALOG_NAMES,

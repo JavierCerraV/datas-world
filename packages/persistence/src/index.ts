@@ -20,3 +20,5 @@ export type { ControlCommand, ControlCommandName } from './control.ts';
 export { WorldRepository } from './repository.ts';
 export { WorldSession } from './session.ts';
 export type { FlushBatch } from './repository.ts';
+export { eventsById, queryEvents, rowsToEvents } from './queries.ts';
+export type { EventQuery, EventRow } from './queries.ts';

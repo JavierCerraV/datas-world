@@ -28,7 +28,7 @@ const info = (path = db) => JSON.parse(cli('world:info', '--json', '--db', path)
 
 describe('world:new', () => {
   it('crea el mundo y su carpeta; no pisa un mundo existente', () => {
-    expect(cli('world:new', '--seed', '482917', '--db', db).code).toBe(0);
+    expect(cli('world:new', '--seed', '482917', '--empty', '--db', db).code).toBe(0);
     expect(info()).toMatchObject({ id: 'WLD-0001', seed: 482917, now: 0, status: 'created', events: 1, snapshots: 1 });
     const again = cli('world:new', '--seed', '1', '--db', db);
     expect(again.code).toBe(2);
@@ -55,7 +55,7 @@ describe('world:advance', () => {
   // El límite de 2 s de la 002 CA-005 lo comprueba `pnpm bench --check` en un paso propio de la CI:
   // medido aquí, en paralelo con el resto de la suite, daba falsos fallos (2,08 s en GitHub Actions).
   it('002 CA-005: 365 días desde la CLI emiten 365 DAY_STARTED y una instantánea por día', () => {
-    cli('world:new', '--seed', '482917', '--db', db);
+    cli('world:new', '--seed', '482917', '--empty', '--db', db);
     expect(cli('world:advance', '--days', '365', '--db', db).code).toBe(0);
     expect(info()).toMatchObject({ now: 365 * 1440, daysStarted: 365, snapshots: 366, writerPid: null });
   });
@@ -68,8 +68,8 @@ describe('world:advance', () => {
 
   it('avanzar 10 + 5 días da lo mismo que 15 seguidos', () => {
     const other = join(dir, 'b.db');
-    cli('world:new', '--seed', '482917', '--db', db);
-    cli('world:new', '--seed', '482917', '--db', other);
+    cli('world:new', '--seed', '482917', '--empty', '--db', db);
+    cli('world:new', '--seed', '482917', '--empty', '--db', other);
     cli('world:advance', '--days', '10', '--db', db);
     cli('world:advance', '--days', '5', '--db', db);
     cli('world:advance', '--days', '15', '--db', other);
@@ -77,7 +77,7 @@ describe('world:advance', () => {
   });
 
   it('no avanza si otro proceso vivo escribe en el mundo (R-001)', () => {
-    cli('world:new', '--seed', '482917', '--db', db);
+    cli('world:new', '--seed', '482917', '--empty', '--db', db);
     const h = openWorldDb(db);
     acquireWriterLock(h, process.ppid);
     closeDb(h);
@@ -90,7 +90,7 @@ describe('world:advance', () => {
 
 describe('control', () => {
   it('encola órdenes válidas para el worker y rechaza las inválidas', () => {
-    cli('world:new', '--seed', '482917', '--db', db);
+    cli('world:new', '--seed', '482917', '--empty', '--db', db);
     expect(cli('control', 'pause', '--db', db).code).toBe(0);
     expect(cli('control', 'speed', '100', '--db', db).code).toBe(0);
     expect(cli('control', 'speed', '--db', db).code).toBe(2);
@@ -104,21 +104,26 @@ describe('control', () => {
   });
 });
 
-describe('023 CA-001 entre procesos', () => {
+describe('023 CA-001 entre procesos, con la población de M1', () => {
   const exec = promisify(execFile);
   const node = (...args: string[]) => exec(process.execPath, [MAIN, ...args]);
 
-  it('determinismo: dos procesos con la misma semilla dan el mismo hash tras 30 días', async () => {
+  it('determinismo: un mundo de 100 personas, dos procesos con la misma semilla, mismo hash tras 30 días', async () => {
     const chain = async (path: string) => {
-      await node('world:new', '--seed', '482917', '--db', path);
+      await node('world:new', '--seed', '482917', '--population', '100', '--db', path);
       await node('world:advance', '--days', '30', '--db', path);
-      return JSON.parse((await node('world:info', '--json', '--db', path)).stdout) as { hash: string; now: number };
+      return JSON.parse((await node('world:info', '--json', '--db', path)).stdout) as {
+        hash: string;
+        now: number;
+        citizens: number;
+      };
     };
     const [a, b] = await Promise.all([chain(join(dir, 'a.db')), chain(join(dir, 'b.db'))]);
     expect(a.now).toBe(30 * 1440);
     expect(a.hash).toBe(b.hash);
-    cli('world:new', '--seed', '482917', '--db', db);
+    expect(a.citizens).toBeGreaterThanOrEqual(95);
+    cli('world:new', '--seed', '482917', '--population', '100', '--db', db);
     cli('world:advance', '--days', '30', '--db', db);
     expect(info().hash).toBe(a.hash); // y el mismo que dentro de este proceso
-  }, 60_000);
+  }, 120_000);
 });
