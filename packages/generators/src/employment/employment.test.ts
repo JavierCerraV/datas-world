@@ -121,13 +121,13 @@ describe('006 CA-001: mercado laboral agregado de 20 mundos', () => {
     expect(r.informality).toBeLessThanOrEqual(profileNumber(co, 'labor.informality', at));
     for (const v of r.perWorld)
       expect(Math.abs(v - profileNumber(co, 'labor.employmentRate', at))).toBeLessThanOrEqual(0.1);
-  });
+  }, 60_000); // 20 mundos completos: con salud y esparcimiento pasan de 5 s en paralelo
 
   it('perfil prototipo: la ocupación de 18 a 64 años está en 0,86 ± 0,04 y no hay informalidad', () => {
     const r = tally(PROTOTYPE_PROFILE, seeds(1));
     expect(Math.abs(r.e1864 - 0.86)).toBeLessThanOrEqual(0.04);
     expect(r.informality).toBe(0);
-  });
+  }, 60_000);
 });
 
 describe('006 CA-003: paridad del empleo con el prototipo (10 semillas, perfil prototipo)', () => {
@@ -184,5 +184,5 @@ describe('006 CA-003: paridad del empleo con el prototipo (10 semillas, perfil p
     };
     const [p, q] = [norm(proto), norm(ours)];
     for (const k of Object.values(MAP)) expect(Math.abs(p(k) - q(k)), k).toBeLessThanOrEqual(0.06);
-  });
+  }, 60_000);
 });

@@ -55,6 +55,7 @@ export type {
   HealthCondition,
   Household,
   Kinship,
+  LeisureInterest,
   KinshipKind,
   NewOrganization,
   NewPerson,

@@ -86,3 +86,4 @@ Con el perfil `prototipo` porta `genJobs` y `hire`: 86 % de ocupación de 18 a 6
 | 2026-09-24 | m1/g-empleo-objetos | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/g-empleo-objetos (G1) | 006, 007 | `generateEmployment` con definiciones GEIH, pesos por estrato y eventos de trayectoria; parámetros del perfil calibrados. 8 pruebas: 006 CA-001, CA-002, CA-003; 007 CA-003 |
 | 2026-09-25 | m1/j-salud | 031, 006 | 031 R-004: con discapacidad para caminar o para el autocuidado (`limitsWork`), la probabilidad de empleo se multiplica por `gen.health.disabilityEmploymentFactor` (0,4, estimado); sin la entrada en el perfil, no cambia. Las pruebas de 006 siguen verdes |
+| 2026-09-25 | m1/j-ocio | 006 | Solo pruebas: las tres que generan 10 o 20 mundos dentro de un `it` tienen un límite de 60 s. Con la salud y el esparcimiento, cada mundo tarda más y pasaban de los 5 s por defecto de Vitest en paralelo. Sin cambios de código |

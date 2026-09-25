@@ -19,6 +19,8 @@ import { generateHabits } from './health/habits.ts';
 import { generateInsurance } from './health/insurance.ts';
 import { healthParams } from './health/params.ts';
 import { generateHistory } from './history/generate.ts';
+import { generateLeisure } from './leisure/generate.ts';
+import { leisureParams } from './leisure/params.ts';
 import type { HistoryResult } from './history/generate.ts';
 import { generateObjects } from './objects/generate.ts';
 import { generateOrganizations } from './organizations/generate.ts';
@@ -112,6 +114,9 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
     healthEvents.push(...generateInsurance(world, pop.citizenIds, prior, health, rng));
     computePhysical(world, pop.citizenIds, catalogs.health_conditions);
   }
+  // 032: ficha de esparcimiento, con la salud, el empleo (ingresos, tiempo) y la oferta de lugares ya definidos.
+  const leisure = leisureParams(profile, epoch.slice(0, 10));
+  if (leisure) healthEvents.push(...generateLeisure(world, pop.citizenIds, catalogs.leisure_activities, leisure, rng));
   const events = [...created, ...prior, ...hist.events, ...healthEvents].sort((a, b) => idNumber(a.id) - idNumber(b.id));
   sortBackstories(world, events);
   return {

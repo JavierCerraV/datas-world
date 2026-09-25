@@ -18,6 +18,7 @@ export const CATALOG_NAMES = [
   'given_names',
   'health_conditions',
   'historical_events',
+  'leisure_activities',
   'object_kinds',
   'occupations',
   'org_sectors',

@@ -7,6 +7,7 @@ import { pendingEntries } from '@datas-world/generators';
 import { WorldRepository, openReadonly, queryEvents } from '@datas-world/persistence';
 import { DEFAULT_DB, UsageError, dayOf, withDb } from './common.ts';
 import type { Io } from './common.ts';
+import { healthSummary, leisureSummary, placesSummary } from './ficha.ts';
 
 export interface ReportRow {
   indicator: string;
@@ -77,6 +78,9 @@ export function worldReport(args: string[], io: Io): void {
     options: {
       json: { type: 'boolean', default: false },
       history: { type: 'boolean', default: false },
+      health: { type: 'boolean', default: false },
+      leisure: { type: 'boolean', default: false },
+      places: { type: 'boolean', default: false },
       db: { type: 'string', default: DEFAULT_DB },
     },
   });
@@ -98,6 +102,9 @@ export function worldReport(args: string[], io: Io): void {
     }
     io.out(`Cifras por confirmar en el perfil (${pending.length}): ${pending.join(', ') || 'ninguna'}`);
     if (history) for (const line of history) io.out(line);
+    if (v.health) for (const line of healthSummary(world)) io.out(line);
+    if (v.leisure) for (const line of leisureSummary(world, profile)) io.out(line);
+    if (v.places) for (const line of placesSummary(world)) io.out(line);
   });
 }
 
