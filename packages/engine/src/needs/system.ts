@@ -64,6 +64,7 @@ function step(view: WorldView, ctx: TickCtx): SystemOutput {
     if (FUN.has(act)) fun += R.funLeisure! * dt;
     else if (!rest) fun -= R.funAwake! * dt;
     if (act === ACTIVITY.wash) hygiene = 1;
+    if (act === ACTIVITY.eat) hunger += R.eatRate! * dt; // 010 R-001: comer sacia (prototipo: desayuno −0,4, comida −0,65)
     if (act === ACTIVITY.sleep) set('state.sleptToday', row, i['state.sleptToday']![row]! + view.config.tickMinutes, 'i32');
 
     // R-002: el estrés tiende a un objetivo; los estresores se modulan por neuroticismo y resiliencia.

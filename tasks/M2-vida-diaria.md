@@ -24,9 +24,9 @@ Cada cosa que les pasa queda como evento con sus causas. Ánimo, estrés, empleo
 - [x] B4. Criterios: 010 CA-003, CA-004, CA-005; 031 CA-006; 009 CA-004. (010 CA-001 en el bloque C; CA-002 y CA-006 en el bloque H con un año).
 
 ## Bloque C — Rutinas (spec 011)
-- [ ] C1. Rutinas derivadas por situación (R-001): turno del puesto, colegio en calendario A, informal, desempleado, cuidado, pensionado, niño pequeño.
-- [ ] C2. Comidas colombianas (R-002), calendario con domingos, festivos y vacaciones escolares (R-003), bloques libres para esparcimiento (R-004).
-- [ ] C3. Criterios: 011 CA-001 a CA-005; 010 CA-001 (`OVERSLEPT` tras dos noches sin dormir, con la hora de despertar de la rutina).
+- [x] C1. Rutinas derivadas por situación (R-001): turno del puesto, colegio en calendario A, informal, desempleado, cuidado, pensionado, niño pequeño.
+- [x] C2. Comidas colombianas (R-002), calendario con domingos, festivos y vacaciones escolares (R-003), bloques libres para esparcimiento (R-004).
+- [x] C3. Criterios: 011 CA-001 a CA-005; 010 CA-001 (`OVERSLEPT` tras dos noches sin dormir, con la hora de despertar de la rutina).
 
 ## Bloque D — Movilidad y uso de los lugares (specs 016, 004)
 - [ ] D1. Paradero intermunicipal en la plaza (`transporte.paradero` pasa a M1 en el catálogo y a la plantilla `datas-world-v1`).

@@ -5,44 +5,20 @@ import { defineColumn } from '../components.ts';
 import { setOccupation } from '../employment.ts';
 import type { WorldEvent } from '../events.ts';
 import { formatId } from '../ids.ts';
-import type { CountryProfile } from '../profile.ts';
 import { createRng } from '../rng.ts';
 import { Runner } from '../runner.ts';
 import { applyPatches } from '../simulation/patches.ts';
 import { createRegistry } from '../simulation/registry.ts';
 import type { System } from '../simulation/system.ts';
 import { stateHash } from '../serialize.ts';
-import { testConfig } from '../testing.ts';
+import { TEST_PROFILE, testConfig } from '../testing.ts';
 import { addCitizen, createWorld } from '../world.ts';
 import type { World } from '../world.ts';
 import { EMOTIONS, NEEDS, initNeeds } from './columns.ts';
 import { emotionPatches } from './emotions.ts';
 import { NEEDS_SYSTEMS } from './index.ts';
 
-const entry = (key: string, value: CountryProfile['entries'][number]['value']) =>
-  ({ key, value, validFrom: '1900-01-01', source: 'prueba', status: 'estimado' }) as const;
-
-/** Perfil mínimo con los parámetros de la 010 (los mismos valores que el perfil colombiano). */
-const PROFILE: CountryProfile = {
-  id: 'TEST',
-  country: 'CO',
-  currency: { code: 'COP', minorUnit: 1 },
-  entries: [
-    entry('needs.rates', {
-      energyRest: 0.125, energyAwake: 0.045, energyWork: 0.058, energyStress: 0.4, restStress: 0.45, sickRest: 0.6,
-      hungerRest: 0.035, hungerAwake: 0.16, hungerWork: 0.09, socialCompany: 0.012, socialRest: 0.004, socialAlone: 0.045,
-      hygieneAwake: 0.02, funAwake: 0.03, funLeisure: 0.15, stressRate: 0.05, moodRate: 0.08, emotionHalfLife: 12,
-    }),
-    entry('needs.stress', {
-      base: 0.12, instability: 0.25, negativeMoney: 0.25, lowMoney: 0.1, lowMoneyThreshold: 150000, unemployed: 0.15,
-      hungry: 0.1, exhausted: 0.08, sick: 0.08, peak: 0.8,
-    }),
-    entry('needs.mood', { energy: 0.2, stress: 0.4, stressRef: 0.3, loneliness: 0.25, hunger: 0.2, valence: 0.15, fun: 0.1 }),
-    entry('health.acute.dailyP', 0.0095),
-    entry('health.acute.weights', { gripa: 0.7, gastroenteritis: 0.3 }),
-    entry('health.acute.days', { gripa: 5, gastroenteritis: 3 }),
-  ],
-};
+const PROFILE = TEST_PROFILE;
 
 /** Rutina mínima de prueba: duerme de 22 a 6, trabaja de 8 a 17, come y se lava en sus horas; el resto, libre. */
 const testRoutine: System = {

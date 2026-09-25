@@ -148,3 +148,17 @@ export {
   stability,
 } from './needs/index.ts';
 export type { NeedsParams } from './needs/index.ts';
+
+export {
+  ROUTINE_COLUMNS,
+  dayInfo,
+  defineRoutineColumns,
+  initRoutines,
+  isEarlyDay,
+  planAt,
+  routineParams,
+  routinesSystem,
+  shiftOf,
+  worksShiftToday,
+} from './routines/index.ts';
+export type { DayInfo, Planned } from './routines/index.ts';

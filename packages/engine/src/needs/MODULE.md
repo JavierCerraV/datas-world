@@ -16,7 +16,7 @@ Estado interno que cambia hora a hora (spec 010): necesidades, emociones, estré
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 010 | CA-003, CA-004, CA-005; R-001 a R-008 (R-005: la tabla de emociones por evento está; la usan los sistemas que emiten cada evento) | CA-001 (bloque C, con la hora de despertar de la rutina); CA-002 y CA-006 (bloque H, 1 año) |
+| 010 | CA-003, CA-004, CA-005; R-001 a R-008 (R-005: la tabla de emociones por evento está; la usan los sistemas que emiten cada evento) | CA-001 lo cubre el módulo `routines` (`OVERSLEPT`); CA-002 y CA-006 (bloque H, 1 año) |
 | 009 | CA-004 (el estrés sube más con neuroticismo alto) | — |
 | 031 | CA-006 (con EPOC, menos energía) | — |
 
@@ -43,7 +43,8 @@ Desde `@datas-world/engine`:
   - `health.energyFactor` (1 + 2 × carga de las condiciones de la 031; EPOC → × 1,3) acelera la caída de energía;
   - la enfermedad aguda se decide a medianoche: base del perfil × edad × estrés × deuda de sueño × salud física; dura los días del perfil y termina con `RECOVERED`;
   - las enfermedades y su duración están en el perfil (`health.acute.*`), no en un catálogo, porque son tasas del país.
-- **Sueño (R-004):** `state.sleptToday` suma los minutos dormidos; a medianoche, la deuda suma lo que faltó respecto a `health.sleepHours` de la ficha. `OVERSLEPT` llega con la rutina (bloque C).
+- **Comer:** con la actividad `eat`, el hambre sube `eatRate` por hora (1,3), así que un desayuno de 30 min sacia ≈ 0,4 y un almuerzo de 45 min ≈ 0,65, como el prototipo.
+- **Sueño (R-004):** `state.sleptToday` suma los minutos dormidos; a medianoche, la deuda suma lo que faltó respecto a `health.sleepHours` de la ficha. `OVERSLEPT` lo emite la rutina (módulo `routines`), con la deuda como causa.
 - **Compañía:** sin posiciones todavía (016, bloque D), se aproxima por la actividad (trabajo, estudio, socializar, ocio, cuidado).
 - **Rendimiento:** los sistemas devuelven un parche `setMany` por columna. Con el mundo de M1 (199 personas), 30 días de necesidades tardan ≈ 1,7 s.
 - **Coste:** 21 columnas ≈ 64 B por persona.
@@ -66,7 +67,7 @@ Desde `@datas-world/engine`:
 Porta `updateNeeds` (tasas de energía, hambre y soledad; objetivos de estrés y ánimo) y `bump`. El perfil `prototipo` tiene los mismos valores y una sola enfermedad genérica (≈ 2,2 episodios al año, como la línea base). La paridad del ánimo y del estrés se mide en el bloque H.
 
 ## 8. Pendientes y deuda
-- [ ] `OVERSLEPT` y 010 CA-001 con la rutina (bloque C).
+- [x] `OVERSLEPT` y 010 CA-001 con la rutina (bloque C, módulo `routines`).
 - [ ] Compañía real por ocupación de los lugares (bloque D).
 - [ ] `EMOTIONAL_OUTBURST` con las relaciones (M3).
 - [ ] Revisar la tabla de emociones por evento con expertos (como la de rasgos de la 009).
@@ -76,3 +77,4 @@ Porta `updateNeeds` (tasas de energía, hambre y soledad; objetivos de estrés y
 |---|---|---|---|
 | 2026-09-25 | m2/b-necesidades | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m2/b-necesidades (B1–B4) | 010, 009, 031, 021 | `columns.ts`, `params.ts`, `system.ts`, `illness.ts`, `emotions.ts` e `index.ts`; `src/activity.ts`. 6 pruebas |
+| 2026-09-25 | m2/c-rutinas | 010 | Comer sacia: con `eat`, el hambre sube `eatRate` por hora (1,3; prototipo: desayuno −0,4, comida −0,65). Las pruebas usan `TEST_PROFILE` de `testing.ts` |
