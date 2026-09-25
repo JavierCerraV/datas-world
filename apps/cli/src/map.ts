@@ -44,12 +44,23 @@ export function renderMap(world: World): string[] {
   const districts = [...world.places.values()]
     .filter((p) => p.kind === 'territorio.barrio')
     .map((p) => `${p.name} (estrato ${p.stratum})`);
+  // 033: lugares regionales, fuera del mapa, en la ciudad de referencia.
+  const regional = [...world.places.values()]
+    .filter((p) => p.travel && !p.kind.startsWith('territorio.'))
+    .sort((a, b) => (a.id < b.id ? -1 : 1));
+  const city = regional.length ? world.places.get(regional[0]!.parentId!) : undefined;
   return [
     ...grid.map((row) => row.join('').trimEnd()),
     '',
     `Barrios: ${districts.join(' · ')}`,
     'Leyenda: · calle  " parque  + plaza  ~ agua  v vivienda',
     ...legend,
+    ...(city
+      ? [
+          `Fuera del mapa, en ${city.name} (${city.travel!.minutes} min en bus, $${city.travel!.cost.toLocaleString('es-CO')} por trayecto):`,
+          ...regional.map((p) => `  ·  ${p.name} (${p.kind})`),
+        ]
+      : []),
   ];
 }
 

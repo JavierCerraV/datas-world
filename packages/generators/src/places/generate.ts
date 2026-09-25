@@ -1,12 +1,14 @@
 // Generador de lugares (spec 004): una parcela de la plantilla = un lugar; los edificios residenciales
 // se dividen en viviendas según el estrato del barrio.
-import { TILE, addPlace, setTile } from '@datas-world/engine';
+import { TILE, addPlace, profileNumber, setTile } from '@datas-world/engine';
 import type { EntityId, OpeningHours, World } from '@datas-world/engine';
 import { catalogEntry } from '../catalogs/load.ts';
 import type { Catalog } from '../catalogs/schema.ts';
+import { districtAt } from '../geography/generate.ts';
 import type { Territory } from '../geography/generate.ts';
 import { plots } from '../geography/template.ts';
 import type { PlotTemplate } from '../geography/template.ts';
+import { worldDate } from '../organizations/generate.ts';
 
 /** Residentes máximos por vivienda (spec 004): cabe el hogar más grande de las plantillas (spec 008). */
 export const DWELLING_CAPACITY = 6;
@@ -29,6 +31,10 @@ export interface PlacesResult {
 type OpenDays = 'all' | 'mon-fri' | 'mon-sat';
 interface PlaceAttrs {
   defaultName?: string;
+  /** Nombres de las instancias sucesivas del mismo tipo (tiendas, bares…). */
+  names?: string[];
+  /** Vida nocturna: el cierre no pasa de `amenity.nightlifeClose` del perfil (033 R-004). */
+  nightlife?: boolean;
   open?: [number, number];
   openDays?: OpenDays;
   slots?: number;
@@ -46,27 +52,49 @@ function hoursOf(a: PlaceAttrs): OpeningHours | undefined {
 }
 
 /**
- * Crea los lugares de las parcelas de la plantilla del territorio y pinta sus tiles (edificio o parque).
- * Sin azar: los atributos salen del catálogo y los nombres del orden de las parcelas (004 R-001, R-002).
+ * Crea los lugares de las parcelas y pinta sus tiles (edificio, parque o plaza). Por defecto, las parcelas de
+ * la plantilla; con dotación (033), las ya resueltas por `resolvePlots`. Sin azar: los atributos salen del
+ * catálogo y los nombres del orden de las parcelas (004 R-001, R-002).
  */
-export function generatePlaces(world: World, territory: Territory, placeKinds: Catalog): PlacesResult {
+export function generatePlaces(
+  world: World,
+  territory: Territory,
+  placeKinds: Catalog,
+  plotList: readonly PlotTemplate[] = plots(territory.template),
+): PlacesResult {
   const g = world.geo;
   if (!g) throw new Error('Primero la geografía: el mundo no tiene mapa');
   const result: PlacesResult = { plots: [], dwellingIds: [], workplaceIds: [] };
+  const profile = world.config.profile;
+  const nightlifeClose = (() => {
+    try {
+      return profile ? profileNumber(profile, 'amenity.nightlifeClose', worldDate(world)) : undefined;
+    } catch {
+      return undefined; // el perfil prototipo no tiene vida nocturna
+    }
+  })();
+  const seen = new Map<string, number>();
   let building = 0;
-  for (const plot of plots(territory.template)) {
+  for (const plot of plotList) {
     const entry = catalogEntry(placeKinds, plot.kind);
     if (entry.since !== 'M1') throw new Error(`${plot.kind} es de ${entry.since}: no se instancia en M1`);
     const attrs = (entry.attrs ?? {}) as PlaceAttrs;
-    const districtId = territory.districtIds[plot.row];
-    if (!districtId) throw new Error(`La fila de manzanas ${plot.row} no tiene barrio`);
+    // El barrio es el de la fila del edificio: un barrio puede ocupar varias filas de manzanas (033).
+    const districtId = districtAt(world, territory, plot.rect.y);
     const stratum = world.places.get(districtId)!.stratum!;
     const residential = plot.kind === 'vivienda.edificio';
     if (residential) building += 1;
-    const hours = hoursOf(attrs);
+    const nth = seen.get(plot.kind) ?? 0;
+    seen.set(plot.kind, nth + 1);
+    const baseName = attrs.defaultName ?? entry.name;
+    const own = nth === 0 ? territory.template.names?.[plot.kind] : undefined;
+    const name = own ?? attrs.names?.[nth] ?? (nth === 0 ? baseName : `${baseName} ${nth + 1}`);
+    let hours = hoursOf(attrs);
+    if (attrs.nightlife && nightlifeClose !== undefined && hours && hours !== '24h' && hours.close > nightlifeClose)
+      hours = { ...hours, close: nightlifeClose };
     const placeId = addPlace(world, {
       kind: plot.kind,
-      name: residential ? `Edificio ${pad(building)}` : (attrs.defaultName ?? entry.name),
+      name: residential ? `Edificio ${pad(building)}` : name,
       districtId,
       rect: plot.rect,
       door: plot.door,
@@ -74,7 +102,8 @@ export function generatePlaces(world: World, territory: Territory, placeKinds: C
       ...(attrs.capacity !== undefined ? { capacity: attrs.capacity } : {}),
     });
     const r = plot.rect;
-    const tile = plot.kind === 'espacio_publico.parque' ? TILE.park : TILE.building;
+    const tile =
+      plot.kind === 'espacio_publico.parque' ? TILE.park : plot.kind === 'espacio_publico.plaza' ? TILE.plaza : TILE.building;
     for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) setTile(g, x, y, tile);
 
     const dwellingIds: EntityId[] = [];

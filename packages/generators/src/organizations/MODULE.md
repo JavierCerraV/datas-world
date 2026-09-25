@@ -65,3 +65,4 @@ Porta `PDEF` (`slots`, `pay`, `shift`, `wd`) y el jefe × 1,6 de `hire`. Con el 
 |---|---|---|---|
 | 2026-09-24 | m1/d-organizaciones | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/d-organizaciones (D1) | 006 | `generateOrganizations`: 8 organizaciones, 45 puestos con ocupación CIUO, sueldo mensual con suelo en el salario mínimo (o diario en el perfil prototipo), turnos legales y cultura. 5 pruebas: 006 CA-007 (sueldos y turnos) y CA-002 en parte |
+| 2026-09-24 | m1/j-dotacion | 006, 033 | Sedes: un lugar con `orgWith` (la escuela) no crea organización; suma sus puestos, sin jefe, a la primera organización del tipo indicado, que toma `orgName` ("Institución Educativa Los Alisos") y queda con dos lugares. Con la dotación de 200 habitantes hay 19 organizaciones y 76 puestos y la informalidad baja de 0,53 a ≈ 0,46, dentro del rango del DANE (0,405–0,545); 006 CA-001 sigue verde. La prueba de la sede está en `amenities.test.ts` |

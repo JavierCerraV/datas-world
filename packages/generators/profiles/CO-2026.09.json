@@ -3,6 +3,9 @@
   "country": "CO",
   "currency": { "code": "COP", "minorUnit": 1 },
   "entries": [
+    {"key": "amenity.nightlifeClose", "value": 1560, "validFrom": "1900-01-01", "source": "Estimado (spec 033 R-004): cierre de bares y discotecas a las 02:00 (minuto 1560 = 26:00). El horario de rumba lo fija cada municipio por decreto", "status": "estimado"},
+    {"key": "amenity.travel.cost", "value": 12000, "validFrom": "2026-01-01", "source": "Estimado (spec 033): pasaje intermunicipal de ida a una ciudad a una hora, en COP de 2026", "status": "estimado"},
+    {"key": "amenity.travel.minutes", "value": 60, "validFrom": "1900-01-01", "source": "Estimado (spec 033): Data's World está a una hora de su ciudad de referencia", "status": "estimado"},
     {"key": "demo.parentAgeAtBirth.byDecade", "value": {}, "validFrom": "1900-01-01", "source": "DANE, estadísticas vitales (pendiente)", "status": "por_confirmar"},
     {"key": "demo.share.age0to11", "value": 0.171, "validFrom": "2026-01-01", "source": "DANE, proyecciones de población 2026 (citado por UNFPA e ICBF)", "status": "oficial"},
     {"key": "demo.share.age12to17", "value": 0.094, "validFrom": "2026-01-01", "source": "DANE, proyecciones de población 2026 (citado por UNFPA e ICBF)", "status": "oficial"},
@@ -10,6 +13,7 @@
     {"key": "education.attainment.workforce", "value": {"ninguno": 0.108, "primaria": 0.179, "basica_secundaria": 0.047, "media": 0.367, "tecnica_tecnologica": 0.121, "universitaria": 0.127, "posgrado": 0.051}, "validFrom": "2024-01-01", "source": "DANE, GEIH 2024, citado en fuentes secundarias; fuerza laboral; universitaria por diferencia hasta 1", "status": "estimado"},
     {"key": "gen.household.templateWeights", "value": {"single": 0.202, "couple": 0.14, "couple_kids": 0.31, "extended": 0.1, "single_parent": 0.205, "roommates": 0.043}, "validFrom": "2025-01-01", "source": "Derivado de DANE ECV 2024–2025 (spec 008 v0.3); reparto interno de biparental y monoparental estimado", "status": "estimado"},
     {"key": "gen.jobs.bossWageFactor", "value": 1.6, "validFrom": "1900-01-01", "source": "prototipo (hire), a falta de una fuente colombiana sobre la brecha de sueldo entre jefes y personal", "status": "estimado"},
+    {"key": "gen.map.template", "value": "datas-world-v1", "validFrom": "1900-01-01", "source": "Decisión del usuario (2026-09-24, spec 033): plantilla de 80×50 con plaza central y dotación urbana", "status": "oficial"},
     {"key": "gen.labor.informalShare", "value": 0.45, "validFrom": "2026-01-01", "source": "Ciudad intermedia: entre 13 ciudades (0,405) y total nacional (0,545), DANE GEIH julio 2026 (spec 029) (medición de referencia para el año 2026)", "status": "estimado"},
     {"key": "gen.objects.carP", "value": {"2": 0.05, "3": 0.2, "4": 0.45}, "validFrom": "2026-01-01", "source": "Estimación provisional por estrato (spec 005 v0.3)", "status": "estimado"},
     {"key": "gen.personality.extremeP", "value": 0.22, "validFrom": "1900-01-01", "source": "prototipo (newAgent), a la espera de la tabla de expertos (spec 009)", "status": "estimado"},

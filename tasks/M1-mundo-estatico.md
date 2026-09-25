@@ -59,9 +59,9 @@ Cada bloque se hace en su rama (`m1/a-catalogos`, `m1/b-geografia`…) y termina
 
 ## Bloque J — Salud, esparcimiento y dotación urbana (specs 031–033, decisión del usuario del 2026-09-24)
 Requiere las specs 031, 032 y 033 aprobadas. Orden: primero la dotación (cambia el mapa y el empleo), después la salud y el esparcimiento (dependen de los lugares).
-- [ ] J1. Catálogo `place_kinds` con las entradas nuevas y reglas de dotación (033 R-001, R-002); ciudad de referencia y lugares regionales (INV-002).
-- [ ] J2. Plantilla de mapa `DATAS_WORLD_V1` (80 × 50, plaza central) para el perfil colombiano, con fila en la spec 003; el prototipo conserva la suya (033 CA-004).
-- [ ] J3. Organizaciones de los lugares nuevos (institución educativa con dos sedes) y recalibración del empleo (006 CA-001 con más puestos formales).
+- [x] J1. Catálogo `place_kinds` con las entradas nuevas y reglas de dotación (033 R-001, R-002); ciudad de referencia y lugares regionales (INV-002).
+- [x] J2. Plantilla de mapa `DATAS_WORLD_V1` (80 × 50, plaza central) para el perfil colombiano, con fila en la spec 003; el prototipo conserva la suya (033 CA-004).
+- [x] J3. Organizaciones de los lugares nuevos (institución educativa con dos sedes) y recalibración del empleo (006 CA-001 con más puestos formales). La informalidad pasa de 0,53 a ≈ 0,46 sin tocar parámetros.
 - [ ] J4. Ficha de salud (031): afiliación según el empleo y el hogar, hábitos, peso, discapacidad y condiciones con `CONDITION_DIAGNOSED`; hipertensión y diabetes en los antepasados.
 - [ ] J5. Ficha de esparcimiento (032): catálogo `leisure_activities`, afinidades según personalidad, estrato, salud y oferta, con `LEISURE_TAKEN_UP`.
 - [ ] J6. `world:report --health`, `--leisure` y `--places`; `citizen:report` con las fichas; nuevo mundo de ejemplo si cambia el esquema (027 R-011).

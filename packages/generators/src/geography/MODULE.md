@@ -26,13 +26,21 @@ Desde `@datas-world/generators`:
 | `generateGeography(world, { template?, departmentName?, placeKinds? })` → `Territory` | Pone `world.geo` (calles y pasto) y crea con `addPlace` el departamento, el municipio (se llama como el mundo, `config.name`), la comuna 1 y los barrios. Con `placeKinds` comprueba que los tipos existan en el catálogo. Lanza si el mundo ya tiene mapa |
 | `Territory` | `{ template, departmentId, municipalityId, comunaId, districtIds }` |
 | `districtAt(world, territory, y)` | Barrio de una fila del mapa |
-| `PROTOTYPE_64X40`, `MAP_TEMPLATES`, tipos `MapTemplate`/`DistrictTemplate`/`PlotTemplate` | Plantillas de mapa |
-| `plots(template)` | Parcelas (23 en la plantilla del prototipo): tipo de lugar, rectángulo y puerta, en orden de fila, columna e índice |
+| `PROTOTYPE_64X40`, `DATAS_WORLD_V1`, `MAP_TEMPLATES`, `COMMERCIAL_LOT`, tipos `MapTemplate`/`DistrictTemplate`/`PlotTemplate` | Plantillas de mapa. El perfil elige la suya con `gen.map.template`. Una celda puede ser `park`, `plaza` o un par de parcelas; una parcela puede ser `@com` (comercial libre, la llena la dotación de la 033). `names` da nombres propios de la plantilla |
+| `plots(template)` | Parcelas: tipo de lugar, rectángulo y puerta, en orden de fila, columna e índice. Son 23 en la plantilla del prototipo y 38 en `datas-world-v1` (con parque y plaza) |
 | `isRoadTile(template, x, y)` | Regla de calles de la plantilla |
 | `SAFETY_BY_STRATUM`, `DEFAULT_DEPARTMENT` | Parámetros por defecto |
 
 ## 4. Diseño interno y decisiones
 - **La plantilla es el prototipo:** 64 × 40 tiles de 8 m; calles de 2 tiles en `x ∈ {5, 17, 29, 41, 53}` e `y ∈ {4, 14, 24, 34}`; manzanas en `COLS`/`ROWS`; parcelas y puertas como `buildPlaces`. La única diferencia es la iglesia, que ocupa la primera casa de la tercera manzana de San Martín (004 R-001).
+- **Plantilla de Data's World (`datas-world-v1`, 033, perfil colombiano)**:
+  - 80 × 50 tiles; calles en `x ∈ {5, 17, 29, 41, 53, 65}` e `y ∈ {4, 14, 24, 34, 44}`;
+  - 4 filas de 5 manzanas;
+  - La Esperanza `y 0–14` (estrato 3), Centro `y 15–34` (estrato 4, dos filas de manzanas) y San Martín `y 35–49` (estrato 2);
+  - plaza central (tile `plaza`) con la alcaldía, la policía, la parroquia y la biblioteca; parque con polideportivo;
+  - 9 parcelas comerciales `@com` y 15 de vivienda.
+
+  El perfil `prototipo` conserva la del prototipo.
 - **Sin azar:** la plantilla es fija, así que no se consume el flujo `gen:geography`. Queda reservado para plantillas procedurales (por ejemplo, el mapa del concepto visual B, con avenida de ladrillo y plaza).
 - **Barrios por filas** que parten el mapa sin huecos: La Esperanza `y 0–14`, estrato 3; Centro `y 15–24`, estrato 4; San Martín `y 25–39`, estrato 2. Las puertas de cada fila de manzanas caen en su barrio. La plantilla lleva la década de fundación de cada barrio para la historia (030).
 - **Códigos DIVIPOLA ficticios** con prefijo `00`, que ningún departamento real usa: departamento `00`, municipio `00001`, comuna `00001-C01`, barrios `00001-C01-B01…`. Los códigos de comuna y barrio no son oficiales del DANE; siguen su jerarquía.
@@ -66,3 +74,4 @@ Porta `isRoad`, `ROAD_X`, `ROAD_Y`, `COLS`, `ROWS`, `LAYOUT`, `BARRIOS` y el cá
 |---|---|---|---|
 | 2026-09-24 | m1/b-geografia | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/b-geografia (B1–B3) | 003 | Plantilla `prototipo-64x40` con parcelas y puertas; `generateGeography` (mapa y jerarquía territorial con estrato y DIVIPOLA ficticio); `districtAt`. 7 pruebas: 003 CA-001 a CA-005 |
+| 2026-09-24 | m1/j-dotacion | 003, 033 | Plantilla `datas-world-v1` (80 × 50, plaza central, parcelas comerciales `@com`), celdas `plaza`, `COMMERCIAL_LOT` y nombres propios por plantilla (`names`). Las pruebas de la 033 cubren la plantilla nueva |

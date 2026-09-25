@@ -41,7 +41,8 @@ const withWorld = <T>(fn: (world: World, h: Db) => T): T => {
 describe('world:new con el perfil colombiano', () => {
   it('guarda el mundo completo y al cargarlo el hash es el generado (027 CA-001 y CA-006 con población)', () => {
     const info = JSON.parse(cli('world:info', '--json', '--db', db).out[0]!) as Record<string, number | string>;
-    expect(info).toMatchObject({ profile: 'CO-2026.09', now: 0, organizations: 8 });
+    expect(info).toMatchObject({ profile: 'CO-2026.09', now: 0 });
+    expect(info.organizations).toBeGreaterThanOrEqual(15); // dotación urbana (033)
     expect(info.pending).toContain('stratum.share'); // 029 CA-003: world:info lista las cifras por confirmar
     expect(cli('world:info', '--db', db).out.some((l) => /cifras por confirmar \(\d+\): .*stratum\.share/.test(l))).toBe(true);
     expect(info.citizens).toBeGreaterThanOrEqual(190);
@@ -87,13 +88,15 @@ describe('world:report', () => {
 });
 
 describe('world:map', () => {
-  it('dibuja el mapa de 64 × 40 con barrios y la leyenda de lugares', () => {
+  it('dibuja el mapa de 80 × 50 (033) con barrios, leyenda y los lugares de la ciudad de referencia', () => {
     const out = cli('world:map', '--db', db).out;
     const blank = out.indexOf('');
-    expect(blank).toBe(40);
-    expect(out.slice(0, 40).every((l) => l.length <= 64)).toBe(true);
+    expect(blank).toBe(50);
+    expect(out.slice(0, 50).every((l) => l.length <= 80)).toBe(true);
     expect(out.some((l) => /Barrios: La Esperanza/.test(l))).toBe(true);
-    expect(out.some((l) => /Iglesia/.test(l))).toBe(true);
+    expect(out.some((l) => /Parroquia/.test(l))).toBe(true);
+    expect(out.some((l) => /^Fuera del mapa, en La Capital/.test(l))).toBe(true);
+    expect(out.some((l) => /Cine Multiplex/.test(l))).toBe(true);
   });
 });
 

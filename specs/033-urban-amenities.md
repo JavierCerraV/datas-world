@@ -4,7 +4,7 @@ nombre: urban-amenities
 estado: aprobada
 hito: M1 (dotación inicial y nueva plantilla de mapa) · M2 (uso: horarios, capacidad, viajes a la ciudad) · peldaño 4+ (crecimiento)
 depende_de: [003, 004, 006, 016, 023, 029, 030]
-version: 0.2
+version: 0.3
 ---
 
 # 033 — Dotación urbana
@@ -47,7 +47,7 @@ Implementa la visión §20 (Lugares: categorías; cada lugar con capacidad, hora
 | Clave | Nombre | CIIU (actividad) | Ámbito |
 |---|---|---|---|
 | `cultura.biblioteca` | Biblioteca pública | 9101 | local (una por municipio) |
-| `cultura.casa_cultura` | Casa de la cultura | 9006 | local |
+| `cultura.casa_cultura` | Casa de la cultura | 8553 (enseñanza cultural) | local |
 | `cultura.museo` | Museo | 9102 | regional (local desde `minPopulation`) |
 | `ocio.cine` | Cine | 5914 | regional |
 | `comercio.centro_comercial` | Centro comercial | 6810 (administración) | regional |
@@ -120,7 +120,7 @@ No hay eventos nuevos.
 
 ## 7. Criterios de aceptación
 - **CA-001 (M1)** — *Dado* un mundo de 200 habitantes con el perfil colombiano, *entonces* el municipio tiene biblioteca, escuela, estación de policía, alcaldía, polideportivo, al menos 3 tiendas de barrio, al menos un bar y un restaurante, y un banco o un corresponsal. Cine, centro comercial, museo y parque de diversiones existen en la ciudad de referencia.
-- **CA-002 (M1)** — *Dado* un mundo con `population.target` = 60 000, *entonces* el coliseo, el cine y el museo pasan a ser locales, según sus `minPopulation`. La prueba es solo de la regla: no genera 60 000 personas.
+- **CA-002 (M1)** — *Dado* un plan de dotación para 150 000 habitantes, *entonces* el coliseo, el cine y el museo pasan a ser locales, según sus `minPopulation`, y el parque de diversiones sigue siendo regional. La prueba es solo de la regla: no genera 150 000 personas.
 - **CA-003 (M1)** — *Dado* un mundo generado, *entonces* se cumplen INV-001 a INV-003, y cada lugar nuevo tiene su `PLACE_BUILT` antes de sus primeros eventos (030 INV-003).
 - **CA-004 (M1)** — *Dado* el perfil `prototipo`, *entonces* el mapa y los lugares siguen siendo los del prototipo (003 CA-004 y 004 CA-002 no cambian).
 - **CA-005 (M1)** — *Dado* un mundo generado, *entonces* los horarios de bares y discotecas terminan a más tardar a `amenity.nightlifeClose`, y los turnos cumplen la jornada máxima (004 R-007).
@@ -161,3 +161,15 @@ No hay eventos nuevos.
 | 2026-09-24 | 0.1 | Decisión del usuario sobre la escala: lugares regionales en la ciudad de referencia mientras la población sea pequeña; el territorio se expande primero y la población después, por entregas, hasta tener todo lo que tiene una ciudad |
 | 2026-09-24 | 0.2 | Decisiones del usuario (§10): plantilla nueva de 80 × 50, escuela como sede de la institución educativa, bloque J en M1 y revisión del empleo. Cifra verificada de tiendas de barrio (Fenalco, 2024) |
 | 2026-09-25 | 0.2 | Estado → aprobada |
+| 2026-09-25 | 0.3 | Implementación del bloque J (J1–J3). Correcciones:
+- CA-002 decía 60 000 habitantes, pero el cine tiene un umbral de ≈ 100 000 (§8): la prueba usa 150 000;
+- la casa de la cultura es CIIU 8553 (enseñanza cultural), no 9006 (actividades teatrales).
+
+Precisiones:
+- la regla `amenity` vive en `place_kinds` (2026.09.3), con `placement` (`template`: sitio fijo de la plantilla; `com`: parcela comercial libre) y `spread` (repartir entre barrios);
+- las tiendas se reparten primero;
+- con 200 habitantes, el pueblo tiene 3 tiendas (una por barrio), bar, restaurante, café, panadería, droguería y corresponsal bancario, más los institucionales de la plantilla. La Capital, a 60 min y $12 000, tiene cine, centro comercial, museo, coliseo, banco y parque de diversiones;
+- la parroquia de la plaza toma su nombre de la plantilla;
+- 19 organizaciones y la informalidad pasa a ≈ 0,46.
+
+CA-006 (viaje) queda para M2 |

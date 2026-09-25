@@ -1,7 +1,11 @@
 // Generación completa de un mundo de M1 (specs 007 R-001 y 030 R-001): configuración con perfil, catálogos y
 // festivos, y después geografía → lugares → organizaciones → población → empleo → objetos → historia.
-import { ENGINE_VERSION, createRng, createWorld, idNumber, parseEpoch, profileNumber } from '@datas-world/engine';
+import { ENGINE_VERSION, createRng, createWorld, idNumber, parseEpoch, profileNumber, profileValue } from '@datas-world/engine';
 import type { EntityId, World, WorldConfig, WorldEvent } from '@datas-world/engine';
+import { amenityPlan, resolvePlots } from './amenities/plan.ts';
+import type { AmenityPlan, ResolvedPlots } from './amenities/plan.ts';
+import { generateRegional } from './amenities/regional.ts';
+import type { RegionalResult } from './amenities/regional.ts';
 import { catalogRefs, loadCatalogs } from './catalogs/load.ts';
 import type { Catalogs } from './catalogs/load.ts';
 import { holidayDates } from './country/holidays.ts';
@@ -9,6 +13,7 @@ import { DEFAULT_PROFILE, PROTOTYPE_PROFILE, loadProfile } from './country/profi
 import { generateEmployment } from './employment/generate.ts';
 import { generateGeography } from './geography/generate.ts';
 import type { Territory } from './geography/generate.ts';
+import { COMMERCIAL_LOT, MAP_TEMPLATES, plots } from './geography/template.ts';
 import { generateHistory } from './history/generate.ts';
 import type { HistoryResult } from './history/generate.ts';
 import { generateObjects } from './objects/generate.ts';
@@ -45,6 +50,8 @@ export interface GeneratedWorld {
   pop: PopulationResult;
   objectIds: EntityId[];
   hist: HistoryResult;
+  /** Dotación urbana (033), si la plantilla tiene parcelas comerciales; el perfil prototipo no la tiene. */
+  amenities?: { plan: AmenityPlan; resolved: ResolvedPlots; regional: RegionalResult };
 }
 
 export function generateWorld(opts: WorldOptions): GeneratedWorld {
@@ -69,8 +76,20 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
   };
   const { world, events: created } = createWorld(config);
   const rng = createRng(config.seed);
-  const territory = generateGeography(world, { placeKinds: catalogs.place_kinds });
-  const places = generatePlaces(world, territory, catalogs.place_kinds);
+  const template = String(profileValue(profile, 'gen.map.template', epoch.slice(0, 10)));
+  if (!MAP_TEMPLATES[template]) throw new Error(`Plantilla de mapa desconocida en el perfil: ${template}`);
+  const territory = generateGeography(world, { template, placeKinds: catalogs.place_kinds });
+  // 033: con parcelas comerciales en la plantilla, la dotación decide qué lugares hay y cuáles son regionales.
+  let amenities: GeneratedWorld['amenities'];
+  let plotList = plots(territory.template);
+  if (plotList.some((p) => p.kind === COMMERCIAL_LOT)) {
+    const plan = amenityPlan(catalogs.place_kinds, config.population.target);
+    const resolved = resolvePlots(territory.template, plan, catalogs.place_kinds);
+    plotList = resolved.plots;
+    amenities = { plan, resolved, regional: { cityId: territory.departmentId, placeIds: [] } };
+  }
+  const places = generatePlaces(world, territory, catalogs.place_kinds, plotList);
+  if (amenities) amenities.regional = generateRegional(world, territory, amenities.plan, catalogs.place_kinds);
   const orgIds = generateOrganizations(world, places.workplaceIds, catalogs, rng.fork('gen:orgs'), {
     prototype: profileId === PROTOTYPE_PROFILE,
   });
@@ -81,5 +100,15 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
   const hist = generateHistory(world, territory, places, orgIds, pop.citizenIds, prior, catalogs, rng);
   const events = [...created, ...prior, ...hist.events].sort((a, b) => idNumber(a.id) - idNumber(b.id));
   sortBackstories(world, events);
-  return { world, events, territory, places, orgIds, pop, objectIds: objs.objectIds, hist };
+  return {
+    world,
+    events,
+    territory,
+    places,
+    orgIds,
+    pop,
+    objectIds: objs.objectIds,
+    hist,
+    ...(amenities ? { amenities } : {}),
+  };
 }
