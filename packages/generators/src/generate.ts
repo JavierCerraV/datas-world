@@ -6,6 +6,7 @@ import {
   createWorld,
   idNumber,
   initNeeds,
+  initRoutines,
   parseEpoch,
   profileNumber,
   profileValue,
@@ -128,6 +129,8 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
   // 032: ficha de esparcimiento, con la salud, el empleo (ingresos, tiempo) y la oferta de lugares ya definidos.
   const leisure = leisureParams(profile, epoch.slice(0, 10));
   if (leisure) healthEvents.push(...generateLeisure(world, pop.citizenIds, catalogs.leisure_activities, leisure, rng));
+  // 011: horarios de rutina, con el turno (empleo) y las horas de sueño (ficha de salud) ya asignados.
+  initRoutines(world, rng);
   const events = [...created, ...prior, ...hist.events, ...healthEvents].sort((a, b) => idNumber(a.id) - idNumber(b.id));
   sortBackstories(world, events);
   return {

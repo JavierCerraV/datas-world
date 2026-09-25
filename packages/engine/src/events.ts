@@ -167,6 +167,12 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { citizenId: str, illness: str }),
     text: (e) => `${e.payload.citizenId} se recupera (${e.payload.illness}).`,
   }),
+  OVERSLEPT: def<{ citizenId: string; minutes: number }>({
+    baseImportance: 0.4,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, minutes: (v) => Number.isSafeInteger(v) && (v as number) > 0 }),
+    text: (e) => `${e.payload.citizenId} se queda dormido ${e.payload.minutes} minutos.`,
+  }),
   STRESS_PEAK: def<{ citizenId: string; value: number }>({
     baseImportance: 0.5,
     spontaneous: false,

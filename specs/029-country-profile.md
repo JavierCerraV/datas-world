@@ -141,3 +141,4 @@ No define tipos propios. Un cambio de perfil en un mundo vivo sería una entrada
 | 2026-09-25 | 0.3 | Estado → implementada |
 | 2026-09-25 | 0.3 | Spec 033 (bloque J): `gen.map.template` en ambos perfiles, y en `CO-2026.09` las estimadas `amenity.nightlifeClose` (02:00), `amenity.travel.minutes` (60) y `amenity.travel.cost` (12 000 COP). Sin cambios en CA |
 | 2026-09-25 | 0.3 | Spec 010 (bloque B de M2): `needs.rates`, `needs.stress`, `needs.mood` y `health.acute.*` en ambos perfiles; `health.acute.weights` por confirmar con el INS en `CO-2026.09`. Sin cambios en CA |
+| 2026-09-25 | 0.3 | Spec 011 (bloque C de M2): `routine.school` (jornada 6:30–12:30 y vacaciones del calendario A) y `routine.meals` (aseo, desayuno, almuerzo 12:00 y comida 19:00), estimados, en ambos perfiles; `needs.rates.eatRate`. Sin cambios en CA |
