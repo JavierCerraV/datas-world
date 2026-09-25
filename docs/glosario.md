@@ -32,3 +32,26 @@
 | **Esquema** | Generalización que una persona extrae de varios episodios ("con Laura suelo discutir por dinero"). Es una expectativa, no un hecho (spec 013). |
 | **Capítulo autobiográfico** | Periodo en que la persona divide su propia vida, con tema y tono subjetivos. Se compara con el capítulo objetivo de la historia (specs 013 y 020). |
 | **Consolidación** | Proceso nocturno que convierte episodios en esquemas y capítulos y libera RAM sin perder su efecto (spec 013). |
+| **Temperamento** | Diferencias individuales relativamente estables que parametrizan cómo aprende una persona (sensibilidades, habituación, valores iniciales del descuento y la variabilidad). No produce conducta (spec 009 v1.0, ADR-007). |
+| **Función (de un estímulo)** | Lo que un estímulo hace en la conducta de una persona: elicitar una respuesta, señalar qué respuesta será reforzada (discriminativa) o reforzar o castigar lo que lo produce. Es apetitiva o aversiva y tiene fuerza, contexto y origen (spec 036). |
+| **Función derivada** | Función que un estímulo adquiere sin experiencia directa, a través de relaciones con otros estímulos (spec 037). Se distingue de la directa, la transformada, la generalizada y la discriminada. |
+| **Marco relacional** | Patrón aprendido de responder a un estímulo en términos de otro según una clave arbitraria: coordinación, distinción, oposición, comparación, jerarquía, deíctico, causal o temporal (TMR; spec 037). |
+| **Crel** | Clave contextual relacional: indica qué marco se aplica entre dos estímulos en un contexto (spec 037). |
+| **Cfunc** | Clave contextual funcional: indica qué función se transforma a través de una relación (spec 037). |
+| **Transformación de funciones** | Cambio en la función de un estímulo por sus relaciones derivadas con otros: la coordinación transfiere, la oposición invierte, la comparación escala y la jerarquía hereda (spec 037). |
+| **Vinculación mutua** | Derivar la relación inversa: si A es mayor que B, B es menor que A (spec 037). |
+| **Vinculación combinatoria** | Derivar la relación entre A y C a partir de A–B y B–C (spec 037). |
+| **Pliance** | Seguir una regla porque históricamente lo reforzó el hablante (aprobación, evitar la crítica), no el mundo (spec 038). |
+| **Tracking** | Seguir una regla porque históricamente lo que especifica ha coincidido con lo que pasa en el mundo (spec 038). |
+| **Augmenting** | Seguir una regla que altera la eficacia de una consecuencia, creando una nueva (formativo) o cambiándola temporalmente (motivador) (spec 038). |
+| **Augmental** | Regla o estímulo verbal que altera la eficacia reforzante de una consecuencia; los apetitivos acercan a los valores (specs 038 y 039). |
+| **Operación motivadora** | Condición que altera la eficacia de un reforzador y la probabilidad de las conductas que lo producen (hambre, fatiga, soledad). En el motor, las necesidades de la 010 funcionan así (specs 036 y 040). |
+| **Reforzador generalizado** | Estímulo que se volvió reforzante al emparejarse con varios reforzadores y conserva su eficacia sin una operación motivadora concreta: la aprobación, la crítica, el dinero. Se adquiere, no es innato (spec 036). |
+| **PNR** | Pensamiento negativo repetitivo (preocupación y rumia) como **proceso**: una función aversiva dispara derivaciones que producen pensamientos aversivos nuevos, prolongan el afecto negativo y llevan a evitar. Tiene inicio, pasos y fin; no es un rasgo (spec 039). |
+| **Evitación experiencial** | Responder para reducir pensamientos y emociones con función aversiva. Se mantiene por el alivio inmediato (reforzamiento negativo) y tiene costes demorados. Es una relación dinámica entre contexto, función, historia, repertorio y consecuencias (spec 039). |
+| **Flexibilidad** | Repertorio aprendido de enmarcar los eventos privados en jerarquía con el deíctico "Yo" (discriminarlos como eventos que uno experimenta), lo que deja entrar otras fuentes de control, como los valores. Puede aumentar o disminuir (spec 039). |
+| **Deíctico** | Marco relacional desde la perspectiva de quien habla: yo/tú, aquí/allí, ahora/entonces (spec 037). |
+| **Valor (motor funcional)** | Red jerárquica de reforzadores positivos (valor → metas → objetivos → acciones) con su red opuesta derivada. No es un número por persona (spec 038). |
+| **Dominio vital** | Raíz posible de una red de valor (familia, salud, conocimiento…): los 12 valores del prototipo en el catálogo `life_domains` (specs 009 v1.0 y 038). |
+| **Fuente de control** | Lo que contribuye a que se emita una conducta: consecuencias inmediatas y demoradas, reglas, valores, hábitos, funciones aversivas presentes, operaciones motivadoras, contexto social. Cada conducta guarda su vector de aportes (spec 040). |
+| **Estatus epistémico** | Etiqueta de cada regla de una spec: [E] empírico, [T] teórico o [M] supuesto de modelado (plantilla de specs §4 bis). |
