@@ -1,5 +1,5 @@
-// Tick mínimo de M0 y entradas externas (specs 002, 001 R-007, 023 R-004).
-// El bucle completo por fases y el registro de sistemas llegan con la spec 021 (M2).
+// Tick y entradas externas (specs 002, 001 R-007, 023 R-004). Desde M2, el tick recorre además el
+// registro de sistemas por fases (spec 021, `simulation/`).
 import { MINUTES_PER_DAY, formatDate, toCalendar } from './calendar.ts';
 import type { WorldMinute } from './calendar.ts';
 import { canEnable, withCapability } from './capabilities.ts';
@@ -7,6 +7,10 @@ import { EVENT_TYPES, makeEvent } from './events.ts';
 import type { WorldEvent } from './events.ts';
 import type { Rng } from './rng.ts';
 import { popDue } from './scheduler.ts';
+import { runSystems } from './simulation/loop.ts';
+import type { LoopOptions } from './simulation/loop.ts';
+import { EMPTY_REGISTRY } from './simulation/registry.ts';
+import type { SystemRegistry } from './simulation/registry.ts';
 import type { ScheduledItem } from './scheduler.ts';
 import { stateHash } from './serialize.ts';
 import type { World } from './world.ts';
@@ -18,7 +22,13 @@ export type ScheduledHandler = (world: World, item: ScheduledItem, rng: Rng) => 
  * en el scheduler en orden (at, id). El azar de cada elemento sale de `rng.fork('sched').fork(item.id)`:
  * el flujo raíz nunca se consume, así que no hay estado de RNG que guardar.
  */
-export function tick(world: World, rng: Rng, handlers: Readonly<Record<string, ScheduledHandler>> = {}): WorldEvent[] {
+export function tick(
+  world: World,
+  rng: Rng,
+  handlers: Readonly<Record<string, ScheduledHandler>> = {},
+  systems: SystemRegistry = EMPTY_REGISTRY,
+  loop: LoopOptions = {},
+): WorldEvent[] {
   const events: WorldEvent[] = [];
   world.now += world.config.tickMinutes;
   if (world.now % MINUTES_PER_DAY === 0) {
@@ -37,6 +47,8 @@ export function tick(world: World, rng: Rng, handlers: Readonly<Record<string, S
     if (!handler) throw new Error(`No hay manejador para el elemento programado ${item.id} de tipo ${item.kind}`);
     events.push(...handler(world, item, sched.fork(item.id)));
   }
+  // 021 R-001: después del scheduler, los sistemas por fases. Sin sistemas activos no cambia nada (M0, M1).
+  events.push(...runSystems(world, rng, systems, loop));
   return events;
 }
 

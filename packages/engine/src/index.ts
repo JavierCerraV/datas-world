@@ -93,6 +93,28 @@ export type { WorldSnapshot } from './serialize.ts';
 export { applyExternalInput, tick } from './tick.ts';
 export type { ExternalInput, InputResult, ScheduledHandler } from './tick.ts';
 
+export { PHASES } from './simulation/system.ts';
+export type {
+  ActionOutcome,
+  ActionRequest,
+  ActionValidator,
+  Cadence,
+  DeepReadonly,
+  Patch,
+  Phase,
+  SimLevel,
+  System,
+  SystemOutput,
+  TickCtx,
+  WorldView,
+} from './simulation/system.ts';
+export { EMPTY_REGISTRY, activeSystems, createRegistry } from './simulation/registry.ts';
+export type { SystemRegistry } from './simulation/registry.ts';
+export { levelOf, runSystems } from './simulation/loop.ts';
+export type { LoopOptions } from './simulation/loop.ts';
+export { applyPatches } from './simulation/patches.ts';
+export { viewOf } from './simulation/view.ts';
+
 export { ENGINE_VERSION } from './version.ts';
 
 export { hire, setOccupation } from './employment.ts';
