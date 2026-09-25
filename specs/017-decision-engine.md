@@ -1,7 +1,7 @@
 ---
 id: 017
 nombre: decision-engine
-estado: borrador
+estado: aprobada
 hito: M2 (decisión con estado propio e información pública) · M3 (con creencias, 025)
 depende_de: [009, 010, 011, 015, 016, 021, 032]
 version: 0.2
@@ -82,3 +82,4 @@ Distribución de actividades por hora y por situación (comparable con la ENUT),
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-25 | 0.2 | Revisión de M2 con las decisiones del usuario: en M2 decide con su estado e información pública, y con creencias desde M3 (CA-002 pasa a M3); opciones de esparcimiento desde la ficha 032; `explain` como causa (enganche de la capa clínica, 034); tipos de acción de M2; CA-004 y CA-005 nuevos |
+| 2026-09-25 | 0.2 | Estado → aprobada |

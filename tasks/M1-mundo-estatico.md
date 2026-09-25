@@ -72,4 +72,6 @@ Requiere las specs 031, 032 y 033 aprobadas. Orden: primero la dotación (cambia
 - [x] `pnpm bench` con 200 personas: memoria por persona y tiempo de `world:new`. Nota en `docs/validaciones/M1-cierre.md`: ≈ 16 KB por persona viva y `world:new` en ≈ 0,25 s.
 - [x] Paridad con el perfil prototipo (60 personas): edades, hogares y empleo frente al prototipo (`genWorld`), incluida la nueva prueba de la 007 CA-006.
 - [x] `/sincronizar-docs all` sin discrepancias; proponer las specs que pasan a `implementada`: 001, 003, 007, 029 y 030 tienen todos sus CA con prueba verde.
-- [ ] Revisar y aprobar las specs de M2 (010, 011, 015, 016, 017, 021) antes de redactar `tasks/M2-vida-diaria.md`.
+- [x] Revisar y aprobar las specs de M2 (010, 011, 015, 016, 017, 021) antes de redactar `tasks/M2-vida-diaria.md`. Aprobadas por el usuario el 2026-09-25 (v0.2 y v0.3 de la 021).
+
+**M1 cerrado el 2026-09-25.** Sigue en `tasks/M2-vida-diaria.md`.

@@ -1,7 +1,7 @@
 ---
 id: 021
 nombre: simulation
-estado: borrador
+estado: aprobada
 hito: M2 (registro de sistemas, niveles 1 y 2) · M3–M4 (niveles 3 y 4, observación) · M7 (nivel 0, escala)
 depende_de: [001, 002, 017, 014]
 version: 0.3
@@ -106,3 +106,4 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-23 | 0.2 | Registro de sistemas enchufables por fases y capacidades, variantes gruesas, flujos RNG por sistema, presupuesto de niveles y CA de escala 10 000 (ADR-005, idea A) |
 | 2026-09-25 | 0.3 | Revisión de M2 con las decisiones del usuario: en M2 solo los niveles 1 y 2; la observación no cambia el mundo (R-010, enganche de la capa clínica); `WorldView` de solo lectura por tipos y congelada en pruebas; `runCoarse` en needs, routines y economy; CA marcados por hito (CA-003 en M4, CA-007 en M7) |
+| 2026-09-25 | 0.3 | Estado → aprobada |
