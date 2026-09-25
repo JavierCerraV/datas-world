@@ -58,9 +58,9 @@ Cada bloque se hace en su rama (`m1/a-catalogos`, `m1/b-geografia`…) y termina
 - [x] I5. Guardar, cerrar y cargar un mundo de M1: mismo hash (027 CA-001 con población). Mundo de ejemplo en `docs/validaciones/mundos/` (027 R-011).
 
 ## Cierre de M1
-- [ ] 023 CA-001 y CA-002 con población: dos procesos, mismo hash; semillas distintas dan hashes distintos. CA-001 hecho en el bloque I (100 personas, 30 días) y hashes distintos con 001 CA-005; la parte del 50 % de la CA-002 espera a M2.
+- [x] 023 CA-001 y CA-002 con población: dos procesos, mismo hash; semillas distintas dan hashes distintos. CA-001 hecho en el bloque I (100 personas, 30 días) y hashes distintos con 001 CA-005. La parte del 50 % de la CA-002 pasa a M2, porque necesita la vida diaria.
 - [x] Decidir el coste del `stateHash` en cada flush con población. Decidido por el usuario: puntos de control (027 R-012). 30 días pasan de 12 s a 2,4 s.
-- [ ] `pnpm bench` con 200 personas: memoria por persona y tiempo de `world:new`. Nota en `docs/validaciones/`.
-- [ ] Paridad con el perfil prototipo (60 personas): edades, hogares y empleo frente a la línea base.
-- [ ] `/sincronizar-docs all` sin discrepancias; proponer las specs que pasan a `implementada`.
+- [x] `pnpm bench` con 200 personas: memoria por persona y tiempo de `world:new`. Nota en `docs/validaciones/M1-cierre.md`: ≈ 16 KB por persona viva y `world:new` en ≈ 0,25 s.
+- [x] Paridad con el perfil prototipo (60 personas): edades, hogares y empleo frente al prototipo (`genWorld`), incluida la nueva prueba de la 007 CA-006.
+- [x] `/sincronizar-docs all` sin discrepancias; proponer las specs que pasan a `implementada`: 001, 003, 007, 029 y 030 tienen todos sus CA con prueba verde.
 - [ ] Revisar y aprobar las specs de M2 (010, 011, 015, 016, 017, 021) antes de redactar `tasks/M2-vida-diaria.md`.

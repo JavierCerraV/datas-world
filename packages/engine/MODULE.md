@@ -16,7 +16,7 @@ Núcleo puro de la simulación: tipos del dominio, RNG, reloj, scheduler, evento
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 001 | CA-001, CA-002, CA-003, CA-004, CA-006, CA-007, CA-008 | CA-005 (necesita generación de población, M1) |
+| 001 | CA-001, CA-002, CA-003, CA-004, CA-006, CA-007, CA-008; CA-005 se prueba con la generación (`generators/src/population`, `apps/cli`) | — |
 | 002 | CA-001, CA-002, CA-003, CA-004, CA-005 (en el motor y desde la CLI, `apps/cli`) | — |
 | 014 | CA-001, CA-002, CA-003 | — |
 | 023 | CA-003, CA-004, CA-005, CA-006; CA-001 en parte: mismo hash en un proceso y entre dos procesos (`apps/cli`), pero con un mundo vacío | CA-001 con 100 personas y CA-002 (necesitan población, M1–M2) |

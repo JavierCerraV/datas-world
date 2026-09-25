@@ -16,7 +16,7 @@ Genera los hogares y las personas del presente del mundo (specs 008 y 007): comp
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 007 | CA-001 y CA-007 (sobre el agregado de 20 mundos, spec v0.5), CA-002, CA-004; R-001 a R-006 (sin la ocupación), R-009; INV-002, INV-003 | CA-003 (situación laboral explicada por la trayectoria: bloque G), CA-005 y CA-006 (bloque I) |
+| 007 | CA-001 y CA-007 (sobre el agregado de 20 mundos, spec v0.5), CA-002, CA-004, CA-005, CA-006 (`parity.test.ts`); CA-003 en `src/employment`; R-001 a R-006, R-009; INV-002, INV-003 | — |
 | 008 | CA-001, CA-003; CA-002 y CA-006 (sobre el agregado, spec v0.4); R-001 a R-004 | CA-004 (M2), CA-005 (M3) |
 | 001 | CA-005 (semillas distintas dan hashes distintos) | — |
 
@@ -83,6 +83,8 @@ Desde `@datas-world/generators`:
   - apariencia coherente;
   - datos por edad.
 - **Determinismo:** 001 CA-005.
+
+`src/population/parity.test.ts` (1 prueba, 007 CA-006): ejecuta `genWorld` del prototipo en un contexto aislado y compara con el perfil `prototipo` sobre 10 semillas. Tolerancias: edad media ±2 años, menores ±0,03 y ahorro medio de los adultos ±15 %. Medido: prototipo 30,1 años, 0,386 y 2,18 M COP; motor 30,7, 0,377 y 1,95 M COP.
 - **Perfil prototipo:** unas 60 personas, sin `roommates`, jubilación a los 65.
 - **Agregado de 20 mundos:** 007 CA-007 y CA-001; 008 CA-002 y CA-006.
 
@@ -104,3 +106,4 @@ Con el perfil `prototipo` porta `genPopulation` (plantillas, edades, sexos, apel
 | 2026-09-24 | m1/f-poblacion (F1–F3) | 001, 007, 008, 009 | Generación de hogares y personas con parámetros del perfil (calibrados con el DANE), personalidad, apariencia y trayectoria previa. 15 pruebas |
 | 2026-09-24 | m1/f-poblacion | 007, 008 | El usuario aprueba la revisión de los CA estadísticos (agregado de 20 mundos) |
 | 2026-09-24 | m1/h-historia | 007, 030 | Lugar de nacimiento según la urbanización del año de nacimiento (entradas con `rural` del catálogo); `PopulationParams.urbanization` |
+| 2026-09-24 | m1/cierre | 007 | `parity.test.ts`: 007 CA-006 frente a `genWorld` del prototipo (edad media, menores y ahorro medio). La tabla de criterios queda completa. 1 prueba nueva |

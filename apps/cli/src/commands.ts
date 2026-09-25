@@ -3,6 +3,7 @@
 import { statSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import { MINUTES_PER_DAY, Runner, createRng, stateHash } from '@datas-world/engine';
+import { pendingEntries } from '@datas-world/generators';
 import {
   CONTROL_COMMANDS,
   WorldRepository,
@@ -77,6 +78,8 @@ function worldInfo(args: string[], io: Io): void {
       name: world.config.name,
       seed: world.config.seed,
       profile: world.config.profile?.id ?? null,
+      // 029 CA-003: las cifras del perfil que están por confirmar.
+      pending: world.config.profile ? pendingEntries(world.config.profile).map((e) => e.key) : [],
       engineVersion: world.config.engineVersion,
       now: world.now,
       date: dateOf(world.now, world.config.epoch),
@@ -104,6 +107,7 @@ function worldInfo(args: string[], io: Io): void {
     `  ciudadanos ${info.citizens} · antepasados ${info.ancestors} · hogares ${info.households} · lugares ${info.places} · organizaciones ${info.organizations} · objetos ${info.objects}`,
   );
   io.out(`  eventos ${info.events} (DAY_STARTED ${info.daysStarted}) · instantáneas ${info.snapshots}`);
+  if (info.profile) io.out(`  cifras por confirmar (${info.pending.length}): ${info.pending.join(', ') || 'ninguna'}`);
   io.out(
     `  hash ${info.hash} · base ${(info.dbBytes / 1024).toFixed(0)} KiB · escritor ${info.writerPid ?? 'ninguno'}`,
   );

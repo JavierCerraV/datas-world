@@ -20,7 +20,7 @@ Herramientas de línea de comandos: crear mundo, avanzar N días, informes, expo
 | 002 | CA-005 desde la CLI: 365 `DAY_STARTED` en `cli.test.ts`; el límite de < 2 s, con `pnpm bench --check` en un paso propio de la CI | — |
 | 023 | CA-001 entre dos procesos, con un mundo de 100 personas y 30 días | CA-002 (necesita la vida diaria de M2) |
 | 027 | CA-001 y CA-006 con población: guardar y cargar da el hash generado; R-011: mundo de ejemplo `docs/validaciones/mundos/m1-482917.db` que se carga y avanza | — |
-| 029 | §9: `world:report` frente al perfil, con las cifras por confirmar | — |
+| 029 | CA-003 (`world:info` lista las cifras por confirmar); §9: `world:report` frente al perfil | — |
 | 030 | CA-003 (`citizen:report` con padres y abuelos), CA-006 (`world:history --from 1948 --to 1958`), CA-007 (`bench --check`: `world:new` < 5 s y base < 2 MB) | — |
 
 
@@ -97,3 +97,4 @@ Sustituye a los scripts headless usados para calibrar el prototipo.
 | 2026-09-24 | fix/bench-ci | 002 | La medición de < 2 s de la 002 CA-005 sale de `cli.test.ts` (falso fallo de 2,08 s en la CI, con 15 archivos en paralelo) y pasa a `pnpm bench --check`, en un paso propio de la CI. 1 prueba nueva |
 | 2026-09-24 | chore/nombre-datas-world | — | El nombre del mundo en las configuraciones de prueba y por defecto pasa de "Villa Cordillera" a "Data's World" (decisión del usuario). Sin cambios de comportamiento |
 | 2026-09-24 | m1/i-cli (I1–I5) | 001, 023, 027, 029, 030 | `world:new` genera el mundo de M1 completo con `generateWorld` (perfil, catálogos, festivos, epoch 2026-01-01; `--profile`, `--empty` para el mundo vacío de M0); comandos `world:report` (con `--history`), `world:map`, `world:history` y `citizen:report`; `world:info` cuenta antepasados, hogares, lugares, organizaciones y objetos; `bench` mide `world:new` (030 CA-007). El código se divide en `common.ts`, `world-new.ts`, `report.ts`, `map.ts` e `history.ts`; `main.ts` termina sin error si se corta la salida. 11 pruebas nuevas en `m1.test.ts`; 023 CA-001 pasa a un mundo de 100 personas |
+| 2026-09-24 | m1/cierre | 029 | `world:info` lista las cifras del perfil por confirmar (`pending` en `--json`), como pide la 029 CA-003 |
