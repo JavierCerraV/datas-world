@@ -147,7 +147,7 @@ No hay eventos nuevos.
 `world:map` marca la plaza y lista los destinos regionales.
 
 ## 10. Preguntas abiertas
-- [ ] **Escala (la decisión principal).** ¿Aceptas que cine, centro comercial, museo y parque de diversiones estén en una "ciudad de referencia" fuera del mapa, a una hora en bus, mientras Data's World tenga pocos habitantes? La alternativa es ponerlos todos en el pueblo, que es menos realista pero más visible. Propuesta: regionales, que se hacen locales cuando la población crezca (R-008).
+- [x] **Escala (la decisión principal).** ¿Cine, centro comercial, museo y parque de diversiones en una "ciudad de referencia" fuera del mapa, a una hora en bus, mientras Data's World tenga pocos habitantes? → **Sí** (usuario, 2026-09-24). Con una precisión: la idea es **expandir primero el territorio y después la población**. Para simular una vida cotidiana, la ciudad debe llegar a tener todo lo que una ciudad tiene, construido por entregas. Por eso la dotación es un catálogo que crece: cada actualización añade tipos de lugar, parcelas o barrios, y R-008 los pasa de "regional" a "local" cuando el territorio y la población lo permiten.
 - [ ] ¿Nueva plantilla de mapa para el perfil colombiano (80 × 50, con plaza central)? Toca la spec 003 y el visor (M4). Propuesta: sí; el prototipo conserva la suya para la paridad.
 - [ ] "Escuela": ¿sede de primaria aparte del colegio, o una misma institución educativa con dos sedes (la organización habitual en Colombia)? Propuesta: una institución educativa (una organización) con dos sedes (dos lugares).
 - [ ] ¿En qué hito? Propuesta: en M1, como bloque J junto con la 031 y la 032, antes de cerrar el hito, porque cambia el mapa, el empleo y la historia. Alternativa: al empezar M2.
@@ -157,3 +157,4 @@ No hay eventos nuevos.
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-24 | 0.1 | Borrador inicial a petición del usuario: cines, centros comerciales, bares, museos, bibliotecas, restaurantes, parques de diversiones, coliseos, escuelas, bancos, tiendas de barrio y estaciones de policía, con dotación por población y ley, lugares regionales fuera del mapa y una plantilla de mapa nueva |
+| 2026-09-24 | 0.1 | Decisión del usuario sobre la escala: lugares regionales en la ciudad de referencia mientras la población sea pequeña; el territorio se expande primero y la población después, por entregas, hasta tener todo lo que tiene una ciudad |
