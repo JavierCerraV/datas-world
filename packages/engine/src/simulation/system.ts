@@ -66,10 +66,16 @@ export interface ActionRequest {
   reason: NewEvent['causes'];
 }
 
+/**
+ * Evento que emite un sistema. Con `recordAs`, el bucle anota el número del id asignado (`EVT-…`) en esa columna
+ * i32 de la persona, para que otro sistema pueda citarlo después como causa (`{ event }`, spec 014).
+ */
+export type SystemEvent = NewEvent & { recordAs?: { column: string; row: number } };
+
 export interface SystemOutput {
   patches?: Patch[];
   /** Eventos nuevos; el bucle les asigna id y minuto al aplicar la fase, en orden. */
-  events?: NewEvent[];
+  events?: SystemEvent[];
   actions?: ActionRequest[];
 }
 

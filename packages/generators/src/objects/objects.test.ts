@@ -40,6 +40,7 @@ describe('spec 005: objetos iniciales', () => {
 describe('005 CA-001: proporciones agregadas de 20 mundos', () => {
   const stats = { adults: [0, 0], teens: [0, 0], bike: [0, 0], heir: [0, 0] };
   const cars: Record<string, [number, number]> = { '2': [0, 0], '3': [0, 0], '4': [0, 0] };
+  const motos: Record<string, [number, number]> = { '2': [0, 0], '3': [0, 0], '4': [0, 0] };
   for (let s = 1; s <= 20; s++) {
     const { world, pop } = buildWorld(DEFAULT_PROFILE, s);
     for (const id of pop.citizenIds) {
@@ -57,8 +58,11 @@ describe('005 CA-001: proporciones agregadas de 20 mundos', () => {
     }
     for (const h of pop.householdIds.map((x) => world.households.get(x)!)) {
       const s2 = String(world.places.get(world.places.get(h.dwellingId)!.districtId!)!.stratum);
+      const own = new Set([...world.objects.values()].filter((o) => o.ownerId === h.id).map((o) => o.kind));
       cars[s2]![1] += 1;
-      if ([...world.objects.values()].some((o) => o.ownerId === h.id)) cars[s2]![0] += 1;
+      motos[s2]![1] += 1;
+      if (own.has('transporte.carro')) cars[s2]![0] += 1;
+      if (own.has('transporte.moto')) motos[s2]![0] += 1;
     }
   }
   const rate = ([k, n]: number[]) => k! / n!;
@@ -74,5 +78,11 @@ describe('005 CA-001: proporciones agregadas de 20 mundos', () => {
     expect(Math.abs(rate(cars['2']!) - 0.05)).toBeLessThanOrEqual(0.08);
     expect(Math.abs(rate(cars['3']!) - 0.2)).toBeLessThanOrEqual(0.08);
     expect(Math.abs(rate(cars['4']!) - 0.45)).toBeLessThanOrEqual(0.08);
+  });
+
+  it('moto del hogar según el estrato (gen.objects.motoP: 0,4 · 0,35 · 0,25) a ±0,08 (016 R-002)', () => {
+    expect(Math.abs(rate(motos['2']!) - 0.4)).toBeLessThanOrEqual(0.08);
+    expect(Math.abs(rate(motos['3']!) - 0.35)).toBeLessThanOrEqual(0.08);
+    expect(Math.abs(rate(motos['4']!) - 0.25)).toBeLessThanOrEqual(0.08);
   });
 });

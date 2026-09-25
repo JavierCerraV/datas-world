@@ -1,5 +1,5 @@
 // Objetos iniciales (spec 005 R-001 a R-004, R-008): de las personas según las reglas del catálogo y del
-// hogar (carro) según el estrato; cada uno con su evento de origen anterior al presente (R-003).
+// hogar (carro, moto) según el estrato; cada uno con su evento de origen anterior al presente (R-003).
 import { addObject, ageInYears, idNumber, makeEvent, profileValue, recordObjectEvent } from '@datas-world/engine';
 import type { EntityId, Rng, World, WorldEvent } from '@datas-world/engine';
 import type { Catalog } from '../catalogs/schema.ts';
@@ -14,6 +14,8 @@ interface ObjectAttrs {
   price: number;
   sentimental?: number;
   ownedBy?: 'household';
+  /** Clave del perfil con la probabilidad por estrato de un objeto del hogar (`gen.objects.carP`, `gen.objects.motoP`). */
+  pKey?: string;
   condition?: [number, number];
   gen?: { minAge?: number; maxAge?: number; p: number }[];
 }
@@ -25,7 +27,8 @@ export interface ObjectsResult {
 
 /**
  * Por persona, en orden de id, y por tipo de objeto en orden del catálogo: se aplica la primera regla `gen`
- * cuya edad encaja. Después, por hogar, el carro con `gen.objects.carP[estrato]`. Azar: `gen:objects/<dueño>/<tipo>`.
+ * cuya edad encaja. Después, por tipo de vehículo del hogar y por hogar, con la tabla por estrato del perfil
+ * (`gen.objects.carP`, `gen.objects.motoP`). Azar: `gen:objects/<dueño>/<tipo>`.
  */
 export function generateObjects(
   world: World,
@@ -91,15 +94,17 @@ export function generateObjects(
       create(cid, k.key, a, r, cid, earliest);
     }
   }
-  const car = kinds.find((k) => (k.attrs as unknown as ObjectAttrs).ownedBy === 'household');
-  if (car) {
+  // Vehículos del hogar (carro, moto), en orden del catálogo, cada uno con su tabla por estrato del perfil.
+  for (const k of kinds.filter((k) => (k.attrs as unknown as ObjectAttrs).ownedBy === 'household')) {
+    const a = k.attrs as unknown as ObjectAttrs;
+    const pByStratum = a.pKey ? (profileValue(profile, a.pKey, worldDate(world)) as Record<string, number>) : carP;
     for (const hid of householdIds) {
       const h = world.households.get(hid)!;
       const stratum = world.places.get(world.places.get(h.dwellingId)!.districtId!)!.stratum!;
-      const r = rng.fork(`gen:objects/${hid}/${car.key}`);
-      if (!r.chance(carP[String(stratum)] ?? 0)) continue;
+      const r = rng.fork(`gen:objects/${hid}/${k.key}`);
+      if (!r.chance(pByStratum[String(stratum)] ?? 0)) continue;
       const head = h.headId!;
-      create(hid, car.key, car.attrs as unknown as ObjectAttrs, r, head, Math.min(birth(head) + 18 * YEAR, -DAY));
+      create(hid, k.key, a, r, head, Math.min(birth(head) + 18 * YEAR, -DAY));
     }
   }
   return result;

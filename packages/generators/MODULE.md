@@ -68,3 +68,4 @@ Porta `genWorld`, `buildPlaces`, `genPopulation`, `newAgent`, `genJobs`, `genRel
 | 2026-09-25 | m1/j-ocio | 032 | Submódulo `leisure` (ficha de esparcimiento). `generateWorld` la genera al final, cuando la salud, el empleo y la oferta de lugares ya existen |
 | 2026-09-25 | m2/b-necesidades | 010 | `generateWorld` llama a `initNeeds` (motor) después de la población: necesidades, estrés y ánimo iniciales según la personalidad |
 | 2026-09-25 | m2/c-rutinas | 011 | `generateWorld` llama a `initRoutines` (motor) al final, con el turno y las horas de sueño ya asignados. Perfiles: `routine.school`, `routine.meals` y `needs.rates.eatRate` |
+| 2026-09-25 | m2/d-movilidad | 016, 005 | `generateWorld` llama a `initMobility` (motor): todos empiezan en su vivienda. Perfiles: `mobility.speeds`, `mobility.fuelPerKm`, `mobility.bus`, `mobility.intercity`, `mobility.habits` y `gen.objects.motoP` |

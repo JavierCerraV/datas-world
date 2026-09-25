@@ -173,6 +173,18 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { citizenId: str, minutes: (v) => Number.isSafeInteger(v) && (v as number) > 0 }),
     text: (e) => `${e.payload.citizenId} se queda dormido ${e.payload.minutes} minutos.`,
   }),
+  ARRIVED_LATE: def<{ citizenId: string; placeId: string; minutes: number }>({
+    baseImportance: 0.35,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, placeId: str, minutes: (v) => Number.isSafeInteger(v) && (v as number) > 0 }),
+    text: (e) => `${e.payload.citizenId} llega ${e.payload.minutes} minutos tarde a ${e.payload.placeId}.`,
+  }),
+  TRIP_TAKEN: def<{ citizenId: string; to: string; mode: string; minutes: number; cost: number }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, to: str, mode: str, minutes: int, cost: int }),
+    text: (e) => `${e.payload.citizenId} viaja a ${e.payload.to} (${e.payload.mode}, ${e.payload.minutes} min).`,
+  }),
   STRESS_PEAK: def<{ citizenId: string; value: number }>({
     baseImportance: 0.5,
     spontaneous: false,

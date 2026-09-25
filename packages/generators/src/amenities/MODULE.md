@@ -16,7 +16,7 @@ Dotación urbana (spec 033): decide qué lugares tiene el municipio y cuántos, 
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 033 | CA-001, CA-002 (con 150 000 habitantes, v0.3), CA-003 (INV-001 a INV-003 y `PLACE_BUILT`), CA-004, CA-005; R-001 a R-006 | CA-006 (viaje a la ciudad, M2 con la 016); R-007 y R-008 (M2 y peldaño 4) |
+| 033 | CA-001, CA-002 (con 150 000 habitantes, v0.3), CA-003 (INV-001 a INV-003 y `PLACE_BUILT`), CA-004, CA-005, CA-006 (`viajes.test.ts`, con la movilidad del motor); R-001 a R-006 | R-007 y R-008 (M2 y peldaño 4) |
 
 ## 3. API pública
 Desde `@datas-world/generators`:
@@ -76,3 +76,4 @@ No aplica: el perfil `prototipo` usa la plantilla del prototipo sin dotación (0
 |---|---|---|---|
 | 2026-09-24 | m1/j-dotacion | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/j-dotacion (J1–J3) | 033, 004, 029 | `plan.ts` (`amenityPlan`, `resolvePlots`) y `regional.ts` (`generateRegional`, `REFERENCE_CITY`). 8 pruebas |
+| 2026-09-25 | m2/d-movilidad | 033, 016 | Prueba nueva `viajes.test.ts`: el paradero de la plaza, 033 CA-006 (ida y vuelta al cine en bus) y una semana de vida del mundo generado con necesidades, rutina y movilidad |

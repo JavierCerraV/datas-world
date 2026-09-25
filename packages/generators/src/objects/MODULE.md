@@ -23,10 +23,10 @@ Desde `@datas-world/generators`:
 
 | Símbolo | Descripción |
 |---|---|
-| `generateObjects(world, citizenIds, householdIds, objectKinds, rng)` → `{ objectIds, events }` | Objetos por persona según las reglas `gen` del catálogo y carro por hogar según `gen.objects.carP[estrato]`, cada uno con su evento de origen (`OBJECT_ACQUIRED` u `OBJECT_INHERITED`). Hay que reordenar las trayectorias después (`sortBackstories`) |
+| `generateObjects(world, citizenIds, householdIds, objectKinds, rng)` → `{ objectIds, events }` | Objetos por persona según las reglas `gen` del catálogo y vehículos por hogar (carro y moto) según la tabla por estrato de su `pKey` en el perfil (`gen.objects.carP`, `gen.objects.motoP`), cada uno con su evento de origen (`OBJECT_ACQUIRED` u `OBJECT_INHERITED`). Hay que reordenar las trayectorias después (`sortBackstories`) |
 
 ## 4. Diseño interno y decisiones
-- **Reglas en el catálogo** `object_kinds` (2026.09.2). `gen` es una lista de `{ minAge?, maxAge?, p }` y se aplica la primera que encaje con la edad. `condition` es el rango del estado inicial. En M1:
+- **Reglas en el catálogo** `object_kinds` (2026.09.3). `gen` es una lista de `{ minAge?, maxAge?, p }` y se aplica la primera que encaje con la edad. `condition` es el rango del estado inicial. En M1:
   - teléfono: adultos 0,9 y de 12 a 17 años 0,6;
   - bicicleta: de 10 a 59 años, 0,3;
   - herencia: 25 años o más, 0,08, con valor emocional 0,95.
@@ -62,3 +62,4 @@ Porta `genObjects` (probabilidades, precios, "el anillo de su abuela"). El carro
 |---|---|---|---|
 | 2026-09-24 | m1/g-empleo-objetos | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/g-empleo-objetos (G2) | 005 | `generateObjects` con reglas del catálogo, carro por estrato y eventos de origen. 5 pruebas: 005 CA-001, CA-002, CA-003 |
+| 2026-09-25 | m2/d-movilidad | 005, 016 | Moto del hogar (`transporte.moto`, catálogo 2026.09.3) con `gen.objects.motoP` por estrato (0,4 · 0,35 · 0,25, por confirmar); los vehículos del hogar se generan por tipo con su `pKey`. La prueba del carro ya no cuenta cualquier objeto del hogar como carro. 1 prueba nueva |

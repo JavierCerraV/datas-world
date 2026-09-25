@@ -1,7 +1,7 @@
 {
   "name": "object_kinds",
-  "version": "2026.09.2",
-  "source": "ADR-006; spec 005 v0.3. Precios en pesos colombianos: los de M1 vienen de PRICE del prototipo; el del carro es una estimación (estado: estimado, spec 029 R-001).",
+  "version": "2026.09.3",
+  "source": "ADR-006; spec 005 v0.3. Precios en pesos colombianos: los de M1 vienen de PRICE del prototipo; los del carro y la moto son estimaciones (estado: estimado, spec 029 R-001).",
   "entries": [
     { "key": "accesorio.reloj", "name": "Reloj", "since": "M2" },
     { "key": "musica.guitarra", "name": "Guitarra", "since": "M2" },
@@ -13,6 +13,8 @@
     { "key": "transporte.bicicleta", "name": "Bicicleta", "since": "M1",
       "attrs": { "gen": [{ "minAge": 10, "maxAge": 59, "p": 0.3 }], "condition": [0.4, 1], "proto": "bicicleta", "defaultName": "una bicicleta", "price": 480000, "priceStatus": "estimado" } },
     { "key": "transporte.carro", "name": "Carro", "since": "M1",
-      "attrs": { "condition": [0.4, 1], "defaultName": "el carro de la casa", "price": 45000000, "priceStatus": "estimado", "ownedBy": "household" } }
+      "attrs": { "condition": [0.4, 1], "defaultName": "el carro de la casa", "price": 45000000, "priceStatus": "estimado", "ownedBy": "household", "pKey": "gen.objects.carP" } },
+    { "key": "transporte.moto", "name": "Moto", "since": "M1",
+      "attrs": { "condition": [0.4, 1], "defaultName": "la moto de la casa", "price": 7500000, "priceStatus": "estimado", "ownedBy": "household", "pKey": "gen.objects.motoP" } }
   ]
 }
