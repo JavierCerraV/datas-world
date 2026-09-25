@@ -2,7 +2,7 @@
 modulo: engine
 ruta: packages/engine
 estado: en-desarrollo
-specs: [001, 002, 003, 004, 005, 006, 007, 008, 014, 023, 029, 030]
+specs: [001, 002, 003, 004, 005, 006, 007, 008, 009, 014, 023, 029, 030, 035]
 actualizado: 2026-09-24
 ---
 
@@ -146,3 +146,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-25 | m2/c-rutinas | 011, 010, 014 | Módulo nuevo `src/routines/` (horarios, tipo de día, plan del día, despertar y `OVERSLEPT`). Evento `OVERSLEPT`. `index.ts` exporta su API. `testing.ts` comparte el perfil de prueba `TEST_PROFILE` (necesidades y rutina). 7 pruebas en el módulo |
 | 2026-09-25 | m2/d-movilidad | 016, 004, 014, 021 | Módulo nuevo `src/mobility/` (posición, viajes, modos, bus a La Capital, entrada a los lugares, llegadas tarde). Eventos `ARRIVED_LATE` y `TRIP_TAKEN`. `SystemEvent` con `recordAs` en el bucle. `testing.ts`: parámetros `mobility.*` en `TEST_PROFILE`. 8 pruebas en el módulo |
 | 2026-09-25 | m2/e-decisiones | 017, 032, 014 | Módulo nuevo `src/decision/` (opciones, utilidad, softmax, validación de acciones y explicación como causa). Evento `LEISURE_DONE`. `LeisureInterest.lastDone`. 7 pruebas en el módulo |
+| 2026-09-25 | mf/1-temperamento (MF1.4, MF1.5) | 009 v1.0, 035 | Módulos nuevos `src/temperament/` (registro de mecanismos, términos prohibidos, adaptador @deprecated) y `src/architecture/` (guardarraíl anticircularidad). `index.ts` exporta `MECHANISMS`, `isMechanism`, `FORBIDDEN_TERMS`, `legacyTraits`/`legacyTrait` (@deprecated), `checkArchitecture`, `POLICY` y `doneTasks` |

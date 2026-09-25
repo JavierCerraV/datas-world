@@ -2,7 +2,7 @@
 modulo: decision
 ruta: packages/engine/src/decision
 estado: en-desarrollo
-specs: [017, 032, 010, 011, 016, 021]
+specs: [017, 032, 010, 011, 016, 021, 035]
 actualizado: 2026-09-25
 ---
 
@@ -80,3 +80,4 @@ Porta `decide`: opciones de tiempo libre con puntuación y ruido y duración aco
 |---|---|---|---|
 | 2026-09-25 | m2/e-decisiones | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m2/e-decisiones (E1–E4) | 017, 032, 010, 016, 021 | `columns.ts`, `options.ts`, `validate.ts`, `system.ts` e `index.ts`. 7 pruebas |
+| 2026-09-25 | mf/1-temperamento (MF1.4) | 035, 009 v1.0 | La responsabilidad (utilidad de las obligaciones) y la impulsividad (temperatura) se leen por el adaptador @deprecated (`temperament/legacy.ts`); la impulsividad sale ahora de `tmp.discount0`. Caducan en MF3.4 (040). ESLint y la prueba de arquitectura prohíben importar el temperamento desde este módulo |

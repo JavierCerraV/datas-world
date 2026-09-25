@@ -2,7 +2,7 @@
 modulo: needs
 ruta: packages/engine/src/needs
 estado: en-desarrollo
-specs: [010, 009, 021, 031]
+specs: [010, 009, 021, 031, 035]
 actualizado: 2026-09-25
 ---
 
@@ -80,3 +80,4 @@ Porta `updateNeeds` (tasas de energía, hambre y soledad; objetivos de estrés y
 | 2026-09-25 | m2/c-rutinas | 010 | Comer sacia: con `eat`, el hambre sube `eatRate` por hora (1,3; prototipo: desayuno −0,4, comida −0,65). Las pruebas usan `TEST_PROFILE` de `testing.ts` |
 | 2026-09-25 | m2/d-movilidad | 010 | El reposo del enfermo cuenta como sueño: antes, cada día de enfermedad sumaba una noche entera de deuda y, al curarse, la persona se quedaba dormida horas durante días (visto en una semana del mundo generado) |
 | 2026-09-25 | m2/e-decisiones | 010, 032 | El ejercicio (`exercise`) también sube la diversión, como `leisure` y `socialize` |
+| 2026-09-25 | mf/1-temperamento (MF1.4) | 035, 009 v1.0 | Neuroticismo, extraversión y resiliencia se leen por el adaptador @deprecated; la resiliencia es ahora 1 − `tmp.aversiveSensitivity`. Caducan: emociones en MF2.5; estresores y línea base del ánimo en MF6.4 |

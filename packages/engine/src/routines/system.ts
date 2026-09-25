@@ -5,6 +5,7 @@ import { formatId } from '../ids.ts';
 import { needsParams } from '../needs/params.ts';
 import type { Patch, System, SystemEvent, SystemOutput, TickCtx, WorldView } from '../simulation/system.ts';
 import type { Rng } from '../rng.ts';
+import { legacyTrait } from '../temperament/legacy.ts';
 import { dayInfo } from './day.ts';
 import { isEarlyDay, planAt } from './plan.ts';
 
@@ -45,7 +46,7 @@ function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
         const wake = wakeDay + (isEarlyDay(view, row, tomorrow) ? i['routine.wakeW']![row]! : i['routine.wakeE']![row]!);
         const stress = f['state.stress']![row]!;
         const proj = Math.min(1, f['need.energy']![row]! + ((wake - ctx.now) / 60) * R.energyRest! * (1 - R.restStress! * stress));
-        const conscientiousness = f['pers.conscientiousness']?.[row] ?? 0.5;
+        const conscientiousness = legacyTrait(view, row, 'conscientiousness'); // @deprecated: se retira en MF3
         let over = proj < OVERSLEEP_ENERGY ? Math.round((OVERSLEEP_ENERGY - proj) * 200 * (1.3 - conscientiousness)) : 0;
         over += Math.round(i['state.sleepDebt']![row]! * 0.1);
         over = Math.max(0, over + rng.fork(id).int(-5, 8));
@@ -66,7 +67,7 @@ function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
         causes: [
           { state: 'deuda_de_sueno', entity: id, value: i['state.sleepDebt']![row]!, weight: 0.5 },
           { state: 'energia', entity: id, value: Math.round(f['need.energy']![row]! * 100) / 100, weight: 0.3 },
-          { state: 'responsabilidad', entity: id, value: Math.round((f['pers.conscientiousness']?.[row] ?? 0.5) * 100) / 100, weight: 0.2 },
+          { state: 'responsabilidad', entity: id, value: Math.round(legacyTrait(view, row, 'conscientiousness') * 100) / 100, weight: 0.2 },
         ],
       });
     }

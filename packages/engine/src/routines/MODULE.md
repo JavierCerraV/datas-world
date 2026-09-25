@@ -2,7 +2,7 @@
 modulo: routines
 ruta: packages/engine/src/routines
 estado: en-desarrollo
-specs: [011, 010, 006, 021, 029]
+specs: [011, 010, 006, 021, 029, 035]
 actualizado: 2026-09-25
 ---
 
@@ -70,3 +70,4 @@ Porta `setRoutine` (horarios), `wakeFor` e `inSleep` (tipo de día, madrugar) y 
 | 2026-09-25 | m2/c-rutinas | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m2/c-rutinas (C1–C3) | 011, 010, 021, 029 | `columns.ts`, `day.ts`, `plan.ts`, `system.ts` e `index.ts`; evento `OVERSLEPT`. 7 pruebas |
 | 2026-09-25 | m2/d-movilidad | 011, 016 | Columna `routine.oversleptEvt`: `OVERSLEPT` se emite con `recordAs` para que `ARRIVED_LATE` (movilidad) lo cite como causa |
+| 2026-09-25 | mf/1-temperamento (MF1.4) | 035, 009 v1.0 | Responsabilidad (quedarse dormido y su causa) e impulsividad, extraversión y responsabilidad (horas de sueño sin ficha de salud) se leen por el adaptador @deprecated. Caducan en MF3.4 y MF7.3 |

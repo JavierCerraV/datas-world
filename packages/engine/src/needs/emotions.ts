@@ -2,6 +2,7 @@
 // parches, para que la emoción llegue en el mismo tick que el hecho y con la personalidad (009) como filtro.
 import type { EventType } from '../events.ts';
 import type { Patch, WorldView } from '../simulation/system.ts';
+import { legacyTraits } from '../temperament/legacy.ts';
 
 type Emotion = 'joy' | 'sadness' | 'anger' | 'fear' | 'shame';
 
@@ -21,8 +22,7 @@ export function emotionPatches(view: WorldView, row: number, type: EventType): P
   const table = EVENT_EMOTIONS[type];
   if (!table) return [];
   const f = view.components.f32;
-  const n = f['pers.neuroticism']?.[row] ?? 0.5;
-  const e = f['pers.extraversion']?.[row] ?? 0.5;
+  const { neuroticism: n, extraversion: e } = legacyTraits(view, row); // @deprecated: funciones elicitadas en MF2
   return Object.entries(table).map(([emotion, base]) => {
     const column = `emo.${emotion}`;
     const k = emotion === 'joy' ? 0.5 + e : 0.5 + n;

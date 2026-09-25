@@ -1,0 +1,103 @@
+{
+  "name": "life_domains",
+  "version": "2026.10.1",
+  "source": "Spec 009 v1.0 R-007 y spec 038 R-009 (ADR-007): los 12 valores de la lista VALUES del prototipo como dominios vitales, raíces posibles de las redes jerárquicas de valor. No tienen columnas ni valor por persona: una persona \"valora\" un dominio solo si su historia construyó esa red.",
+  "entries": [
+    {
+      "key": "dominio.altruismo",
+      "name": "Altruismo",
+      "since": "M1",
+      "attrs": {
+        "proto": "altruismo"
+      }
+    },
+    {
+      "key": "dominio.autonomia",
+      "name": "Autonomía",
+      "since": "M1",
+      "attrs": {
+        "proto": "autonomía"
+      }
+    },
+    {
+      "key": "dominio.conocimiento",
+      "name": "Conocimiento",
+      "since": "M1",
+      "attrs": {
+        "proto": "conocimiento"
+      }
+    },
+    {
+      "key": "dominio.creatividad",
+      "name": "Creatividad",
+      "since": "M1",
+      "attrs": {
+        "proto": "creatividad"
+      }
+    },
+    {
+      "key": "dominio.dinero",
+      "name": "Dinero",
+      "since": "M1",
+      "attrs": {
+        "proto": "dinero"
+      }
+    },
+    {
+      "key": "dominio.exito",
+      "name": "Éxito",
+      "since": "M1",
+      "attrs": {
+        "proto": "éxito"
+      }
+    },
+    {
+      "key": "dominio.familia",
+      "name": "Familia",
+      "since": "M1",
+      "attrs": {
+        "proto": "familia"
+      }
+    },
+    {
+      "key": "dominio.libertad",
+      "name": "Libertad",
+      "since": "M1",
+      "attrs": {
+        "proto": "libertad"
+      }
+    },
+    {
+      "key": "dominio.pertenencia",
+      "name": "Pertenencia",
+      "since": "M1",
+      "attrs": {
+        "proto": "pertenencia"
+      }
+    },
+    {
+      "key": "dominio.prestigio",
+      "name": "Prestigio",
+      "since": "M1",
+      "attrs": {
+        "proto": "prestigio"
+      }
+    },
+    {
+      "key": "dominio.salud",
+      "name": "Salud",
+      "since": "M1",
+      "attrs": {
+        "proto": "salud"
+      }
+    },
+    {
+      "key": "dominio.seguridad",
+      "name": "Seguridad",
+      "since": "M1",
+      "attrs": {
+        "proto": "seguridad"
+      }
+    }
+  ]
+}

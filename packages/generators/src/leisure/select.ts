@@ -5,6 +5,7 @@ import type { EntityId, Rng, World } from '@datas-world/engine';
 import type { Catalog } from '../catalogs/schema.ts';
 import { limitsWork } from '../health/habits.ts';
 import { stepAt } from '../health/params.ts';
+import { legacyColumn } from '../personality/legacy.ts';
 import type { ActivityAttrs, LeisureParams } from './params.ts';
 
 export interface Offer {
@@ -61,7 +62,8 @@ export function selectActivities(
     const h = world.households.get(world.citizens.get(id)!.householdId!)!;
     return world.places.get(world.places.get(h.dwellingId)!.districtId!)!.stratum!;
   };
-  const trait = (col: string, id: EntityId) => c.f32[col]?.[idNumber(id)] ?? 0.5;
+  // @deprecated (035 §9): los rasgos y valores que nombra el catálogo, vía el adaptador, hasta MF7.3 (041 R-008).
+  const trait = (col: string, id: EntityId) => legacyColumn(world, idNumber(id), col);
   const persons = livingIds.filter((id) => age(id) >= 3);
   const chosen = new Map<EntityId, Choice[]>(persons.map((id) => [id, []]));
   const candidates = new Map<EntityId, Choice[]>(persons.map((id) => [id, []]));

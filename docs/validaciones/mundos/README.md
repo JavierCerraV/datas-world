@@ -15,3 +15,5 @@ Contenido de `m1-482917.db`:
 No se regeneran: un mundo de ejemplo es una foto del peldaño en que se creó. Si cambia la generación, el hash de un mundo nuevo será otro, pero este debe seguir cargándose.
 
 La prueba `apps/cli/src/m1.test.ts` copia el archivo, lo carga con el motor actual (lo que verifica el hash guardado) y lo avanza un día.
+
+**Motor funcional (MF1, 2026-09-25).** Desde la 009 v1.0 (temperamento) cambian los catálogos de personalidad, así que un mundo nuevo con la misma semilla tiene otro hash (009 INV-002). `m1-482917.db` se sigue cargando sin migrar: conserva sus columnas de la v0.3 (`pers.*` extra, `val.*`, `pers.coping`), que el motor ya no lee, y su hash guardado no cambia. Como no tiene `tmp.*`, el adaptador de temperamento usa 0,5 para esas personas.

@@ -5,6 +5,7 @@ import { MINUTES_PER_DAY } from '../calendar.ts';
 import type { NewEvent } from '../events.ts';
 import { formatId } from '../ids.ts';
 import type { Patch, System, SystemOutput, TickCtx, WorldView } from '../simulation/system.ts';
+import { legacyTraits } from '../temperament/legacy.ts';
 import { EMOTIONS } from './columns.ts';
 import { needsParams } from './params.ts';
 
@@ -58,7 +59,8 @@ function step(view: WorldView, ctx: TickCtx): SystemOutput {
       hunger -= (work ? R.hungerWork! : R.hungerAwake!) * dt;
       hygiene -= R.hygieneAwake! * dt;
     }
-    const extraversion = f['pers.extraversion']?.[row] ?? 0.5;
+    const traits = legacyTraits(view, row); // @deprecated: sustituido por funciones y carga aversiva en MF2 y MF6
+    const extraversion = traits.extraversion;
     if (!rest && COMPANY.has(act)) social += R.socialCompany! * dt;
     else social -= (rest ? R.socialRest! : R.socialAlone! * (0.5 + extraversion)) * dt;
     if (FUN.has(act)) fun += R.funLeisure! * dt;
@@ -69,8 +71,8 @@ function step(view: WorldView, ctx: TickCtx): SystemOutput {
     if (rest) set('state.sleptToday', row, i['state.sleptToday']![row]! + view.config.tickMinutes, 'i32');
 
     // R-002: el estrés tiende a un objetivo; los estresores se modulan por neuroticismo y resiliencia.
-    const neuroticism = f['pers.neuroticism']?.[row] ?? 0.5;
-    const resilience = f['pers.resilience']?.[row] ?? 0.5;
+    const neuroticism = traits.neuroticism;
+    const resilience = traits.resilience;
     const occ = view.citizens.get(formatId('CIT', row))?.occupation;
     const ageYears = (view.now - i['demo.birthMinute']![row]!) / (365.25 * MINUTES_PER_DAY);
     const money = i.money?.[row] ?? 0;
