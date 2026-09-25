@@ -93,6 +93,8 @@ export type { ExternalInput, InputResult, ScheduledHandler } from './tick.ts';
 export { ENGINE_VERSION } from './version.ts';
 
 export { hire, setOccupation } from './employment.ts';
+export { addAncestor, setFoundedAt, setParents } from './history.ts';
+export type { NewAncestor } from './history.ts';
 export { addObject, objectsOf, recordObjectEvent } from './objects.ts';
 
 export { checkProfile, profileEntry, profileNumber, profileValue } from './profile.ts';

@@ -30,6 +30,7 @@ Desde `@datas-world/generators`:
 | `holidayDates(from, to)` | Fechas únicas y ordenadas para `WorldConfig.holidays` |
 | `easterSunday(year)` | Domingo de Pascua en días desde 1970-01-01 |
 | `FIRST_SUPPORTED_YEAR` | 1984 |
+| `seriesAt(series, year)` | Valor de una serie `{ "AAAA": n }` en un año: interpolación lineal entre puntos y extremos planos (029, 030) |
 
 ## 4. Diseño interno y decisiones
 - **Festivos:**
@@ -68,3 +69,4 @@ El perfil `prototipo` reproduce los parámetros de paridad (029 R-004): pesos de
 | 2026-09-24 | m1/d-organizaciones | 029 | Nueva entrada `gen.jobs.bossWageFactor` = 1,6 en `CO-2026.09` (estimado, del prototipo): ya son 47 entradas |
 | 2026-09-24 | m1/f-poblacion | 007, 008, 029 | Parámetros de población en ambos perfiles: edades y número de hijos por plantilla (`gen.household.*`), modelo de edad de los hijos, ahorro (`gen.savings.*`) y educación por estrato (`gen.education.*`). En `CO-2026.09` están calibrados por simulación con el DANE 2026 (estimado); en `prototipo` son los de `genPopulation`/`newAgent`, más `pension.age` 65 y `pension.coverage` 1. Quedan 73 y 35 entradas |
 | 2026-09-24 | m1/g-empleo-objetos | 006, 029 | Parámetros de empleo `gen.labor.*` en ambos perfiles (79 y 41 entradas). Las mediciones de la GEIH de julio de 2026 pasan a regir desde el 2026-01-01 (medición de referencia del año); las leyes conservan su fecha |
+| 2026-09-24 | m1/h-historia | 029, 030 | `series.ts` (`seriesAt`, con pruebas). Series oficiales `demo.lifeExpectancy.byYear` y `demo.urbanization.byYear` (sustituyen a las `byDecade` por confirmar) y parámetros estimados `gen.history.*` en ambos perfiles |

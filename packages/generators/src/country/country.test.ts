@@ -2,6 +2,7 @@ import { profileNumber, profileValue } from '@datas-world/engine';
 import { describe, expect, it } from 'vitest';
 import { colombianHolidays, easterSunday, holidayDates } from './holidays.ts';
 import { DEFAULT_PROFILE, PROTOTYPE_PROFILE, loadProfile, parseProfile, pendingEntries } from './profile.ts';
+import { seriesAt } from './series.ts';
 import { civilFromDays, formatDate } from '@datas-world/engine';
 
 const dates = (y: number) => colombianHolidays(y).map((h) => h.date);
@@ -107,12 +108,8 @@ describe('perfil colombiano (spec 029)', () => {
 
   it('CA-003: todas las entradas tienen fuente y vigencia válidas; las pendientes se pueden listar', () => {
     expect(co.entries.length).toBeGreaterThan(30);
-    expect(pendingEntries(co).map((e) => e.key)).toEqual([
-      'demo.lifeTable.byDecade',
-      'demo.parentAgeAtBirth.byDecade',
-      'demo.urbanization.byDecade',
-      'stratum.share',
-    ]);
+    // La esperanza de vida y la urbanización históricas ya tienen fuente (bloque H).
+    expect(pendingEntries(co).map((e) => e.key)).toEqual(['demo.parentAgeAtBirth.byDecade', 'stratum.share']);
   });
 
   it('las variaciones territoriales y las leyes escalonadas se resuelven por fecha y alcance', () => {
@@ -139,6 +136,28 @@ describe('perfil colombiano (spec 029)', () => {
       parseProfile({ id: 'X', country: 'CO', currency: { code: 'COP', minorUnit: 1 }, entries: [e] }),
     ).toThrow(/sin fuente/);
     expect(() => loadProfile('../secreto')).toThrow(/inválido/);
+  });
+});
+
+describe('series históricas (spec 029)', () => {
+  it('seriesAt interpola entre puntos y mantiene los extremos', () => {
+    const s = { '1938': 0.31, '1951': 0.39, '1973': 0.59 };
+    expect(seriesAt(s, 1900)).toBe(0.31);
+    expect(seriesAt(s, 1938)).toBe(0.31);
+    expect(seriesAt(s, 1962)).toBeCloseTo(0.49, 10);
+    expect(seriesAt(s, 2020)).toBe(0.59);
+    expect(() => seriesAt({}, 2000)).toThrow(/vacía/);
+  });
+
+  it('la esperanza de vida y la urbanización del perfil colombiano crecen con el tiempo', () => {
+    const co = loadProfile(DEFAULT_PROFILE);
+    const le = profileValue(co, 'demo.lifeExpectancy.byYear', '2026-01-01') as Record<string, number>;
+    const ur = profileValue(co, 'demo.urbanization.byYear', '2026-01-01') as Record<string, number>;
+    expect(seriesAt(le, 1908)).toBe(38);
+    expect(seriesAt(le, 1950)).toBeCloseTo(49.7, 10);
+    expect(seriesAt(le, 2026)).toBeCloseTo(76.9, 10);
+    expect(seriesAt(ur, 1920)).toBe(0.31);
+    expect(seriesAt(ur, 2026)).toBe(0.74);
   });
 });
 

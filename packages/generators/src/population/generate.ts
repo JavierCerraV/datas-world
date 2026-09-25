@@ -1,8 +1,9 @@
 // Generador de población (specs 008 y 007): hogares por plantilla hasta la población objetivo, personas con
 // sus datos, personalidad (009), apariencia y trayectoria previa.
-import { addHousehold, addPerson, completeHousehold, idNumber } from '@datas-world/engine';
+import { addHousehold, addPerson, completeHousehold, idNumber, parseEpoch } from '@datas-world/engine';
 import type { EntityId, Rng, World, WorldEvent } from '@datas-world/engine';
 import type { Catalogs } from '../catalogs/load.ts';
+import { seriesAt } from '../country/series.ts';
 import type { Territory } from '../geography/generate.ts';
 import { worldDate } from '../organizations/generate.ts';
 import { definePersonalityColumns, generatePersonality } from '../personality/generate.ts';
@@ -81,7 +82,11 @@ export function generatePopulation(
       const family: [string, string] = [from(m.surnameFrom[0]), from(m.surnameFrom[1])];
       surnames.push(family);
       const names = given(m.sex);
-      const bp = catalogs.birthplaces.entries[r.int(0, catalogs.birthplaces.entries.length - 1)]!.key;
+      // 030 R-005: nacer en el campo es tan probable como no urbana era Colombia el año de nacimiento.
+      const birthYear = parseEpoch(world.config.epoch).year - m.age;
+      const rural = r.chance(1 - seriesAt(P.urbanization, birthYear));
+      const pool = catalogs.birthplaces.entries.filter((e) => Boolean((e.attrs as { rural?: boolean } | undefined)?.rural) === rural);
+      const bp = pool[r.int(0, pool.length - 1)]!.key;
       const birthplace = m.age < 18 || bp === 'local.municipio' ? territory.municipalityId : bp;
       const id = addPerson(world, {
         name: { given: names[r.int(0, names.length - 1)]!.name, family },

@@ -48,7 +48,7 @@ Desde `@datas-world/generators`:
 - **Personas:**
   - nombre del catálogo según el sexo;
   - apellidos colombianos: los hijos llevan el primero del padre y el primero de la madre (008 R-002);
-  - los menores nacen en el municipio;
+  - los menores nacen en el municipio; un adulto nace en el campo con probabilidad 1 − urbanización de su año de nacimiento (`demo.urbanization.byYear`, 030 R-005) y, si no, en una ciudad del catálogo;
   - el nacimiento es un día al azar con la edad exacta en el epoch;
   - educación por estrato (007 R-004, en CINE), limitada por la edad (`maxLevelForAge`);
   - ahorro por estrato y bonificación desde los 65 (R-005);
@@ -103,3 +103,4 @@ Con el perfil `prototipo` porta `genPopulation` (plantillas, edades, sexos, apel
 | 2026-09-24 | m1/f-poblacion | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/f-poblacion (F1–F3) | 001, 007, 008, 009 | Generación de hogares y personas con parámetros del perfil (calibrados con el DANE), personalidad, apariencia y trayectoria previa. 15 pruebas |
 | 2026-09-24 | m1/f-poblacion | 007, 008 | El usuario aprueba la revisión de los CA estadísticos (agregado de 20 mundos) |
+| 2026-09-24 | m1/h-historia | 007, 030 | Lugar de nacimiento según la urbanización del año de nacimiento (entradas con `rural` del catálogo); `PopulationParams.urbanization` |

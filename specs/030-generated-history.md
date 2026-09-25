@@ -4,7 +4,7 @@ nombre: generated-history
 estado: aprobada
 hito: M1
 depende_de: [001, 003, 004, 006, 007, 008, 014, 023, 029]
-version: 0.1
+version: 0.2
 ---
 
 # 030 — Historia generada (1900 → presente)
@@ -24,7 +24,7 @@ Responde a la pregunta guía de la visión: *¿estas personas parecen haber vivi
 **Incluye:**
 - fundación del municipio;
 - crecimiento de barrios, lugares y organizaciones por décadas;
-- genealogía hacia atrás desde los hogares del presente, con antepasados ya fallecidos;
+- genealogía hacia atrás desde los hogares del presente, con antepasados fallecidos o vivos fuera del mundo;
 - nacimientos, uniones, migraciones, trabajos y muertes anteriores al presente;
 - el contexto histórico nacional, como eventos que dejan huella en las trayectorias.
 
@@ -35,14 +35,14 @@ Responde a la pregunta guía de la visión: *¿estas personas parecen haber vivi
 
 ## 3. Modelo de datos
 - **Presente del mundo:** `WorldConfig.epoch = '2026-01-01T00:00'` (minuto 0). Todo lo anterior tiene `at < 0`. El 1-ene-1900 es el minuto −66 268 800, que cabe en `i32`. Comprobado con el calendario del motor: fechas y días de la semana correctos antes del epoch.
-- **Antepasados:** son ciudadanos `CIT` con `status: 'inactive'` y el motivo `deceased`. No se reutilizan ni se borran (spec 001 R-001, R-003). Tienen las columnas de 007 y dos nuevas:
+- **Antepasados:** son ciudadanos `CIT` con `status: 'inactive'`, `active = 0` y `ancestor: true`, sin hogar. No se reutilizan ni se borran (spec 001 R-001, R-003). Pueden haber muerto (`demo.deathMinute < 0`) o **seguir vivos fuera del mundo** (`demo.deathMinute = 0`): existen en la genealogía, pero no se simulan (precisión aprobada por el usuario). Tienen las columnas de 007 y dos nuevas:
 
 | Columna | Tipo | Qué es |
 |---|---|---|
 | `demo.deathMinute` | `i32` | minuto de la muerte (0 = vive) |
 | `demo.generation` | `u8` | 0 = vive en el presente · 1 = padres de algún vivo · 2 = abuelos · 3 = bisabuelos |
 
-- **Parentesco a través de generaciones:** `lineage: { childId, motherId?, fatherId? }[]`, en orden por `childId`. Complementa el parentesco de los hogares del presente (008).
+- **Parentesco a través de generaciones:** cada ciudadano guarda `motherId?` y `fatherId?`. `lineageOf(world)` los expone como `{ childId, motherId?, fatherId? }[]`, en orden por `childId`. Complementa el parentesco de los hogares del presente (008).
 - **Fechas de fundación:** los lugares (004) y las organizaciones (006) ganan `foundedAt: WorldMinute`.
 - **Contexto histórico:** es un catálogo `historical_events` (ADR-006). Cada entrada tiene:
   - clave y nombre;
@@ -50,7 +50,7 @@ Responde a la pregunta guía de la visión: *¿estas personas parecen haber vivi
   - fuente;
   - `effects`: multiplicadores sobre las probabilidades de la generación en su periodo (migración campo → ciudad, muerte violenta, desplazamiento, emigración, desempleo).
 
-Coste en memoria: ≈ 3 antepasados por persona viva de media, con ramas compartidas. Para 200 vivos, unos 600 antepasados: unos 250 KB en columnas y objetos, y ≈ 10 000 eventos históricos.
+Coste en memoria (medido en v0.2): ≈ 5,5 antepasados por persona viva, es decir 2 padres + 4 abuelos + 8 · 0,35 bisabuelos, menos las ramas que comparten los hermanos. Para 200 vivos salen unos 1 100 antepasados y unos 2 700 eventos históricos (≈ 750 KB en JSON). La generación completa del mundo tarda ≈ 0,15 s.
 
 ## 4. Reglas
 - **R-001** — Orden de generación, cada paso con su flujo `rng.fork('hist:<paso>')`:
@@ -153,3 +153,4 @@ Alerta si alguna invariante vital se incumple o si una década queda vacía.
 | 2026-09-24 | 0.1 | Borrador inicial: el mundo existe desde 1900 con historia generada y consultable; la vida detallada empieza el 2026-01-01 (decisiones del usuario) |
 | 2026-09-24 | 0.1 | Estado → aprobada |
 | 2026-09-24 | 0.1 | Nombre (usuario): el mundo y su municipio se llaman **Data's World**, en lugar de Villa Cordillera. Inspirado en el androide Data: ciudadanos autónomos, curiosos y capaces de aprender. Solo cambia el nombre; la información sigue siendo de Colombia |
+| 2026-09-24 | 0.2 | Implementación del bloque H. Precisión aprobada por el usuario: un antepasado puede seguir vivo fuera del mundo (`deathMinute = 0`, no se simula). Precisiones: `lineage` se guarda como `motherId`/`fatherId` en cada ciudadano (con `lineageOf`); la edad de muerte sigue la esperanza de vida del año de nacimiento más una sobrevida adulta (`gen.history.*`), sin tablas por edad y sexo; las muertes de un periodo con efecto de muerte se atribuyen al hecho con probabilidad 1 − 1/efecto. Las uniones solo se generan cuando uno de los dos es antepasado (las parejas vivas ya tienen `HOUSEHOLD_FORMED`). CA-005 se comprueba sobre el agregado de 20 mundos, con los nacidos de 1900 a 1999; desde 2000 hay menores, que nacen siempre en el municipio. CA-003 y CA-006 se cubren con datos en el bloque H y con la CLI en el bloque I. CA-007: tiempo y tamaño medidos (§3); la comprobación en disco llega con la persistencia del bloque I. El coste de §3 se corrige a ≈ 5,5 antepasados por persona viva |

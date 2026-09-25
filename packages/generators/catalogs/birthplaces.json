@@ -1,9 +1,9 @@
 {
   "name": "birthplaces",
-  "version": "2026.09.1",
-  "source": "Lugares de nacimiento de la lista BIRTH del prototipo, con su código DIVIPOLA real (municipio de 5 dígitos; departamento de 2 dígitos para \"un pueblo de Boyacá\"). `local.municipio` es el municipio del propio mundo.",
+  "version": "2026.09.2",
+  "source": "Lugares de nacimiento de la lista BIRTH del prototipo, con su código DIVIPOLA real (municipio de 5 dígitos; departamento de 2 dígitos para \"un pueblo de Boyacá\"). `local.municipio` es el municipio del propio mundo. `rural: true` marca los lugares rurales (spec 030: la probabilidad de nacer en el campo sigue la urbanización del año de nacimiento).",
   "entries": [
-    {"key": "co.boyaca_rural", "name": "un pueblo de Boyacá", "since": "M1", "code": "15"},
+    {"key": "co.boyaca_rural", "name": "un pueblo de Boyacá", "since": "M1", "code": "15", "attrs": {"rural": true}},
     {"key": "co.bucaramanga", "name": "Bucaramanga", "since": "M1", "code": "68001"},
     {"key": "co.cali", "name": "Cali", "since": "M1", "code": "76001"},
     {"key": "co.ibague", "name": "Ibagué", "since": "M1", "code": "73001"},
@@ -12,6 +12,7 @@
     {"key": "co.pasto", "name": "Pasto", "since": "M1", "code": "52001"},
     {"key": "co.tunja", "name": "Tunja", "since": "M1", "code": "15001"},
     {"key": "co.villavicencio", "name": "Villavicencio", "since": "M1", "code": "50001"},
-    {"key": "local.municipio", "name": "El municipio del mundo", "since": "M1"}
+    {"key": "local.municipio", "name": "El municipio del mundo", "since": "M1"},
+    {"key": "rural.campo", "name": "el campo", "since": "M1", "attrs": {"rural": true}}
   ]
 }

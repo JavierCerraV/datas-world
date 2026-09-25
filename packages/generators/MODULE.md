@@ -55,3 +55,4 @@ Porta `genWorld`, `buildPlaces`, `genPopulation`, `newAgent`, `genJobs`, `genRel
 | 2026-09-24 | m1/e-personalidad | 009 | Submódulo `personality` y catálogos de rasgos y valores |
 | 2026-09-24 | m1/f-poblacion | 007, 008 | Submódulo `population` (hogares, personas, apariencia y trayectoria) y 5 catálogos de población |
 | 2026-09-24 | m1/g-empleo-objetos | 005, 006 | Submódulos `employment` y `objects`; `src/testing.ts` monta un mundo de M1 completo para las pruebas |
+| 2026-09-24 | m1/h-historia | 030 | Submódulo `history` (historia desde 1900); `src/testing.ts` añade la historia al final y devuelve `hist`; `src/index.ts` exporta `generateHistory` y `lineageOf` |
