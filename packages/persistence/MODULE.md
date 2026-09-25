@@ -34,6 +34,7 @@ Desde `@datas-world/persistence` (`src/index.ts`):
 | `acquireWriterLock`, `releaseWriterLock`, `writerLock` | `src/control.ts` | Cerrojo de escritor en `meta.writer_pid` (R-001); se recupera si su dueño ya no existe |
 | `encodeSnapshot`, `decodeSnapshot`, `columnToLE`, `columnFromLE` | `src/codec.ts` | Formato binario de instantáneas y columnas |
 | `FLUSH_TICKS`, `SNAPSHOT_EVERY_DAYS` | `src/params.ts` | Parámetros de la §8 que usa el M0 |
+| `queryEvents(db, { from?, to?, types?, participant?, place?, limit? })`, `eventsById(db, ids)`, `rowsToEvents`, tipos `EventQuery`/`EventRow` | `src/queries.ts` | Consultas de solo lectura del registro, en orden (`at`, `seq`). `participant` usa `event_participants`; `place` busca en `place_id` y en `placeId`/`orgId` del payload (`json_extract`). Las usa la CLI (`world:history`, `citizen:report`, 030 R-008) |
 
 ## 4. Diseño interno y decisiones
 - **better-sqlite3 13** (ADR-001), síncrono. Trae binarios precompilados (`gypfile: false`), así que en `pnpm-workspace.yaml` su script de instalación queda deshabilitado (`allowBuilds: better-sqlite3: false`): no hace falta compilador de C++. El RSS del módulo nativo son unos pocos MB.
@@ -68,6 +69,7 @@ Vitest, desde la raíz: `pnpm test`. Cada prueba usa una carpeta temporal propia
   - CA-004: un lector con una transacción abierta ve su instantánea mientras el escritor hace 20 flush, sin `SQLITE_BUSY`.
 - `src/crash.test.ts` (1 prueba, CA-003): un proceso hijo (`src/crash-child.fixture.ts`) avanza 30 días con flush cada `FLUSH_TICKS` ticks. El padre lo mata en seco (`SIGKILL`) después de un flush del día 10. Al reabrir: estado de un flush, ningún evento confirmado perdido, eventos iguales al prefijo de una ejecución de referencia. Seguir hasta el día 30 da el mismo hash y los mismos eventos.
 
+- `src/queries.test.ts` (1 prueba): filtros por fecha, tipo, participante y lugar, orden cronológico, límite y búsqueda por id.
 - `src/control.test.ts` (3 pruebas): órdenes en orden de id; cerrojo rechazado con un dueño vivo, liberado y recuperado de un proceso muerto.
 - `src/session.test.ts` (2 pruebas): flush cada `FLUSH_TICKS`, una instantánea por día, progreso cada 5 %; entradas guardadas una sola vez y numeración continua entre sesiones.
 
@@ -79,7 +81,7 @@ No aplica (el prototipo no persiste).
 ## 8. Pendientes y deuda
 - [ ] ¿Quién encola órdenes cuando exista la API (M5)? Hoy solo la CLI (decisión del usuario, bloque E).
 - [ ] Retención de instantáneas (R-004) y compactación (R-005, CA-002, CA-005), M4.
-- [ ] `stateHash` en cada flush: medir su coste con población (M1) y, si pesa, calcularlo solo en instantáneas y al cerrar.
+- [ ] `stateHash` en cada flush. Medido con la población de M1 (1 300 personas, vivas y antepasados): ≈ 15 ms por flush, y 30 días tardan ≈ 12 s. Antes de M2 hay que decidir en la 027 si se calcula solo en las instantáneas y al cerrar.
 - [ ] `meta.scheduler` se reescribe entero en cada flush; revisar cuando el scheduler tenga miles de elementos.
 - [ ] `readEvents` lee participantes con una consulta por evento; para la API conviene un JOIN (E2 o M5).
 
@@ -93,3 +95,4 @@ No aplica (el prototipo no persiste).
 | 2026-09-24 | chore/renombrar-datas-world-2 | — | Renombrado de los paquetes `@mundo-social/*` → `@datas-world/*` (imports y `package.json`). Sin cambios de comportamiento |
 | 2026-09-24 | chore/nombre-datas-world | — | El nombre del mundo en las configuraciones de prueba y por defecto pasa de "Villa Cordillera" a "Data's World" (decisión del usuario). Sin cambios de comportamiento |
 | 2026-09-24 | m1/b-geografia | 003, 027 | El mapa del mundo se guarda una vez en `meta.geo` y se carga con el mundo; los lugares con campos anidados se cargan con su tipo. 1 prueba nueva (mundo con mapa y lugares: guardar, cargar e instantánea con el mismo hash) |
+| 2026-09-24 | m1/i-cli | 027, 030 | `queries.ts` (`queryEvents`, `eventsById`, `rowsToEvents`), que también usa `readEvents`. `meta.scheduler` se escribe desde `sortedItems` sin serializar el mundo entero. Junto con el `stateHash` sin copias del motor, avanzar 30 días un mundo poblado pasa de 22 s a 12 s. 1 prueba nueva |

@@ -12,6 +12,8 @@ export interface HistoryParams {
   fatherAgeGap: Range;
   adultDeathBonusFactor: number;
   deathAgeSd: number;
+  /** Proporción base de muertes violentas, sobre la que actúan los efectos de violencia del catálogo. */
+  violentDeathShare: number;
   greatGrandparentP: number;
   lifeExpectancy: Record<string, number>;
   urbanization: Record<string, number>;
@@ -28,6 +30,7 @@ export function historyParams(p: CountryProfile, date: string): HistoryParams {
     fatherAgeGap: range('gen.history.fatherAgeGap'),
     adultDeathBonusFactor: profileNumber(p, 'gen.history.adultDeathBonusFactor', date),
     deathAgeSd: profileNumber(p, 'gen.history.deathAgeSd', date),
+    violentDeathShare: profileNumber(p, 'gen.history.violentDeathShare', date),
     greatGrandparentP: profileNumber(p, 'gen.history.greatGrandparentP', date),
     lifeExpectancy: profileValue(p, 'demo.lifeExpectancy.byYear', date) as Record<string, number>,
     urbanization: profileValue(p, 'demo.urbanization.byYear', date) as Record<string, number>,

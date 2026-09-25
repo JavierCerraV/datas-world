@@ -6,15 +6,13 @@ import {
   idKind,
   idNumber,
   isCapability,
-  serializeWorld,
+  sortedItems,
   stateHash,
 } from '@datas-world/engine';
 import type {
   BaseEntity,
-  CauseRef,
   ColumnType,
   EntityId,
-  EventOrigin,
   EventType,
   ExternalInput,
   GeoMapData,
@@ -24,6 +22,8 @@ import type {
 } from '@datas-world/engine';
 import { columnFromLE, columnToLE, decodeSnapshot, encodeSnapshot } from './codec.ts';
 import type { Db } from './db.ts';
+import { rowsToEvents } from './queries.ts';
+import type { EventRow } from './queries.ts';
 
 export interface FlushBatch {
   world: World;
@@ -42,18 +42,6 @@ const LIST_OF_KIND: Record<string, EntityList> = {
   PLC: 'places',
   OBJ: 'objects',
 };
-
-interface EventRow {
-  seq: number;
-  id: string;
-  type: string;
-  at: number;
-  importance: number;
-  payload: string;
-  causes: string;
-  origin: string;
-  place_id: string | null;
-}
 
 /**
  * Único escritor de la base (R-001). Recuerda lo último que escribió de cada entidad y columna para
@@ -166,7 +154,7 @@ export class WorldRepository {
     this.#setMeta('status', world.status);
     this.#setMeta('counters', JSON.stringify(world.counters));
     this.#setMeta('capabilities', JSON.stringify(world.capabilities)); // ya en orden canónico (R-009)
-    this.#setMeta('scheduler', JSON.stringify(serializeWorld(world).scheduler));
+    this.#setMeta('scheduler', JSON.stringify(sortedItems(world.scheduler))); // sin serializar el mundo entero
     this.#setMeta('state_hash', stateHash(world));
 
     const upEntity = this.#st.entity;
@@ -277,23 +265,7 @@ export class WorldRepository {
     const rows = this.db
       .prepare('SELECT * FROM events WHERE seq > ? ORDER BY seq LIMIT ?')
       .all(afterSeq, limit) as EventRow[];
-    const parts = this.db.prepare(
-      'SELECT entity_id, role FROM event_participants WHERE event_seq = ? ORDER BY entity_id',
-    );
-    return rows.map((r) => ({
-      id: r.id as EntityId,
-      type: r.type as EventType,
-      at: r.at,
-      participants: (parts.all(r.seq) as { entity_id: EntityId; role: string }[]).map((p) => ({
-        id: p.entity_id,
-        role: p.role,
-      })),
-      ...(r.place_id !== null ? { placeId: r.place_id as EntityId } : {}),
-      importance: r.importance,
-      payload: JSON.parse(r.payload) as unknown,
-      causes: JSON.parse(r.causes) as CauseRef[],
-      origin: r.origin as EventOrigin,
-    }));
+    return rowsToEvents(this.db, rows);
   }
 
   /** Número de eventos guardados, en total o de un tipo. */
