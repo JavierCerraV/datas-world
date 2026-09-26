@@ -12,7 +12,7 @@ export {
   leisureStrength0,
   variabilityOf,
 } from './history.ts';
-export { distance, elicited, gradient, isGeneralized, netValue, operant, ownValue, pair, prune, reinforcingValue } from './learn.ts';
+export { directValue, distance, elicited, gradient, isGeneralized, netValue, operant, ownValue, pair, prune, reinforcingValue } from './learn.ts';
 export type { Trial } from './learn.ts';
 export { EVENT_LEARNING, WORLD_STIMULI } from './rules.ts';
 export type { LearningRule } from './rules.ts';

@@ -18,6 +18,7 @@ import {
 import type { ControlCommandName } from '@datas-world/persistence';
 import { bench } from './bench.ts';
 import { benchLife } from './bench-life.ts';
+import { benchRelations } from './bench-relations.ts';
 import { validateParity } from './validate.ts';
 import { DEFAULT_DB, UsageError, dateOf, toInt, withDb } from './common.ts';
 import type { Io } from './common.ts';
@@ -42,7 +43,8 @@ export const USAGE = `Uso: pnpm cli <comando> [opciones]
   control pause|resume|step|stop|speed <0|1|10|100|1000> [--db RUTA]
   bench [--days N] [--json] [--check]
   validate:parity [--profile prototipo|CO-2026.09] [--seeds N-M] [--days N] [--population N] [--out RUTA]
-  bench:life [--population 500] [--days 365] [--profile CO-2026.09] [--out RUTA]`;
+  bench:life [--population 500] [--days 365] [--profile CO-2026.09] [--out RUTA]
+  bench:relations [--out RUTA]`;
 
 function worldAdvance(args: string[], io: Io): void {
   const { values: v } = parseArgs({
@@ -145,6 +147,7 @@ const COMMANDS: Record<string, (args: string[], io: Io) => void> = {
   bench: (args, io) => bench(args, io),
   'validate:parity': (args, io) => validateParity(args, io),
   'bench:life': (args, io) => benchLife(args, io),
+  'bench:relations': (args, io) => benchRelations(args, io),
 };
 
 /** Ejecuta un comando y devuelve el código de salida. */

@@ -2,7 +2,7 @@
 modulo: lab
 ruta: packages/engine/src/lab
 estado: en-desarrollo
-specs: [042, 036, 040, 009]
+specs: [042, 036, 040, 037, 009]
 actualizado: 2026-09-25
 ---
 
@@ -16,8 +16,9 @@ Laboratorio determinista de la batería de validación conductual (spec 042): es
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 042 | V-1, V-2, V-3, V-6 (MF2); V-4, V-5 (MF3) | V-7 en adelante (MF4–MF8) |
+| 042 | V-1, V-2, V-3, V-6 (MF2); V-4, V-5 (MF3); V-7, V-8, V-11a (MF4) | V-9, V-10, V-11b en adelante (MF5–MF8) |
 | 040 | CA-001 (V-4), CA-002 (V-5) | — |
+| 037 | CA-001 (V-7), CA-002 (V-8), CA-003 (V-11a) | — |
 | 036 | CA-001 (V-1), CA-002 (V-2), CA-003 (V-3), CA-004, CA-005 | — |
 | 009 | CA-E | — |
 
@@ -59,3 +60,4 @@ No aplica.
 | 2026-09-25 | mf/2-funciones | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | mf/2-funciones (MF2.4) | 042, 036, 009 | Escenarios V-1, V-2, V-3 y V-6 y batería con 036 CA-001 a CA-005 y 009 CA-E |
 | 2026-09-26 | mf/3-seleccion (MF3.5) | 042, 040 | `choice.ts`: V-4 (igualación: pendiente 0,72, R² ≈ 1) y V-5 (descuento e inversión: 76 % y 48 %), con `choice.test.ts` |
+| 2026-09-26 | mf/4-red (MF4.4) | 042, 037 | `relational.ts`: V-7 (`trainedPair`, `relationOf`), V-8 (`comparisonTransform`) y V-11a (`chessScenario`), con `relational.test.ts` |

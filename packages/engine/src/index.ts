@@ -254,6 +254,7 @@ export {
   leisureResponse,
   leisureStrength0,
   variabilityOf,
+  directValue,
   elicited,
   emptyStore,
   gradient,
@@ -280,6 +281,26 @@ export type {
   StimulusClass,
   Trial,
 } from './functions/index.ts';
+
+export {
+  ATTENUATION,
+  CFUNC_DEFAULT,
+  COMP_FACTOR,
+  EVENT_TEACHING,
+  INVERSE,
+  MAX_DEPTH,
+  MAX_RELATIONS,
+  compose,
+  derive,
+  emptyNetwork,
+  functionalValue,
+  networkMetrics,
+  relationalNetworkOf,
+  relationsSystem,
+  teach,
+  transformFactor,
+} from './relations/index.ts';
+export type { Derived, FunctionalValue, NetworkMetrics, Relation, RelationType, RelationalNetwork, Teaching, TeachingRule } from './relations/index.ts';
 
 export { FORBIDDEN_TERMS, MECHANISMS, isMechanism } from './temperament/mechanisms.ts';
 export type { MechanismId } from './temperament/mechanisms.ts';

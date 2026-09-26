@@ -124,3 +124,4 @@ Distribuciones de necesidades, emociones, estrés y ánimo en la prueba de 100 p
 | 2026-09-26 | 0.2 | Estado → implementada |
 | 2026-09-26 | 0.2 | Bloque MF2 (036, ADR-007): la intensidad de las emociones por evento (R-005) ya no la modula el neuroticismo, sino la activación basal (`tmp.arousalBaseline`) y la función aprendida del estímulo principal del evento: `0,75 + 0,5·|v|`. Sin cambios en CA |
 | 2026-09-26 | 0.2 | Bloque MF3 (040 R-010): el exceso de sueño por falta de energía ya no depende de la responsabilidad sino del descuento aprendido (`1,3 − 1/(1 + 5k)`); `OVERSLEPT` cita `descuento`. CA-001 sigue verde. Sin cambios en CA |
+| 2026-09-26 | 0.2 | Bloque MF4 (037 R-006): la ganancia de las emociones por evento usa el valor funcional del estímulo principal (aprendido o derivado por la red relacional). Sin cambios en CA |

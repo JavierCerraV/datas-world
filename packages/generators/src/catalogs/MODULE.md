@@ -81,3 +81,4 @@ Las entradas de M1 de `place_kinds` llevan `proto` (el tipo del prototipo), `def
 | 2026-09-25 | m1/j-ocio | 032 | Catálogo nuevo `leisure_activities`: 22 actividades con lugar, coste, compañía, edad, esfuerzo, frecuencia, horas, curva de edad, sexo, y pesos de rasgos y valores. `CATALOG_NAMES` pasa a 17 |
 | 2026-09-25 | mf/1-temperamento (MF1.2) | 009 v1.0 | `personality_traits` 2026.10.1 (solo Big Five); `temperament_params` 2026.10.1 (nuevo, 8 parámetros con `modula`); `life_domains` 2026.10.1 sustituye a `personal_values` (borrado). `CATALOG_NAMES` actualizado |
 | 2026-09-25 | mf/2-funciones (MF2.1) | 036 | Catálogo nuevo `stimulus_classes` 2026.09.1: 12 clases del motor y 24 familias de rasgos para lugares y actividades (6 dimensiones [M]). `CATALOG_NAMES` pasa a 19 |
+| 2026-09-26 | mf/4-red | 037 | `stimulus_classes` 2026.09.2: `verbal.despido`, `verbal.llegar_tarde` y `verbal.no_pagar` (37 entradas) |
