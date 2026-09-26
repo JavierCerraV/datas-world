@@ -1,7 +1,7 @@
 // Worker de un mundo (specs 002, 027): avanza según el tiempo real, atiende órdenes y persiste por lotes.
 // No lee el reloj: `pump` recibe los milisegundos transcurridos (lo mide main.ts). Así se prueba sin esperas.
-import { Runner, createRng } from '@datas-world/engine';
-import type { Speed, World } from '@datas-world/engine';
+import type { Runner, Speed, World } from '@datas-world/engine';
+import { lifeRunner } from '@datas-world/generators';
 import {
   FLUSH_TICKS,
   WorldRepository,
@@ -41,7 +41,7 @@ export class WorldWorker {
       closeDb(this.db);
       throw err;
     }
-    this.runner = new Runner(this.world, createRng(this.world.config.seed));
+    this.runner = lifeRunner(this.world); // vida diaria de M2 si el mundo tiene sus capacidades
     this.session = new WorldSession(this.repo, this.runner);
     // spec 001 R-006: un mundo recién creado empieza a vivir; uno en pausa sigue en pausa.
     if (this.world.status === 'created') this.runner.resume('arranque del worker');

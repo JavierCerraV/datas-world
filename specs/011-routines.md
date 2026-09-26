@@ -1,7 +1,7 @@
 ---
 id: 011
 nombre: routines
-estado: aprobada
+estado: implementada
 hito: M2 · M5 (hábitos que la ajustan, 018)
 depende_de: [002, 004, 006, 010, 021, 029, 032]
 version: 0.2
@@ -89,3 +89,4 @@ Tiempo en cada actividad por situación (comparable con la ENUT del DANE: trabaj
 | 2026-09-25 | 0.2 | Estado → aprobada |
 | 2026-09-25 | 0.2 | Implementación del bloque C de M2 (módulo `routines`). Precisiones: la rutina se deriva de cinco columnas por persona (`routine.wakeW`, `wakeE`, `bed`, `wakeAt`, `plannedWake`) y del tipo de día; la jornada escolar, las vacaciones del calendario A (1 dic–25 ene, 16 jun–6 jul y Semana Santa) y los horarios de comida van en el perfil como `routine.school` y `routine.meals`; en CA-001 el almuerzo dentro del turno cuenta como tiempo en el trabajo; `ROUTINE_BROKEN` llega con el motor de decisiones (bloque E), que es quien desvía los bloques. Sin cambios en CA |
 | 2026-09-25 | 0.2 | Bloque MF1 (ADR-007, 035 §9): la responsabilidad (quedarse dormido) y los rasgos de las horas de sueño sin ficha de salud se leen por el adaptador @deprecated de la 009 v1.0. Caducan en MF3.4 y MF7.3. Sin cambios en CA |
+| 2026-09-26 | 0.2 | Estado → implementada |

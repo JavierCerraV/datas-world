@@ -17,6 +17,8 @@ export interface LoopOptions {
   guard?: boolean;
   /** Validador de acciones (017). Sin él, un sistema que devuelve acciones es un error. */
   validate?: ActionValidator;
+  /** Nivel de todas las personas (R-011; 021 CA-001 compara el 1 con el 2). Sin él, `levelOf` (2 en M2). */
+  level?: SimLevel;
 }
 
 const due = (cadence: Cadence, now: number) =>
@@ -44,7 +46,7 @@ export function runSystems(world: World, rng: Rng, registry: SystemRegistry, opt
   if (systems.length === 0) return [];
   const view = viewOf(world, opts.guard ?? false);
   const rows = activeRows(world);
-  const level = (row: number) => levelOf(world, row);
+  const level = (row: number) => opts.level ?? levelOf(world, row);
   const events: WorldEvent[] = [];
 
   for (const phase of PHASES) {

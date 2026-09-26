@@ -1,7 +1,7 @@
 ---
 id: 006
 nombre: organizations
-estado: aprobada
+estado: implementada
 hito: M1 (generación y empleo inicial) · M2 (desempeño, despidos, contratación)
 depende_de: [004, 023, 029]
 version: 0.5
@@ -118,3 +118,4 @@ Ocupación por tipo y por estrato, puestos libres y sueldo medio por organizaci�
 | 2026-09-25 | 0.5 | Spec 033 (bloque J): una organización puede tener varias sedes (la escuela, con `orgWith`, suma sus puestos a la institución educativa, que toma su `orgName`); con la dotación hay 19 organizaciones y 76 puestos, y la informalidad de un mundo baja de 0,53 a ≈ 0,46, más cerca de una ciudad intermedia. CA-001 (entre 0,405 y 0,545 en el agregado) sigue verde. Sin cambios en CA |
 | 2026-09-25 | 0.5 | Spec 031 (bloque J4): con discapacidad para caminar o para el autocuidado, la probabilidad de empleo se multiplica por `gen.health.disabilityEmploymentFactor` (0,4, estimado). Sin cambios en CA |
 | 2026-09-25 | 0.5 | Implementación del bloque G de M2 (módulo `work`). Precisiones [M]: (1) el retraso cuenta si pasa 10 min (prototipo `arriveWork`) y no se advierte al jefe; (2) `WARN_LIMIT` = 3 retrasos en una ventana de 30 días, cada uno con `JOB_WARNING` y todos como causas del despido; (3) crisis: 60 días seguidos con la caja en negativo despiden al titular del último puesto no directivo, y la cuenta vuelve a 30 para el siguiente; una organización en crisis no contrata; (4) vacantes: probabilidad 0,2 al día por puesto, entre desempleados de 18 a 64 años sin discapacidad para caminar ni para el autocuidado, al azar (requisitos y red de contactos en M3, 012); (5) las faltas y el desempeño por energía y habilidades de R-005 quedan para M3 o M5. Sin cambios en CA |
+| 2026-09-26 | 0.5 | Estado → implementada |

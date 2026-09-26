@@ -37,6 +37,15 @@ function step(view: WorldView, ctx: TickCtx): SystemOutput {
     c.values.push(type === 'f32' ? clamp(value) : value);
   };
   const emoDecay = Math.pow(0.5, dt / R.emotionHalfLife!);
+  // Compañía (010 R-001, prototipo `updateNeeds`): despierto y con alguien más despierto en el mismo lugar. Con
+  // posiciones (016, `loc.place`), por ocupación; sin ellas, aproximada por la actividad, como en el bloque B.
+  const loc = i['loc.place'];
+  const awakeAt = new Map<number, number>();
+  if (loc)
+    for (const row of ctx.citizens) {
+      const a = u[ACTIVITY_COLUMN]![row]!;
+      if (loc[row]! > 0 && a !== ACTIVITY.sleep && a !== ACTIVITY.sick) awakeAt.set(loc[row]!, (awakeAt.get(loc[row]!) ?? 0) + 1);
+    }
 
   for (const row of ctx.citizens) {
     const act = u[ACTIVITY_COLUMN]![row]!;
@@ -61,7 +70,8 @@ function step(view: WorldView, ctx: TickCtx): SystemOutput {
     }
     const traits = legacyTraits(view, row); // @deprecated: sustituido por funciones y carga aversiva en MF2 y MF6
     const extraversion = traits.extraversion;
-    if (!rest && COMPANY.has(act)) social += R.socialCompany! * dt;
+    const company = loc ? (awakeAt.get(loc[row]!) ?? 0) > 1 : COMPANY.has(act);
+    if (!rest && company) social += R.socialCompany! * dt;
     else social -= (rest ? R.socialRest! : R.socialAlone! * (0.5 + extraversion)) * dt;
     if (FUN.has(act)) fun += R.funLeisure! * dt;
     else if (!rest) fun -= R.funAwake! * dt;
