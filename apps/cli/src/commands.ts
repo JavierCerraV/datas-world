@@ -2,8 +2,8 @@
 // No contienen reglas de simulación: solo combinan engine, generators y persistence.
 import { statSync } from 'node:fs';
 import { parseArgs } from 'node:util';
-import { MINUTES_PER_DAY, Runner, createRng, stateHash } from '@datas-world/engine';
-import { pendingEntries } from '@datas-world/generators';
+import { MINUTES_PER_DAY, stateHash } from '@datas-world/engine';
+import { lifeRunner, pendingEntries } from '@datas-world/generators';
 import {
   CONTROL_COMMANDS,
   WorldRepository,
@@ -17,6 +17,8 @@ import {
 } from '@datas-world/persistence';
 import type { ControlCommandName } from '@datas-world/persistence';
 import { bench } from './bench.ts';
+import { benchLife } from './bench-life.ts';
+import { validateParity } from './validate.ts';
 import { DEFAULT_DB, UsageError, dateOf, toInt, withDb } from './common.ts';
 import type { Io } from './common.ts';
 import { citizenReport, worldHistory } from './history.ts';
@@ -38,7 +40,9 @@ export const USAGE = `Uso: pnpm cli <comando> [opciones]
                 [--no-causes] [--db RUTA]
   citizen:report CIT-000123 [--db RUTA]
   control pause|resume|step|stop|speed <0|1|10|100|1000> [--db RUTA]
-  bench [--days N] [--json] [--check]`;
+  bench [--days N] [--json] [--check]
+  validate:parity [--profile prototipo|CO-2026.09] [--seeds N-M] [--days N] [--population N] [--out RUTA]
+  bench:life [--population 500] [--days 365] [--profile CO-2026.09] [--out RUTA]`;
 
 function worldAdvance(args: string[], io: Io): void {
   const { values: v } = parseArgs({
@@ -51,7 +55,8 @@ function worldAdvance(args: string[], io: Io): void {
     try {
       const repo = new WorldRepository(db);
       const world = repo.loadWorld();
-      const session = new WorldSession(repo, new Runner(world, createRng(world.config.seed)));
+      // La vida diaria de M2 (bloque H); un mundo sin sus capacidades (M1) solo avanza el reloj.
+      const session = new WorldSession(repo, lifeRunner(world));
       session.advanceTicks((days * MINUTES_PER_DAY) / world.config.tickMinutes, (f) =>
         io.err(`avance: ${Math.round(f * 100)} %`),
       );
@@ -138,6 +143,8 @@ const COMMANDS: Record<string, (args: string[], io: Io) => void> = {
   'citizen:report': citizenReport,
   control,
   bench: (args, io) => bench(args, io),
+  'validate:parity': (args, io) => validateParity(args, io),
+  'bench:life': (args, io) => benchLife(args, io),
 };
 
 /** Ejecuta un comando y devuelve el código de salida. */

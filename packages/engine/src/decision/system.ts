@@ -50,7 +50,8 @@ export function choose(view: WorldView, options: Option[], temperature: number, 
 
 export function createDecisionSystem(table: LeisureTable): System {
   const validate = createActionValidator(table);
-  const step = (view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput => {
+  /** `coarse` (nivel 1, 021 R-011): mantiene lo elegido cada tick, pero solo decide algo nuevo en punto cada hora. */
+  const step = (view: WorldView, ctx: TickCtx, rng: Rng, coarse = false): SystemOutput => {
     const now = ctx.now;
     const P = mobilityParams(view.config.profile!, view.config.epoch.slice(0, 10));
     const i = view.components.i32;
@@ -86,6 +87,7 @@ export function createDecisionSystem(table: LeisureTable): System {
         if (choice > 0) patches.push({ op: 'set', type: 'u8', column: ACTIVITY_COLUMN, row, value: choice - 1 });
         continue;
       }
+      if (coarse && now % 60 !== 0 && !hungry) continue;
       const plan = planAt(view, row, day(now), ((now % DAY) + DAY) % DAY);
       if (plan.flexibility < MIN_FLEXIBILITY) {
         drop();
@@ -116,6 +118,8 @@ export function createDecisionSystem(table: LeisureTable): System {
     capability: 'routines',
     cadence: 'tick',
     minLevel: 2,
-    run: step,
+    run: (view, ctx, rng) => step(view, ctx, rng),
+    // Nivel 1 (021 R-011, CA-001): decisiones por horas, con la misma utilidad; da un gasto y un ánimo parecidos.
+    runCoarse: (view, ctx, rng) => step(view, ctx, rng, true),
   };
 }

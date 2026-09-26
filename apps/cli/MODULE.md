@@ -2,7 +2,7 @@
 modulo: cli
 ruta: apps/cli
 estado: en-desarrollo
-specs: [001, 002, 009, 023, 027, 029, 030]
+specs: [001, 002, 009, 010, 015, 021, 023, 027, 029, 030]
 actualizado: 2026-09-24
 ---
 
@@ -102,3 +102,5 @@ Sustituye a los scripts headless usados para calibrar el prototipo.
 | 2026-09-25 | m1/j-salud | 030 | `bench` mide la 030 CA-007 como dice la spec, "lo que añade la historia": bytes de los eventos de la 030, de sus participantes y de los antepasados (≈ 0,79 MB). Antes medía la base entera, que ahora incluye las fichas de salud (1,93 MB). Muestra ambos |
 | 2026-09-25 | m1/j-ocio (J6) | 031, 032, 033 | `ficha.ts`: `citizen:report` muestra la ficha de salud (afiliación, peso, hábitos, discapacidad, condiciones, salud física) y la de esparcimiento (afinidad y veces al mes; "le gusta, pero hoy no le alcanzan el dinero o el tiempo" si es 0). `world:report --health`, `--leisure` (práctica frente a la popularidad del perfil) y `--places` (dotación esperada frente a generada y lugares de La Capital). 1 prueba nueva y 1 ampliada |
 | 2026-09-25 | mf/1-temperamento (MF1.7) | 009 v1.0 | `citizen:report` muestra el temperamento (descriptores Big Five y parámetros `tmp.*`) con la advertencia de que describe cómo aprende y no explica la conducta (`temperamentLines` en `ficha.ts`) |
+| 2026-09-25 | m2/h-cierre (H1–H5) | 021, 023, 027, 010, 015 | `world:advance` avanza con la vida diaria (`lifeRunner`; un mundo de M1 solo avanza el reloj). Comandos nuevos: `validate:parity` (`validate.ts`: N semillas × N días en memoria, métricas de la línea base del prototipo y de 010 CA-002, CA-006 y 015 CA-006, informe en Markdown) y `bench:life` (`bench-life.ts`: tiempo y memoria de la vida diaria, 021 CA-002). Prueba `m2.test.ts` con los mundos de ejemplo de M1 y M2 |
+| 2026-09-25 | m2/h-cierre | 009 | `ficha.ts` lee cada catálogo una vez por proceso: `temperamentLines` (MF1) los leía del disco por persona y `citizen:report` de todas las personas pasaba de 5 s en la suite |

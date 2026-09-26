@@ -20,7 +20,13 @@ const DOMAINS: [number, string][] = [
   [64, 'comunicarse'],
 ];
 
-const names = (catalog: CatalogName) => new Map(loadCatalog(catalog).entries.map((e) => [e.key, e.name]));
+// Los catálogos se leen del disco una vez por proceso: los informes recorren a todas las personas.
+const cache = new Map<CatalogName, ReturnType<typeof loadCatalog>>();
+const catalog = (name: CatalogName) => {
+  if (!cache.has(name)) cache.set(name, loadCatalog(name));
+  return cache.get(name)!;
+};
+const names = (name: CatalogName) => new Map(catalog(name).entries.map((e) => [e.key, e.name]));
 
 /** Líneas de la ficha de salud y de esparcimiento de una persona (vacías si el mundo no las tiene). */
 export function fichaLines(world: World, c: Citizen): string[] {
@@ -60,8 +66,8 @@ export function temperamentLines(world: World, c: Citizen): string[] {
   if (c.ancestor) return [];
   const row = idNumber(c.id);
   const col = (e: { attrs?: Record<string, unknown> | undefined }) => String(e.attrs?.column ?? '');
-  const traits = loadCatalog('personality_traits').entries.filter((e) => col(e) in f32);
-  const params = loadCatalog('temperament_params').entries.filter((e) => col(e) in f32);
+  const traits = catalog('personality_traits').entries.filter((e) => col(e) in f32);
+  const params = catalog('temperament_params').entries.filter((e) => col(e) in f32);
   if (!traits.length && !params.length) return [];
   const out = ['', 'Temperamento (describe cómo aprende; no explica su conducta, que sale de su historia)'];
   if (traits.length) out.push(`  Big Five: ${traits.map((e) => `${e.name.toLowerCase()} ${f32[col(e)]![row]!.toFixed(2)}`).join(' · ')}`);
@@ -119,7 +125,7 @@ export function placesSummary(world: World): string[] {
     // Mundo sin dotación (perfil prototipo): solo los lugares que hay.
     return ['', 'Lugares', ...[...local].sort().map(([k, n]) => `  ${(kinds.get(k) ?? k).padEnd(30)} ${String(n).padStart(3)}`)];
   }
-  const plan = amenityPlan(loadCatalog('place_kinds'), world.config.population.target);
+  const plan = amenityPlan(catalog('place_kinds'), world.config.population.target);
   const out = ['', `Lugares (dotación para ${world.config.population.target} habitantes)`];
   for (const { kind, count } of plan.local) {
     const got = local.get(kind) ?? 0;

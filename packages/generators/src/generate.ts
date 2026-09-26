@@ -24,6 +24,7 @@ import type { Catalogs } from './catalogs/load.ts';
 import { holidayDates } from './country/holidays.ts';
 import { DEFAULT_PROFILE, PROTOTYPE_PROFILE, loadProfile } from './country/profile.ts';
 import { generateEconomy } from './economy/generate.ts';
+import { LIFE_CAPABILITIES } from './life.ts';
 import { generateEmployment } from './employment/generate.ts';
 import { generateGeography } from './geography/generate.ts';
 import type { Territory } from './geography/generate.ts';
@@ -58,6 +59,8 @@ export interface WorldOptions {
   epoch?: string;
   tickMinutes?: number;
   catalogs?: Catalogs;
+  /** Mundo estático, solo con el reloj (como los de M1): sin la vida diaria de M2. */
+  static?: boolean;
 }
 
 export interface GeneratedWorld {
@@ -89,7 +92,8 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
     population: { target: opts.population ?? profileNumber(profile, 'gen.population.target', epoch.slice(0, 10)) },
     engineVersion: ENGINE_VERSION,
     params: {},
-    initialCapabilities: ['clock'],
+    // Con vida diaria (M2) salvo que se pida un mundo estático (como los de M1).
+    initialCapabilities: opts.static ? ['clock'] : [...LIFE_CAPABILITIES],
     holidays: holidayDates(year, year + HOLIDAY_YEARS - 1),
     profile,
     catalogs: catalogRefs(catalogs),

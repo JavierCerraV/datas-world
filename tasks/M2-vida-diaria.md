@@ -53,9 +53,9 @@ Cada cosa que les pasa queda como evento con sus causas. Ánimo, estrés, empleo
 - [x] G2. Objetos en la vida diaria: regalos con valor sentimental y objetos que nunca desaparecen de la base (005 CA-004, CA-005).
 
 ## Bloque H — Integración, paridad y cierre de M2
-- [ ] H1. `pnpm cli validate:parity`: 10 semillas × 365 días del perfil prototipo frente a la línea base; resultado en `docs/validaciones/`.
-- [ ] H2. Prueba de 100 personas × 1 año con el perfil colombiano: 010 CA-002 y CA-006, 015 CA-006, sin NaN ni degeneraciones.
-- [ ] H3. Niveles y rendimiento: 021 CA-001 (nivel 1 frente a 2) y CA-002 (500 personas, 1 año en < 10 min); `pnpm bench` con la vida diaria; memoria por persona.
-- [ ] H4. Determinismo con vida diaria: 023 CA-002 completo (el 50 % de las personas con un evento distinto el día 30).
-- [ ] H5. Mundo de ejemplo de M2 en `docs/validaciones/mundos/` (027 R-011) y prueba de que el de M1 se carga y avanza.
+- [x] H1. `pnpm cli validate:parity`: 10 semillas × 365 días del perfil prototipo frente a la línea base; resultado en `docs/validaciones/`.
+- [x] H2. Prueba de 100 personas × 1 año con el perfil colombiano: 010 CA-002 y CA-006, 015 CA-006, sin NaN ni degeneraciones.
+- [x] H3. Niveles y rendimiento: 021 CA-001 (nivel 1 frente a 2) y CA-002 (500 personas, 1 año en < 10 min); `pnpm bench` con la vida diaria; memoria por persona.
+- [x] H4. Determinismo con vida diaria: 023 CA-002 completo (el 50 % de las personas con un evento distinto el día 30).
+- [x] H5. Mundo de ejemplo de M2 en `docs/validaciones/mundos/` (027 R-011) y prueba de que el de M1 se carga y avanza.
 - [ ] H6. `/sincronizar-docs all`; proponer las specs que pasan a `implementada`; revisar las specs de M3 (012, 013, 019, 020, 025) antes de redactar `tasks/M3-vida-social.md`.

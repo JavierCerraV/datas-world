@@ -5,5 +5,5 @@
   "type": "module",
   "description": "Proceso que avanza el mundo y persiste",
   "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@datas-world/engine": "workspace:*", "@datas-world/persistence": "workspace:*" }
+  "dependencies": { "@datas-world/engine": "workspace:*", "@datas-world/generators": "workspace:*", "@datas-world/persistence": "workspace:*" }
 }
