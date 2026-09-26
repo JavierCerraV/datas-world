@@ -2,7 +2,7 @@
 modulo: decision
 ruta: packages/engine/src/decision
 estado: en-desarrollo
-specs: [040, 036, 037, 032, 010, 011, 016, 021, 035]
+specs: [040, 036, 037, 038, 032, 010, 011, 016, 021, 035]
 actualizado: 2026-09-26
 ---
 
@@ -39,7 +39,8 @@ Desde `@datas-world/engine`:
   - `reforzador` (magnitud × operación motivadora, R-007): comer, 1,5 × (1 − hambre) + 4 × hambre crítica; dormir un rato, 0,3 + 2 × (0,3 − energía); descansar en casa, 0,3 + 0,2 × cansancio; esparcimiento, 0,8 × aburrimiento, 0,4 × soledad (si no es solitaria) y la saciedad específica: 3 × (min(2, tiempo desde la última vez / intervalo) − 1), con el intervalo de la frecuencia de la ficha;
   - `fuerza` (036 R-002): `1,5 × ln(max(0,02, w) / 0,46)`, con `w` la fuerza de `ocio.<clave>` en `Citizen.functions.r` (sin almacén, la de partida: 0,2 + 0,4 × afinidad). Escala 1,5: la igualación de V-4 da 0,72 (con 1, 0,69; por encima se satura). Referencia 0,46: el mundo generado hace el mismo volumen de ocio que con la 017 (a menos del 2 %);
   - `demorado` (036 R-009): obligaciones de la rutina (buscar empleo, tareas, cuidar, estudiar), `0,4 / (1 + k · 5 días)`, con `k = hist.discountK`. Con k = 0,2 (mediana) aporta 0,2, lo que daba la responsabilidad media;
-  - `regla`: la rutina como regla hasta la 038 (obligaciones 0,45, estudiar 0,35, diligencias 0,45, siesta infantil 2);
+  - `regla`: el aporte de las reglas de la persona para esa obligación (038 R-004: `s × (1 − contraste × d)`); empiezan en 0,45 (0,35 estudiar), el número fijo de antes, que se usa si la persona no tiene reglas. La siesta infantil sigue fija (2);
+  - `valor` (038 R-006): lo que la actividad señala de un valor, la función de la raíz `dominio.*` transformada por el camino jerárquico;
   - `aversion`: `0,5 × min(0, vf(actividad) + vf(lugar))` con la ontología, donde `vf` es el valor funcional (037 R-006): el aprendido (036) o el derivado por la red relacional, si es mayor;
   - `coste`: dinero, viaje y esfuerzo, como en la 017.
 - **Selección (R-004):** softmax con `T = 0,15 + 0,4 × hist.variability` (antes 0,3 × (0,6 + 0,8 × impulsividad)). Si el validador rechaza la elegida, se quita y se vuelve a elegir; cada rechazo sube la variabilidad 0,05 × (1 − v) (R-009).
@@ -84,3 +85,4 @@ Porta `decide`: opciones de tiempo libre con puntuación y ruido y duración aco
 | 2026-09-25 | m2/h-cierre | 017, 021 | `runCoarse` para el nivel 1 (021 R-011): mantiene lo elegido cada tick y solo decide algo nuevo en punto cada hora (o con hambre crítica). Con él, 30 días en nivel 1 dan un ánimo y un gasto a < 5 % del nivel 2 (021 CA-001); sin él, en nivel 1 no había esparcimiento y el gasto difería un 13 % |
 | 2026-09-26 | mf/3-seleccion (MF3.2–MF3.4) | 040, 036 | Pasa de la 017 a la 040: `select.ts` (softmax, temperatura desde `hist.variability`, aporte logarítmico de la fuerza), aportes por fuente en `options.ts` (`SourceContribution` sustituye a `Factor`; `Option.value` a `utility`), causas `fuente.*` con eventos de origen, `choose` devuelve los rechazos y sube la variabilidad. Sin el adaptador de temperamento. Referencia de la fuerza calibrada al volumen de ocio de la 017 |
 | 2026-09-26 | mf/4-red | 037, 040 | La fuente `aversion` usa el valor funcional (037 R-006) de la actividad y del lugar: el aprendido (con `directValue`: generalización y primarios) o el derivado por la red relacional, si es mayor; sus orígenes incluyen los eventos de las relaciones del camino |
+| 2026-09-26 | mf/5-reglas-valores | 038, 040 | La fuente `regla` de las obligaciones sale de las reglas de la persona (038 R-004; sin reglas, el número fijo de antes). Fuente nueva `valor` para el ocio que señala un valor (038 R-006). La aversión se calcula sin las raíces de valor. Elegir buscar empleo acumula el contraste de su regla (desaliento, 038 R-005). Prueba 038 CA-004 |

@@ -29,7 +29,17 @@ describe('037: derivación', () => {
     for (const x of TYPES)
       for (const y of TYPES) {
         const expected =
-          x === 'coordination' ? y : y === 'coordination' ? x : x === 'opposition' && y === 'opposition' ? 'coordination' : x === y && TRANSITIVE.includes(x) ? x : null;
+          x === 'coordination'
+            ? y
+            : y === 'coordination'
+              ? x
+              : x === 'opposition' && y === 'opposition'
+                ? 'coordination'
+                : x === 'opposition' && y === 'part_of' // 038 R-007
+                  ? 'opposition'
+                  : x === y && TRANSITIVE.includes(x)
+                    ? x
+                    : null;
         expect(compose(x, y)).toBe(expected);
         // Y en la red: A x B, B y C ⇒ A (x∘y) C, o nada.
         const net = emptyNetwork();

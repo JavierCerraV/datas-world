@@ -302,6 +302,29 @@ export {
 } from './relations/index.ts';
 export type { Derived, FunctionalValue, NetworkMetrics, Relation, RelationType, RelationalNetwork, Teaching, TeachingRule } from './relations/index.ts';
 
+export {
+  DOMAIN_PREFIX,
+  JOB_SEARCH_CONTRAST_RATE,
+  LAB_CONTRAST_RATE,
+  MAX_RULES,
+  PLIANCE_DISCOUNT,
+  ROUTINE_RULES,
+  SPEAKER_APPROVAL_BONUS,
+  THOUGHT_THRESHOLD,
+  addRule,
+  applicable,
+  initRules,
+  kindOf,
+  observe,
+  routineResponse,
+  ruleContribution,
+  rulesOf,
+  rulesSystem,
+  thoughtAppears,
+  valueContribution,
+} from './rules/index.ts';
+export type { NewRule, Rule, RuleKind } from './rules/index.ts';
+
 export { FORBIDDEN_TERMS, MECHANISMS, isMechanism } from './temperament/mechanisms.ts';
 export type { MechanismId } from './temperament/mechanisms.ts';
 /** @deprecated Adaptador temporal de la migración al motor funcional (035 §9); se elimina en MF7. */

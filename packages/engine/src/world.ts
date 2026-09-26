@@ -11,6 +11,7 @@ import { allocateId, emptyCounters, idKind, idNumber } from './ids.ts';
 import type { Counters, EntityId, WorldId } from './ids.ts';
 import type { FunctionStore } from './functions/types.ts';
 import type { RelationalNetwork } from './relations/types.ts';
+import type { Rule } from './rules/rules.ts';
 import type { GeoMap } from './geo.ts';
 import { checkProfile } from './profile.ts';
 import type { CountryProfile } from './profile.ts';
@@ -99,6 +100,8 @@ export interface Citizen extends BaseEntity {
   functions?: FunctionStore;
   /** Red relacional (037, capa 3): relaciones enseñadas entre estímulos. */
   network?: RelationalNetwork;
+  /** Reglas (038, capa 4), con su historia de seguimiento. */
+  rules?: Rule[];
   /** Llegadas tarde a su trabajo en la ventana de advertencias (006 R-005), con el evento de cada una. */
   jobRecord?: { lates: { eventId: EntityId; at: WorldMinute; minutes: number }[] };
 }

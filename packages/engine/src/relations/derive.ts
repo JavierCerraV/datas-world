@@ -27,6 +27,8 @@ export function compose(x: RelationType, y: RelationType): RelationType | null {
   if (x === 'coordination') return y;
   if (y === 'coordination') return x;
   if (x === 'opposition' && y === 'opposition') return 'coordination';
+  // 038 R-007 [M]: lo opuesto a un miembro de una clase es opuesto a la clase (red opuesta de un valor).
+  if (x === 'opposition' && y === 'part_of') return 'opposition';
   if (x === y && TRANSITIVE.has(x)) return x;
   return null;
 }

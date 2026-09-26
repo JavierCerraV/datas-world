@@ -16,6 +16,8 @@ import { createRng } from '../rng.ts';
 import { initRoutines } from '../routines/columns.ts';
 import { dayInfo } from '../routines/day.ts';
 import { planAt } from '../routines/plan.ts';
+import { initRules, routineResponse } from '../rules/routine.ts';
+import { ruleContribution } from '../rules/rules.ts';
 import { routinesSystem } from '../routines/system.ts';
 import { Runner } from '../runner.ts';
 import { stateHash } from '../serialize.ts';
@@ -209,6 +211,24 @@ describe('040 en marcha, con el validador en el bucle (021)', () => {
     runner.advanceTicks(12);
     expect(world.components.f32['need.fun']![row]!).toBeGreaterThan(funBefore);
   });
+
+  it('038 CA-004: buscar empleo sin conseguirlo baja el aporte de la regla (desaliento); al empezar, el aporte es el de la 040', () => {
+    const t = town([{ leisure: [interest('entretenimiento.tv_series', 0.5)] }]);
+    const row = t.rows[0]!;
+    const id = formatId('CIT', row);
+    setOccupation(t.world, id, { kind: 'none', reason: 'unemployed', since: 0 });
+    initRules(t.world);
+    const jobRule = () => t.world.citizens.get(id)!.rules!.find((r) => r.resp === routineResponse('job_search'))!;
+    expect(ruleContribution(jobRule())).toBeCloseTo(0.45, 10);
+    const runner = new Runner(t.world, createRng(1), {}, {
+      systems: createRegistry([needsSystem, sleepSystem, routinesSystem, createDecisionSystem(TABLE), mobilitySystem]),
+      loop: { validate },
+    });
+    runner.advanceDays(14);
+    expect(jobRule().hist.followed).toBeGreaterThan(10);
+    expect(jobRule().contrast).toBeGreaterThan(0.03);
+    expect(ruleContribution(jobRule())).toBeLessThan(0.45 * 0.97);
+  }, 60_000);
 
   it('INV-003: tres días con la vista congelada, misma semilla y mismo hash; tras una semana, todos duermen en casa', () => {
     const a = run(true);

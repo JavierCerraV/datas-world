@@ -14,6 +14,7 @@ import {
   mobilitySystem,
   relationsSystem,
   routinesSystem,
+  rulesSystem,
 } from '@datas-world/engine';
 import type { Capability, LoopOptions, SystemRegistry, World } from '@datas-world/engine';
 import { loadCatalogs } from './catalogs/load.ts';
@@ -43,6 +44,7 @@ export function lifeSystems(world: World, catalogs: Catalogs = loadCatalogs()): 
       ...WORK_SYSTEMS,
       createLearningSystem(onto),
       relationsSystem,
+      rulesSystem,
     ]),
     loop: { validate: createActionValidator(table) },
   };

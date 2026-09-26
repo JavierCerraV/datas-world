@@ -8,6 +8,10 @@ import { discountKOf, discounted, leisureResponse, leisureStrength0 } from '../f
 import { directValue } from '../functions/learn.ts';
 import { functionalValue } from '../relations/derive.ts';
 import type { RelationalNetwork } from '../relations/types.ts';
+import { routineResponse } from '../rules/routine.ts';
+import { applicable, ruleContribution } from '../rules/rules.ts';
+import type { Rule } from '../rules/rules.ts';
+import { DOMAIN_PREFIX, valueContribution } from '../rules/values.ts';
 import type { FunctionStore, LearningParams, Ontology } from '../functions/types.ts';
 import { formatId } from '../ids.ts';
 import type { EntityId } from '../ids.ts';
@@ -24,7 +28,7 @@ import type { LeisureTable } from './columns.ts';
 import { strengthContribution } from './select.ts';
 
 /** Fuentes de control de la 040 R-003 (sin reglas verbales, valores ni contexto social hasta MF5 y M3). */
-export type ControlSource = 'reforzador' | 'fuerza' | 'demorado' | 'regla' | 'aversion' | 'coste';
+export type ControlSource = 'reforzador' | 'fuerza' | 'demorado' | 'regla' | 'valor' | 'aversion' | 'coste';
 
 export interface SourceContribution {
   source: ControlSource;
@@ -110,18 +114,29 @@ const valueOf = (sources: readonly SourceContribution[]) => sources.reduce((s, f
 /** Minutos entre dos veces de una afición según su frecuencia mensual (032). */
 export const intervalOf = (perMonth: number): number => (30 * DAY) / Math.max(0.1, perMonth);
 
-/** Aportes de seguir la rutina en un bloque flexible (040 R-003): la rutina como regla y, en las obligaciones, sus consecuencias demoradas. */
-function routineSources(activity: ActivityKind, energy: number, k: number): SourceContribution[] {
+/**
+ * Fuente `regla` de una obligación (038 R-004): el aporte de las reglas de la persona para esa actividad. Sin reglas
+ * (mundos anteriores a MF5), el número fijo de la 040 con el que empiezan las reglas de la rutina (038 R-010).
+ */
+function ruleSource(rules: readonly Rule[] | undefined, activity: ActivityKind, fixed: number): SourceContribution {
+  const resp = routineResponse(activity);
+  if (!rules?.length) return { source: 'regla', contribution: fixed, ref: resp };
+  const rs = applicable(rules, activity, resp);
+  return { source: 'regla', contribution: rs.reduce((s, r) => s + ruleContribution(r), 0), ref: resp };
+}
+
+/** Aportes de seguir la rutina en un bloque flexible (040 R-003): sus reglas (038) y, en las obligaciones, sus consecuencias demoradas. */
+function routineSources(activity: ActivityKind, energy: number, k: number, rules: readonly Rule[] | undefined): SourceContribution[] {
   const delayed: SourceContribution = { source: 'demorado', contribution: discounted(OBLIGATION_MAGNITUDE, OBLIGATION_DELAY_DAYS, k), ref: 'hist.discountK' };
   switch (activity) {
     case 'job_search':
     case 'chores':
     case 'care':
-      return [{ source: 'regla', contribution: 0.45, ref: `rutina.${activity}` }, delayed];
+      return [ruleSource(rules, activity, 0.45), delayed];
     case 'study':
-      return [{ source: 'regla', contribution: 0.35, ref: 'rutina.study' }, delayed];
+      return [ruleSource(rules, activity, 0.35), delayed];
     case 'errands':
-      return [{ source: 'regla', contribution: 0.45, ref: 'rutina.errands' }];
+      return [ruleSource(rules, activity, 0.45)];
     case 'sleep':
       return [{ source: 'regla', contribution: 2, ref: 'rutina.siesta' }];
     default:
@@ -142,7 +157,9 @@ function aversion(
   ctx: string,
 ): SourceContribution | undefined {
   if ((!store && !net) || !c.onto || !c.learning) return undefined;
-  const directOf = (s: string) => directValue(store, c.onto!, s, ctx, c.now, c.learning!);
+  // Las raíces de valor (`dominio.*`) no cuentan aquí: las aporta la fuente `valor`, que no compite con la
+  // aversión (038 R-006). Si contaran, el valor derivado taparía la aversión directa y se contaría dos veces.
+  const directOf = (s: string) => (s.startsWith(DOMAIN_PREFIX) ? 0 : directValue(store, c.onto!, s, ctx, c.now, c.learning!));
   const values = stims.map((x) => functionalValue(net, directOf, x, ctx));
   const v = values.reduce((s, x) => s + x.value, 0);
   if (v >= 0) return undefined;
@@ -173,7 +190,8 @@ export function buildOptions(c: DecisionCtx, rng: Rng): Option[] {
   // seguir la rutina es descansar en casa (`idle`): la diversión la dan las aficiones elegidas.
   const plan = planAt(view, row, c.day(now), minuteOf(now));
   const routine: ActivityKind = plan.activity === 'leisure' ? 'idle' : plan.activity;
-  add('follow_routine', { activity: routine, until: Math.min(now + 60, cap), cost: 0 }, routineSources(plan.activity, energy, discountKOf(view, row)));
+  const rules = view.citizens.get(id)?.rules as readonly Rule[] | undefined;
+  add('follow_routine', { activity: routine, until: Math.min(now + 60, cap), cost: 0 }, routineSources(plan.activity, energy, discountKOf(view, row), rules));
 
   // Comer donde esté (prototipo: hambre > 0,35); con hambre crítica, casi seguro (CA-003). El hambre es la
   // operación motivadora del reforzador comida (R-007).
@@ -238,6 +256,12 @@ export function buildOptions(c: DecisionCtx, rng: Rng): Option[] {
     ];
     const av = aversion(c, store, relNet, [`actividad.${interest.key}`, ...(placeKind ? [`lugar.${placeKind}`] : [])], placeKind ? `lugar.${placeKind}` : '');
     if (av) sources.push(av);
+    // 038 R-006: la actividad señala un valor (subred jerárquica con raíz en un dominio vital).
+    if (relNet && c.onto && c.learning) {
+      const directOf = (s: string) => directValue(store, c.onto!, s, '', c.now, c.learning!);
+      const val = valueContribution(relNet, directOf, `actividad.${interest.key}`);
+      if (val) sources.push({ source: 'valor', contribution: val.value, ref: val.root, origins: val.derived.path.flatMap((k) => relNet.e[k]?.src ?? []) });
+    }
     add(
       'leisure',
       { activity: activityOf(interest.key, a), until: now + best.out + Math.round(stay), cost, travelCost: best.travelCost, leisure: interest.key },
