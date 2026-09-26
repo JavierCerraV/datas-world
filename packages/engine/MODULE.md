@@ -152,3 +152,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-25 | mf/2-funciones | 036, 042, 001, 021 | Módulos nuevos `src/functions/` (capa 2 del motor funcional) y `src/lab/` (batería 042). `Citizen.functions` (almacén por persona). `capabilities.ts`: `learning` depende de `routines`. `index.ts` exporta la API de `functions` |
 | 2026-09-26 | mf/3-seleccion | 040, 036 | `decision` pasa a la 040 (fuentes de control, `select.ts`); `functions` añade los estados aprendidos y el aprendizaje de la selección; `lab` añade V-4 y V-5; `routines` quita el adaptador. `index.ts` exporta la API nueva y deja de exportar `Factor` |
 | 2026-09-26 | mf/4-red | 037 | Módulo nuevo `src/relations/` (capa 3: red relacional). `Citizen.network`. `index.ts` exporta su API y `directValue` |
+| 2026-09-26 | mf/5-reglas-valores | 038 | Módulo nuevo `src/rules/` (capa 4: reglas y valores). `Citizen.rules`. `index.ts` exporta su API |

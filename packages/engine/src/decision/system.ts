@@ -11,6 +11,8 @@ import { homeOf } from '../mobility/columns.ts';
 import { occupancy } from '../mobility/enter.ts';
 import { mobilityParams } from '../mobility/params.ts';
 import type { Rng } from '../rng.ts';
+import { JOB_SEARCH_CONTRAST_RATE, routineResponse, rulesOf } from '../rules/routine.ts';
+import { observe } from '../rules/rules.ts';
 import type { DayInfo } from '../routines/day.ts';
 import { dayInfo } from '../routines/day.ts';
 import { planAt } from '../routines/plan.ts';
@@ -110,6 +112,15 @@ export function createDecisionSystem(table: LeisureTable, onto?: Ontology): Syst
       const variability = variabilityOf(view, row);
       const { pick, rejected } = choose(view, options, temperatureOf(variability), r, validate);
       if (pick) actions.push(pick.action);
+      // 038 R-005: seguir la regla de buscar empleo sin conseguirlo acumula contraste (lo confirma `JOB_HIRED`).
+      if (pick?.action.kind === 'follow_routine' && plan.activity === 'job_search') {
+        const rules = rulesOf(view, row);
+        const rule = rules.find((x) => x.resp === routineResponse('job_search'));
+        if (rule) {
+          observe(rule, 1, JOB_SEARCH_CONTRAST_RATE);
+          patches.push({ op: 'entity', id, fields: { rules } });
+        }
+      }
       if (rejected > 0 && f['hist.variability'])
         patches.push({ op: 'set', type: 'f32', column: 'hist.variability', row, value: 1 - (1 - variability) * (1 - VARIABILITY_ON_FAILURE) ** rejected });
     }

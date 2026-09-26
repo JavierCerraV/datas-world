@@ -77,3 +77,4 @@ Porta `genWorld`, `buildPlaces`, `genPopulation`, `newAgent`, `genJobs`, `genRel
 | 2026-09-25 | mf/2-funciones (MF2.1, MF2.5) | 036 | Módulo nuevo `src/stimuli/` (`buildOntology`, exportado). `life.ts`: `LIFE_CAPABILITIES` incluye `learning` y `lifeSystems` monta el sistema de aprendizaje con la ontología del catálogo; cambia el hash de los mundos nuevos |
 | 2026-09-26 | mf/3-seleccion | 040 | `generateWorld` llama a `initLearnedStates` (040 R-011) después de la ficha de esparcimiento; `lifeSystems` pasa la ontología al sistema de decisiones. Cambia el hash de los mundos nuevos |
 | 2026-09-26 | mf/4-red | 037 | `lifeSystems` monta el sistema `relations` (enseñanza de la comunidad verbal); catálogo `stimulus_classes` 2026.09.2 |
+| 2026-09-26 | mf/5-reglas-valores | 038 | `generateWorld` llama a `initRules` (reglas de la rutina); `lifeSystems` monta el sistema `rules`. Catálogo `stimulus_classes` 2026.09.3 |

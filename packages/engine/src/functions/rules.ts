@@ -24,7 +24,10 @@ export interface LearningRule {
   social?: boolean;
 }
 
-const placeKind = (view: WorldView, id: unknown) => (typeof id === 'string' ? view.places.get(id as EntityId)?.kind : undefined);
+/** Familias de actividades de ocio que se hacen con otras personas (038 R-011) [M]. */
+const SOCIAL_LEISURE = ['social.', 'baile.', 'comunidad.'];
+
+const placeKind =(view: WorldView, id: unknown) => (typeof id === 'string' ? view.places.get(id as EntityId)?.kind : undefined);
 const payload = <T>(e: WorldEvent) => e.payload as T;
 
 /** 036 R-001 [M]: las consecuencias del mundo como ensayos de aprendizaje, con magnitudes estimadas (PA-002). */
@@ -34,7 +37,9 @@ export const EVENT_LEARNING: Readonly<Partial<Record<EventType, LearningRule>>> 
     stims: (e, v) => {
       const p = payload<{ activity: string; placeId: string }>(e);
       const kind = placeKind(v, p.placeId);
-      return [`actividad.${p.activity}`, ...(kind ? [`lugar.${kind}`] : [])];
+      // 038 R-011 [M]: en el ocio con otros, la aprobación de los demás se empareja con el disfrute.
+      const withOthers = SOCIAL_LEISURE.some((x) => p.activity.startsWith(x));
+      return [`actividad.${p.activity}`, ...(kind ? [`lugar.${kind}`] : []), ...(withOthers ? ['verbal.aprobacion'] : [])];
     },
     // 040 R-009 [M]: cuánto disfruta esa persona esa actividad; la afinidad de la ficha (032) resume su historia
     // hasta la historia sintética (MF7).
@@ -50,7 +55,8 @@ export const EVENT_LEARNING: Readonly<Partial<Record<EventType, LearningRule>>> 
     stims: (e, v) => {
       const org = v.organizations.get(payload<{ orgId: string }>(e).orgId as EntityId);
       const kind = placeKind(v, org?.placeIds[0]);
-      return ['verbal.trabajo', ...(kind ? [`lugar.${kind}`] : [])];
+      // 038 R-011: ser elegido para un puesto es aprobación, emparejada con el dinero.
+      return ['verbal.trabajo', ...(kind ? [`lugar.${kind}`] : []), 'verbal.aprobacion'];
     },
     lambda: 0.5,
     us: 'verbal.dinero',

@@ -9,6 +9,7 @@ import {
   defineWorkColumns,
   initLearnedStates,
   initMobility,
+  initRules,
   initNeeds,
   initRoutines,
   parseEpoch,
@@ -146,6 +147,8 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
   defineWorkColumns(world); // 006: retrasos al trabajo (bloque G de M2)
   // 040 R-011: descuento y variabilidad aprendidos (desde el temperamento) y fuerza inicial de cada afición.
   initLearnedStates(world);
+  // 038 R-010: reglas de la rutina (con su arista en la red relacional), con el aporte del número fijo de la 040.
+  initRules(world);
   // 015: tenencia, arriendo, ahorro del hogar, caja de las organizaciones y resto del país (con el empleo ya hecho).
   generateEconomy(world, pop.householdIds, orgIds, rng);
   const events = [...created, ...prior, ...hist.events, ...healthEvents].sort((a, b) => idNumber(a.id) - idNumber(b.id));

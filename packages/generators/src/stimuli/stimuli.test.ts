@@ -55,5 +55,10 @@ describe('aprendizaje en la vida diaria (036 R-001, MF2.5)', () => {
     expect(done.some((e) => e.causes.some((c) => 'event' in c && ids.has(c.event)))).toBe(true);
     // 040 R-011: los estados aprendidos existen y parten del temperamento.
     expect(world.components.f32['hist.discountK']![idNumber(who.id)]).toBeGreaterThan(0);
+    // 038 CA-005 (INV-002): ningún valor es un escalar por persona; 038 R-010: los adultos tienen las reglas de su rutina.
+    const f32 = world.components.f32;
+    expect(Object.keys(f32).filter((k) => k.startsWith('val.'))).toEqual([]);
+    const adults = [...world.citizens.values()].filter((c) => !c.ancestor && (world.now - world.components.i32['demo.birthMinute']![idNumber(c.id)]!) / (365.25 * 1440) >= 18);
+    for (const c of adults) expect(c.rules?.length).toBe(5);
   }, 120_000);
 });

@@ -70,10 +70,10 @@ Specs: 009 v1.0 (aprobada), 035 (aprobada).
 - [x] MF4.4 Criterios: 037 CA-001–CA-005; 042 V-7, V-8 y V-11a. CA-004 se cumple con ≤ 2 relaciones por estímulo; con redes muy densas queda abierto (PA-110).
 
 ## Bloque MF5 — Reglas, valores y augmentals (038; rama `mf/5-reglas-valores`)
-- [ ] MF5.1 Reglas: pliance, tracking y augmenting con su historia; competencia con las contingencias.
-- [ ] MF5.2 Redes de valor desde `life_domains` y red opuesta derivada.
-- [ ] MF5.3 La aprobación como reforzador generalizado en la vida social mínima (encuentros de M2).
-- [ ] MF5.4 Criterios: 038 CA-001–CA-003; 042 V-9 y V-11b.
+- [x] MF5.1 Reglas: pliance, tracking y augmenting (formativo) con su historia; competencia con las contingencias; reglas de la rutina con desaliento en la búsqueda de empleo.
+- [x] MF5.2 Redes de valor desde `life_domains` (raíz `dominio.*`) y red opuesta derivada (`opposition ∘ part_of`).
+- [x] MF5.3 La aprobación emparejada con el disfrute (ocio con otros) y con el dinero (contratación). Aún no es generalizada: el tercer reforzador llega con la vida social (M3).
+- [x] MF5.4 Criterios: 038 CA-001–CA-005; 042 V-9 y V-11b.
 
 ## Bloque MF6 — Eventos privados y flexibilidad (039; rama `mf/6-privados`)
 - [ ] MF6.1 Eventos privados como estímulos; paso de derivación; episodios de PNR con condición de parada.

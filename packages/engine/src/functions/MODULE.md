@@ -2,7 +2,7 @@
 modulo: functions
 ruta: packages/engine/src/functions
 estado: en-desarrollo
-specs: [036, 040, 037, 035, 009, 042, 021, 010]
+specs: [036, 040, 037, 038, 035, 009, 042, 021, 010]
 actualizado: 2026-09-25
 ---
 
@@ -78,3 +78,4 @@ No aplica (ADR-007 §7): la referencia es la batería 042.
 | 2026-09-25 | mf/2-funciones (MF2.2, MF2.3, MF2.5) | 036, 009, 010, 021 | Primera implementación: tipos y almacén por persona, mecanismos R-001 a R-008, reglas de los eventos de M2, sistema `learning` y ganancia de elicitación de las emociones. Generalización solo dentro de un tipo; habituación solo sin función aprendida |
 | 2026-09-26 | mf/3-seleccion (MF3.1, MF3.3) | 040, 036 | `history.ts` (estados aprendidos `hist.discountK` y `hist.variability`, inicialización desde el temperamento, fuerza inicial de las aficiones) y `selection.ts` (aprendizaje de la selección). `ResponseEntry.src` y `operant(…, source)`. `LEISURE_DONE` enseña según la afinidad. `LearningRule.lambda` recibe la vista |
 | 2026-09-26 | mf/4-red | 037, 036, 010 | `directValue` (valor neto aprendido o primario, 037 R-003). `elicitationGain` usa el valor funcional (aprendido o derivado por la red). Estímulos nuevos en `WORLD_STIMULI`: `verbal.despido`, `verbal.llegar_tarde`, `verbal.no_pagar`; `JOB_LOST` incluye `verbal.despido` |
+| 2026-09-26 | mf/5-reglas-valores | 038, 036 | 038 R-011: `verbal.aprobacion` se empareja con el disfrute en el ocio con otros (`social.*`, `baile.*`, `comunidad.*`) y con el dinero en `JOB_HIRED` |

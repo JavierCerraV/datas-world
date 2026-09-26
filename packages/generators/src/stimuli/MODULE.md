@@ -2,7 +2,7 @@
 modulo: stimuli
 ruta: packages/generators/src/stimuli
 estado: en-desarrollo
-specs: [036, 029, 040]
+specs: [036, 029, 040, 038]
 actualizado: 2026-09-25
 ---
 
@@ -48,3 +48,4 @@ No aplica: el prototipo no tiene aprendizaje.
 |---|---|---|---|
 | 2026-09-25 | mf/2-funciones | 036 | Módulo creado: catálogo `stimulus_classes` y `buildOntology` (MF2.1) |
 | 2026-09-26 | mf/3-seleccion | 040 | La prueba de 14 días comprueba también 040 CA-005 (las salidas de ocio citan sus fuentes y los eventos de origen de la fuerza) y que existen los estados `hist.*` |
+| 2026-09-26 | mf/5-reglas-valores | 038 | La prueba del mundo comprueba también 038 CA-005 (sin columnas `val.*`) y que los adultos tienen las 5 reglas de su rutina |

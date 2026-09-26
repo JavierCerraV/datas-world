@@ -2,7 +2,7 @@
 modulo: relations
 ruta: packages/engine/src/relations
 estado: en-desarrollo
-specs: [037, 036, 035]
+specs: [037, 036, 035, 038]
 actualizado: 2026-09-26
 ---
 
@@ -62,3 +62,4 @@ No aplica (ADR-007 §7): la referencia es la batería 042.
 |---|---|---|---|
 | 2026-09-26 | mf/4-red | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-26 | mf/4-red (MF4.1–MF4.4) | 037, 036 | Primera implementación: tipos, derivación y transformación (`derive.ts`), enseñanza, poda y métricas (`network.ts`), tabla de enseñanza y sistema `relations` (`system.ts`). Optimizaciones de CA-004 sin cambiar el resultado |
+| 2026-09-26 | mf/5-reglas-valores | 038, 037 | Tabla de composición: `opposition ∘ part_of = opposition` (038 R-007, red opuesta de un valor). La prueba de la tabla completa lo incluye |
