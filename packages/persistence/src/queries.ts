@@ -43,6 +43,10 @@ export interface EventQuery {
   participant?: EntityId;
   /** Eventos de un lugar u organización: `place_id` o `placeId`/`orgId` del payload. */
   place?: EntityId;
+  /** Solo los eventos registrados después de este id (orden de inserción; SSE, 022 R-003). */
+  afterId?: EntityId;
+  /** Los `limit` más recientes (en orden cronológico) en lugar de los primeros. */
+  latest?: boolean;
   limit?: number;
 }
 
@@ -70,8 +74,14 @@ export function queryEvents(db: Db, q: EventQuery = {}): WorldEvent[] {
     where.push("(place_id = ? OR json_extract(payload, '$.placeId') = ? OR json_extract(payload, '$.orgId') = ?)");
     args.push(q.place, q.place, q.place);
   }
-  const sql = `SELECT * FROM events${where.length ? ` WHERE ${where.join(' AND ')}` : ''} ORDER BY at, seq LIMIT ?`;
-  return rowsToEvents(db, db.prepare(sql).all(...args, q.limit ?? 10_000) as EventRow[]);
+  if (q.afterId !== undefined) {
+    where.push('seq > COALESCE((SELECT seq FROM events WHERE id = ?), 0)');
+    args.push(q.afterId);
+  }
+  const order = q.latest ? 'ORDER BY seq DESC' : 'ORDER BY at, seq';
+  const sql = `SELECT * FROM events${where.length ? ` WHERE ${where.join(' AND ')}` : ''} ${order} LIMIT ?`;
+  const rows = db.prepare(sql).all(...args, q.limit ?? 10_000) as EventRow[];
+  return rowsToEvents(db, q.latest ? rows.reverse() : rows);
 }
 
 /** Eventos por id, en el orden pedido; los que no existen se omiten. */

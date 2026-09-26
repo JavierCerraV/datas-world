@@ -18,7 +18,8 @@
     "cli": "node apps/cli/src/main.ts",
     "worker": "node apps/worker/src/main.ts",
     "bench": "node apps/cli/src/main.ts bench",
-    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm guardrails"
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm guardrails",
+    "api": "node apps/api/src/main.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

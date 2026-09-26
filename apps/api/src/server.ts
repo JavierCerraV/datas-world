@@ -1,0 +1,146 @@
+// Servidor HTTP de la API (spec 022): lectura del mundo, SSE en vivo y controles autenticados. Solo lee la base,
+// salvo `control_commands` (R-001), que atiende el worker.
+import { Buffer } from 'node:buffer';
+import { statSync } from 'node:fs';
+import type { EntityId, WorldEvent } from '@datas-world/engine';
+import { CONTROL_COMMANDS, closeDb, enqueueCommand, openWorldDb, queryEvents } from '@datas-world/persistence';
+import type { ControlCommandName } from '@datas-world/persistence';
+import Fastify from 'fastify';
+import type { FastifyInstance, FastifyReply } from 'fastify';
+import { z } from 'zod';
+import { WorldReader } from './reader.ts';
+import { citizenDetail, dateOf, eventView, positions, worldView } from './views.ts';
+
+export interface ApiOptions {
+  db: string;
+  /** Credenciales de los controles (R-004); sin ellas, desactivados. */
+  auth?: { user: string; password: string };
+  /** Hora real para `control_commands.created_at` (se inyecta: la lógica no lee el reloj). */
+  clock?: () => string;
+}
+
+const eventsQuery = z.object({ since: z.string().regex(/^EVT-\d+$/).optional(), limit: z.coerce.number().int().min(1).max(200).default(100) });
+const citizenParams = z.object({ id: z.string().regex(/^CIT-\d+$/) });
+const controlBody = z.object({ cmd: z.enum(['pause', 'resume', 'speed', 'step']), arg: z.union([z.string(), z.number()]).optional() });
+
+const MB = 1024 * 1024;
+
+/** Velocidad vigente: la del último `SPEED_CHANGED` (1 si no hay). */
+function speedOf(reader: WorldReader): number {
+  const last = queryEvents(reader.db, { types: ['SPEED_CHANGED'], latest: true, limit: 1 })[0];
+  return last ? (last.payload as { to: number }).to : 1;
+}
+
+function authorized(header: string | undefined, auth: { user: string; password: string }): boolean {
+  if (!header?.startsWith('Basic ')) return false;
+  const [user, password] = Buffer.from(header.slice(6), 'base64').toString('utf8').split(':');
+  return user === auth.user && password === auth.password;
+}
+
+/** Envío de un mensaje SSE. */
+const sse = (reply: FastifyReply, event: string, data: unknown, id?: string) =>
+  reply.raw.write(`${id ? `id: ${id}\n` : ''}event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+
+export interface Api {
+  app: FastifyInstance;
+  reader: WorldReader;
+  /** Una vuelta del sondeo (R-006): recarga si cambió el minuto y avisa a los clientes SSE. */
+  poll: () => void;
+  close: () => Promise<void>;
+}
+
+export function buildApi(opts: ApiOptions): Api {
+  const reader = new WorldReader(opts.db);
+  const app = Fastify({ logger: false });
+  const clients = new Set<{ reply: FastifyReply; last?: string }>();
+
+  app.get('/api/health', async () => {
+    const w = reader.world;
+    let dbMb: number;
+    try {
+      dbMb = statSync(opts.db).size / MB;
+    } catch {
+      dbMb = 0;
+    }
+    return { now: w.now, date: dateOf(w, w.now), status: w.status, speed: speedOf(reader), citizens: positions(w).length, rssMb: Math.round(process.memoryUsage().rss / MB), dbMb: Math.round(dbMb * 10) / 10 };
+  });
+
+  app.get('/api/world', async () => worldView(reader.world));
+
+  app.get('/api/citizens', async () => positions(reader.world));
+
+  app.get('/api/citizens/:id', async (req, reply) => {
+    const p = citizenParams.safeParse(req.params);
+    if (!p.success) return reply.code(400).send({ error: 'id inválido' });
+    const events = queryEvents(reader.db, { participant: p.data.id as EntityId, latest: true, limit: 20 });
+    const detail = citizenDetail(reader.world, p.data.id as EntityId, events);
+    if (!detail) return reply.code(404).send({ error: 'no existe' });
+    return detail;
+  });
+
+  app.get('/api/events', async (req, reply) => {
+    const q = eventsQuery.safeParse(req.query);
+    if (!q.success) return reply.code(400).send({ error: q.error.issues.map((i) => i.message).join('; ') });
+    const events = q.data.since
+      ? queryEvents(reader.db, { afterId: q.data.since as EntityId, limit: q.data.limit })
+      : queryEvents(reader.db, { latest: true, limit: q.data.limit });
+    return events.map((e) => eventView(reader.world, e));
+  });
+
+  // R-003: SSE con reconexión; `Last-Event-ID` recupera los eventos perdidos.
+  app.get('/api/stream', (req, reply) => {
+    reply.raw.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache', connection: 'keep-alive' });
+    const lastHeader = req.headers['last-event-id'];
+    const client: { reply: FastifyReply; last?: string } = { reply };
+    const last = typeof lastHeader === 'string' && /^EVT-\d+$/.test(lastHeader) ? lastHeader : queryEvents(reader.db, { latest: true, limit: 1 })[0]?.id;
+    if (last) client.last = last;
+    clients.add(client);
+    const w = reader.world;
+    sse(reply, 'tick', { now: w.now, date: dateOf(w, w.now), status: w.status });
+    sendEvents(client);
+    req.raw.on('close', () => clients.delete(client));
+  });
+
+  function sendEvents(client: { reply: FastifyReply; last?: string }): void {
+    const events: WorldEvent[] = client.last ? queryEvents(reader.db, { afterId: client.last as EntityId, limit: 200 }) : [];
+    for (const e of events) sse(client.reply, 'event', eventView(reader.world, e), e.id);
+    if (events.length) client.last = events.at(-1)!.id;
+  }
+
+  // R-004: controles con basic auth; la orden queda en `control_commands` para el worker.
+  app.post('/api/control', async (req, reply) => {
+    if (!opts.auth) return reply.code(503).send({ error: 'controles desactivados: define DATAS_WORLD_USER y DATAS_WORLD_PASSWORD' });
+    if (!authorized(req.headers.authorization, opts.auth)) return reply.code(401).header('www-authenticate', 'Basic realm="datas-world"').send({ error: 'credenciales' });
+    const b = controlBody.safeParse(req.body);
+    if (!b.success) return reply.code(400).send({ error: 'orden inválida' });
+    const cmd = b.data.cmd as ControlCommandName;
+    if (!CONTROL_COMMANDS.includes(cmd)) return reply.code(400).send({ error: 'orden inválida' });
+    const db = openWorldDb(opts.db);
+    try {
+      const id = enqueueCommand(db, cmd, b.data.arg === undefined ? null : String(b.data.arg), (opts.clock ?? (() => new Date().toISOString()))());
+      return { queued: id };
+    } finally {
+      closeDb(db);
+    }
+  });
+
+  const poll = () => {
+    if (!reader.refresh()) return;
+    const w = reader.world;
+    for (const c of clients) {
+      sse(c.reply, 'tick', { now: w.now, date: dateOf(w, w.now), status: w.status });
+      sendEvents(c);
+    }
+  };
+
+  return {
+    app,
+    reader,
+    poll,
+    close: async () => {
+      for (const c of clients) c.reply.raw.end();
+      await app.close();
+      reader.close();
+    },
+  };
+}
