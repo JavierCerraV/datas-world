@@ -30,7 +30,8 @@ export const CAPABILITY_DEPS: Readonly<Record<Capability, readonly Capability[]>
   relationships: ['needs'],
   memory: ['relationships'],
   beliefs: ['memory'],
-  learning: ['memory'],
+  // Motor funcional (035 §6, bloque MF2): el aprendizaje directo no necesita la memoria episódica (013).
+  learning: ['routines'],
   consolidation: ['memory'],
   conflict: ['relationships', 'memory'],
   lifecourse: ['relationships', 'economy'],

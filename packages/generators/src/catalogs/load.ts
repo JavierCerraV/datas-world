@@ -25,6 +25,7 @@ export const CATALOG_NAMES = [
   'org_sectors',
   'personality_traits',
   'place_kinds',
+  'stimulus_classes',
   'temperament_params',
   'territory_levels',
   'trades_informal',

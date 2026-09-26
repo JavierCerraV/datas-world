@@ -135,7 +135,7 @@ describe('citizen:report (030 CA-003)', () => {
         for (const l of grand) expect(l).toMatch(/n\. \d{4}-\d\d-\d\d .*(m\. \d{4}|vive)|desconocido/);
       }
     });
-  });
+  }, 60_000); // la ficha de cada persona: ≈ 1 s sola, más de 5 s junto a las simulaciones de la batería completa
 
   it('por la CLI: ficha, familia y línea de vida; un id inexistente es un error de uso', () => {
     const r = cli('citizen:report', 'CIT-000001', '--db', db);

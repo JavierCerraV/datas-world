@@ -57,7 +57,7 @@ export function runSystems(world: World, rng: Rng, registry: SystemRegistry, opt
       const r = rng.fork(`sys:${s.id}`).fork(now);
       const full = rows.filter((row) => level(row) >= s.minLevel);
       const coarse = rows.filter((row) => level(row) < s.minLevel);
-      const ctx = (citizens: number[]): TickCtx => ({ now, citizens, level });
+      const ctx = (citizens: number[]): TickCtx => ({ now, citizens, level, events });
       outputs.push([s, s.run(view, ctx(full), r)]);
       if (s.runCoarse && coarse.length > 0) outputs.push([s, s.runCoarse(view, ctx(coarse), r.fork('coarse'))]);
     }

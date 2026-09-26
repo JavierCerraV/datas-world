@@ -165,3 +165,4 @@ Número de entidades por tipo y estado; hash de estado en cada instantánea.
 | 2026-09-24 | 0.2 | Nombre (usuario): el mundo y su municipio se llaman **Data's World**, en lugar de Villa Cordillera. Inspirado en el androide Data: ciudadanos autónomos, curiosos y capaces de aprender. Solo cambia el nombre; la información sigue siendo de Colombia |
 | 2026-09-25 | 0.2 | Estado → implementada |
 | 2026-09-25 | 0.2 | Bloque F de M2 (015): `World.accounts` (resto del país) opcional; la instantánea y el hash lo incluyen solo si existe, así que los mundos anteriores conservan su hash. Sin cambios en CA |
+| 2026-09-26 | 0.2 | Bloque MF2 (036): la capacidad `learning` depende de `routines` (aprende de las consecuencias de la vida diaria) y entra en las capacidades de los mundos nuevos. `Citizen.functions` opcional. Sin cambios en CA |

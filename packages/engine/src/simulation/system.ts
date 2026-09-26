@@ -2,7 +2,7 @@
 import type { WorldMinute } from '../calendar.ts';
 import type { Capability } from '../capabilities.ts';
 import type { ColumnType } from '../components.ts';
-import type { NewEvent } from '../events.ts';
+import type { NewEvent, WorldEvent } from '../events.ts';
 import type { EntityId } from '../ids.ts';
 import type { Rng } from '../rng.ts';
 import type { World } from '../world.ts';
@@ -43,6 +43,11 @@ export interface TickCtx {
   /** Filas (número del CIT) de las personas que tocan a este sistema, en orden ascendente. */
   citizens: readonly number[];
   level: (row: number) => SimLevel;
+  /**
+   * Eventos ya emitidos en este tick por las fases anteriores (en orden). Así el aprendizaje (036, fase `memory`)
+   * recibe las consecuencias del tick sin que ningún sistema lea el registro de eventos.
+   */
+  events: readonly WorldEvent[];
 }
 
 /**
