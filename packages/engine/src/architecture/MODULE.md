@@ -62,3 +62,4 @@ No aplica.
 | 2026-09-25 | mf/1-temperamento | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | mf/1-temperamento (MF1.5) | 009 v1.0, 035 | `rules.ts` (política y comprobación), `fixtures.ts` y 4 pruebas (CA-B) |
 | 2026-09-25 | mf/2-funciones (MF2.5) | 035, 009 | `POLICY`: `functions/` es lector registrado de `tmp.*`; `needs/emotions.ts` deja de importar el adaptador |
+| 2026-09-26 | mf/3-seleccion (MF3.4) | 040, 009 | `POLICY.legacyImporters` ya no incluye `decision/options.ts`, `decision/system.ts` ni `routines/system.ts`. La prueba usa `needs/system.ts` como importador vigente y comprueba que `decision/system.ts` queda no autorizado (040 CA-004) |

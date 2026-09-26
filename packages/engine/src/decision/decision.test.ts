@@ -4,7 +4,7 @@ import { defineColumn } from '../components.ts';
 import { setOccupation } from '../employment.ts';
 import type { WorldEvent } from '../events.ts';
 import { TILE, createGeoMap, setTile } from '../geo.ts';
-import { idNumber } from '../ids.ts';
+import { formatId, idNumber } from '../ids.ts';
 import { homeOf, initMobility } from '../mobility/columns.ts';
 import { occupancy } from '../mobility/enter.ts';
 import { mobilityParams } from '../mobility/params.ts';
@@ -15,6 +15,7 @@ import { needsSystem } from '../needs/system.ts';
 import { createRng } from '../rng.ts';
 import { initRoutines } from '../routines/columns.ts';
 import { dayInfo } from '../routines/day.ts';
+import { planAt } from '../routines/plan.ts';
 import { routinesSystem } from '../routines/system.ts';
 import { Runner } from '../runner.ts';
 import { stateHash } from '../serialize.ts';
@@ -25,7 +26,8 @@ import type { LeisureInterest, World } from '../world.ts';
 import { defineDecisionColumns } from './columns.ts';
 import type { LeisureTable } from './columns.ts';
 import { buildOptions, freeUntil } from './options.ts';
-import { choose, createDecisionSystem, softmax, temperatureOf } from './system.ts';
+import { softmax, temperatureOf } from './select.ts';
+import { choose, createDecisionSystem } from './system.ts';
 import { createActionValidator } from './validate.ts';
 
 const DAY = 1440;
@@ -88,10 +90,10 @@ function decideAt(world: World, row: number, at: number, seed: number) {
   };
   const r = createRng(seed);
   const options = buildOptions(ctx, r);
-  return choose(world, options, temperatureOf(0.5), r, validate);
+  return choose(world, options, temperatureOf(0.5), r, validate).pick;
 }
 
-describe('spec 017: motor de decisiones', () => {
+describe('spec 040: selección por fuentes de control (conserva los criterios de la 017)', () => {
   it('INV-001: la softmax da probabilidades finitas en [0,1] que suman 1', () => {
     const r = createRng(3);
     for (let n = 0; n < 200; n++) {
@@ -102,7 +104,7 @@ describe('spec 017: motor de decisiones', () => {
     }
   });
 
-  it('CA-001: con hambre crítica en un bloque libre se elige comer en más del 95 % de los casos', () => {
+  it('040 CA-003 (017 CA-001): con hambre crítica en un bloque libre se elige comer en más del 95 % de los casos', () => {
     const { world, rows } = town([{ leisure: [interest('baile.rumba', 1), interest('entretenimiento.tv_series', 1)] }]);
     const row = rows[0]!;
     let eat = 0;
@@ -114,7 +116,7 @@ describe('spec 017: motor de decisiones', () => {
     expect(eat / 300).toBeGreaterThan(0.95);
   });
 
-  it('CA-003: una acción imposible (sin dinero para el cine) se rechaza y se elige otra', () => {
+  it('040 R-008 (017 CA-003): una acción imposible (sin dinero para el cine) se rechaza y se elige otra', () => {
     const { world, rows } = town([{ leisure: [interest('cultura.cine', 1, 8)], money: 1_000 }]);
     const row = rows[0]!;
     world.components.f32['need.fun']![row] = 0;
@@ -146,9 +148,29 @@ describe('spec 017: motor de decisiones', () => {
     expect(leisure / 300).toBeGreaterThan(0.5);
     expect(count.get('baile.rumba')!).toBeGreaterThan(count.get('entretenimiento.tv_series') ?? 0);
   });
+
+  it('CA-006: a igual situación, con descuento alto se sigue menos la rutina de obligaciones', () => {
+    const { world, rows } = town([{ leisure: [interest('entretenimiento.tv_series', 0.5)] }]);
+    const row = rows[0]!;
+    defineColumn(world.components, 'f32', 'hist.discountK', 0.2);
+    setOccupation(world, formatId('CIT', row), { kind: 'none', reason: 'unemployed', since: 0 });
+    // Martes 11:00: bloque de búsqueda de empleo (obligación flexible) de una persona desempleada.
+    const routineShare = (k: number) => {
+      world.components.f32['hist.discountK']![row] = k;
+      let n = 0;
+      for (let s = 0; s < 300; s++) {
+        world.components.f32['need.fun']![row] = 0.3;
+        if (decideAt(world, row, DAY + 11 * 60, s)?.action.kind === 'follow_routine') n++;
+      }
+      return n / 300;
+    };
+    const plan = planAt(world, row, dayInfo(world, DAY + 11 * 60), 11 * 60);
+    expect(['job_search', 'chores', 'care']).toContain(plan.activity);
+    expect(routineShare(0.02)).toBeGreaterThan(routineShare(2) + 0.05);
+  });
 });
 
-describe('017 en marcha, con el validador en el bucle (021)', () => {
+describe('040 en marcha, con el validador en el bucle (021)', () => {
   const run = (guard: boolean, seed = 1) => {
     const t = town([{ leisure: [interest('baile.rumba', 0.9), interest('entretenimiento.tv_series', 0.3)] }, { leisure: [interest('entretenimiento.tv_series', 0.8)] }], seed);
     const runner = new Runner(t.world, createRng(seed), {}, {
@@ -158,7 +180,7 @@ describe('017 en marcha, con el validador en el bucle (021)', () => {
     return { ...t, runner };
   };
 
-  it('CA-005 y 032 CA-006: la afición elegida produce LEISURE_DONE con el explain como causa, lleva al lugar y sube la diversión', () => {
+  it('040 CA-005 y 032 CA-006: la afición elegida produce LEISURE_DONE con sus aportes como causa, lleva al lugar y sube la diversión', () => {
     const { world, rows, bar, runner } = run(false);
     const row = rows[0]!;
     runner.advanceTicks((18 * 60) / 5); // lunes 18:00
@@ -178,7 +200,8 @@ describe('017 en marcha, con el validador en el bucle (021)', () => {
     expect(done.length).toBeGreaterThan(0);
     for (const e of done) {
       expect(e.causes.length).toBeGreaterThan(0);
-      for (const c of e.causes) expect('state' in c && c.state.startsWith('decision.')).toBe(true);
+      expect(e.causes.some((c) => 'state' in c && c.state.startsWith('fuente.'))).toBe(true);
+      for (const c of e.causes) expect(('state' in c && c.state.startsWith('fuente.')) || 'event' in c).toBe(true);
     }
     expect(atBar).toBe(true);
     expect(done.some((e) => (e.payload as { activity: string }).activity === 'baile.rumba')).toBe(true);

@@ -47,6 +47,8 @@ export interface ResponseEntry {
   w: number;
   n: number;
   at: number;
+  /** Eventos de las últimas consecuencias (019; 040 R-006), los 3 más recientes. */
+  src?: string[];
 }
 
 /** Lo que una persona ha aprendido por experiencia directa. `pruned` cuenta lo podado (INV-003). */

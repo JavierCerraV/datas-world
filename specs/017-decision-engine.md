@@ -1,7 +1,7 @@
 ---
 id: 017
 nombre: decision-engine
-estado: aprobada
+estado: obsoleta
 hito: M2 (decisión con estado propio e información pública) · M3 (con creencias, 025)
 depende_de: [009, 010, 011, 015, 016, 021, 032]
 version: 0.2
@@ -87,3 +87,4 @@ Distribución de actividades por hora y por situación (comparable con la ENUT),
 | 2026-09-25 | 0.2 | Bloque MF1 (ADR-007, 035 §9): la temperatura (impulsividad) y la utilidad de las obligaciones (responsabilidad) se leen por el adaptador @deprecated de la 009 v1.0; la impulsividad sale ahora de `tmp.discount0`. Esta spec pasa a `obsoleta` en MF3.4, sustituida por la 040. Sin cambios en CA |
 | 2026-09-25 | 0.2 | Bloque G de M2: el tiempo libre termina `mobility.habits.lookahead` (30 min) antes de la próxima obligación, para que la movilidad salga a tiempo. Sin cambios en CA |
 | 2026-09-25 | 0.2 | Bloque H de M2: `runCoarse` del motor de decisiones para el nivel 1 (021 R-011): mantiene lo elegido cada tick y decide algo nuevo solo en punto cada hora. Sin cambios en CA |
+| 2026-09-26 | 0.2 | Estado → obsoleta |

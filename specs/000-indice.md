@@ -24,8 +24,8 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [014](014-events.md) | Eventos | M2 | 001, 002 | implementada | `packages/engine`, `packages/generators/src/population` |
 | [015](015-economy.md) | Economía | M2 | 006, 007, 008, 021, 029, 031, 032, 033 | implementada | `apps/cli`, `packages/engine/src/economy`, `packages/engine/src/work`, `packages/generators/src/economy`, `packages/persistence` |
 | [016](016-mobility.md) | Movilidad | M2 | 003, 004, 005, 015, 021, 033 | implementada | `packages/engine/src/decision`, `packages/engine/src/mobility`, `packages/engine/src/work` |
-| [017](017-decision-engine.md) | Motor de decisiones | M2 (decisión con estado propio e información pública) · M3 (con creencias, 025) | 009, 010, 011, 015, 016, 021, 032 | aprobada | `packages/engine/src/decision` |
-| [018](018-learning.md) | Aprendizaje y hábitos | M5 | 017, 013 | borrador | — |
+| [017](017-decision-engine.md) | Motor de decisiones | M2 (decisión con estado propio e información pública) · M3 (con creencias, 025) | 009, 010, 011, 015, 016, 021, 032 | obsoleta | — |
+| [018](018-learning.md) | Aprendizaje y hábitos | M5 | 017, 013 | obsoleta | — |
 | [019](019-causality.md) | Causalidad | M3 | 014 | borrador | — |
 | [020](020-history.md) | Historia e informe de vida | M3 | 014, 019, 013 | borrador | — |
 | [021](021-simulation.md) | Bucle de simulación, registro de sistemas y niveles de detalle | M2 (registro de sistemas, niveles 1 y 2) · M3–M4 (niveles 3 y 4, observación) · M7 (nivel 0, escala) | 001, 002, 017, 014 | aprobada | `apps/cli`, `apps/worker`, `packages/engine/src/decision`, `packages/engine/src/economy`, `packages/engine/src/functions`, `packages/engine/src/mobility`, `packages/engine/src/needs`, `packages/engine/src/routines`, `packages/engine/src/simulation`, `packages/engine/src/work` |
@@ -43,11 +43,11 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [033](033-urban-amenities.md) | Dotación urbana | M1 (dotación inicial y nueva plantilla de mapa) · M2 (uso: horarios, capacidad, viajes a la ciudad) · peldaño 4+ (crecimiento) | 003, 004, 006, 016, 023, 029, 030 | aprobada | `packages/engine/src/mobility`, `packages/generators/src/amenities`, `packages/generators/src/leisure` |
 | [034](034-clinical-sessions.md) | Sesiones e intervenciones | Después (capa clínica, tras M7; ver docs/roadmap.md) · enganches en M3–M6 (ver §2) | 010, 012, 013, 017, 019, 020, 023, 025, 026, 028, 031 | borrador | — |
 | [035](035-functional-engine.md) | Motor funcional-contextual (spec paraguas) | MF (motor funcional) | 001, 009, 010, 014, 019, 021, 023, 027 | aprobada | `packages/engine`, `packages/engine/src/architecture`, `packages/engine/src/decision`, `packages/engine/src/functions`, `packages/engine/src/needs`, `packages/engine/src/routines`, `packages/engine/src/temperament`, `packages/generators/src/architecture`, `packages/generators/src/health`, `packages/generators/src/leisure`, `packages/generators/src/personality`, `packages/generators/src/population` |
-| [036](036-stimulus-functions.md) | Estímulos, funciones y aprendizaje directo (capa 2) | MF (bloque MF2) | 009, 035, 021, 023 | aprobada | `packages/engine/src/functions`, `packages/engine/src/lab`, `packages/generators/src/stimuli` |
+| [036](036-stimulus-functions.md) | Estímulos, funciones y aprendizaje directo (capa 2) | MF (bloque MF2) | 009, 035, 021, 023 | aprobada | `packages/engine/src/decision`, `packages/engine/src/functions`, `packages/engine/src/lab`, `packages/generators/src/stimuli` |
 | [037](037-relational-network.md) | Red relacional y transformación de funciones (capa 3) | MF (bloque MF4) | 035, 036 | borrador | — |
 | [038](038-rules-values.md) | Reglas, valores y augmentals (capa 4) | MF (bloque MF5) | 035, 036, 037 | borrador | — |
 | [039](039-private-events.md) | Eventos privados, PNR, evitación experiencial y flexibilidad (capa 5) | MF (bloque MF6) | 035, 036, 037, 038 | borrador | — |
-| [040](040-behavior-selection.md) | Competencia entre fuentes de control y selección de conducta (capa 6) | MF (bloque MF3) | 035, 036, 017, 021 | borrador | — |
+| [040](040-behavior-selection.md) | Competencia entre fuentes de control y selección de conducta (capa 6) | MF (bloque MF3) | 035, 036, 017, 021 | aprobada | `packages/engine/src/decision`, `packages/engine/src/functions`, `packages/engine/src/lab`, `packages/engine/src/routines`, `packages/generators/src/stimuli` |
 | [041](041-development.md) | Desarrollo: historia de aprendizaje sintética (0 años → presente) | MF (bloque MF7) | 030, 035, 036, 037, 038, 039 | borrador | — |
 | [042](042-behavior-validation.md) | Batería de validación conductual | MF (se completa por bloques MF2–MF7) | 035, 036, 037, 038, 039, 040, 041 | aprobada | `packages/engine/src/functions`, `packages/engine/src/lab` |
 <!-- INDICE:FIN -->

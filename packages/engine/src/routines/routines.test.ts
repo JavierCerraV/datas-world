@@ -17,7 +17,7 @@ import { addCitizen, addOrganization, addPlace, createWorld } from '../world.ts'
 import type { Shift, World } from '../world.ts';
 import { initRoutines } from './columns.ts';
 import { dayInfo } from './day.ts';
-import { routinesSystem } from './system.ts';
+import { oversleepFactor, routinesSystem } from './system.ts';
 
 type Kind = 'formal' | 'unemployed' | 'student' | 'informal';
 const EPOCH = '2027-02-01T00:00'; // lunes, en calendario escolar
@@ -182,18 +182,31 @@ describe('spec 011: rutinas', () => {
 });
 
 describe('spec 010 CA-001: quedarse dormido', () => {
+  // Insomnio forzado los días 0 y 1 (lunes y martes); la noche del miércoles al jueves se mide el despertar.
+  const insomnia: System = {
+    id: 'prueba.insomnio',
+    phase: 'decision',
+    order: 1,
+    capability: 'routines',
+    cadence: 'tick',
+    minLevel: 0,
+    run: (_v, ctx) =>
+      ctx.now < 2 * DAY ? { patches: [{ op: 'setMany', type: 'u8', column: ACTIVITY_COLUMN, rows: [...ctx.citizens], values: ctx.citizens.map(() => ACTIVITY.idle) }] } : {},
+  };
+
+  it('040 CA-006 (R-010): con más descuento, más exceso de sueño por falta de energía; OVERSLEPT cita el descuento', () => {
+    expect(oversleepFactor(0.02)).toBeCloseTo(0.39, 2);
+    expect(oversleepFactor(0.2)).toBeCloseTo(0.8, 2);
+    expect(oversleepFactor(2)).toBeCloseTo(1.21, 2);
+    const w = build(Array.from({ length: 20 }, () => ({ kind: 'formal' as const })));
+    const r = runner(w, new Map(), [insomnia]);
+    r.advanceDays(4);
+    const events = r.drainEvents().filter((e) => e.type === 'OVERSLEPT');
+    expect(events.length).toBeGreaterThan(0);
+    for (const e of events) expect(e.causes.some((c) => 'state' in c && c.state === 'descuento')).toBe(true);
+  }, 60_000);
+
   it('sin dormir 2 noches, más del 50 % se queda dormido al día siguiente (con OVERSLEPT y sus causas)', () => {
-    // Insomnio forzado los días 0 y 1 (lunes y martes); la noche del miércoles al jueves se mide el despertar.
-    const insomnia: System = {
-      id: 'prueba.insomnio',
-      phase: 'decision',
-      order: 1,
-      capability: 'routines',
-      cadence: 'tick',
-      minLevel: 0,
-      run: (_v, ctx) =>
-        ctx.now < 2 * DAY ? { patches: [{ op: 'setMany', type: 'u8', column: ACTIVITY_COLUMN, rows: [...ctx.citizens], values: ctx.citizens.map(() => ACTIVITY.idle) }] } : {},
-    };
     const n = 40;
     const late = (extra: System[]) => {
       const w = build(Array.from({ length: n }, () => ({ kind: 'formal' as const })));

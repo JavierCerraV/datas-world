@@ -1,7 +1,7 @@
 ---
 id: 018
 nombre: learning
-estado: borrador
+estado: obsoleta
 hito: M5
 depende_de: [017, 013]
 version: 0.1
@@ -55,3 +55,4 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
+| 2026-09-26 | 0.1 | Estado → obsoleta |

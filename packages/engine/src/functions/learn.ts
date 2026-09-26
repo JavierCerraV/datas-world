@@ -148,7 +148,7 @@ export const reinforcingValue = (f: FunctionEntry, ctx: string, now: number, P: 
  * R-002 [E]: aprendizaje operante. La fuerza de la respuesta en el contexto se acerca a la consecuencia obtenida
  * (`w += rate·sens·(resultado − w)`); el reforzamiento negativo (alivio) es un resultado positivo.
  */
-export function operant(store: FunctionStore, r: string, ctx: string, outcome: number, now: number, P: LearningParams, sens: Sensitivity): ResponseEntry {
+export function operant(store: FunctionStore, r: string, ctx: string, outcome: number, now: number, P: LearningParams, sens: Sensitivity, source?: string): ResponseEntry {
   let e = store.r.find((x) => x.r === r && x.c === ctx);
   if (!e) {
     e = { r, c: ctx, w: 0, n: 0, at: now };
@@ -158,6 +158,7 @@ export function operant(store: FunctionStore, r: string, ctx: string, outcome: n
   e.w = clamp1(e.w + P.operantRate * s * (clamp1(outcome) - e.w));
   e.n += 1;
   e.at = now;
+  if (source && !e.src?.includes(source)) e.src = [...(e.src ?? []), source].slice(-3);
   return e;
 }
 

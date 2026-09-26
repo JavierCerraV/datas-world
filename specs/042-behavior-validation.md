@@ -63,3 +63,4 @@ PA-122 (rangos cuantitativos), PA-123 (qué escenarios faltan para cubrir el doc
 | 2026-09-25 | 0.1 | Borrador (Fase A, ADR-007) |
 | 2026-09-26 | 0.1 | Estado → aprobada |
 | 2026-09-26 | 0.1 | Bloque MF2: V-1, V-2, V-3 y V-6 implementados en `packages/engine/src/lab/`. V-6 con protocolo clásico: adquisición hasta 5 evitaciones seguidas, exposición breve al evitar sin extinción (conservación de la ansiedad) y media de 5 sujetos. Resultado ≈ 52 evitaciones de 100 con sensibilidad aversiva alta y ≈ 35 con baja: pasa justo; la teoría de dos factores sola da persistencia moderada (PA-132). Sin cambios en CA |
+| 2026-09-26 | 0.1 | Bloque MF3: V-4 (`lab/choice.ts`: intervalo variable con probabilidad total 0,2, 1 000 ensayos, 7 proporciones, 3 semillas; pendiente 0,72, R² ≈ 1, subigualación; con programas más pobres baja a 0,64) y V-5 (k = 0,2: 76 % y 48 %, estable en 5 semillas). Sin cambios en CA |

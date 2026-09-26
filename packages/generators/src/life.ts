@@ -31,9 +31,17 @@ export const LIFE_CAPABILITIES: readonly Capability[] = Object.freeze(['clock', 
 export function lifeSystems(world: World, catalogs: Catalogs = loadCatalogs()): { systems: SystemRegistry; loop: LoopOptions } {
   const profile = world.config.profile;
   const table = profile ? leisureTable(catalogs.leisure_activities, profile, world.config.epoch.slice(0, 10)) : {};
-  const learning = createLearningSystem(buildOntology(catalogs));
+  const onto = buildOntology(catalogs);
   return {
-    systems: createRegistry([...NEEDS_SYSTEMS, routinesSystem, createDecisionSystem(table), mobilitySystem, economySystem, ...WORK_SYSTEMS, learning]),
+    systems: createRegistry([
+      ...NEEDS_SYSTEMS,
+      routinesSystem,
+      createDecisionSystem(table, onto),
+      mobilitySystem,
+      economySystem,
+      ...WORK_SYSTEMS,
+      createLearningSystem(onto),
+    ]),
     loop: { validate: createActionValidator(table) },
   };
 }

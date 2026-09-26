@@ -1,5 +1,5 @@
 // Ontología compartida de estímulos (036 R-004, MF2.1) y enganche del aprendizaje con la vida diaria (MF2.5).
-import { LEARNING_DEFAULTS, WORLD_STIMULI, distance, gradient } from '@datas-world/engine';
+import { LEARNING_DEFAULTS, WORLD_STIMULI, distance, gradient, idNumber } from '@datas-world/engine';
 import type { EntityId, WorldEvent } from '@datas-world/engine';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_PROFILE } from '../country/profile.ts';
@@ -49,5 +49,11 @@ describe('aprendizaje en la vida diaria (036 R-001, MF2.5)', () => {
     const who = world.citizens.get(leisure.participants[0]!.id)!;
     const act = (leisure.payload as { activity: string }).activity;
     expect(who.functions!.f.find((f) => f.s === `actividad.${act}`)!.v).toBeGreaterThan(0);
+    // 040 CA-005: toda salida de ocio cita sus fuentes; cuando pesa la fuerza, también los eventos que la formaron.
+    const done = events.filter((e) => e.type === 'LEISURE_DONE');
+    for (const e of done) expect(e.causes.some((c) => 'state' in c && c.state.startsWith('fuente.'))).toBe(true);
+    expect(done.some((e) => e.causes.some((c) => 'event' in c && ids.has(c.event)))).toBe(true);
+    // 040 R-011: los estados aprendidos existen y parten del temperamento.
+    expect(world.components.f32['hist.discountK']![idNumber(who.id)]).toBeGreaterThan(0);
   }, 120_000);
 });
