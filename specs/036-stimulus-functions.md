@@ -1,7 +1,7 @@
 ---
 id: 036
 nombre: stimulus-functions
-estado: borrador
+estado: aprobada
 hito: MF (bloque MF2)
 depende_de: [009, 035, 021, 023]
 version: 0.1
@@ -113,3 +113,5 @@ PA-001 a PA-005 (§11.1), PA-011 a PA-014 (§11.3), PA-015 a PA-018 (§11.4), PA
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-25 | 0.1 | Borrador (Fase A, ADR-007) |
+| 2026-09-26 | 0.1 | Estado → aprobada |
+| 2026-09-26 | 0.1 | Implementación del bloque MF2. Precisiones: (1) el almacén va en `Citizen.functions` y se persiste con la entidad (JSON en SQLite); de lo podado se guarda solo la cuenta; (2) R-004: la generalización primaria es solo entre clases del mismo tipo (lugar con lugar, término con término); entre tipos la transferencia es relacional (037). Con generalización entre tipos, el lugar bloqueaba el aprendizaje de las actividades hechas en él [M]; (3) R-006: la habituación se aplica a estímulos sin función aprendida; en uno condicionado, la extinción ya reduce la respuesta y habituarlo además anulaba el alivio de la evitación (V-6); (4) la extinción se divide por la sensibilidad de la valencia [M]; (5) cada estímulo del evento es un ensayo propio, no un compuesto [M]; (6) R-009, R-010 (en la selección), R-012 y la parte conducta → consecuencia de R-011 pasan a MF3 con la selección de conducta; (7) ontología inicial: catálogo `stimulus_classes` con 6 dimensiones de rasgos [M] y lugares y actividades con los rasgos de su familia (PA-131). CA-001 a CA-005 verificados en la batería. Sin cambios en CA |

@@ -39,18 +39,18 @@ Specs: 009 v1.0 (aprobada), 035 (aprobada).
 - [x] MF1.8 Criterios: 009 CA-A, CA-B, CA-C, CA-D y CA-G. CA-E queda para MF2.
 
 ## Bloque MF2 — Estímulos, funciones y laboratorio (036, 042 V-1–V-3, V-6; rama `mf/2-funciones`)
-- [ ] MF2.1 Ontología compartida de estímulos (catálogo `stimulus_classes`) con rasgos para la generalización.
-- [ ] MF2.2 Almacenes por persona (funciones y fuerzas de respuesta) con topes, poda y archivo en SQLite.
-- [ ] MF2.3 Mecanismos:
+- [x] MF2.1 Ontología compartida de estímulos (catálogo `stimulus_classes`) con rasgos para la generalización.
+- [x] MF2.2 Almacenes por persona (funciones y fuerzas de respuesta) con topes, poda y archivo en SQLite (con la entidad).
+- [x] MF2.3 Mecanismos:
   - respondiente (R-001) y operante (R-002);
   - extinción contextual (R-003);
   - generalización y discriminación (R-004, R-005);
   - habituación (R-006);
   - reforzadores secundarios y generalizados (R-007, R-008);
-  - registro de contingencias (R-011).
-- [ ] MF2.4 Laboratorio determinista `engine/src/lab/` y escenarios V-1, V-2, V-3 y V-6.
-- [ ] MF2.5 Enganche con el mundo: las consecuencias de los eventos de M2 (`JOB_LOST`, `FELL_ILL`, `LEISURE_DONE`…) actualizan funciones. Las emociones de 010 salen de las funciones elicitadas presentes (se retira del adaptador la modulación por neuroticismo de las emociones).
-- [ ] MF2.6 Criterios: 036 CA-001–CA-005; 009 CA-E; `pnpm bench` con KB por persona.
+  - registro de contingencias (R-011): evento → consecuencia (`EVENT_LEARNING`); conducta → consecuencia pasa a MF3.
+- [x] MF2.4 Laboratorio determinista `engine/src/lab/` y escenarios V-1, V-2, V-3 y V-6.
+- [x] MF2.5 Enganche con el mundo: las consecuencias de los eventos de M2 (`JOB_LOST`, `FELL_ILL`, `LEISURE_DONE`…) actualizan funciones. Las emociones de 010 salen de las funciones elicitadas presentes (se retira del adaptador la modulación por neuroticismo de las emociones).
+- [x] MF2.6 Criterios: 036 CA-001–CA-005; 009 CA-E; `pnpm bench` con KB por persona (`docs/validaciones/MF2-bench-funciones.md`).
 
 ## Bloque MF3 — Selección de conducta (040, 036 R-009/R-012; rama `mf/3-seleccion`)
 - [ ] MF3.1 Estados aprendidos `hist.discountK` y `hist.variability`, inicializados por el temperamento.

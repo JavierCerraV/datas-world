@@ -117,16 +117,20 @@ describe('spec 010: necesidades, emociones y salud del día a día', () => {
     expect(energy(2)).toBeLessThan(energy(1));
   });
 
-  it('CA-005 y 009 CA-004: perder el empleo sube tristeza y miedo ese día y el estrés de las 4 semanas siguientes, más con neuroticismo alto', () => {
+  it('CA-005: perder el empleo sube tristeza y miedo ese día (más con más activación basal, 036) y el estrés de las 4 semanas siguientes (más con neuroticismo, por el adaptador hasta MF6)', () => {
     const log = new Map<number, Record<string, number>[]>();
     const w = worldWith([{ neuroticism: 0.2 }, { neuroticism: 0.8 }]);
+    // 009 v1.0: la intensidad emocional depende de la activación basal (temperamento) y de la historia, no del neuroticismo.
+    defineColumn(w.components, 'f32', 'tmp.arousalBaseline', 0.5);
+    w.components.f32['tmp.arousalBaseline']![1] = 0.2;
+    w.components.f32['tmp.arousalBaseline']![2] = 0.8;
     const runner = runnerFor(w, log);
     runner.advanceDays(28);
     for (const row of [1, 2]) {
       setOccupation(w, formatId('CIT', row), { kind: 'none', reason: 'unemployed', since: w.now });
       applyPatches(w, emotionPatches(w, row, 'JOB_LOST'), 'prueba');
     }
-    expect(w.components.f32['emo.sadness']![2]).toBeGreaterThan(w.components.f32['emo.sadness']![1]!); // neuroticismo
+    expect(w.components.f32['emo.sadness']![2]).toBeGreaterThan(w.components.f32['emo.sadness']![1]!); // activación basal
     runner.advanceDays(28);
     const cut = 28 * MINUTES_PER_DAY;
     const stressDelta = (row: number) => {

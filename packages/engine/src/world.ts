@@ -9,6 +9,7 @@ import { makeEvent } from './events.ts';
 import type { WorldEvent } from './events.ts';
 import { allocateId, emptyCounters, idKind, idNumber } from './ids.ts';
 import type { Counters, EntityId, WorldId } from './ids.ts';
+import type { FunctionStore } from './functions/types.ts';
 import type { GeoMap } from './geo.ts';
 import { checkProfile } from './profile.ts';
 import type { CountryProfile } from './profile.ts';
@@ -93,6 +94,8 @@ export interface Citizen extends BaseEntity {
   leisure?: LeisureInterest[];
   /** Deudas vigentes (015 §3), en orden de creación. */
   debts?: Debt[];
+  /** Funciones aprendidas por experiencia directa (036, capa 2 del motor funcional). */
+  functions?: FunctionStore;
   /** Llegadas tarde a su trabajo en la ventana de advertencias (006 R-005), con el evento de cada una. */
   jobRecord?: { lates: { eventId: EntityId; at: WorldMinute; minutes: number }[] };
 }

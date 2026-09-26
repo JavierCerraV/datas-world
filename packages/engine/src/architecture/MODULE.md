@@ -61,3 +61,4 @@ No aplica.
 |---|---|---|---|
 | 2026-09-25 | mf/1-temperamento | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | mf/1-temperamento (MF1.5) | 009 v1.0, 035 | `rules.ts` (política y comprobación), `fixtures.ts` y 4 pruebas (CA-B) |
+| 2026-09-25 | mf/2-funciones (MF2.5) | 035, 009 | `POLICY`: `functions/` es lector registrado de `tmp.*`; `needs/emotions.ts` deja de importar el adaptador |

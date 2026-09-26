@@ -1,7 +1,7 @@
 ---
 id: 042
 nombre: behavior-validation
-estado: borrador
+estado: aprobada
 hito: MF (se completa por bloques MF2–MF7)
 depende_de: [035, 036, 037, 038, 039, 040, 041]
 version: 0.1
@@ -61,3 +61,5 @@ PA-122 (rangos cuantitativos), PA-123 (qué escenarios faltan para cubrir el doc
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-25 | 0.1 | Borrador (Fase A, ADR-007) |
+| 2026-09-26 | 0.1 | Estado → aprobada |
+| 2026-09-26 | 0.1 | Bloque MF2: V-1, V-2, V-3 y V-6 implementados en `packages/engine/src/lab/`. V-6 con protocolo clásico: adquisición hasta 5 evitaciones seguidas, exposición breve al evitar sin extinción (conservación de la ansiedad) y media de 5 sujetos. Resultado ≈ 52 evitaciones de 100 con sensibilidad aversiva alta y ≈ 35 con baja: pasa justo; la teoría de dos factores sola da persistencia moderada (PA-132). Sin cambios en CA |

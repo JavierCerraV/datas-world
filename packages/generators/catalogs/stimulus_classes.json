@@ -1,0 +1,309 @@
+{
+  "name": "stimulus_classes",
+  "version": "2026.09.1",
+  "source": "Spec 036 R-004 (ADR-007): ontología compartida de estímulos. [M] Rasgos estimados para la generalización, seis dimensiones en [0,1]: social, cuerpo, dinero, trabajo, ocio y hogar (dims). Clases explícitas: los términos verbales, roles y estados del cuerpo que usan las reglas del motor (WORLD_STIMULI). Las entradas `familia.lugar.<categoría>` y `familia.actividad.<categoría>` dan los rasgos de las clases `lugar.<clave>` y `actividad.<clave>` que se derivan de place_kinds y leisure_activities. Primarios (R-007): dolor −1 y disfrute +1. Calibración pendiente (PA-131).",
+  "entries": [
+    {
+      "key": "cuerpo.disfrute",
+      "name": "Disfrute (estado del cuerpo)",
+      "since": "M2",
+      "attrs": {
+        "kind": "body_state",
+        "features": [0, 1, 0, 0, 1, 0],
+        "primary": 1
+      }
+    },
+    {
+      "key": "cuerpo.dolor",
+      "name": "Dolor",
+      "since": "M2",
+      "attrs": {
+        "kind": "body_state",
+        "features": [0, 1, 0, 0, 0, 0],
+        "primary": -1
+      }
+    },
+    {
+      "key": "cuerpo.enfermedad",
+      "name": "Enfermedad",
+      "since": "M2",
+      "attrs": {
+        "kind": "body_state",
+        "features": [0, 0.9, 0, 0, 0, 0]
+      }
+    },
+    {
+      "key": "familia.actividad.arte",
+      "name": "Actividades de arte",
+      "since": "M2",
+      "attrs": {
+        "features": [0.2, 0.2, 0, 0, 1, 0]
+      }
+    },
+    {
+      "key": "familia.actividad.baile",
+      "name": "Actividades de baile",
+      "since": "M2",
+      "attrs": {
+        "features": [0.8, 0.6, 0, 0, 1, 0]
+      }
+    },
+    {
+      "key": "familia.actividad.comunidad",
+      "name": "Actividades comunitarias",
+      "since": "M2",
+      "attrs": {
+        "features": [0.8, 0, 0, 0.3, 0.6, 0]
+      }
+    },
+    {
+      "key": "familia.actividad.cultura",
+      "name": "Actividades culturales",
+      "since": "M2",
+      "attrs": {
+        "features": [0.3, 0, 0, 0, 1, 0]
+      }
+    },
+    {
+      "key": "familia.actividad.deporte",
+      "name": "Actividades deportivas",
+      "since": "M2",
+      "attrs": {
+        "features": [0.4, 0.8, 0, 0, 1, 0]
+      }
+    },
+    {
+      "key": "familia.actividad.entretenimiento",
+      "name": "Entretenimiento",
+      "since": "M2",
+      "attrs": {
+        "features": [0.3, 0, 0, 0, 1, 0.3]
+      }
+    },
+    {
+      "key": "familia.actividad.naturaleza",
+      "name": "Actividades en la naturaleza",
+      "since": "M2",
+      "attrs": {
+        "features": [0.5, 0.5, 0, 0, 1, 0]
+      }
+    },
+    {
+      "key": "familia.actividad.religioso",
+      "name": "Actividades religiosas",
+      "since": "M2",
+      "attrs": {
+        "features": [0.8, 0, 0, 0, 0.5, 0]
+      }
+    },
+    {
+      "key": "familia.actividad.social",
+      "name": "Actividades sociales",
+      "since": "M2",
+      "attrs": {
+        "features": [1, 0, 0, 0, 1, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.comercio",
+      "name": "Lugares de comercio",
+      "since": "M2",
+      "attrs": {
+        "features": [0.3, 0, 0.6, 0, 0.3, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.cultura",
+      "name": "Lugares de cultura",
+      "since": "M2",
+      "attrs": {
+        "features": [0.3, 0, 0, 0, 0.8, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.deporte",
+      "name": "Lugares de deporte",
+      "since": "M2",
+      "attrs": {
+        "features": [0.3, 0.6, 0, 0, 0.8, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.educacion",
+      "name": "Lugares de educación",
+      "since": "M2",
+      "attrs": {
+        "features": [0.6, 0, 0, 0.5, 0, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.espacio_publico",
+      "name": "Espacio público",
+      "since": "M2",
+      "attrs": {
+        "features": [0.5, 0, 0, 0, 0.6, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.finanzas",
+      "name": "Lugares de finanzas",
+      "since": "M2",
+      "attrs": {
+        "features": [0, 0, 1, 0, 0, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.gobierno",
+      "name": "Lugares de gobierno",
+      "since": "M2",
+      "attrs": {
+        "features": [0.5, 0, 0.3, 0, 0, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.industria",
+      "name": "Lugares de industria",
+      "since": "M2",
+      "attrs": {
+        "features": [0.3, 0.3, 0, 1, 0, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.ocio",
+      "name": "Lugares de ocio",
+      "since": "M2",
+      "attrs": {
+        "features": [0.6, 0, 0.3, 0, 1, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.religioso",
+      "name": "Lugares religiosos",
+      "since": "M2",
+      "attrs": {
+        "features": [0.8, 0, 0, 0, 0.3, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.salud",
+      "name": "Lugares de salud",
+      "since": "M2",
+      "attrs": {
+        "features": [0.3, 1, 0, 0, 0, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.servicios",
+      "name": "Lugares de servicios",
+      "since": "M2",
+      "attrs": {
+        "features": [0.3, 0, 0.3, 1, 0, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.territorio",
+      "name": "Unidades territoriales",
+      "since": "M2",
+      "attrs": {
+        "features": [0, 0, 0, 0, 0, 0.5]
+      }
+    },
+    {
+      "key": "familia.lugar.transporte",
+      "name": "Lugares de transporte",
+      "since": "M2",
+      "attrs": {
+        "features": [0.3, 0, 0, 0.3, 0, 0]
+      }
+    },
+    {
+      "key": "familia.lugar.vivienda",
+      "name": "Vivienda (lugar)",
+      "since": "M2",
+      "attrs": {
+        "features": [0, 0, 0, 0, 0, 1]
+      }
+    },
+    {
+      "key": "rol.jefe",
+      "name": "Jefe o jefa",
+      "since": "M2",
+      "attrs": {
+        "kind": "person_role",
+        "features": [1, 0, 0.3, 1, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.amenaza",
+      "name": "Amenaza",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0.5, 0, 0, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.aprobacion",
+      "name": "Aprobación",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0, 0, 0, 0.3, 0]
+      }
+    },
+    {
+      "key": "verbal.critica",
+      "name": "Crítica",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0, 0, 0, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.deuda",
+      "name": "Deuda",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [0.3, 0, 1, 0, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.dinero",
+      "name": "Dinero",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [0, 0, 1, 0, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.gota_a_gota",
+      "name": "Gota a gota (préstamo informal)",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [0.6, 0.3, 1, 0, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.trabajo",
+      "name": "Trabajo",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [0.3, 0, 0.5, 1, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.vivienda",
+      "name": "Vivienda",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [0, 0, 0.5, 0, 0, 1]
+      }
+    }
+  ]
+}

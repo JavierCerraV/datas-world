@@ -63,6 +63,7 @@ export type { Holiday } from './country/holidays.ts';
 export { seriesAt } from './country/series.ts';
 
 export { LIFE_CAPABILITIES, lifeRunner, lifeSystems } from './life.ts';
+export { buildOntology } from './stimuli/ontology.ts';
 export { generateEconomy } from './economy/generate.ts';
 export type { EconomyResult } from './economy/generate.ts';
 export { leisureParams, leisureTable } from './leisure/params.ts';

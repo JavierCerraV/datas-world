@@ -80,3 +80,5 @@ Las preguntas PA-001 a PA-039 son **todas** las de la §11 del documento rector 
 | PA-122 | ¿Qué rangos cuantitativos exigir en la batería? | 16 | 042 | Rangos ordinales y de forma | Datos experimentales comparables por fenómeno | abierta |
 | PA-123 | ¿Qué fenómenos faltan en la batería para cubrir §16 del documento rector? | 16 | 042 | 12 escenarios | Revisión experta de la batería | abierta |
 | PA-130 | ¿Qué topes por persona conservan la conducta verosímil? | — | 035 §7 | Tabla de topes de 035 §7 | Medición de sensibilidad en MF2–MF7 | abierta |
+| PA-131 | ¿Qué rasgos distinguen los estímulos para la generalización (dimensiones y valores por clase)? | — | 036 R-004 | 6 dimensiones [M]; lugares y actividades con los rasgos de su familia (generalización completa dentro de la familia) | Revisión experta; sensibilidad medida en MF3 | abierta |
+| PA-132 | ¿Qué mecanismo sostiene la evitación durante cientos de ensayos? | 16 | 036, 042 V-6 | Dos factores con conservación de la ansiedad: ≈ 52 de 100 (justo sobre el umbral) | Señales de seguridad (Dinsmoor, referencia a verificar) o evitación habitual; decidir en MF3 | abierta |

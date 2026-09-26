@@ -2,7 +2,7 @@
 // parches, para que la emoción llegue en el mismo tick que el hecho y con la personalidad (009) como filtro.
 import type { EventType } from '../events.ts';
 import type { Patch, WorldView } from '../simulation/system.ts';
-import { legacyTraits } from '../temperament/legacy.ts';
+import { elicitationGain } from '../functions/elicit.ts';
 
 type Emotion = 'joy' | 'sadness' | 'anger' | 'fear' | 'shame';
 
@@ -24,10 +24,11 @@ export function emotionPatches(view: WorldView, row: number, type: EventType): P
   const table = EVENT_EMOTIONS[type];
   if (!table) return [];
   const f = view.components.f32;
-  const { neuroticism: n, extraversion: e } = legacyTraits(view, row); // @deprecated: funciones elicitadas en MF2
+  // 036 R-001 (bloque MF2.5): la intensidad sale de la activación basal y de lo que el estímulo ya significa para la
+  // persona (su historia), no de un rasgo.
+  const k = elicitationGain(view, row, type);
   return Object.entries(table).map(([emotion, base]) => {
     const column = `emo.${emotion}`;
-    const k = emotion === 'joy' ? 0.5 + e : 0.5 + n;
     return { op: 'set', type: 'f32', column, row, value: Math.min(1, Math.max(f[column]![row]!, base * k)) } as Patch;
   });
 }

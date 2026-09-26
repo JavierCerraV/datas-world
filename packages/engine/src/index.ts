@@ -230,6 +230,42 @@ export { balanceOf } from './simulation/patches.ts';
 export { JobChanges, WORK_COLUMNS, WORK_SYSTEMS, defineWorkColumns, workLateSystem, workMarketSystem, workParams } from './work/index.ts';
 export type { WorkParams } from './work/index.ts';
 
+export {
+  EVENT_LEARNING,
+  LEARNING_DEFAULTS,
+  NEUTRAL,
+  WORLD_STIMULI,
+  createLearningSystem,
+  createOntology,
+  distance,
+  elicitationGain,
+  elicited,
+  emptyStore,
+  gradient,
+  isGeneralized,
+  learningParams,
+  netValue,
+  operant,
+  ownValue,
+  pair,
+  prune,
+  reinforcingValue,
+  sensitivityOf,
+  storeOf,
+} from './functions/index.ts';
+export type {
+  FunctionEntry,
+  FunctionStore,
+  Inhibition,
+  LearningParams,
+  LearningRule,
+  Ontology,
+  ResponseEntry,
+  Sensitivity,
+  StimulusClass,
+  Trial,
+} from './functions/index.ts';
+
 export { FORBIDDEN_TERMS, MECHANISMS, isMechanism } from './temperament/mechanisms.ts';
 export type { MechanismId } from './temperament/mechanisms.ts';
 /** @deprecated Adaptador temporal de la migración al motor funcional (035 §9); se elimina en MF7. */

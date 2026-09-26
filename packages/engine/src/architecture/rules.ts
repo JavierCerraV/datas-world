@@ -30,6 +30,7 @@ export interface ArchitecturePolicy {
 export const POLICY: ArchitecturePolicy = Object.freeze({
   temperamentReaders: [
     'packages/engine/src/temperament/',
+    'packages/engine/src/functions/', // mecanismos de la 036 (035 §5)
     'packages/engine/src/architecture/',
     'packages/generators/src/personality/',
     'packages/generators/src/architecture/',
@@ -40,7 +41,6 @@ export const POLICY: ArchitecturePolicy = Object.freeze({
   legacyImporters: {
     'packages/engine/src/needs/columns.ts': 'MF6.4',
     'packages/engine/src/needs/system.ts': 'MF6.4',
-    'packages/engine/src/needs/emotions.ts': 'MF2.5',
     'packages/engine/src/routines/columns.ts': 'MF7.3',
     'packages/engine/src/routines/system.ts': 'MF3.4',
     'packages/engine/src/decision/options.ts': 'MF3.4',
