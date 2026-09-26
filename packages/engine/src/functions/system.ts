@@ -7,6 +7,8 @@ import type { CountryProfile } from '../profile.ts';
 import type { DeepReadonly, Patch, System, SystemOutput, TickCtx, WorldView } from '../simulation/system.ts';
 import { pair, prune } from './learn.ts';
 import { EVENT_LEARNING } from './rules.ts';
+import { histOf, learnSelection } from './selection.ts';
+import type { HistState } from './selection.ts';
 import { sensitivityOf } from './sensitivity.ts';
 import { LEARNING_DEFAULTS, emptyStore } from './types.ts';
 import type { FunctionStore, LearningParams, Ontology } from './types.ts';
@@ -43,26 +45,34 @@ export function createLearningSystem(onto: Ontology): System {
     const P = learningParams(view.config.profile, view.config.epoch.slice(0, 10));
     const active = new Set(ctx.citizens);
     const stores = new Map<number, FunctionStore>();
+    const hists = new Map<number, HistState>();
     for (const e of ctx.events) {
       const rule = EVENT_LEARNING[e.type];
       if (!rule) continue;
       const stims = rule.stims(e, view).filter((s) => onto.classes.has(s));
       if (stims.length === 0) continue;
-      const lambda = typeof rule.lambda === 'number' ? rule.lambda : rule.lambda(e);
+      const lambda = typeof rule.lambda === 'number' ? rule.lambda : rule.lambda(e, view);
       const ctxKey = e.placeId ? `lugar.${view.places.get(e.placeId)?.kind ?? ''}` : '';
       for (const row of learners(e, view)) {
         if (!active.has(row)) continue;
         if (!stores.has(row)) stores.set(row, storeOf(view, row));
+        if (!hists.has(row)) hists.set(row, histOf(view, row));
         const store = stores.get(row)!;
         const sens = sensitivityOf(view, row);
         for (const stim of stims)
           pair(store, onto, { stim, ctx: ctxKey, now: ctx.now, lambda, us: rule.us, source: e.id, ...(rule.social ? { social: true } : {}) }, P, sens);
+        learnSelection(e, lambda, store, hists.get(row)!, P, sens);
       }
     }
     const patches: Patch[] = [];
     for (const [row, store] of [...stores].sort((a, b) => a[0] - b[0])) {
       prune(store, P);
       patches.push({ op: 'entity', id: formatId('CIT', row) as EntityId, fields: { functions: store } });
+      const h = hists.get(row)!;
+      const f = view.components.f32;
+      if (f['hist.discountK'] && h.k !== f['hist.discountK'][row]) patches.push({ op: 'set', type: 'f32', column: 'hist.discountK', row, value: h.k });
+      if (f['hist.variability'] && h.variability !== f['hist.variability'][row])
+        patches.push({ op: 'set', type: 'f32', column: 'hist.variability', row, value: h.variability });
     }
     return { patches };
   };

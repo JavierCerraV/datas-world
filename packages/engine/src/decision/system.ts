@@ -1,13 +1,16 @@
-// Sistema `decision` (spec 017): en los bloques flexibles de la rutina, la persona elige qué hacer con una
-// softmax sobre la utilidad de sus opciones y se compromete hasta que termine lo elegido. La acción elegida se
-// solicita al bucle, que la valida y la aplica (R-006, 021); si la primera no es posible, se elige otra.
+// Sistema `decision` (spec 040): en los bloques flexibles de la rutina, la persona elige qué hacer con una softmax
+// sobre el valor de sus candidatas (suma de aportes por fuente de control) y se compromete hasta que termine lo
+// elegido. La acción elegida se solicita al bucle, que la valida y la aplica (R-008, 021); si la primera no es
+// posible, se elige otra, y ese fracaso de la respuesta dominante sube la variabilidad aprendida (R-009).
 import { ACTIVITY, ACTIVITY_COLUMN } from '../activity.ts';
+import { variabilityOf } from '../functions/history.ts';
+import { learningParams } from '../functions/system.ts';
+import type { Ontology } from '../functions/types.ts';
 import { formatId } from '../ids.ts';
 import { homeOf } from '../mobility/columns.ts';
 import { occupancy } from '../mobility/enter.ts';
 import { mobilityParams } from '../mobility/params.ts';
 import type { Rng } from '../rng.ts';
-import { legacyTrait } from '../temperament/legacy.ts';
 import type { DayInfo } from '../routines/day.ts';
 import { dayInfo } from '../routines/day.ts';
 import { planAt } from '../routines/plan.ts';
@@ -15,45 +18,45 @@ import type { ActionRequest, Patch, System, SystemOutput, TickCtx, WorldView } f
 import type { LeisureTable } from './columns.ts';
 import { buildOptions, freeUntil } from './options.ts';
 import type { Option } from './options.ts';
+import { pickIndex, softmax, temperatureOf } from './select.ts';
 import { createActionValidator } from './validate.ts';
 
 const DAY = 1440;
-/** Temperatura base de la softmax (017 §8, prototipo) y bloque mínimo de flexibilidad para decidir. */
-const BASE_TEMPERATURE = 0.3;
+/** Bloque mínimo de flexibilidad para decidir. */
 const MIN_FLEXIBILITY = 0.5;
+/** 040 R-009: subida de la variabilidad cuando se rechaza la opción elegida [M]. */
+const VARIABILITY_ON_FAILURE = 0.05;
 
-/** Probabilidades de la softmax (INV-001: finitas, en [0,1] y suman 1). */
-export function softmax(utilities: readonly number[], temperature: number): number[] {
-  const max = Math.max(...utilities);
-  const w = utilities.map((u) => Math.exp((u - max) / temperature));
-  const total = w.reduce((s, x) => s + x, 0);
-  return w.map((x) => x / total);
-}
-
-/** Temperatura de la persona: más alta con más impulsividad (R-003). */
-export const temperatureOf = (impulsivity: number): number => BASE_TEMPERATURE * (0.6 + 0.8 * impulsivity);
-
-/** Elige una opción; si el validador la rechaza, la quita y vuelve a elegir entre las demás (R-006). */
-export function choose(view: WorldView, options: Option[], temperature: number, rng: Rng, validate: ReturnType<typeof createActionValidator>): Option | undefined {
+/**
+ * Elige una opción; si el validador la rechaza, la quita y vuelve a elegir entre las demás (R-008). Devuelve
+ * también cuántas se rechazaron.
+ */
+export function choose(
+  view: WorldView,
+  options: Option[],
+  temperature: number,
+  rng: Rng,
+  validate: ReturnType<typeof createActionValidator>,
+): { pick: Option | undefined; rejected: number } {
   let left = [...options];
+  let rejected = 0;
   while (left.length > 0) {
-    const p = softmax(left.map((o) => o.utility), temperature);
-    let x = rng.next();
-    let k = 0;
-    while (k < p.length - 1 && x >= p[k]!) x -= p[k++]!;
+    const k = pickIndex(softmax(left.map((o) => o.value), temperature), rng.next());
     const pick = left[k]!;
-    if (validate(view, pick.action).ok) return pick;
+    if (validate(view, pick.action).ok) return { pick, rejected };
+    rejected++;
     left = left.filter((_, j) => j !== k);
   }
-  return undefined;
+  return { pick: undefined, rejected };
 }
 
-export function createDecisionSystem(table: LeisureTable): System {
+export function createDecisionSystem(table: LeisureTable, onto?: Ontology): System {
   const validate = createActionValidator(table);
   /** `coarse` (nivel 1, 021 R-011): mantiene lo elegido cada tick, pero solo decide algo nuevo en punto cada hora. */
   const step = (view: WorldView, ctx: TickCtx, rng: Rng, coarse = false): SystemOutput => {
     const now = ctx.now;
     const P = mobilityParams(view.config.profile!, view.config.epoch.slice(0, 10));
+    const learning = learningParams(view.config.profile, view.config.epoch.slice(0, 10));
     const i = view.components.i32;
     const u = view.components.u8;
     const f = view.components.f32;
@@ -101,12 +104,14 @@ export function createDecisionSystem(table: LeisureTable): System {
       const id = formatId('CIT', row);
       const r = rng.fork(id);
       const options = buildOptions(
-        { view, row, now, here: i['loc.place']?.[row] ?? 0, home: homeOf(view, row), cap, day, occ, P, table },
+        { view, row, now, here: i['loc.place']?.[row] ?? 0, home: homeOf(view, row), cap, day, occ, P, table, ...(onto ? { onto, learning } : {}) },
         r,
       );
-      // @deprecated: la temperatura saldrá de la variabilidad aprendida (hist.variability) en MF3 (040 R-004).
-      const pick = choose(view, options, temperatureOf(legacyTrait(view, row, 'impulsivity')), r, validate);
+      const variability = variabilityOf(view, row);
+      const { pick, rejected } = choose(view, options, temperatureOf(variability), r, validate);
       if (pick) actions.push(pick.action);
+      if (rejected > 0 && f['hist.variability'])
+        patches.push({ op: 'set', type: 'f32', column: 'hist.variability', row, value: 1 - (1 - variability) * (1 - VARIABILITY_ON_FAILURE) ** rejected });
     }
     return { patches, actions };
   };

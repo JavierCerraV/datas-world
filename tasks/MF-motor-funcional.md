@@ -53,15 +53,15 @@ Specs: 009 v1.0 (aprobada), 035 (aprobada).
 - [x] MF2.6 Criterios: 036 CA-001–CA-005; 009 CA-E; `pnpm bench` con KB por persona (`docs/validaciones/MF2-bench-funciones.md`).
 
 ## Bloque MF3 — Selección de conducta (040, 036 R-009/R-012; rama `mf/3-seleccion`)
-- [ ] MF3.1 Estados aprendidos `hist.discountK` y `hist.variability`, inicializados por el temperamento.
-- [ ] MF3.2 Selección por fuentes de control:
+- [x] MF3.1 Estados aprendidos `hist.discountK` y `hist.variability`, inicializados por el temperamento.
+- [x] MF3.2 Selección por fuentes de control:
   - candidatas del repertorio y de la rutina como reglas;
   - operaciones motivadoras desde 010;
   - vector de aportes;
   - validador de 017 conservado.
-- [ ] MF3.3 Causas funcionales en los eventos de las decisiones (`LEISURE_DONE`, `ARRIVED_LATE`). La frecuencia del esparcimiento pasa a ser fuerza de respuesta.
-- [ ] MF3.4 Se retiran del adaptador la temperatura (impulsividad), la utilidad de las obligaciones (responsabilidad) y quedarse dormido por responsabilidad. 017 → `obsoleta`; 018 → `obsoleta`.
-- [ ] MF3.5 Criterios: 040 CA-001–CA-005; 042 V-4 y V-5.
+- [x] MF3.3 Causas funcionales en los eventos de las decisiones (`LEISURE_DONE` con sus fuentes y orígenes; `ARRIVED_LATE` cita `OVERSLEPT`, que cita el descuento). La fuerza aprendida de cada afición es una fuente; la frecuencia de la ficha queda como saciedad (intervalo del reforzador).
+- [x] MF3.4 Se retiran del adaptador la temperatura (impulsividad), la utilidad de las obligaciones (responsabilidad) y quedarse dormido por responsabilidad. 017 → `obsoleta`; 018 → `obsoleta`.
+- [x] MF3.5 Criterios: 040 CA-001–CA-006; 042 V-4 y V-5.
 
 ## Bloque MF4 — Red relacional (037; rama `mf/4-red`)
 - [ ] MF4.1 Grafo por persona con marcos, Crel y Cfunc; enseñanza por la comunidad verbal en las conversaciones del mundo (enganche mínimo con 025).

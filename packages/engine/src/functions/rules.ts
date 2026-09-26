@@ -4,6 +4,7 @@
 import type { EventType, WorldEvent } from '../events.ts';
 import type { EntityId } from '../ids.ts';
 import type { WorldView } from '../simulation/system.ts';
+import { leisureStrength0 } from './history.ts';
 
 /** Términos verbales y estados del cuerpo que usan las reglas; la ontología del mundo (generadores) los incluye. */
 export const WORLD_STIMULI = Object.freeze([
@@ -16,7 +17,7 @@ export interface LearningRule {
   main: string;
   /** Estímulos presentes en el evento (el principal primero). */
   stims: (e: WorldEvent, view: WorldView) => string[];
-  lambda: number | ((e: WorldEvent) => number);
+  lambda: number | ((e: WorldEvent, view: WorldView) => number);
   us: string;
   social?: boolean;
 }
@@ -33,7 +34,13 @@ export const EVENT_LEARNING: Readonly<Partial<Record<EventType, LearningRule>>> 
       const kind = placeKind(v, p.placeId);
       return [`actividad.${p.activity}`, ...(kind ? [`lugar.${kind}`] : [])];
     },
-    lambda: 0.4,
+    // 040 R-009 [M]: cuánto disfruta esa persona esa actividad; la afinidad de la ficha (032) resume su historia
+    // hasta la historia sintética (MF7).
+    lambda: (e, v) => {
+      const p = payload<{ citizenId: string; activity: string }>(e);
+      const affinity = v.citizens.get(p.citizenId as EntityId)?.leisure?.find((l) => l.key === p.activity)?.affinity ?? 0.5;
+      return leisureStrength0(affinity);
+    },
     us: 'cuerpo.disfrute',
   },
   JOB_HIRED: {

@@ -5,7 +5,7 @@ import { formatId } from '../ids.ts';
 import { needsParams } from '../needs/params.ts';
 import type { Patch, System, SystemEvent, SystemOutput, TickCtx, WorldView } from '../simulation/system.ts';
 import type { Rng } from '../rng.ts';
-import { legacyTrait } from '../temperament/legacy.ts';
+import { discountKOf, discounted } from '../functions/history.ts';
 import { dayInfo } from './day.ts';
 import { isEarlyDay, planAt } from './plan.ts';
 
@@ -14,6 +14,14 @@ const DAY = 1440;
 const OVERSLEEP_ENERGY = 0.72;
 /** Minutos de retraso desde los que se registra `OVERSLEPT`. */
 const OVERSLEPT_MIN = 10;
+/** 040 R-010: demora de la consecuencia de llegar tarde (la advertencia llega días después) [M]. */
+const LATE_DELAY_DAYS = 5;
+
+/**
+ * 040 R-010: multiplicador del exceso de sueño por falta de energía. Quien descuenta mucho la consecuencia demorada
+ * de llegar tarde se queda dormido más: 0,39 con k = 0,02, 0,8 con k = 0,2 y 1,21 con k = 2 (antes, 1,3 − responsabilidad).
+ */
+export const oversleepFactor = (k: number): number => 1.3 - discounted(1, LATE_DELAY_DAYS, k);
 
 function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
   const f = view.components.f32;
@@ -46,8 +54,7 @@ function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
         const wake = wakeDay + (isEarlyDay(view, row, tomorrow) ? i['routine.wakeW']![row]! : i['routine.wakeE']![row]!);
         const stress = f['state.stress']![row]!;
         const proj = Math.min(1, f['need.energy']![row]! + ((wake - ctx.now) / 60) * R.energyRest! * (1 - R.restStress! * stress));
-        const conscientiousness = legacyTrait(view, row, 'conscientiousness'); // @deprecated: se retira en MF3
-        let over = proj < OVERSLEEP_ENERGY ? Math.round((OVERSLEEP_ENERGY - proj) * 200 * (1.3 - conscientiousness)) : 0;
+        let over = proj < OVERSLEEP_ENERGY ? Math.round((OVERSLEEP_ENERGY - proj) * 200 * oversleepFactor(discountKOf(view, row))) : 0;
         over += Math.round(i['state.sleepDebt']![row]! * 0.1);
         over = Math.max(0, over + rng.fork(id).int(-5, 8));
         wakeRows.push(row);
@@ -67,7 +74,7 @@ function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
         causes: [
           { state: 'deuda_de_sueno', entity: id, value: i['state.sleepDebt']![row]!, weight: 0.5 },
           { state: 'energia', entity: id, value: Math.round(f['need.energy']![row]! * 100) / 100, weight: 0.3 },
-          { state: 'responsabilidad', entity: id, value: Math.round(legacyTrait(view, row, 'conscientiousness') * 100) / 100, weight: 0.2 },
+          { state: 'descuento', entity: id, value: Math.round(discountKOf(view, row) * 100) / 100, weight: 0.2 },
         ],
       });
     }

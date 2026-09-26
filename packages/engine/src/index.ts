@@ -205,10 +205,15 @@ export {
   defineDecisionColumns,
   explainCauses,
   freeUntil,
+  OBLIGATION_DELAY_DAYS,
+  pickIndex,
   softmax,
+  STRENGTH_REF,
+  STRENGTH_SCALE,
+  strengthContribution,
   temperatureOf,
 } from './decision/index.ts';
-export type { ActionParams, DecisionCtx, Factor, LeisureActivity, LeisureTable, Option } from './decision/index.ts';
+export type { ActionParams, ControlSource, DecisionCtx, LeisureActivity, LeisureTable, Option, SourceContribution } from './decision/index.ts';
 
 export {
   ECONOMY_COLUMNS,
@@ -237,8 +242,18 @@ export {
   WORLD_STIMULI,
   createLearningSystem,
   createOntology,
+  DEFAULT_K,
+  DEFAULT_VARIABILITY,
+  discounted,
+  discountKOf,
   distance,
   elicitationGain,
+  initLearnedStates,
+  K_MAX,
+  K_MIN,
+  leisureResponse,
+  leisureStrength0,
+  variabilityOf,
   elicited,
   emptyStore,
   gradient,
