@@ -10,6 +10,8 @@ import { leisureStrength0 } from './history.ts';
 export const WORLD_STIMULI = Object.freeze([
   'verbal.trabajo', 'verbal.dinero', 'verbal.deuda', 'verbal.gota_a_gota', 'verbal.vivienda', 'verbal.critica',
   'verbal.aprobacion', 'verbal.amenaza', 'rol.jefe', 'cuerpo.enfermedad', 'cuerpo.dolor', 'cuerpo.disfrute',
+  // Los que enseña la comunidad verbal (037 R-007) y el despido (MF4).
+  'verbal.despido', 'verbal.llegar_tarde', 'verbal.no_pagar',
 ] as const);
 
 export interface LearningRule {
@@ -55,7 +57,7 @@ export const EVENT_LEARNING: Readonly<Partial<Record<EventType, LearningRule>>> 
   },
   SALARY_PAID: { main: 'verbal.trabajo', stims: () => ['verbal.trabajo'], lambda: 0.3, us: 'verbal.dinero' },
   JOB_WARNING: { main: 'rol.jefe', stims: () => ['rol.jefe', 'verbal.trabajo'], lambda: -0.4, us: 'verbal.critica', social: true },
-  JOB_LOST: { main: 'verbal.trabajo', stims: () => ['verbal.trabajo', 'rol.jefe'], lambda: -0.8, us: 'verbal.critica' },
+  JOB_LOST: { main: 'verbal.trabajo', stims: () => ['verbal.trabajo', 'verbal.despido', 'rol.jefe'], lambda: -0.8, us: 'verbal.critica' },
   FELL_ILL: { main: 'cuerpo.enfermedad', stims: () => ['cuerpo.enfermedad'], lambda: -0.5, us: 'cuerpo.dolor' },
   DEBT_TAKEN: {
     main: 'verbal.deuda',

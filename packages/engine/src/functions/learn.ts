@@ -54,6 +54,15 @@ export function netValue(store: FunctionStore, onto: Ontology, stim: string, ctx
   return clamp1(v);
 }
 
+/**
+ * Función directa de un estímulo (037 R-003): su valor neto aprendido o, si no tiene y es un reforzador primario
+ * (036 R-007), su valor primario (±1).
+ */
+export function directValue(store: FunctionStore | undefined, onto: Ontology, stim: string, ctx: string, now: number, P: LearningParams): number {
+  const v = store ? netValue(store, onto, stim, ctx, now, P) : 0;
+  return v !== 0 ? v : (onto.classes.get(stim)?.primary ?? 0);
+}
+
 function entryFor(store: FunctionStore, stim: string, ctx: string, now: number): FunctionEntry {
   let f = store.f.find((x) => x.s === stim);
   if (!f) {

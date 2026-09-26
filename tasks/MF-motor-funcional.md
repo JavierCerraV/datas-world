@@ -64,10 +64,10 @@ Specs: 009 v1.0 (aprobada), 035 (aprobada).
 - [x] MF3.5 Criterios: 040 CA-001–CA-006; 042 V-4 y V-5.
 
 ## Bloque MF4 — Red relacional (037; rama `mf/4-red`)
-- [ ] MF4.1 Grafo por persona con marcos, Crel y Cfunc; enseñanza por la comunidad verbal en las conversaciones del mundo (enganche mínimo con 025).
-- [ ] MF4.2 Vinculación mutua y combinatoria perezosa con caché; transformación de funciones por marco.
-- [ ] MF4.3 Métricas de red (037 R-008).
-- [ ] MF4.4 Criterios: 037 CA-001–CA-004; 042 V-7, V-8 y V-11a.
+- [x] MF4.1 Grafo por persona con marcos, Crel y Cfunc; enseñanza por la comunidad verbal en los eventos con hablante (`JOB_WARNING`, gota a gota), sin conversaciones hasta M3 (025).
+- [x] MF4.2 Vinculación mutua y combinatoria perezosa con caché; transformación de funciones por marco.
+- [x] MF4.3 Métricas de red (037 R-008).
+- [x] MF4.4 Criterios: 037 CA-001–CA-005; 042 V-7, V-8 y V-11a. CA-004 se cumple con ≤ 2 relaciones por estímulo; con redes muy densas queda abierto (PA-110).
 
 ## Bloque MF5 — Reglas, valores y augmentals (038; rama `mf/5-reglas-valores`)
 - [ ] MF5.1 Reglas: pliance, tracking y augmenting con su historia; competencia con las contingencias.

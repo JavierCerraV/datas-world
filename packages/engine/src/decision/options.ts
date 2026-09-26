@@ -5,7 +5,9 @@
 import type { ActivityKind } from '../activity.ts';
 import type { CauseRef } from '../events.ts';
 import { discountKOf, discounted, leisureResponse, leisureStrength0 } from '../functions/history.ts';
-import { netValue } from '../functions/learn.ts';
+import { directValue } from '../functions/learn.ts';
+import { functionalValue } from '../relations/derive.ts';
+import type { RelationalNetwork } from '../relations/types.ts';
 import type { FunctionStore, LearningParams, Ontology } from '../functions/types.ts';
 import { formatId } from '../ids.ts';
 import type { EntityId } from '../ids.ts';
@@ -128,12 +130,26 @@ function routineSources(activity: ActivityKind, energy: number, k: number): Sour
   }
 }
 
-/** 040 R-003: funciones aversivas presentes (actividad y lugar) en una respuesta de acercamiento. */
-function aversion(c: DecisionCtx, store: FunctionStore | undefined, stims: readonly string[], ctx: string): SourceContribution | undefined {
-  if (!store || !c.onto || !c.learning) return undefined;
-  const v = stims.reduce((s, x) => s + netValue(store, c.onto!, x, ctx, c.now, c.learning!), 0);
+/**
+ * 040 R-003: funciones aversivas presentes (actividad y lugar) en una respuesta de acercamiento. Es el valor
+ * funcional (037 R-006): el aprendido o el derivado por la red relacional, si es mayor.
+ */
+function aversion(
+  c: DecisionCtx,
+  store: FunctionStore | undefined,
+  net: RelationalNetwork | undefined,
+  stims: readonly string[],
+  ctx: string,
+): SourceContribution | undefined {
+  if ((!store && !net) || !c.onto || !c.learning) return undefined;
+  const directOf = (s: string) => directValue(store, c.onto!, s, ctx, c.now, c.learning!);
+  const values = stims.map((x) => functionalValue(net, directOf, x, ctx));
+  const v = values.reduce((s, x) => s + x.value, 0);
   if (v >= 0) return undefined;
-  const origins = store.f.filter((f) => stims.includes(f.s) && f.v < 0).flatMap((f) => f.src);
+  const origins = [
+    ...(store?.f.filter((f) => stims.includes(f.s) && f.v < 0).flatMap((f) => f.src) ?? []),
+    ...values.flatMap((x) => (x.derived && net ? x.derived.path.flatMap((k) => net.e[k]?.src ?? []) : [])),
+  ];
   return { source: 'aversion', contribution: 0.5 * v, ref: stims.join('+'), origins };
 }
 
@@ -173,6 +189,7 @@ export function buildOptions(c: DecisionCtx, rng: Rng): Option[] {
   // Aficiones de la ficha (032 R-006), en orden de clave.
   const person = view.citizens.get(id);
   const store = person?.functions as FunctionStore | undefined; // solo se lee (netValue no muta)
+  const relNet = person?.network as RelationalNetwork | undefined;
   const net = networkOf(view);
   for (const interest of [...(person?.leisure ?? [])].sort((a, b) => (a.key < b.key ? -1 : 1))) {
     const a = c.table[interest.key];
@@ -219,7 +236,7 @@ export function buildOptions(c: DecisionCtx, rng: Rng): Option[] {
       { source: 'coste', contribution: -0.25 * Math.min(2, best.out / 60), ref: 'viaje' },
       { source: 'coste', contribution: -0.3 * a.physical * Math.max(0, 0.5 - energy), ref: 'need.energy' },
     ];
-    const av = aversion(c, store, [`actividad.${interest.key}`, ...(placeKind ? [`lugar.${placeKind}`] : [])], placeKind ? `lugar.${placeKind}` : '');
+    const av = aversion(c, store, relNet, [`actividad.${interest.key}`, ...(placeKind ? [`lugar.${placeKind}`] : [])], placeKind ? `lugar.${placeKind}` : '');
     if (av) sources.push(av);
     add(
       'leisure',
