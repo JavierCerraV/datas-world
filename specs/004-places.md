@@ -1,7 +1,7 @@
 ---
 id: 004
 nombre: places
-estado: aprobada
+estado: implementada
 hito: M1 (generación) · M2 (ocupación y horarios)
 depende_de: [003, 029]
 version: 0.4
@@ -108,3 +108,4 @@ Lugares por tipo y barrio, viviendas libres y ocupadas tras la generación, y, d
 | 2026-09-24 | 0.4 | Implementación del bloque C: edificios "Edificio NN" con viviendas "Vivienda NN-A…"; capacidad de vivienda `DWELLING_CAPACITY` = 6; la iglesia ocupa la primera parcela de la tercera manzana de San Martín; la atmósfera (`ambience`) no se genera en M1 porque solo la usa la R-006 (M3); la capacidad de los lugares de uso llega con la R-004 (M2). Sin cambios en CA |
 | 2026-09-25 | 0.4 | Spec 033 (bloque J): un horario puede cerrar después de medianoche, hasta las 06:00 del día siguiente (`close` ≤ 1800), para bares y discotecas; un lugar regional, fuera del mapa, lleva `travel` (minutos y coste) y no tiene rectángulo; con la plantilla de Data's World, `PLACE_LAYOUT` sale de la dotación de la 033 y los lugares repetidos llevan nombres distintos. Sin cambios en CA: CA-002 sigue refiriéndose a la plantilla del prototipo |
 | 2026-09-25 | 0.4 | Bloque D de M2: R-003 a R-005, CA-004 y CA-005 en el módulo `mobility` del motor (`enterRefusal`: cerrado, lleno; quien trabaja ahí con turno siempre entra; los cierres después de medianoche cuentan para el día anterior). Al llegar a un lugar cerrado o lleno, la persona vuelve a casa hasta que el motor de decisiones (017) reprograme. `transporte.paradero` pasa a M1 en `place_kinds` (2026.09.4). Sin cambios en CA |
+| 2026-09-26 | 0.4 | Estado → implementada |

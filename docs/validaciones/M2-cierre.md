@@ -34,6 +34,6 @@ Desde ADR-007 el prototipo solo es referencia de mundo, economía y parte visual
 - **Mundos nuevos:** nacen con la vida diaria y los mundos de M1 siguen estáticos. La CLI y el worker avanzan con `lifeRunner`.
 
 ## Pendiente de decisión del usuario
-- Pasar a `implementada` las specs con todos sus criterios cubiertos: **004, 006, 010, 011, 015 y 016**. La 005 y la 008 tienen criterios de M3; la 017 y la 021 tienen criterios de M3, M4 o M7.
+- ✔ El usuario aprobó (2026-09-25) pasar a `implementada` las specs con todos sus criterios cubiertos: **004, 006, 010, 011, 015 y 016**. La 005 y la 008 tienen criterios de M3; la 017 y la 021, de M3, M4 o M7.
 - Transferencias públicas (Colombia Mayor, Renta Ciudadana) para los 16 hogares sin ingresos: hoy quedan para M3 (opción b).
 - Siguiente: el plan MF (`tasks/MF-motor-funcional.md`), bloques MF2 a MF8, antes de M3.

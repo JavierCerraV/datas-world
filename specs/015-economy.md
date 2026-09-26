@@ -1,7 +1,7 @@
 ---
 id: 015
 nombre: economy
-estado: aprobada
+estado: implementada
 hito: M2
 depende_de: [006, 007, 008, 021, 029, 031, 032, 033]
 version: 0.2
@@ -112,3 +112,4 @@ Todo en enteros de COP (R-001). Coste: ≈ 16 B por persona, más ≈ 40 B por d
 | 2026-09-25 | 0.2 | Estado → aprobada |
 | 2026-09-25 | 0.2 | Implementación del bloque F de M2. Precisiones [M]: (1) todo movimiento es un parche `transfer` entre cuentas (persona `money`, hogar `savings`, organización `cash`, resto del país), así que R-006 se cumple por construcción; (2) los gastos del hogar los pagan sus adultos (de más a menos saldo) y después el ahorro; (3) alimentación con escala de equivalencia (menores de 12 = 0,6) a la tienda de barrio del distrito, y un rubro de "otros gastos" = 35 % del ingreso esperado del hogar (vestuario, comunicaciones, educación…), porque sin él el patrimonio crecía de forma irreal; (4) las organizaciones privadas venden a clientes de fuera (nómina/30 × U(0,8, 1,3)) y a los vecinos, y lo que pasa de 3 meses de nómina sale a proveedores y dueños; las públicas reciben su nómina del resto del país; (5) topes de crédito: banco ≤ 3 sueldos de deuda, gota a gota ≤ $1 000 000, así que un hogar sin ingresos termina en impago; (6) una cuota atrasada emite evento la primera vez y cada 30; (7) las cuotas no piden préstamos nuevos; (8) sin `economy.*` en el perfil (prototipo) no hay economía. Hallazgo: 16 de 72 hogares del mundo generado no tienen ningún ingreso (mayores sin pensión, desempleados) y viven en déficit crónico; faltan las transferencias de §10 y la red familiar (M3). Sin cambios en CA |
 | 2026-09-25 | 0.2 | Bloque H de M2, CA-006 (diferencia justificada): con el perfil colombiano, 100 personas y 1 año, el patrimonio de los adultos (saldo − deudas) queda en p10 −$0,95 M, p50 $7,5 M y p90 $22 M, frente a −$4,7 M, $0,21 M y $17 M del prototipo. El prototipo no tiene ahorro del hogar, crédito con tope ni gasto proporcional al ingreso, y su costo diario fijo por estrato endeuda a la mitad de la población; aquí los hogares con empleo formal ahorran y los sin ingresos se endeudan con tope (ver el hallazgo de los 16 hogares sin ingresos). El perfil prototipo no tiene economía (su dinero no se mueve), así que no se compara. Sin cambios en CA |
+| 2026-09-26 | 0.2 | Estado → implementada |

@@ -1,7 +1,7 @@
 ---
 id: 016
 nombre: mobility
-estado: aprobada
+estado: implementada
 hito: M2
 depende_de: [003, 004, 005, 015, 021, 033]
 version: 0.2
@@ -78,3 +78,4 @@ Viajes por modo y por destino, minutos de retraso por mes, gasto en transporte p
 | 2026-09-25 | 0.2 | Estado → aprobada |
 | 2026-09-25 | 0.2 | Implementación del bloque D de M2 (módulo `mobility` del motor). Precisiones: el viaje en curso ocupa 21 B por persona (se guardan también el origen y la salida); dónde se hace cada actividad de la rutina (casa, trabajo, colegio por edad, plaza para el trabajo informal, alcaldía para buscar empleo, corresponsal para diligencias); se sale a tiempo mirando 30 min adelante con la estimación sin ruido del viaje de la persona más 5 min de margen; en bicicleta desde 400 m; con dificultad para caminar, a media velocidad o en el carro del hogar; a La Capital en vehículo propio (80 % del tiempo del bus, 45 km de combustible) o en bus desde el paradero; sin pasaje no hay viaje. Los parámetros van en el perfil como `mobility.speeds`, `mobility.fuelPerKm` (por confirmar), `mobility.bus`, `mobility.intercity` y `mobility.habits`. `ARRIVED_LATE` cita el `OVERSLEPT` de hoy gracias a `recordAs` (021). La moto del hogar se añade al catálogo de objetos (005). Sin cambios en CA |
 | 2026-09-25 | 0.2 | Bloque E de M2: la movilidad lleva al lugar elegido por el motor de decisiones mientras dura lo elegido y lo cancela si está cerrado o lleno; la estimación de un viaje (`planTrip` sin azar) no mira el dinero. Sin cambios en CA |
+| 2026-09-26 | 0.2 | Estado → implementada |

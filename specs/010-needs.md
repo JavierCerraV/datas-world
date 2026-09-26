@@ -1,7 +1,7 @@
 ---
 id: 010
 nombre: needs
-estado: aprobada
+estado: implementada
 hito: M2 (5 necesidades, emociones, estrés, ánimo, enfermedad aguda) · M3 (seguridad, autonomía, propósito)
 depende_de: [007, 009, 021, 031, 032]
 version: 0.2
@@ -121,3 +121,4 @@ Distribuciones de necesidades, emociones, estrés y ánimo en la prueba de 100 p
 | 2026-09-25 | 0.2 | Bloque MF1 (ADR-007, 035 §9): los rasgos que usan las necesidades y las emociones (neuroticismo, extraversión, resiliencia) se leen por el adaptador @deprecated de la 009 v1.0; la resiliencia pasa a ser 1 − sensibilidad aversiva. Caduca en MF2.5 (emociones) y MF6.4 (estresores y ánimo), cuando salen de funciones y carga aversiva. Sin cambios en CA |
 | 2026-09-25 | 0.2 | Bloque F de M2: la presión por deuda (015 R-005) es un estresor (`needs.stress.debt` = 0,12), y el préstamo del gota a gota da miedo y vergüenza (`DEBT_TAKEN` en la tabla de R-005). Sin cambios en CA |
 | 2026-09-25 | 0.2 | Bloque H de M2: la compañía de R-001 pasa a medirse por ocupación, como en el prototipo (despierto y con otra persona despierta en el mismo lugar, `loc.place` de la 016), en lugar de la aproximación por actividad. Con la aproximación, descansar en casa con la familia contaba como soledad y el ánimo medio de un año caía a 0,28–0,32. CA-002 y CA-006 verificados con `validate:parity` (perfil colombiano, 100 personas, 1 año: ánimo 0,463, estrés 0,280, enfermedad aguda 2,54 por persona y año; `docs/validaciones/M2-anio-CO.md`). Sin cambios en CA |
+| 2026-09-26 | 0.2 | Estado → implementada |
