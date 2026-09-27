@@ -6,9 +6,9 @@ Cada módulo (paquete, app o sistema del motor) tiene un `MODULE.md` que se actu
 
 | Módulo | Estado | Specs | Último cambio |
 |---|---|---|---|
-| [`apps/api`](../apps/api/MODULE.md) | planificado | 022 | 2026-09-23 · Solo `package.json` del workspace. Sin `src/` hasta que su spec esté aprobada (el guardarraíl lo bloquea) |
+| [`apps/api`](../apps/api/MODULE.md) | en-desarrollo | 022 | 2026-09-26 · Primera implementación: `views.ts`, `reader.ts`, `server.ts` (Fastify, SSE, controles con basic auth) y `main.ts`. Dependencias: `fastify`, `zod`, `@datas-world/engine` |
 | [`apps/cli`](../apps/cli/MODULE.md) | en-desarrollo | 001, 002, 009, 010, 015, 021, 023, 027, 029, 030 | 2026-09-26 · Comando nuevo `bench:relations` (`bench-relations.ts`): tiempo del valor funcional de un estímulo para 200 personas con 500 relaciones, con redes de 100, 250 y 500 estímulos (037 CA-004) |
-| [`apps/web`](../apps/web/MODULE.md) | planificado | 024 | 2026-09-23 · Solo `package.json` del workspace. Sin `src/` hasta que su spec esté aprobada (el guardarraíl lo bloquea) |
+| [`apps/web`](../apps/web/MODULE.md) | en-desarrollo | 024, 022 | 2026-09-27 · CA-001 y CA-003 aceptados en la revisión del usuario |
 | [`apps/worker`](../apps/worker/MODULE.md) | en-desarrollo | 002, 027, 021 | 2026-09-25 · El worker avanza con la vida diaria (`lifeRunner` de los generadores, que pasan a ser dependencia del worker); un mundo de M1 solo avanza el reloj |
 | [`packages/engine`](../packages/engine/MODULE.md) | en-desarrollo | 001, 002, 003, 004, 005, 006, 007, 008, 009, 014, 023, 029, 030, 035 | 2026-09-26 · Módulo nuevo `src/rules/` (capa 4: reglas y valores). `Citizen.rules`. `index.ts` exporta su API |
 | [`packages/engine/src/architecture`](../packages/engine/src/architecture/MODULE.md) | en-desarrollo | 009, 035 | 2026-09-26 · `POLICY.legacyImporters` ya no incluye `decision/options.ts`, `decision/system.ts` ni `routines/system.ts`. La prueba usa `needs/system.ts` como importador vigente y comprueba que `decision/system.ts` queda no autorizado (040 CA-004) |
@@ -42,4 +42,4 @@ Cada módulo (paquete, app o sistema del motor) tiene un `MODULE.md` que se actu
 | [`packages/generators/src/population`](../packages/generators/src/population/MODULE.md) | en-desarrollo | 001, 007, 008, 009, 014, 029, 035 | 2026-09-25 · Por persona, `generatePersonality` (descriptores) y `generateTemperament` (parámetros `tmp.*`, flujo `gen:temperament`); catálogos `personality_traits` y `temperament_params` en lugar de `personal_values` |
 | [`packages/generators/src/stimuli`](../packages/generators/src/stimuli/MODULE.md) | en-desarrollo | 036, 029, 040, 038 | 2026-09-26 · La prueba del mundo comprueba también 038 CA-005 (sin columnas `val.*`) y que los adultos tienen las 5 reglas de su rutina |
 | [`packages/llm-gateway`](../packages/llm-gateway/MODULE.md) | planificado | 026 | 2026-09-23 · Documento creado (sin código) |
-| [`packages/persistence`](../packages/persistence/MODULE.md) | en-desarrollo | 027, 015 | 2026-09-25 · El repositorio guarda y carga las cuentas del sistema (`World.accounts`, 015) en la clave `accounts` de `meta`, en cada guardado; los mundos sin economía no la tienen |
+| [`packages/persistence`](../packages/persistence/MODULE.md) | en-desarrollo | 027, 015 | 2026-09-26 · `EventQuery`: `afterId` (eventos registrados después de un id, para el SSE) y `latest` (los `limit` más recientes, en orden de inserción) |

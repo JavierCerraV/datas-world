@@ -4,5 +4,10 @@
   "private": true,
   "type": "module",
   "description": "API HTTP y SSE de solo lectura",
-  "dependencies": { "@datas-world/persistence": "workspace:*" }
+  "dependencies": {
+    "@datas-world/engine": "workspace:*",
+    "@datas-world/persistence": "workspace:*",
+    "fastify": "^5.12.5",
+    "zod": "^4.6.5"
+  }
 }

@@ -29,9 +29,9 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [019](019-causality.md) | Causalidad | M3 | 014 | borrador | — |
 | [020](020-history.md) | Historia e informe de vida | M3 | 014, 019, 013 | borrador | — |
 | [021](021-simulation.md) | Bucle de simulación, registro de sistemas y niveles de detalle | M2 (registro de sistemas, niveles 1 y 2) · M3–M4 (niveles 3 y 4, observación) · M7 (nivel 0, escala) | 001, 002, 017, 014 | aprobada | `apps/cli`, `apps/worker`, `packages/engine/src/decision`, `packages/engine/src/economy`, `packages/engine/src/functions`, `packages/engine/src/mobility`, `packages/engine/src/needs`, `packages/engine/src/routines`, `packages/engine/src/simulation`, `packages/engine/src/work` |
-| [022](022-observability.md) | Observación, API y métricas | M4 | 027, 019, 020 | borrador | `apps/api` |
+| [022](022-observability.md) | Observación, API y métricas | M4 (versión mínima adelantada: bloque V) | 027, 019, 020 | aprobada | `apps/api`, `apps/web` |
 | [023](023-reproducibility.md) | Reproducibilidad y azar | M0 (base) · M5 (rewind/replay y ramas) | 001, 002 | aprobada | `apps/cli`, `packages/engine`, `packages/engine/src/simulation`, `packages/generators` |
-| [024](024-visualization.md) | Visualización pixel art | M4 | 022, 003, 004 | borrador | `apps/web` |
+| [024](024-visualization.md) | Visualización pixel art | M4 (versión mínima adelantada: bloque V) | 022, 003, 004 | aprobada | `apps/web` |
 | [025](025-knowledge.md) | Conocimiento, creencias y rumores | M3 | 012, 013, 014 | borrador | — |
 | [026](026-llm-gateway.md) | Pasarela LLM | M6 | 017, 025, 021 | borrador | `packages/llm-gateway` |
 | [027](027-persistence.md) | Persistencia | M0 (base) · M4 (retención) | 001, 002, 014 | aprobada | `apps/cli`, `apps/worker`, `packages/persistence` |

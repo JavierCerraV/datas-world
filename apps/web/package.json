@@ -4,5 +4,11 @@
   "private": true,
   "type": "module",
   "description": "Visor pixel art (solo lee de la API)",
-  "dependencies": {}
+  "devDependencies": {
+    "vite": "^8.3.1"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  }
 }

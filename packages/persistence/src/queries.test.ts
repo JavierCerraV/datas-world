@@ -38,6 +38,10 @@ describe('consultas del registro de eventos (030 R-008)', () => {
     expect(queryEvents(db, { types: ['UNION_FORMED'] }).map((e) => e.id)).toEqual([later.id]);
     expect(queryEvents(db, { participant: a }).map((e) => e.id)).toEqual([earlier.id, later.id]);
     expect(queryEvents(db, { place: plc }).map((e) => e.id)).toEqual([born.id]);
+    // 022: posteriores a un id (orden de inserción) y los más recientes, en orden cronológico de inserción.
+    expect(queryEvents(db, { afterId: later.id }).map((e) => e.id)).toEqual([earlier.id, born.id]);
+    expect(queryEvents(db, { participant: a, latest: true, limit: 1 }).map((e) => e.id)).toEqual([earlier.id]);
+    expect(queryEvents(db, { latest: true, limit: 2 }).map((e) => e.id)).toEqual([earlier.id, born.id]);
     expect(queryEvents(db, { limit: 1 })).toHaveLength(1);
     expect(eventsById(db, [later.id, 'EVT-99999999' as typeof later.id]).map((e) => e.payload)).toEqual([{ a, b }]);
     closeDb(db);
