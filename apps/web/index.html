@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Data's World · Visor</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header>
+      <strong id="title">Data's World</strong>
+      <span id="date">—</span>
+      <span id="live">○ conectando…</span>
+      <span id="pop"></span>
+      <span id="fps"></span>
+    </header>
+    <main>
+      <div class="mapwrap">
+        <canvas id="map" aria-label="Mapa del pueblo. Arrastra para moverte y haz clic en una persona para ver su ficha."></canvas>
+        <div class="ctl" role="toolbar" aria-label="Controles de tiempo y zoom">
+          <button id="btn-pause" title="Pausar o reanudar (espacio)">⏯ Pausa</button>
+          <button id="btn-step" title="Avanzar un paso">⏭ Paso</button>
+          <button id="btn-slower" title="Más lento (−)">− Velocidad</button>
+          <button id="btn-faster" title="Más rápido (+)">+ Velocidad</button>
+          <button id="btn-zout" title="Alejar">−</button>
+          <span id="zoom">×3</span>
+          <button id="btn-zin" title="Acercar">+</button>
+        </div>
+        <p id="msg" role="status" aria-live="polite"></p>
+      </div>
+      <aside>
+        <section id="inspector" hidden aria-labelledby="insp-name">
+          <div class="insp-head">
+            <h2 id="insp-name"></h2>
+            <button id="insp-close" aria-label="Cerrar la ficha (Esc)">✕</button>
+          </div>
+          <div class="tabs" role="tablist">
+            <button role="tab" data-tab="estado" aria-selected="true">Estado</button>
+            <button role="tab" data-tab="historia">Historia</button>
+            <button role="tab" data-tab="funcional">Funcional</button>
+          </div>
+          <div id="insp-body"></div>
+        </section>
+        <section class="logbox" aria-label="Lo que va pasando">
+          <h2>Lo que va pasando</h2>
+          <ul id="log"></ul>
+        </section>
+      </aside>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

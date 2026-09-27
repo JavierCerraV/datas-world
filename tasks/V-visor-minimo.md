@@ -11,8 +11,8 @@ Specs: 022 v0.2 y 024 v0.2 (versiones mínimas). Rama `visor/minimo`.
 - [x] V1.4 Criterios: 022 CA-001 a CA-004.
 
 ## Bloque V2 — Visor (024)
-- [ ] V2.1 `apps/web` con Vite + TS + Canvas 2D: mapa, lugares, personas, día y noche, cámara.
-- [ ] V2.2 Inspector (Estado, Historia, Funcional), registro de eventos y controles de tiempo.
-- [ ] V2.3 Diseño adaptable y teclado.
-- [ ] V2.4 `pnpm dev` (worker + api + web) y guía de uso para el usuario.
-- [ ] V2.5 Criterios: 024 CA-002 y CA-004 con pruebas; CA-001 y CA-003 con revisión del usuario.
+- [x] V2.1 `apps/web` con Vite + TS + Canvas 2D: mapa, lugares, personas, día y noche, cámara.
+- [x] V2.2 Inspector (Estado, Historia, Funcional), registro de eventos y controles de tiempo.
+- [x] V2.3 Diseño adaptable y teclado.
+- [x] V2.4 `pnpm dev` (worker + api + web) y guía de uso para el usuario.
+- [x] V2.5 Criterios: 024 CA-002 y CA-004 con pruebas; CA-001 y CA-003 aceptados por el usuario (2026-09-27).

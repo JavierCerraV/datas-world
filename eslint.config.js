@@ -22,6 +22,11 @@ export default tseslint.config(
     },
   },
   {
+    // Visor (spec 024): corre en el navegador.
+    files: ['apps/web/src/**/*.ts'],
+    languageOptions: { globals: { ...globals.browser } },
+  },
+  {
     files: ['packages/engine/src/**/*.ts'],
     rules: {
       'no-restricted-globals': [
