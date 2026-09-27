@@ -4,7 +4,7 @@ nombre: citizen-chat
 estado: aprobada
 hito: Bloque L (versión mínima adelantada, decisión del usuario 2026-09-27) · completa en M6
 depende_de: [010, 013, 020, 022, 023, 024, 025, 026, 030, 036, 037, 038, 039, 040]
-version: 0.4
+version: 0.5
 ---
 
 # 043 — Charla con ciudadanos
@@ -105,7 +105,8 @@ interface Claim {
 }
 
 interface ChatTone { key: ToneKey; label: string; description: string; examples: string[];
-                     stimulus: StimulusId; magnitude: number }            // chat_tones 2026.10.1
+                     stimulus: StimulusId; magnitude: number;           // chat_tones 2026.10.1
+                     prior: number }                                      // [-1,1] valor social de partida (R-005)
 interface ChatStance { key: StanceKey; label: string; guidance: string;
                        escape: number; w0: number }                        // chat_stances 2026.10.1
 interface ChatScript { key: string; label: string; turns: { text: string; tone: ToneKey }[] } // chat_scripts
@@ -166,7 +167,12 @@ interface ChatScript { key: string; label: string; turns: { text: string; tone: 
   3. si se agota ese tiempo, o con el proveedor `mock`, las reglas léxicas del catálogo (`examples` y palabras clave).
 
   Se guardan las tres cuando existen, para medir el acuerdo entre ellas (§9).
-- **R-005** [T] idea / [M] correspondencia — **El tono es un estímulo.** Cada tono presenta su estímulo verbal (tabla de §3) con su magnitud. Su función para esta persona es la que aprendió (036 `directValue`: el valor neto aprendido o, sin él, el primario). Dos personas reaccionan distinto a la misma frase según su historia, no según un rasgo. Los estímulos nuevos se añaden al catálogo de la 036 (PA-135).
+- **R-005** [T] idea / [M] correspondencia y valores de partida — **El tono es un estímulo.** Cada tono presenta su estímulo verbal (tabla de §3) con su magnitud. Su función para esta persona se toma, por orden (precisión aprobada por el usuario, 2026-09-27):
+  1. **La aprendida:** el valor neto aprendido en su historia (036 `directValue`).
+  2. **La generalizada:** si no la tiene, la generalización desde estímulos parecidos con valor aprendido (036 R-004). Por ejemplo, quien aprendió que la crítica del jefe es aversiva encuentra más aversivo un insulto.
+  3. **La de partida:** si tampoco hay generalización, el valor social `prior` del tono en `chat_tones`, igual para todos: lo que la comunidad enseña a cualquiera [M] (PA-135).
+
+  Así, dos personas reaccionan distinto a la misma frase según su historia, no según un rasgo. Hasta la historia sintética (MF7) las diferencias serán moderadas: salen de lo vivido en el trabajo y con el dinero, y de lo aprendido en las propias charlas `in_world` (R-021). Los estímulos nuevos se añaden al catálogo de la 036.
 - **R-006** [E] — **El visitante adquiere función.** Tras cada turno, el valor del visitante se actualiza por emparejamiento con la función del estímulo presentado (condicionamiento respondiente, 036 R-001; referencia a verificar), con la tasa de la 036. Empieza en la función aprendida del visitante `EXT-0001` si ya hubo charlas `in_world`, o en 0.
 - **R-007** [E] fenómeno / [M] forma — **Escape y carga aversiva.** La carga crece con la magnitud aversiva de cada turno y decae un `LOAD_DECAY` por turno. Las posturas con `escape > 0` reciben un aporte de reforzamiento negativo proporcional a `escape × carga` (036 R-002; 039 R-004; referencia a verificar).
 - **R-008** [T] fuentes / [M] magnitudes — **Postura.** Cada turno del ciudadano es un punto de decisión (040 R-001) con las 8 posturas como candidatas. Los aportes de cada candidata son:
@@ -323,6 +329,7 @@ Todos se prueban con el proveedor `mock`, salvo que se diga otra cosa.
 | `CONTEXT_TOKENS_MAX` | 6 000 | 2 000–20 000 | [M] coste y latencia |
 | `LOAD_DECAY` | 0,2 por turno | 0–1 | [M] (PA-136) |
 | magnitudes de `chat_tones` | por tono | [0,1] | [M] (PA-135) |
+| `prior` de `chat_tones` | hostil −0,8; grosero −0,6; burla −0,5; desagradable y culpabilizador −0,4; presión e invasivo −0,3; victimizante −0,1; neutro 0; curioso +0,1; íntimo +0,2; amable +0,5 | [-1,1] | [M] aprobado por el usuario (PA-135) |
 | `w0` y `escape` de `chat_stances` | por postura | [0,1] | [M] (PA-134) |
 | `MAX_LEARNING_DELTA` | 0,1 por sesión | 0–0,5 | [M] una charla no reescribe una vida; aceptado por el usuario para empezar, a calibrar con pruebas avanzadas (PA-137) |
 | `MAX_MOOD_DELTA` | 0,15 | 0–0,5 | [M] aceptado por el usuario para empezar; a calibrar (PA-137) |
@@ -365,3 +372,4 @@ Por sesión, por ciudadano y por guion (informe de la batería y panel de la vis
 | 2026-09-27 | 0.3 | Decisiones del usuario: el mundo sigue su curso durante una sesión `in_world`, que es una cita con duración acordada (45, 60 o 90 min), validada contra su agenda, en tiempo real y con fin por tiempo (R-019); eventos `CONVERSATION_STARTED` y `CONVERSATION_DECLINED`; CA-015 reescrito, CA-019 y CA-020 nuevos. Topes de huella aceptados para empezar, a calibrar |
 | 2026-09-27 | 0.3 | Estado → aprobada |
 | 2026-09-27 | 0.4 | Corrección del usuario: la charla es casual, no una sesión. Sin duración acordada: acepta según su situación (dormido: no; en una obligación: un momento; libre: hasta su próximo compromiso) y termina por despedida, postura, compromiso o inactividad (R-019). La duración pactada pasa a la 034. CA-015, CA-019 y CA-020 reescritos; `BUSY_WINDOW_MIN` e `IDLE_END_MIN` sustituyen a `CHAT_DURATIONS` y `MIN_SESSION_MIN` |
+| 2026-09-27 | 0.5 | Precisión aprobada por el usuario (R-005): la función de un tono sale de lo aprendido, si no de la generalización (036 R-004) y si no del valor social de partida `prior` de `chat_tones` [M]. Tabla de `prior` en §8. Modelo de la expresión: Haiku 4.5 (026). Sin cambios en CA |
