@@ -151,8 +151,10 @@ Nunca se evalúa si "el terapeuta dijo la respuesta correcta".
 - [ ] ¿Qué proveedor y modelo LLM por defecto, y con qué presupuesto? Se decide en la 026 (M6).
 - [ ] ¿Cómo se revisa y valida la tabla de adherencia? Propuesta: junto con la tabla de rasgos de expertos de la 009.
 - [ ] ¿Varios terapeutas sobre la misma persona o el mismo mundo (formación en grupo)? Propuesta: sí, en ramas separadas (R-007).
+- [ ] **Duración y condiciones de la sesión** (decisión del usuario, 2026-09-27, al separar la charla casual de la 043): la sesión clínica se agenda con una duración pactada (45, 60 o 90 minutos), validada contra la agenda de la persona, mientras el mundo sigue su curso. Se especifica aquí cuando se desarrolle la capa clínica; la 043 solo cubre charlas casuales.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-24 | 0.1 | Borrador inicial a petición del usuario: sesiones e intervenciones con una persona del mundo interpretada por un LLM configurable, con memoria de sesión, adherencia y resistencia decididas por el motor, escenarios configurables y ramas contrafactuales. Deja escritos los enganches que necesitan la 013, la 025, la 026 y la 028 |
+| 2026-09-27 | 0.1 | Pregunta abierta: duración pactada y condiciones de la sesión, separadas de la charla casual de la 043 |

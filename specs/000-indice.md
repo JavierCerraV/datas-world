@@ -33,7 +33,7 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [023](023-reproducibility.md) | Reproducibilidad y azar | M0 (base) · M5 (rewind/replay y ramas) | 001, 002 | aprobada | `apps/cli`, `packages/engine`, `packages/engine/src/simulation`, `packages/generators` |
 | [024](024-visualization.md) | Visualización pixel art | M4 (versión mínima adelantada: bloque V) | 022, 003, 004 | aprobada | `apps/web` |
 | [025](025-knowledge.md) | Conocimiento, creencias y rumores | M3 | 012, 013, 014 | borrador | — |
-| [026](026-llm-gateway.md) | Pasarela LLM | M6 | 017, 025, 021 | borrador | `packages/llm-gateway` |
+| [026](026-llm-gateway.md) | Pasarela LLM | Bloque L (lo que necesita la charla, 043) · M6 (decisiones y diarios) | 021, 023, 025, 040 | aprobada | `packages/llm-gateway` |
 | [027](027-persistence.md) | Persistencia | M0 (base) · M4 (retención) | 001, 002, 014 | aprobada | `apps/cli`, `apps/worker`, `packages/persistence` |
 | [028](028-experiments.md) | Experimentos y ramas | M5 | 023, 027, 022 | borrador | — |
 | [029](029-country-profile.md) | Perfil de país: Colombia | M1 (demografía, territorio, festivos, salario base) · M2 (reglas laborales y de economía) | 001, 002 | implementada | `apps/cli`, `packages/engine`, `packages/engine/src/economy`, `packages/engine/src/routines`, `packages/generators/src/amenities`, `packages/generators/src/country`, `packages/generators/src/economy`, `packages/generators/src/employment`, `packages/generators/src/geography`, `packages/generators/src/health`, `packages/generators/src/history`, `packages/generators/src/leisure`, `packages/generators/src/objects`, `packages/generators/src/organizations`, `packages/generators/src/personality`, `packages/generators/src/places`, `packages/generators/src/population`, `packages/generators/src/stimuli` |
@@ -50,6 +50,7 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [040](040-behavior-selection.md) | Competencia entre fuentes de control y selección de conducta (capa 6) | MF (bloque MF3) | 035, 036, 017, 021 | aprobada | `packages/engine/src/decision`, `packages/engine/src/functions`, `packages/engine/src/lab`, `packages/engine/src/routines`, `packages/engine/src/rules`, `packages/generators/src/stimuli` |
 | [041](041-development.md) | Desarrollo: historia de aprendizaje sintética (0 años → presente) | MF (bloque MF7) | 030, 035, 036, 037, 038, 039 | borrador | — |
 | [042](042-behavior-validation.md) | Batería de validación conductual | MF (se completa por bloques MF2–MF7) | 035, 036, 037, 038, 039, 040, 041 | aprobada | `packages/engine/src/functions`, `packages/engine/src/lab` |
+| [043](043-citizen-chat.md) | Charla con ciudadanos | Bloque L (versión mínima adelantada, decisión del usuario 2026-09-27) · completa en M6 | 010, 013, 020, 022, 023, 024, 025, 026, 030, 036, 037, 038, 039, 040 | aprobada | — |
 <!-- INDICE:FIN -->
 
 ## Orden sugerido de revisión
