@@ -1,7 +1,7 @@
 ---
 id: 026
 nombre: llm-gateway
-estado: borrador
+estado: aprobada
 hito: Bloque L (lo que necesita la charla, 043) · M6 (decisiones y diarios)
 depende_de: [021, 023, 025, 040]
 version: 0.2
@@ -100,7 +100,7 @@ interface LlmRecord {            // tabla llm_records, fuera del stateHash
 ## 4. Reglas
 - **R-001** [M] — **Solo la vista.** El contexto enviado solo contiene la vista de la persona (creencias, recuerdos y estado propio, o la vista mínima de la 043), nunca la verdad del mundo. La construye quien llama; la pasarela la transmite sin añadir datos del estado.
 - **R-002** [M] — **Propuestas validadas** (M6). Las decisiones vuelven como JSON validado. Si una propuesta es inválida o imposible, se descarta (`LLM_PROPOSAL_REJECTED`) y decide el motor por reglas (040).
-- **R-003** [M] — **Registro y replay.** Toda respuesta se guarda en `llm_records` con la clave `sha256(provider, model, purpose, parámetros, prompt serializado)`. Una petición con una clave ya registrada devuelve el registro (`source: 'record'`) sin llamar a la red. Cuando una respuesta influye en el mundo (por ejemplo, una charla `in_world`), la entrada externa que la aplica cita su clave (023 R-004). Así el replay del mundo la reutiliza y se marca `affectsWorld`. Esos registros nunca se borran.
+- **R-003** [M] — **Registro y replay.** Toda respuesta se guarda en `llm_records` con la clave `sha256(provider, model, purpose, parámetros, prompt serializado)`. Una petición con una clave ya registrada devuelve el registro (`source: 'record'`) sin llamar a la red. Cuando una respuesta influye en el mundo (por ejemplo, una charla `in_world`), la entrada externa que la aplica cita su clave (023 R-004). Así el replay del mundo la reutiliza y se marca `affectsWorld`. Esos registros nunca se borran; los demás se podan a los `RECORD_TTL_DAYS` días.
 - **R-004** [M] — **Presupuesto.** Hay un tope diario de tokens y otro mensual de coste. Al agotarse, toda petición devuelve `source: 'fallback'` con `fallbackReason: 'budget'`, sin error, y quien llama usa su respaldo (en la 043, plantillas y reglas léxicas). Una petición en curso puede terminar aunque cruce el tope.
 - **R-005** [M] — **El worker no espera.** El worker nunca llama a la pasarela. Lo que el LLM aporta al mundo llega como entrada externa ya resuelta y se aplica en un tick posterior (043 R-019).
 - **R-006** [M] — **Configuración por propósito** (decisión del usuario, 2026-09-24 y 2026-09-27: modelo configurable y modelos económicos). Cada propósito tiene su proveedor, modelo y parámetros en `config/llm.json`. Cambiarlos no requiere tocar código. Un propósito con `null` usa directamente su respaldo. Las claves se leen solo de variables de entorno (`ANTHROPIC_API_KEY`, `LLM_API_KEY`, `LLM_BASE_URL`).
@@ -149,10 +149,11 @@ Las llamadas, los respaldos y el agotamiento del presupuesto no son eventos del 
 | `summarize` | Anthropic `claude-haiku-4-5-20251001`, temperatura 0,3, 200 tokens, 10 s | configurable | 043 R-020 |
 | `decision`, `diary` | `null` hasta M6 | — | ADR-003 |
 | `session` | `null` hasta la capa clínica | — | 034 R-008 |
-| `budget.dailyTokens` | 2 000 000 | configurable | [M] pregunta abierta |
-| `budget.monthlyCostCents` | 2 000 (20 USD) | configurable | [M] pregunta abierta |
+| `budget.dailyTokens` | 2 000 000 | configurable | decisión del usuario |
+| `budget.monthlyCostCents` | 2 000 (20 USD) | configurable | decisión del usuario |
 | `repairRetries` | 1 | 0–3 | [M] |
 | `RECORD_LRU` | 500 registros | 100–5 000 | presupuesto de RAM (CLAUDE.md, regla 8) |
+| `RECORD_TTL_DAYS` | 90 | 7–∞ | solo registros con `affectsWorld = false` (usuario) |
 
 ## 9. Métricas y observabilidad
 - tokens (de entrada, de salida y de caché), coste y latencia (p50 y p95) por propósito y por día;
@@ -162,9 +163,9 @@ Las llamadas, los respaldos y el agotamiento del presupuesto no son eventos del 
 ## 10. Preguntas abiertas
 - [x] Modelo configurable (usuario, 2026-09-24) y modelos económicos con proveedor configurable (usuario, 2026-09-27): R-006 y §8.
 - [x] Enganche de la capa clínica (034): el propósito `session` queda reservado y desactivado hasta entonces.
-- [ ] ¿Qué topes de presupuesto? Propuesta: 20 USD al mes y 2 millones de tokens al día para empezar.
-- [ ] ¿Qué proveedor alternativo, si alguno? Propuesta: el adaptador `openai_compatible` queda listo para usar otro proveedor o un modelo local, pero por defecto todo va a Anthropic.
-- [ ] ¿Se podan los registros de charlas `sandbox` (no afectan al mundo) pasados N días? Propuesta: sí, a los 90 días; los que afectan al mundo nunca se borran.
+- [x] Topes de presupuesto: 20 USD al mes y 2 millones de tokens al día para empezar (usuario, 2026-09-27).
+- [x] Proveedor: Anthropic por defecto (`claude-haiku-4-5-20251001` en los cuatro propósitos de la charla); el adaptador `openai_compatible` queda listo para otro proveedor o un modelo local (usuario, 2026-09-27).
+- [x] Los registros que no afectan al mundo se podan a los 90 días; los que afectan al mundo nunca se borran (usuario, 2026-09-27). Parámetro `RECORD_TTL_DAYS`.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
@@ -172,3 +173,5 @@ Las llamadas, los respaldos y el agotamiento del presupuesto no son eventos del 
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.1 | Pregunta abierta: sesiones clínicas con modelo configurable (spec 034) |
 | 2026-09-27 | 0.2 | Concreción para el bloque L (043): propósitos `dialogue`, `classify`, `verify` y `summarize`; configuración por propósito sin código; adaptadores `anthropic`, `openai_compatible` y `mock`; streaming; caché de prompts; salidas estructuradas con reintento; registro con clave y replay; tiempos máximos y respaldos; métricas; higiene de claves. Se conservan R-001, R-002, R-004 y R-005, y CA-001 a CA-003. `depende_de` cambia la 017 (obsoleta) por la 040 y añade la 023. CA-004 a CA-011 nuevos |
+| 2026-09-27 | 0.2 | Estado → aprobada |
+| 2026-09-27 | 0.2 | Decisiones del usuario al aprobar: Haiku 4.5 por defecto, presupuesto de 20 USD al mes y 2 M de tokens al día, adaptador compatible con OpenAI listo y poda a 90 días de los registros que no afectan al mundo (`RECORD_TTL_DAYS`) |

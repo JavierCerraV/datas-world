@@ -9,7 +9,7 @@ Specs: 043 v0.3 (aprobada). Usa las implementadas (014, 030) y las aprobadas (02
 - recuerdo episódico de la 013: el recuerdo es el evento `CONVERSATION_HELD`, que entra en la vista.
 
 ## Bloque L0 — Prerrequisitos
-- [ ] L0.1 Actualizar la 026 (pasarela LLM) con lo que pide la 043:
+- [x] L0.1 Actualizar la 026 (pasarela LLM) con lo que pide la 043:
   - propósitos `dialogue` y `classify`;
   - modelos y proveedor configurables por propósito;
   - streaming;
