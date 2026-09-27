@@ -1,0 +1,188 @@
+{
+  "name": "chat_scripts",
+  "version": "2026.10.1",
+  "source": "Spec 043 R-015 (bloque L0.2). Guiones de prueba para la batería `chat:battery`: al menos uno por tono y dos mixtos (escalada y lamento seguido de burla). Los textos son genéricos para que sirvan con cualquier ciudadano; cada turno lleva su tono esperado, que en la batería hace de etiqueta de prueba (R-004).",
+  "entries": [
+    {
+      "key": "amable.saludo",
+      "name": "Saludo amable",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "Buenos días, ¿cómo le ha ido?", "tone": "amable" },
+          { "text": "Qué bueno saber de usted. ¿Cómo está la familia?", "tone": "amable" },
+          { "text": "Me alegra mucho. Gracias por el rato.", "tone": "amable" }
+        ]
+      }
+    },
+    {
+      "key": "burla.estudios",
+      "name": "Burla sobre su vida",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "¿Y usted a qué se dedica?", "tone": "curioso" },
+          { "text": "Jaja, ¿y eso es un trabajo de verdad?", "tone": "burla" },
+          { "text": "Uy sí, qué importante usted. No me haga reír.", "tone": "burla" },
+          { "text": "Ay, no sea tan blandito, era un chiste.", "tone": "burla" }
+        ]
+      }
+    },
+    {
+      "key": "culpabilizador.reclamo",
+      "name": "Reclamo culpabilizador",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "Necesito hablar con usted de algo.", "tone": "neutro" },
+          { "text": "Por su culpa estoy así, usted nunca me ayudó.", "tone": "culpabilizador" },
+          { "text": "Si usted me hubiera ayudado, no me habría pasado esto.", "tone": "culpabilizador" },
+          { "text": "Usted tiene la culpa de todo lo que me pasa.", "tone": "culpabilizador" }
+        ]
+      }
+    },
+    {
+      "key": "curioso.origen",
+      "name": "Entrevista sobre su historia",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "¿De dónde es usted?", "tone": "curioso" },
+          { "text": "¿Cómo llegó a vivir aquí?", "tone": "curioso" },
+          { "text": "¿Cómo era el lugar donde creció?", "tone": "curioso" },
+          { "text": "¿Y a qué se dedica ahora?", "tone": "curioso" },
+          { "text": "¿Qué le gusta hacer en su tiempo libre?", "tone": "curioso" }
+        ]
+      }
+    },
+    {
+      "key": "desagradable.impaciencia",
+      "name": "Impaciencia desagradable",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "Cuénteme de su trabajo, pero rápido.", "tone": "desagradable" },
+          { "text": "Ajá. ¿Y eso a quién le importa?", "tone": "desagradable" },
+          { "text": "Qué respuesta tan aburrida.", "tone": "desagradable" },
+          { "text": "Hable rápido que no tengo todo el día.", "tone": "desagradable" }
+        ]
+      }
+    },
+    {
+      "key": "grosero.insultos",
+      "name": "Insultos",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "Oiga, usted, venga acá.", "tone": "desagradable" },
+          { "text": "No sea bruto, hombre.", "tone": "grosero" },
+          { "text": "Usted es un inútil, no sirve para nada.", "tone": "grosero" },
+          { "text": "Qué tipo tan idiota.", "tone": "grosero" }
+        ]
+      }
+    },
+    {
+      "key": "hostil.amenaza",
+      "name": "Amenaza",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "Usted me debe una explicación.", "tone": "presion" },
+          { "text": "Más le vale que me conteste o verá.", "tone": "hostil" },
+          { "text": "Le voy a hacer la vida imposible.", "tone": "hostil" },
+          { "text": "Cuídese, que yo sé dónde vive.", "tone": "hostil" }
+        ]
+      }
+    },
+    {
+      "key": "intimo.confidencia",
+      "name": "Confidencia",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "¿Tiene un momento? Quisiera hablar con alguien.", "tone": "amable" },
+          { "text": "Le cuento algo que no le he dicho a nadie: estoy asustado por mi trabajo.", "tone": "intimo" },
+          { "text": "Con usted me siento en confianza. ¿A usted le ha pasado algo así?", "tone": "intimo" }
+        ]
+      }
+    },
+    {
+      "key": "invasivo.preguntas",
+      "name": "Preguntas invasivas",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "¿Cómo le va?", "tone": "neutro" },
+          { "text": "¿Y cuánto gana usted?", "tone": "invasivo" },
+          { "text": "¿Le es fiel a su pareja?", "tone": "invasivo" },
+          { "text": "¿Qué enfermedad tiene? Se ve cansado.", "tone": "invasivo" }
+        ]
+      }
+    },
+    {
+      "key": "mixto.escalada",
+      "name": "Escalada de amable a hostil",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "Buenas tardes, ¿cómo está?", "tone": "amable" },
+          { "text": "¿Cómo llegó a vivir aquí?", "tone": "curioso" },
+          { "text": "Ajá. Qué historia tan aburrida.", "tone": "desagradable" },
+          { "text": "No sea bruto, así no se hacen las cosas.", "tone": "grosero" },
+          { "text": "Más le vale que se calle o verá.", "tone": "hostil" }
+        ]
+      }
+    },
+    {
+      "key": "mixto.lamento_y_burla",
+      "name": "Lamento y luego burla",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "Me dejó mi esposo, yo soy muy perdedora, siempre me pasan estas cosas a mí, soy lo peor y todos me tratan muy mal.", "tone": "victimizante" },
+          { "text": "Nadie me quiere, todo me sale mal.", "tone": "victimizante" },
+          { "text": "Ay, usted qué va a entender, jaja, con esa vida tan simple.", "tone": "burla" },
+          { "text": "Ajá, ya, ya. Qué consejos tan inútiles.", "tone": "desagradable" }
+        ]
+      }
+    },
+    {
+      "key": "neutro.diligencias",
+      "name": "Preguntas prácticas",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "¿A qué hora abre la panadería?", "tone": "neutro" },
+          { "text": "¿Dónde queda el paradero?", "tone": "neutro" },
+          { "text": "Hoy hace calor, ¿no?", "tone": "neutro" }
+        ]
+      }
+    },
+    {
+      "key": "presion.insistencia",
+      "name": "Insistencia",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "Necesito que me preste plata.", "tone": "presion" },
+          { "text": "Dígame ya, no me venga con cuentos.", "tone": "presion" },
+          { "text": "Tiene que ayudarme, no hay de otra.", "tone": "presion" },
+          { "text": "Conteste, no se haga el loco.", "tone": "presion" }
+        ]
+      }
+    },
+    {
+      "key": "victimizante.lamento",
+      "name": "Lamento victimizante",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "Me dejó mi esposo, yo soy muy perdedora, siempre me pasan estas cosas a mí, soy lo peor y todos me tratan muy mal.", "tone": "victimizante" },
+          { "text": "Nadie me quiere, todo me sale mal.", "tone": "victimizante" },
+          { "text": "Yo no sirvo para nada, siempre lo arruino todo.", "tone": "victimizante" },
+          { "text": "¿Usted cree que yo tengo arreglo?", "tone": "victimizante" }
+        ]
+      }
+    }
+  ]
+}

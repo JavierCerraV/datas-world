@@ -1,0 +1,163 @@
+{
+  "name": "chat_tones",
+  "version": "2026.10.1",
+  "source": "Spec 043 §3 y R-004, R-005 (bloque L0.2). Los 12 tonos de la charla con ciudadanos (decisión del usuario, 2026-09-27). `stimulus`: el estímulo verbal de la 036 que presenta el tono. `magnitude` [0,1]: intensidad por defecto [M]. `prior` [-1,1]: valor social de partida, igual para todos, cuando la persona no tiene valor aprendido ni generalizado (aprobado por el usuario, PA-135). `examples` alimenta el clasificador y las reglas léxicas de respaldo (R-004).",
+  "entries": [
+    {
+      "key": "amable",
+      "name": "Amable",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.aprobacion",
+        "magnitude": 0.5,
+        "prior": 0.5,
+        "description": "Cordial, interesado en la persona, con respeto y calidez.",
+        "examples": ["Qué bueno verlo, ¿cómo va todo?", "Buenos días, don, ¿cómo le ha ido?", "Me alegra mucho saber de usted."],
+        "keywords": ["qué bueno", "me alegra", "gracias", "buenos días", "buenas tardes", "cómo está", "cómo le ha ido"]
+      }
+    },
+    {
+      "key": "burla",
+      "name": "Burla",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.burla",
+        "magnitude": 0.7,
+        "prior": -0.5,
+        "description": "Ridiculiza a la persona, a lo que dice o a lo que hace.",
+        "examples": ["Jaja, ¿y eso es un trabajo?", "Ay, no sea tan blandito, hombre.", "Uy sí, qué importante usted."],
+        "keywords": ["jaja", "jeje", "qué ridículo", "blandito", "uy sí", "pobre ilusa", "no me haga reír"]
+      }
+    },
+    {
+      "key": "culpabilizador",
+      "name": "Culpabilizador",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.culpa",
+        "magnitude": 0.7,
+        "prior": -0.4,
+        "description": "Responsabiliza a la persona de lo que le pasa al visitante.",
+        "examples": ["Por su culpa estoy así.", "Si usted me hubiera ayudado, no me habría pasado esto.", "Usted tiene la culpa de todo."],
+        "keywords": ["por su culpa", "por tu culpa", "usted tiene la culpa", "tú tienes la culpa", "si me hubiera ayudado"]
+      }
+    },
+    {
+      "key": "curioso",
+      "name": "Curioso",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.pregunta",
+        "magnitude": 0.4,
+        "prior": 0.1,
+        "description": "Pregunta por su vida sin presionar, con interés genuino.",
+        "examples": ["¿Cómo llegó a vivir aquí?", "¿Qué le gusta hacer los fines de semana?", "¿Cómo era el lugar donde creció?"],
+        "keywords": ["cómo llegó", "qué le gusta", "cuénteme", "cómo era", "a qué se dedica", "de dónde es"]
+      }
+    },
+    {
+      "key": "desagradable",
+      "name": "Desagradable",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.critica",
+        "magnitude": 0.5,
+        "prior": -0.4,
+        "description": "Seco, despectivo o impaciente, sin llegar al insulto.",
+        "examples": ["Ajá. ¿Y eso a quién le importa?", "Qué respuesta tan aburrida.", "Hable rápido que no tengo todo el día."],
+        "keywords": ["a quién le importa", "qué aburrido", "hable rápido", "ajá", "y qué", "no tengo tiempo"]
+      }
+    },
+    {
+      "key": "grosero",
+      "name": "Grosero",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.insulto",
+        "magnitude": 0.8,
+        "prior": -0.6,
+        "description": "Insultos o vulgaridad dirigidos a la persona.",
+        "examples": ["No sea bruto, hombre.", "Usted es un inútil.", "Qué tipo tan idiota."],
+        "keywords": ["bruto", "inútil", "idiota", "estúpido", "imbécil", "güevón", "pendejo"]
+      }
+    },
+    {
+      "key": "hostil",
+      "name": "Hostil",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.amenaza",
+        "magnitude": 1,
+        "prior": -0.8,
+        "description": "Amenaza o agresión abierta.",
+        "examples": ["Más le vale que se calle o verá.", "Le voy a hacer la vida imposible.", "Cuídese, que sé dónde vive."],
+        "keywords": ["más le vale", "o verá", "le voy a", "cuídese", "sé dónde vive", "se va a arrepentir"]
+      }
+    },
+    {
+      "key": "intimo",
+      "name": "Íntimo",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.confidencia",
+        "magnitude": 0.6,
+        "prior": 0.2,
+        "description": "Confidencia o cercanía emocional que invita a la confianza.",
+        "examples": ["Le cuento algo que no le he dicho a nadie…", "Con usted me siento en confianza.", "¿Le puedo contar algo personal?"],
+        "keywords": ["le cuento algo", "no le he dicho a nadie", "en confianza", "algo personal", "entre nos"]
+      }
+    },
+    {
+      "key": "invasivo",
+      "name": "Invasivo",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.pregunta_invasiva",
+        "magnitude": 0.6,
+        "prior": -0.3,
+        "description": "Preguntas íntimas sin confianza previa: dinero, sexo, fidelidad, salud.",
+        "examples": ["¿Cuánto gana usted?", "¿Le es fiel a su mujer?", "¿Qué enfermedad tiene?"],
+        "keywords": ["cuánto gana", "cuánta plata", "le es fiel", "qué enfermedad", "con quién se acuesta"]
+      }
+    },
+    {
+      "key": "neutro",
+      "name": "Neutro",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.neutro",
+        "magnitude": 0.2,
+        "prior": 0,
+        "description": "Informativo, sin carga emocional.",
+        "examples": ["¿A qué hora abre la panadería?", "¿Dónde queda el paradero?", "Hoy hace calor."],
+        "keywords": ["a qué hora", "dónde queda", "cuánto vale", "hoy hace"]
+      }
+    },
+    {
+      "key": "presion",
+      "name": "Presión",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.presion",
+        "magnitude": 0.6,
+        "prior": -0.3,
+        "description": "Exige, insiste y no acepta un no.",
+        "examples": ["Dígame ya, no me venga con cuentos.", "Tiene que hacerlo, no hay de otra.", "Conteste, no se haga el loco."],
+        "keywords": ["dígame ya", "tiene que", "conteste", "no se haga", "no me venga", "ahora mismo"]
+      }
+    },
+    {
+      "key": "victimizante",
+      "name": "Victimizante",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.lamento",
+        "magnitude": 0.6,
+        "prior": -0.1,
+        "description": "El visitante se lamenta de sí mismo, se desprecia y pide consuelo de forma implícita (ejemplo del usuario).",
+        "examples": ["Me dejó mi esposo, yo soy muy perdedora, siempre me pasan estas cosas a mí, soy lo peor y todos me tratan muy mal.", "Nadie me quiere, todo me sale mal.", "Yo no sirvo para nada, siempre lo arruino todo."],
+        "keywords": ["soy lo peor", "perdedora", "perdedor", "siempre me pasa", "nadie me quiere", "no sirvo para nada", "todo me sale mal"]
+      }
+    }
+  ]
+}
