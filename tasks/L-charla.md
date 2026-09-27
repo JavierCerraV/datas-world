@@ -44,3 +44,14 @@ Specs: 043 v0.3 (aprobada). Usa las implementadas (014, 030) y las aprobadas (02
 - [x] L4.1 Vista de chat del visor (R-017), según el diseño aprobado.
 - [x] L4.2 `pnpm cli chat:battery` con informe (R-015); criterio CA-016.
 - [ ] L4.3 Guía de uso para el usuario (`docs/uso-charla.md`, hecha) y prueba con un proveedor real: latencia (R-023) y coste por sesión (pendiente de la clave de Anthropic del usuario).
+
+## Arreglos tras la prueba del usuario (2026-09-27)
+- [x] La API se caía al recargar el mundo mientras el worker escribía (027 CA-004): la charla quedaba abierta, sin recuerdo ni cambio de estrés. `loadWorld` en una transacción de lectura; la API resiste los fallos de recarga; las charlas colgadas se cierran y se consolidan al arrancar.
+- [x] Pestaña **Charlas** en la ficha, para revisar las charlas guardadas (043 R-017).
+
+## Bloque L5 — Consecuencias de la charla (spec 044, en borrador: pendiente de aprobación)
+- [ ] L5.0 Resolver las preguntas abiertas P1 a P5 de la 044 y aprobarla.
+- [ ] L5.1 Catálogo `chat_claims` y celular en `object_kinds`; extracción de afirmaciones en el clasificador (R-001).
+- [ ] L5.2 Credibilidad, impacto según la historia y efecto en la postura y el estrés (R-002 a R-005).
+- [ ] L5.3 Intenciones, tensión del vínculo, llamada y encuentro en el bucle (R-006 a R-009).
+- [ ] L5.4 Replay, sandbox y criterios CA-001 a CA-008; guion «revelación sobre la pareja» en la batería.
