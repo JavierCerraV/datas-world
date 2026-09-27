@@ -71,4 +71,5 @@ pnpm cli chat:battery --citizens 5 --provider config
   ```json
   { "budget": { "monthlyCostCents": 1000 } }
   ```
-- **Consultar charlas guardadas:** `GET /api/chat/sessions?citizenId=CIT-000019` y `GET /api/chat/sessions/<id>` (con usuario y contraseña).
+- **Consultar charlas guardadas:** en la ficha de la persona, pestaña **Charlas**. También por la API: `GET /api/chat/sessions?citizenId=CIT-000019` y `GET /api/chat/sessions/<id>` (con usuario y contraseña).
+- **Latencia y coste de tus charlas:** `pnpm cli chat:stats`. Muestra el primer token y la respuesta completa (p50 y p95) frente a los objetivos, y el coste total, por charla y por propósito. Funciona aunque `pnpm dev` esté en marcha (solo lee).
