@@ -32,6 +32,7 @@
         <section id="inspector" hidden aria-labelledby="insp-name">
           <div class="insp-head">
             <h2 id="insp-name"></h2>
+            <button id="insp-chat">Charlar</button>
             <button id="insp-close" aria-label="Cerrar la ficha (Esc)">✕</button>
           </div>
           <div class="tabs" role="tablist">
@@ -47,6 +48,41 @@
         </section>
       </aside>
     </main>
+    <dialog id="chat" aria-labelledby="chat-title">
+      <div class="chat-head">
+        <h2 id="chat-title">Charla</h2>
+        <span id="chat-mode" class="badge"></span>
+        <span class="grow"></span>
+        <button id="chat-end" type="button">Despedirse</button>
+        <button id="chat-close" type="button" aria-label="Cerrar la charla">✕</button>
+      </div>
+      <p id="chat-status" role="status" aria-live="polite"></p>
+      <form id="chat-start" class="chat-start">
+        <fieldset>
+          <legend>Modo</legend>
+          <label><input type="radio" name="chat-mode" value="in_world" checked /> En el mundo: lo recordará y el mundo sigue en tiempo real</label>
+          <label><input type="radio" name="chat-mode" value="sandbox" /> Sandbox: no cambia el mundo</label>
+        </fieldset>
+        <label><input type="checkbox" id="chat-test" /> Modo prueba (etiquetar el tono de cada mensaje)</label>
+        <button type="submit">Iniciar charla</button>
+      </form>
+      <div id="chat-main" class="chat-main" hidden>
+        <section class="chat-conv">
+          <ol id="chat-msgs" class="chat-msgs"></ol>
+          <form id="chat-form" class="chat-form">
+            <label id="chat-tone-l">Tono (prueba) <select id="chat-tone"></select></label>
+            <label class="grow">Mensaje <textarea id="chat-text" rows="2" maxlength="1000"></textarea></label>
+            <button id="chat-send" type="submit">Enviar</button>
+          </form>
+        </section>
+        <aside class="chat-side">
+          <h3>Por qué respondió así</h3>
+          <div id="chat-why"><p class="muted">Aparece con la primera respuesta.</p></div>
+          <h3>Lo que sabe</h3>
+          <ul id="chat-knows"></ul>
+        </aside>
+      </div>
+    </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

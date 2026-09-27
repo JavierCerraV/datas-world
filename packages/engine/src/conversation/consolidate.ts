@@ -63,7 +63,7 @@ function cappedStore(orig: FunctionStore, session: FunctionStore, w0: (key: stri
 }
 
 const templateSummary = (s: ChatSummary) =>
-  `${s.turns} turnos; tono ${s.dominantTones.join(' y ') || 'sin turnos'}; respondió ${s.dominantStances.join(' y ') || 'sin postura'}.`;
+  `${s.turns} ${s.turns === 1 ? 'turno' : 'turnos'}; tono ${s.dominantTones.join(' y ') || 'sin turnos'}; respondió ${(s.dominantStances.map((x) => x.replace(/_/g, ' ')).join(' y ')) || 'sin postura'}.`;
 
 /**
  * Aplica la charla al mundo. `emit` crea cada evento (id y minuto) al momento, para que el aprendizaje cite al

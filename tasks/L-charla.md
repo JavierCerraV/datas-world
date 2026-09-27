@@ -41,6 +41,6 @@ Specs: 043 v0.3 (aprobada). Usa las implementadas (014, 030) y las aprobadas (02
 - [x] L3.4 Criterios: CA-001, CA-014, CA-015 y CA-017.
 
 ## Bloque L4 — Visor y batería
-- [ ] L4.1 Vista de chat del visor (R-017), según el diseño aprobado.
+- [x] L4.1 Vista de chat del visor (R-017), según el diseño aprobado.
 - [x] L4.2 `pnpm cli chat:battery` con informe (R-015); criterio CA-016.
-- [ ] L4.3 Guía de uso para el usuario (`docs/uso-charla.md`) y prueba con un proveedor real: latencia (R-023) y coste por sesión.
+- [ ] L4.3 Guía de uso para el usuario (`docs/uso-charla.md`, hecha) y prueba con un proveedor real: latencia (R-023) y coste por sesión (pendiente de la clave de Anthropic del usuario).

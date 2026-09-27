@@ -117,9 +117,14 @@ export function registerChatRoutes(app: FastifyInstance, d: ChatDeps): { sweep: 
       prevSpeed = speedOf(d.reader.db);
       const done = await command('chat_open', JSON.stringify({ citizenId: b.data.citizenId, visitorId: VISITOR, sessionId: id }));
       if (done !== 1) return reply.code(503).send({ error: 'el worker no atendió la apertura; ¿está corriendo?' });
+      // El worker marca la orden antes de guardar sus eventos: se espera al evento de la apertura.
+      let ev: WorldEvent | undefined;
+      for (let t = 0; t < (d.waitMs ?? 5_000) && !ev; t += 50) {
+        ev = queryEvents(d.reader.db, { types: ['CONVERSATION_STARTED', 'CONVERSATION_DECLINED'], latest: true, limit: 50 })
+          .find((e) => (e.payload as { citizenId: string }).citizenId === b.data.citizenId && ((e.payload as { sessionId?: string }).sessionId ?? id) === id);
+        if (!ev) await sleep(50);
+      }
       d.reader.refresh();
-      const ev = queryEvents(d.reader.db, { types: ['CONVERSATION_STARTED', 'CONVERSATION_DECLINED'], latest: true, limit: 50 })
-        .find((e) => (e.payload as { sessionId?: string; citizenId: string }).citizenId === b.data.citizenId && ((e.payload as { sessionId?: string }).sessionId ?? id) === id);
       if (!ev || ev.type === 'CONVERSATION_DECLINED') {
         const reason = ev ? (ev.payload as { reason: string }).reason : 'sin respuesta';
         return reply.send({ id: null, status: 'declined', reason });
