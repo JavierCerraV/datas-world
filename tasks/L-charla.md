@@ -28,11 +28,11 @@ Specs: 043 v0.3 (aprobada). Usa las implementadas (014, 030) y las aprobadas (02
 - [x] L1.6 Criterios: CA-004, CA-005, CA-006, CA-007, CA-008, CA-013, CA-019 y CA-020.
 
 ## Bloque L2 — Pasarela y vista (`packages/llm-gateway/src/chat/`)
-- [ ] L2.1 `PersonView` mínima y prompt sin verdad del mundo (R-002, R-003).
-- [ ] L2.2 Clasificador de tono con tiempo máximo y reglas léxicas de respaldo (R-004).
-- [ ] L2.3 Expresión en streaming; plantillas sin LLM (R-010, R-014); proveedores `mock` y Anthropic.
-- [ ] L2.4 Verificador asíncrono de afirmaciones y de adherencia (R-012, R-013).
-- [ ] L2.5 Criterios: CA-002, CA-003, CA-009, CA-010, CA-011, CA-012 y CA-018.
+- [x] L2.1 `PersonView` mínima y prompt sin verdad del mundo (R-002, R-003).
+- [x] L2.2 Clasificador de tono con tiempo máximo y reglas léxicas de respaldo (R-004).
+- [x] L2.3 Expresión en streaming; plantillas sin LLM (R-010, R-014); proveedores `mock` y Anthropic.
+- [x] L2.4 Verificador asíncrono de afirmaciones y de adherencia (R-012, R-013).
+- [x] L2.5 Criterios: CA-002, CA-003, CA-009, CA-010, CA-011, CA-012 y CA-018.
 
 ## Bloque L3 — Persistencia, API y worker
 - [ ] L3.1 Tablas del chat fuera del hash y entradas externas `chat_open` y `chat_session` (R-001, R-019).
