@@ -4,7 +4,7 @@ nombre: citizen-chat
 estado: aprobada
 hito: Bloque L (versión mínima adelantada, decisión del usuario 2026-09-27) · completa en M6
 depende_de: [010, 013, 020, 022, 023, 024, 025, 026, 030, 036, 037, 038, 039, 040]
-version: 0.3
+version: 0.4
 ---
 
 # 043 — Charla con ciudadanos
@@ -73,8 +73,8 @@ interface ChatSession {
   state: ConversationState;
   turns: ChatTurn[];
   status: 'open' | 'ended';
-  durationMin?: number;                          // in_world: minutos acordados y aceptados (R-019)
-  endReason?: 'visitor' | 'citizen' | 'time' | 'max_turns' | 'budget';
+  availableUntil?: WorldMinute;                  // in_world: hasta cuándo puede charlar (R-019)
+  endReason?: 'visitor' | 'citizen' | 'obligation' | 'idle' | 'max_turns' | 'budget';
   inputRef?: string;                             // entrada externa de la consolidación (in_world, R-019)
 }
 
@@ -197,7 +197,7 @@ interface ChatScript { key: string; label: string; turns: { text: string; tone: 
 - **R-014** [M] — **Sin LLM.** Sin proveedor, sin presupuesto o con fallo de red, el ciudadano responde con la plantilla de su postura, rellenada con hechos de la vista (`expression: 'template'`). La charla nunca se bloquea.
 - **R-015** [M] — **Guiones y batería.** `pnpm cli chat:battery --citizens <ids|n> --scripts <keys|all> [--provider mock|<proveedor>]` ejecuta en `sandbox` los guiones de `chat_scripts` (al menos uno por tono) contra cada ciudadano y escribe un informe (JSON y Markdown) con las métricas de §9. Con `mock`, dos ejecuciones producen el mismo archivo.
 - **R-016** [M] — **API** (amplía la 022; con basic auth porque cuesta dinero):
-  - `POST /api/chat/sessions { citizenId, mode, durationMin?, testMode? }` (`durationMin` obligatorio en `in_world`; la respuesta dice los minutos aceptados o el rechazo, R-019);
+  - `POST /api/chat/sessions { citizenId, mode, testMode? }` (en `in_world`, la respuesta dice hasta cuándo puede charlar o por qué no puede, R-019);
   - `POST /api/chat/sessions/:id/turns { text, toneTag? }` → SSE: primero `stance` (tono, postura y aportes), luego los `token` del texto y al final `done`;
   - `GET /api/chat/sessions/:id` (incluye las marcas del verificador cuando llegan);
   - `POST /api/chat/sessions/:id/end`.
@@ -212,15 +212,22 @@ interface ChatScript { key: string; label: string; turns: { text: string; tone: 
 
   La web no decide nada.
 - **R-018** [M] — **El visitante en el mundo.** El visitante es una entidad externa `EXT-0001` (no es un `CIT`, no vive ni se mueve en el mundo). Para cada ciudadano es un estímulo con función aprendida: la 036 guarda esa función como la de cualquier estímulo. Si varias personas usan el laboratorio, cada una puede tener su propio `EXT-`.
-- **R-019** [M] — **Sesión acordada; el mundo sigue su curso** (decisión del usuario, 2026-09-27). Una sesión `in_world` es una cita con duración acordada, como en el mundo real:
-  1. **Acuerdo.** El visitante propone una duración de `CHAT_DURATIONS` (45, 60 o 90 minutos). La API registra la entrada externa `chat_open` (023 R-004) y el worker la valida como cualquier acción (CLAUDE.md, regla 4). Los minutos aceptados son el mínimo entre los pedidos y los que faltan hasta su próximo compromiso no flexible (turno de trabajo, clase, cuidado; 011). Si no le queda al menos `MIN_SESSION_MIN`, la rechaza con su motivo (`CONVERSATION_DECLINED`).
-  2. **Cita en su agenda.** Aceptada, el worker emite `CONVERSATION_STARTED` y ocupa ese tramo de su agenda con la actividad `conversation`, en el lugar donde está. Durante la cita no toma otras decisiones de actividad, pero sus necesidades y su estado siguen su dinámica (010).
-  3. **El mundo no se detiene.** Todos los demás siguen su vida y los eventos continúan. Para que la duración acordada coincida con la conversación, durante la sesión el mundo avanza en **tiempo real** (1 minuto del mundo por minuto real, orden `speed` en `control_commands`); al cerrar se restaura la velocidad anterior.
-  4. **Estado vivo.** La vista se congela al empezar (R-002), salvo su estado (necesidades, ánimo y estrés), que se relee en cada turno. Así, si pasa hambre o se cansa durante la charla, eso entra como operación motivadora en su postura (R-008).
-  5. **Fin por tiempo.** Al agotarse los minutos aceptados, la postura siguiente es `terminar` (se despide: "se me hizo la hora") y la sesión se cierra con `endReason: 'time'`. El visitante puede terminarla antes.
-  6. **Consolidación.** Al cerrar, la API registra la entrada externa `chat_session` con los turnos, los tonos, las posturas y las referencias a los textos. El worker la aplica con la función pura `consolidateChat(state, input, rng)`, que emite los eventos y los parches de R-020 a R-022 y libera la agenda.
+- **R-019** [M] — **Charla casual; el mundo sigue su curso** (decisión del usuario, 2026-09-27). Una charla `in_world` es una conversación casual, como encontrarse con alguien: no tiene duración acordada. Las sesiones con duración y condiciones pactadas son de la capa clínica (034).
+  1. **Inicio.** La API registra la entrada externa `chat_open` (023 R-004) y el worker la valida como cualquier acción (CLAUDE.md, regla 4):
+     - si está dormido, la rechaza (`CONVERSATION_DECLINED`);
+     - si está en un bloque no flexible (turno de trabajo, clase, cuidado; 011), acepta hablar solo un momento: `BUSY_WINDOW_MIN`;
+     - si está en tiempo libre, queda disponible hasta su próximo compromiso no flexible.
+  2. **Actividad.** Aceptada, el worker emite `CONVERSATION_STARTED` y la persona pasa a la actividad `conversation` en el lugar donde está. Mientras charla no toma otras decisiones de actividad, pero sus necesidades y su estado siguen su dinámica (010).
+  3. **El mundo no se detiene.** Todos los demás siguen su vida y los eventos continúan. Durante la charla el mundo avanza en **tiempo real** (1 minuto del mundo por minuto real, orden `speed` en `control_commands`); al cerrar se restaura la velocidad anterior.
+  4. **Estado vivo.** La vista se congela al empezar (R-002), salvo su estado (necesidades, ánimo y estrés), que se relee en cada turno. Si pasa hambre o se cansa mientras charla, eso entra como operación motivadora en su postura (R-008).
+  5. **Fin.** La charla termina cuando:
+     - el visitante se despide;
+     - el ciudadano elige la postura `terminar`;
+     - le llega su próximo compromiso: se despide con el motivo ("me tengo que ir, entro a trabajar") y la charla cierra con `endReason: 'obligation'`;
+     - el visitante no escribe en `IDLE_END_MIN` minutos del mundo: `endReason: 'idle'`.
+  6. **Consolidación.** Al cerrar, la API registra la entrada externa `chat_session` con los turnos, los tonos, las posturas y las referencias a los textos. El worker la aplica con la función pura `consolidateChat(state, input, rng)`, que emite los eventos y los parches de R-020 a R-022 y devuelve a la persona a su día.
 
-  El replay del mundo re-inyecta `chat_open` y `chat_session` en su `(at, seq)` y obtiene el mismo resultado sin llamar al LLM. Solo puede haber una sesión `in_world` abierta a la vez.
+  El replay del mundo re-inyecta `chat_open` y `chat_session` en su `(at, seq)` y obtiene el mismo resultado sin llamar al LLM. Solo puede haber una charla `in_world` abierta a la vez.
 - **R-020** [M] — **Recuerdo.** La consolidación emite `CONVERSATION_HELD`, con:
   - la persona y el visitante como participantes;
   - un resumen (plantilla con los tonos y posturas dominantes, o resumen del LLM ya registrado);
@@ -253,14 +260,14 @@ interface ChatScript { key: string; label: string; turns: { text: string; tone: 
 | `CHAT_STANCE_SELECTED` | el motor elige la postura | sessionId, seq, stance, sources, aversiveLoad, visitorValue | el turno del visitante; los 3 aportes mayores como `fuente.*`; los eventos del mundo que originaron la función o la regla implicada (hasta 3, 040 R-006) |
 | `CHAT_CITIZEN_REPLIED` | termina la respuesta | sessionId, seq, expression, llmRef?, latencyMs | `CHAT_STANCE_SELECTED`; entrada del LLM |
 | `CHAT_CLAIM_FLAGGED` | una afirmación es `contradicted` o `unsupported` | sessionId, seq, claim, verdict, evidence? | `CHAT_CITIZEN_REPLIED`; el hecho de la vista |
-| `CHAT_SESSION_ENDED` | cierre | sessionId, reason, turns | `terminar`, el tiempo acordado, el visitante, `MAX_TURNS` o el presupuesto |
+| `CHAT_SESSION_ENDED` | cierre | sessionId, reason, turns | `terminar`, el visitante, su próximo compromiso, la inactividad, `MAX_TURNS` o el presupuesto |
 
 **Del mundo** (solo en `in_world`, por la consolidación):
 
 | Tipo | Cuándo | Payload | Causas esperadas |
 |---|---|---|---|
-| `CONVERSATION_STARTED` | el worker acepta la entrada `chat_open` | citizenId, visitorId, sessionId, durationMin, placeId | la entrada externa `chat_open`; su agenda (tramo libre) |
-| `CONVERSATION_DECLINED` | no le queda tiempo libre suficiente | citizenId, visitorId, requestedMin, reason | la entrada `chat_open`; el compromiso que lo impide |
+| `CONVERSATION_STARTED` | el worker acepta la entrada `chat_open` | citizenId, visitorId, sessionId, availableUntil, placeId | la entrada externa `chat_open`; su agenda (tramo libre u ocupado) |
+| `CONVERSATION_DECLINED` | está dormido | citizenId, visitorId, reason | la entrada `chat_open`; su estado |
 | `CONVERSATION_HELD` | el worker aplica la entrada `chat_session` | citizenId, visitorId, sessionId, turns, dominantTones, dominantStances, summary, valence, intensity | la entrada externa `chat_session`; las posturas con más peso como `fuente.*` |
 | `LEARNED_FROM_CONVERSATION` | cambia alguna función o fuerza | citizenId, sessionId, deltas `{ key, before, after }[]` | `CONVERSATION_HELD` |
 
@@ -271,7 +278,7 @@ El efecto emocional (R-022) va como parche de `CONVERSATION_HELD`; no tiene even
 - **INV-002** — El prompt serializado no contiene ids ni textos de eventos en los que la persona no participa, ni el campo `isTrue`.
 - **INV-003** — La selección de postura no lee `tmp.*` ni `pers.*` (prueba de arquitectura, como la 040 INV-002).
 - **INV-004** — `visitorValue` está en [-1,1], `aversiveLoad` es ≥ 0 y todo es finito; ningún cambio consolidado supera sus topes.
-- **INV-005** — Una sesión cerrada no acepta turnos; todo `CHAT_SESSION_ENDED` tiene `reason`; hay como mucho una sesión `in_world` abierta; ninguna sesión `in_world` dura más de sus minutos aceptados.
+- **INV-005** — Una sesión cerrada no acepta turnos; todo `CHAT_SESSION_ENDED` tiene `reason`; hay como mucho una sesión `in_world` abierta; ninguna charla `in_world` sigue abierta después de su `availableUntil`.
 - **INV-006** — Los cambios de una sesión `in_world` solo llegan al mundo por la entrada externa `chat_session` que aplica el worker.
 
 ## 7. Criterios de aceptación
@@ -295,22 +302,19 @@ Todos se prueban con el proveedor `mock`, salvo que se diga otra cosa.
   - el estrés sube como mucho `MAX_MOOD_DELTA`;
   - ningún cambio de `LEARNED_FROM_CONVERSATION` supera `MAX_LEARNING_DELTA`.
 - **CA-014** — *Dado* un mundo con una sesión `in_world` aplicada, *cuando* se reproduce desde la instantánea anterior con sus entradas externas, *entonces* el `stateHash` final coincide y no hay llamadas de red.
-- **CA-015** — *Dado* un ciudadano libre y una sesión `in_world` de 60 minutos, *entonces*:
-  - `CONVERSATION_STARTED` ocupa su agenda 60 minutos;
-  - durante la sesión el reloj del mundo avanza y otros ciudadanos siguen generando eventos;
+- **CA-015** — *Dado* un ciudadano en su tiempo libre y una charla `in_world`, *entonces*:
+  - `CONVERSATION_STARTED` pasa su actividad a `conversation`;
+  - durante la charla el reloj del mundo avanza y otros ciudadanos siguen generando eventos;
   - el mundo va en tiempo real y al cerrar recupera la velocidad anterior;
   - otra apertura `in_world` responde 409.
-- **CA-019** — *Dado* un ciudadano que entra a trabajar en 30 minutos, *cuando* se pide una sesión de 60, *entonces* se aceptan 30 con el motivo; y *dado* uno que entra en menos de `MIN_SESSION_MIN`, *entonces* `CONVERSATION_DECLINED` con el compromiso como causa.
-- **CA-020** — *Dado* una sesión de 45 minutos, *cuando* se agotan, *entonces* el ciudadano se despide con la postura `terminar`, la sesión se cierra con `endReason: 'time'` y su agenda vuelve a quedar libre.
-- **CA-016** — *Dado* `chat:battery` con `mock` sobre 5 ciudadanos y todos los guiones, *cuando* se ejecuta dos veces, *entonces* los informes son idénticos byte a byte.
-- **CA-017** — *Dado* una petición a `/api/chat/*` sin credenciales, *entonces* 401.
-- **CA-018** — *Dado* el proveedor `mock` con retardo simulado, *entonces* el evento SSE `stance` llega antes del primer `token` y el verificador no retrasa el `done`.
+- **CA-019** — *Dado* un ciudadano en su turno de trabajo, *entonces* la charla se acepta con `availableUntil` = ahora + `BUSY_WINDOW_MIN`; y *dado* uno dormido, *entonces* `CONVERSATION_DECLINED`.
+- **CA-020** — *Dado* un ciudadano que entra a trabajar durante la charla, *cuando* llega la hora, *entonces* se despide con la postura `terminar` y el motivo, la charla cierra con `endReason: 'obligation'` y el ciudadano sigue su rutina.
 
 ## 8. Parámetros y calibración
 | Parámetro | Valor por defecto | Rango | Fuente / justificación |
 |---|---|---|---|
-| `CHAT_DURATIONS` | 45, 60, 90 min | catálogo | decisión del usuario (duración acordada, como en el mundo real) |
-| `MIN_SESSION_MIN` | 15 min | 5–45 | [M] |
+| `BUSY_WINDOW_MIN` | 10 min | 2–30 | [M] hablar un momento en medio de una obligación |
+| `IDLE_END_MIN` | 10 min | 2–60 | [M] se despide si el visitante deja de escribir |
 | `MAX_TURNS` | 40 | 10–200 | [M] tope de coste |
 | `MAX_OPEN_SESSIONS` | 4 (1 `in_world`) | 1–16 | [M] presupuesto de RAM |
 | `MAX_TURN_CHARS` | 1 000 | — | [M] |
@@ -349,7 +353,7 @@ Por sesión, por ciudadano y por guion (informe de la batería y panel de la vis
 - [x] Texto sin voz, baja latencia, modelos económicos y proveedor configurable (usuario, 2026-09-27).
 - [x] Privacidad: no hace falta aviso; no son personas reales (usuario, 2026-09-27).
 - [x] Almacenamiento: tablas del chat en la base del mundo, fuera del hash; efectos solo por entrada externa aplicada por el worker (R-001, R-019), decidido por Claude a petición del usuario.
-- [x] El mundo sigue su curso durante la sesión, con duración acordada de 45, 60 o 90 minutos (usuario, 2026-09-27; R-019).
+- [x] El mundo sigue su curso durante la charla, que es casual y sin duración acordada; la duración pactada es de las sesiones clínicas (034) (usuario, 2026-09-27; R-019).
 - [x] Topes de huella: valen para empezar; se calibran en las pruebas avanzadas (usuario, 2026-09-27; PA-137).
 - [ ] PA-134, PA-135 y PA-136: fuerzas iniciales de las posturas, magnitudes de los tonos y decaimiento de la carga.
 
@@ -360,3 +364,4 @@ Por sesión, por ciudadano y por guion (informe de la batería y panel de la vis
 | 2026-09-27 | 0.2 | Decisiones del usuario: modo `in_world` con recuerdo (`CONVERSATION_HELD`), aprendizaje consolidado con topes y efecto emocional acotado (R-018 a R-022); bloque L adelantado; tabla de 12 tonos con "victimizante" como autolamento (ejemplo del usuario) y "culpabilizador" aparte; chat de texto con streaming y objetivos de latencia (R-023); modelos económicos configurables; sin aviso de privacidad; tablas del chat en la base del mundo fuera del hash. CA-007, CA-013 a CA-015 y CA-018 nuevos |
 | 2026-09-27 | 0.3 | Decisiones del usuario: el mundo sigue su curso durante una sesión `in_world`, que es una cita con duración acordada (45, 60 o 90 min), validada contra su agenda, en tiempo real y con fin por tiempo (R-019); eventos `CONVERSATION_STARTED` y `CONVERSATION_DECLINED`; CA-015 reescrito, CA-019 y CA-020 nuevos. Topes de huella aceptados para empezar, a calibrar |
 | 2026-09-27 | 0.3 | Estado → aprobada |
+| 2026-09-27 | 0.4 | Corrección del usuario: la charla es casual, no una sesión. Sin duración acordada: acepta según su situación (dormido: no; en una obligación: un momento; libre: hasta su próximo compromiso) y termina por despedida, postura, compromiso o inactividad (R-019). La duración pactada pasa a la 034. CA-015, CA-019 y CA-020 reescritos; `BUSY_WINDOW_MIN` e `IDLE_END_MIN` sustituyen a `CHAT_DURATIONS` y `MIN_SESSION_MIN` |
