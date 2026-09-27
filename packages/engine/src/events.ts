@@ -279,6 +279,43 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { citizenId: str, activity: str, name: str }),
     text: (e) => `${e.payload.citizenId} empieza a ${e.payload.name.toLowerCase()}.`,
   }),
+  // Charla con ciudadanos en el mundo (spec 043 R-019 a R-021).
+  CONVERSATION_STARTED: def<{ citizenId: string; visitorId: string; sessionId: string; availableUntil: number; busy: boolean }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, visitorId: str, sessionId: str, availableUntil: int, busy: (v) => typeof v === 'boolean' }),
+    text: (e) => `${e.payload.citizenId} se pone a charlar con ${e.payload.visitorId}${e.payload.busy ? ' un momento' : ''}.`,
+  }),
+  CONVERSATION_DECLINED: def<{ citizenId: string; visitorId: string; reason: string }>({
+    baseImportance: 0.1,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, visitorId: str, reason: str }),
+    text: (e) => `${e.payload.citizenId} no puede charlar con ${e.payload.visitorId} (${e.payload.reason}).`,
+  }),
+  CONVERSATION_HELD: def<{
+    citizenId: string; visitorId: string; sessionId: string; turns: number; dominantTones: string[];
+    dominantStances: string[]; summary: string; valence: number; intensity: number;
+  }>({
+    baseImportance: 0.4,
+    spontaneous: false,
+    check: (p) =>
+      needObj(p, {
+        citizenId: str, visitorId: str, sessionId: str, turns: (v) => int(v) && (v as number) >= 0,
+        dominantTones: (v) => Array.isArray(v) && v.every(str), dominantStances: (v) => Array.isArray(v) && v.every(str),
+        summary: str, valence: (v) => typeof v === 'number' && v >= -1 && v <= 1, intensity: (v) => typeof v === 'number' && v >= 0 && v <= 1,
+      }),
+    text: (e) => `${e.payload.citizenId} charló con ${e.payload.visitorId}: ${e.payload.summary}`,
+  }),
+  LEARNED_FROM_CONVERSATION: def<{ citizenId: string; sessionId: string; deltas: { key: string; before: number; after: number }[] }>({
+    baseImportance: 0.2,
+    spontaneous: false,
+    check: (p) =>
+      needObj(p, {
+        citizenId: str, sessionId: str,
+        deltas: (v) => Array.isArray(v) && v.every((d) => isObj(d) && str(d.key) && Number.isFinite(d.before) && Number.isFinite(d.after)),
+      }),
+    text: (e) => `${e.payload.citizenId} aprende de la charla ${e.payload.sessionId} (${e.payload.deltas.length} cambios).`,
+  }),
   // Historia generada (spec 030), de 1900 al presente.
   TOWN_FOUNDED: def<{ placeId: string; name: string; year: number }>({
     baseImportance: 1,

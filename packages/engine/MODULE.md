@@ -2,7 +2,7 @@
 modulo: engine
 ruta: packages/engine
 estado: en-desarrollo
-specs: [001, 002, 003, 004, 005, 006, 007, 008, 009, 014, 023, 029, 030, 035]
+specs: [001, 002, 003, 004, 005, 006, 007, 008, 009, 014, 023, 029, 030, 035, 043]
 actualizado: 2026-09-24
 ---
 
@@ -27,6 +27,7 @@ Núcleo puro de la simulación: tipos del dominio, RNG, reloj, scheduler, evento
 | 005 | `WorldObject`, `addObject`, `objectsOf`; eventos `OBJECT_ACQUIRED` y `OBJECT_INHERITED`. Los CA se prueban en el generador de objetos | — |
 | 029 | Consulta del perfil (R-002, R-003 con `profileValue`); INV-001 e INV-002 (`checkProfile`). Los CA se prueban en `generators/src/country` | — |
 | 030 | Antepasados, padres y fechas de fundación validados (`history.ts`); 9 eventos de la historia. Los CA se prueban en `generators/src/history` | — |
+| 043 | Eventos de la charla en el mundo: `CONVERSATION_STARTED`, `CONVERSATION_DECLINED`, `CONVERSATION_HELD` y `LEARNED_FROM_CONVERSATION`. Los CA se prueban en `src/conversation` | — |
 
 
 ## 3. API pública
@@ -153,3 +154,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-26 | mf/3-seleccion | 040, 036 | `decision` pasa a la 040 (fuentes de control, `select.ts`); `functions` añade los estados aprendidos y el aprendizaje de la selección; `lab` añade V-4 y V-5; `routines` quita el adaptador. `index.ts` exporta la API nueva y deja de exportar `Factor` |
 | 2026-09-26 | mf/4-red | 037 | Módulo nuevo `src/relations/` (capa 3: red relacional). `Citizen.network`. `index.ts` exporta su API y `directValue` |
 | 2026-09-26 | mf/5-reglas-valores | 038 | Módulo nuevo `src/rules/` (capa 4: reglas y valores). `Citizen.rules`. `index.ts` exporta su API |
+| 2026-09-27 | charla/l1-motor (L1) | 043 | Módulo nuevo `src/conversation/` (charla con ciudadanos: tono, postura, disponibilidad y consolidación). Eventos nuevos `CONVERSATION_STARTED`, `CONVERSATION_DECLINED`, `CONVERSATION_HELD` y `LEARNED_FROM_CONVERSATION`. `index.ts` exporta su API |

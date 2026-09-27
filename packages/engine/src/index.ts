@@ -325,6 +325,47 @@ export {
 } from './rules/index.ts';
 export type { NewRule, Rule, RuleKind } from './rules/index.ts';
 
+export {
+  CHAT_DEFAULTS,
+  FLEXIBLE_FROM,
+  STANCE_PREFIX,
+  chatAvailability,
+  citizenAnswered,
+  consolidateChat,
+  motivation,
+  openingEvent,
+  selectStance,
+  stanceOptions,
+  stanceResponse,
+  stanceStrength,
+  startConversation,
+  summarize,
+  toneValue,
+  visitorSaid,
+  visitorStimulus,
+  visitorValue,
+} from './conversation/index.ts';
+export type {
+  Availability,
+  ChatCatalog,
+  ChatContribution,
+  ChatParams,
+  ChatSessionInput,
+  ChatSource,
+  ChatSummary,
+  Consolidation,
+  ConversationState,
+  LearnerCtx,
+  LiveState,
+  PersonCtx,
+  StanceChoice,
+  StanceDef,
+  StanceOption,
+  ToneDef,
+  TurnRecord,
+  VisitorTurn,
+} from './conversation/index.ts';
+
 export { FORBIDDEN_TERMS, MECHANISMS, isMechanism } from './temperament/mechanisms.ts';
 export type { MechanismId } from './temperament/mechanisms.ts';
 /** @deprecated Adaptador temporal de la migración al motor funcional (035 §9); se elimina en MF7. */

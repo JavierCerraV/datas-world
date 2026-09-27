@@ -20,12 +20,12 @@ Specs: 043 v0.3 (aprobada). Usa las implementadas (014, 030) y las aprobadas (02
 - [x] L0.2 Catálogos `chat_tones` (12), `chat_stances` (8) y `chat_scripts` (al menos un guion por tono), con los estímulos verbales nuevos en el catálogo de la 036 (PA-135).
 
 ## Bloque L1 — Motor de la conversación (`packages/engine/src/conversation/`)
-- [ ] L1.1 `MODULE.md` del módulo nuevo.
-- [ ] L1.2 Tono → estímulo y función aprendida (R-005); valor del visitante (R-006); carga aversiva (R-007).
-- [ ] L1.3 Selección de postura con las fuentes de la 040, sin leer `tmp.*` ni `pers.*` (R-008); aprendizaje local (R-009).
-- [ ] L1.4 Charla casual: validar `chat_open` según su situación y cerrar por compromiso o inactividad (R-019), con `CONVERSATION_STARTED` y `CONVERSATION_DECLINED`.
-- [ ] L1.5 `consolidateChat`: `CONVERSATION_HELD`, `LEARNED_FROM_CONVERSATION`, topes de aprendizaje y efecto emocional acotado (R-020 a R-022).
-- [ ] L1.6 Criterios: CA-004, CA-005, CA-006, CA-007, CA-008, CA-013, CA-019 y CA-020.
+- [x] L1.1 `MODULE.md` del módulo nuevo.
+- [x] L1.2 Tono → estímulo y función aprendida (R-005); valor del visitante (R-006); carga aversiva (R-007).
+- [x] L1.3 Selección de postura con las fuentes de la 040, sin leer `tmp.*` ni `pers.*` (R-008); aprendizaje local (R-009).
+- [x] L1.4 Charla casual: validar `chat_open` según su situación (R-019.1), con `CONVERSATION_STARTED` y `CONVERSATION_DECLINED`. El cierre por compromiso o inactividad pasa a L3.3.
+- [x] L1.5 `consolidateChat`: `CONVERSATION_HELD`, `LEARNED_FROM_CONVERSATION`, topes de aprendizaje y efecto emocional acotado (R-020 a R-022).
+- [x] L1.6 Criterios: CA-004, CA-005, CA-006, CA-007, CA-008, CA-013, CA-019 y CA-020.
 
 ## Bloque L2 — Pasarela y vista (`packages/llm-gateway/src/chat/`)
 - [ ] L2.1 `PersonView` mínima y prompt sin verdad del mundo (R-002, R-003).
@@ -37,7 +37,7 @@ Specs: 043 v0.3 (aprobada). Usa las implementadas (014, 030) y las aprobadas (02
 ## Bloque L3 — Persistencia, API y worker
 - [ ] L3.1 Tablas del chat fuera del hash y entradas externas `chat_open` y `chat_session` (R-001, R-019).
 - [ ] L3.2 Endpoints `/api/chat/*` con SSE y basic auth (R-016); tiempo real durante la sesión y velocidad anterior al cerrar.
-- [ ] L3.3 El worker aplica las entradas; replay sin red.
+- [ ] L3.3 El worker aplica las entradas; replay sin red. Actividad `conversation` en `act.kind`, respetada por rutinas y selección mientras dura la charla; cierre por compromiso o inactividad (R-019.5).
 - [ ] L3.4 Criterios: CA-001, CA-014, CA-015 y CA-017.
 
 ## Bloque L4 — Visor y batería
