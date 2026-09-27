@@ -1,7 +1,7 @@
 {
   "name": "stimulus_classes",
-  "version": "2026.09.3",
-  "source": "Spec 036 R-004 (ADR-007): ontología compartida de estímulos. [M] Rasgos estimados para la generalización, seis dimensiones en [0,1]: social, cuerpo, dinero, trabajo, ocio y hogar (dims). Clases explícitas: los términos verbales, roles y estados del cuerpo que usan las reglas del motor (WORLD_STIMULI). Las entradas `familia.lugar.<categoría>` y `familia.actividad.<categoría>` dan los rasgos de las clases `lugar.<clave>` y `actividad.<clave>` que se derivan de place_kinds y leisure_activities. Primarios (R-007): dolor −1 y disfrute +1. MF4 (037 R-007): despido, llegar tarde y no pagar, que enseña la comunidad verbal. MF5 (038 R-010): las respuestas de la rutina (`rutina.*`) que especifican las reglas. Calibración pendiente (PA-131).",
+  "version": "2026.09.4",
+  "source": "Spec 036 R-004 (ADR-007): ontología compartida de estímulos. [M] Rasgos estimados para la generalización, seis dimensiones en [0, 1]: social, cuerpo, dinero, trabajo, ocio y hogar (dims). Clases explícitas: los términos verbales, roles y estados del cuerpo que usan las reglas del motor (WORLD_STIMULI). Las entradas `familia.lugar.<categoría>` y `familia.actividad.<categoría>` dan los rasgos de las clases `lugar.<clave>` y `actividad.<clave>` que se derivan de place_kinds y leisure_activities. Primarios (R-007): dolor −1 y disfrute +1. MF4 (037 R-007): despido, llegar tarde y no pagar, que enseña la comunidad verbal. MF5 (038 R-010): las respuestas de la rutina (`rutina.*`) que especifican las reglas. Calibración pendiente (PA-131). L0.2 (043 R-005): nueve términos verbales de la charla (burla, confidencia, culpa, insulto, lamento, neutro, presión, pregunta y pregunta invasiva), sin valor primario: su función se aprende o sale del valor de partida de `chat_tones`.",
   "entries": [
     {
       "key": "cuerpo.disfrute",
@@ -297,12 +297,39 @@
       }
     },
     {
+      "key": "verbal.burla",
+      "name": "Burla",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0, 0, 0, 0.2, 0]
+      }
+    },
+    {
+      "key": "verbal.confidencia",
+      "name": "Confidencia",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0, 0, 0, 0, 0.3]
+      }
+    },
+    {
       "key": "verbal.critica",
       "name": "Crítica",
       "since": "M2",
       "attrs": {
         "kind": "verbal_term",
         "features": [1, 0, 0, 0, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.culpa",
+      "name": "Culpa (reproche)",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0, 0, 0, 0, 0.2]
       }
     },
     {
@@ -342,6 +369,24 @@
       }
     },
     {
+      "key": "verbal.insulto",
+      "name": "Insulto",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0.2, 0, 0, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.lamento",
+      "name": "Lamento (autodesprecio)",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0.2, 0, 0, 0, 0.2]
+      }
+    },
+    {
       "key": "verbal.llegar_tarde",
       "name": "Llegar tarde",
       "since": "M2",
@@ -351,12 +396,48 @@
       }
     },
     {
+      "key": "verbal.neutro",
+      "name": "Comentario neutro",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [0.5, 0, 0, 0, 0, 0]
+      }
+    },
+    {
       "key": "verbal.no_pagar",
       "name": "No pagar",
       "since": "M2",
       "attrs": {
         "kind": "verbal_term",
         "features": [0.3, 0, 1, 0, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.pregunta",
+      "name": "Pregunta",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [0.8, 0, 0, 0, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.pregunta_invasiva",
+      "name": "Pregunta invasiva",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0.2, 0.3, 0, 0, 0.3]
+      }
+    },
+    {
+      "key": "verbal.presion",
+      "name": "Presión o exigencia",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0, 0, 0.3, 0, 0]
       }
     },
     {

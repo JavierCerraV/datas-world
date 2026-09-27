@@ -17,7 +17,7 @@ Specs: 043 v0.3 (aprobada). Usa las implementadas (014, 030) y las aprobadas (02
   - registro de respuestas para el replay.
 
   Pedir su aprobación: el módulo `packages/llm-gateway` no se puede tocar con la 026 en borrador.
-- [ ] L0.2 Catálogos `chat_tones` (12), `chat_stances` (8) y `chat_scripts` (al menos un guion por tono), con los estímulos verbales nuevos en el catálogo de la 036 (PA-135).
+- [x] L0.2 Catálogos `chat_tones` (12), `chat_stances` (8) y `chat_scripts` (al menos un guion por tono), con los estímulos verbales nuevos en el catálogo de la 036 (PA-135).
 
 ## Bloque L1 — Motor de la conversación (`packages/engine/src/conversation/`)
 - [ ] L1.1 `MODULE.md` del módulo nuevo.

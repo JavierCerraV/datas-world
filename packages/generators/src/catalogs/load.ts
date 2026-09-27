@@ -8,10 +8,13 @@ import type { Catalog, CatalogEntry } from './schema.ts';
 
 export const CATALOGS_DIR = join(import.meta.dirname, '..', '..', 'catalogs');
 
-/** Catálogos que usa M1, en orden canónico. */
+/** Catálogos del mundo y del laboratorio, en orden canónico. */
 export const CATALOG_NAMES = [
   'appearance',
   'birthplaces',
+  'chat_scripts',
+  'chat_stances',
+  'chat_tones',
   'childhood_events',
   'education_levels',
   'family_names',

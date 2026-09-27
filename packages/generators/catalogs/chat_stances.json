@@ -1,0 +1,87 @@
+{
+  "name": "chat_stances",
+  "version": "2026.10.1",
+  "source": "Spec 043 §3, R-007, R-008 y R-014 (bloque L0.2). Las 8 posturas conversacionales del ciudadano, candidatas del punto de decisión (040). `escape` [0,1]: cuánto reduce la carga aversiva si se elige (reforzamiento negativo, R-007) [M]. `w0` [0,1]: fuerza inicial hasta la historia sintética de MF7 [M] (PA-134). `guidance`: instrucción de expresión para el LLM y base de la plantilla sin LLM (R-010, R-014).",
+  "entries": [
+    {
+      "key": "abrirse",
+      "name": "Abrirse",
+      "since": "M2",
+      "attrs": {
+        "escape": 0,
+        "w0": 0.5,
+        "guidance": "Responde con apertura: cuenta algo de su vida o de lo que siente, con detalles que estén en su vista, y sigue la conversación."
+      }
+    },
+    {
+      "key": "aplacar",
+      "name": "Aplacar",
+      "since": "M2",
+      "attrs": {
+        "escape": 0.3,
+        "w0": 0.4,
+        "guidance": "Busca calmar al otro: consuela, le da la razón o le quita importancia al asunto para evitar el malestar."
+      }
+    },
+    {
+      "key": "callar",
+      "name": "Callar",
+      "since": "M2",
+      "attrs": {
+        "escape": 0.5,
+        "w0": 0.3,
+        "guidance": "Casi no responde: un monosílabo, un silencio incómodo o una evasiva mínima. No explica nada."
+      }
+    },
+    {
+      "key": "contraatacar",
+      "name": "Contraatacar",
+      "since": "M2",
+      "attrs": {
+        "escape": 0.4,
+        "w0": 0.25,
+        "guidance": "Responde a la ofensa con otra: devuelve la crítica, el tono o la burla, sin amenazar."
+      }
+    },
+    {
+      "key": "evadir",
+      "name": "Evadir",
+      "since": "M2",
+      "attrs": {
+        "escape": 0.6,
+        "w0": 0.4,
+        "guidance": "Cambia de tema o responde de forma vaga para no entrar en lo que le preguntan."
+      }
+    },
+    {
+      "key": "poner_limite",
+      "name": "Poner un límite",
+      "since": "M2",
+      "attrs": {
+        "escape": 0.5,
+        "w0": 0.35,
+        "guidance": "Marca un límite con claridad y sin disculparse: dice qué no acepta y por qué, sin dar la razón al otro."
+      }
+    },
+    {
+      "key": "responder_breve",
+      "name": "Responder breve",
+      "since": "M2",
+      "attrs": {
+        "escape": 0.2,
+        "w0": 0.6,
+        "guidance": "Responde lo justo, con cortesía y en pocas palabras, sin abrirse ni cortar la conversación."
+      }
+    },
+    {
+      "key": "terminar",
+      "name": "Terminar",
+      "since": "M2",
+      "attrs": {
+        "escape": 1,
+        "w0": 0.2,
+        "guidance": "Se despide y termina la charla. Si hay un motivo (un compromiso, el trato recibido), lo dice en una frase."
+      }
+    }
+  ]
+}

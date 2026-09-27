@@ -2,8 +2,8 @@
 modulo: catalogs
 ruta: packages/generators/src/catalogs
 estado: en-desarrollo
-specs: [003, 004, 005, 006, 007, 008, 009, 030]
-actualizado: 2026-09-24
+specs: [003, 004, 005, 006, 007, 008, 009, 030, 043]
+actualizado: 2026-09-27
 ---
 
 # Módulo: catalogs
@@ -23,7 +23,7 @@ Desde `@datas-world/generators`:
 
 | Símbolo | Descripción |
 |---|---|
-| `CATALOG_NAMES`, tipo `CatalogName` | Los 15 catálogos de M1, en orden canónico |
+| `CATALOG_NAMES`, tipo `CatalogName` | Los 22 catálogos del mundo y del laboratorio, en orden canónico |
 | `loadCatalog(name, dir?)`, `loadCatalogs(dir?)` → `Catalogs` | Lee `packages/generators/catalogs/<nombre>.json` y lo valida. Lanza con todos los problemas |
 | `parseCatalog(data, label?)` | Valida un catálogo ya leído (Zod + orden de claves) |
 | `catalogRef(c)`, `catalogRefs(cs)` | `{ version, hash }` para `WorldConfig.catalogs` (ADR-006 §4). El hash es el `hashString` del motor sobre el JSON canónico |
@@ -41,7 +41,8 @@ Desde `@datas-world/generators`:
   - territorio: `parent`, `placeKind`;
   - oficios: `occupation`, `kind`;
   - hechos históricos: `start`, `end`, `effects`;
-  - rasgos: `column`, `proto`, `invert`, `correlations`; valores: `column`, `proto`.
+  - rasgos: `column`, `proto`, `invert`, `correlations`; valores: `column`, `proto`;
+  - charla (043): tonos `stimulus`, `magnitude`, `prior`, `description`, `examples`, `keywords`; posturas `escape`, `w0`, `guidance`; guiones `turns` (`{ text, tone }[]`).
 - **Turnos colombianos** (`shiftCO`). Cumplen 42 h semanales sin almuerzo, por la Ley 2101. Por ejemplo, la oficina trabaja de lunes a viernes de 07:00 a 16:24 con 60 min de almuerzo: 8 h 24 min × 5 = 42 h. `shiftProto` conserva el turno del prototipo para la paridad.
 - **Códigos CIIU y CIUO.** Se escribieron desde la clasificación publicada, con nombres abreviados. Queda pendiente verificarlos uno a uno contra la tabla oficial del DANE (lo dice el `source` de cada catálogo).
 
@@ -49,7 +50,9 @@ Desde `@datas-world/generators`:
 Claves únicas, jerárquicas y en orden; `since` válido; el hash cubre el contenido canónico. Un cambio en cualquier fila cambia el hash y, por tanto, el mundo generado (ADR-006 §4).
 
 ## 6. Cómo se prueba
-`src/catalogs/catalogs.test.ts` (8 pruebas):
+`src/catalogs/catalogs.test.ts` (8 pruebas) y `src/catalogs/chat-catalogs.test.ts` (4 pruebas de la 043: los 12 tonos con su estímulo verbal y el valor de partida aprobado, estímulos distintos y no primarios, las 8 posturas con escape y fuerza inicial, y guiones que cubren todos los tonos).
+
+En `catalogs.test.ts`:
 - carga y nombre de todos los catálogos;
 - hash estable y sensible al contenido;
 - lo esencial de M1 en `place_kinds` y el `since` de las entradas futuras;
@@ -83,3 +86,4 @@ Las entradas de M1 de `place_kinds` llevan `proto` (el tipo del prototipo), `def
 | 2026-09-25 | mf/2-funciones (MF2.1) | 036 | Catálogo nuevo `stimulus_classes` 2026.09.1: 12 clases del motor y 24 familias de rasgos para lugares y actividades (6 dimensiones [M]). `CATALOG_NAMES` pasa a 19 |
 | 2026-09-26 | mf/4-red | 037 | `stimulus_classes` 2026.09.2: `verbal.despido`, `verbal.llegar_tarde` y `verbal.no_pagar` (37 entradas) |
 | 2026-09-26 | mf/5-reglas-valores | 038 | `stimulus_classes` 2026.09.3: respuestas de la rutina `rutina.*` (tipo `response`), que especifican las reglas (42 entradas) |
+| 2026-09-27 | charla/l0-catalogos (L0.2) | 043, 036 | Catálogos nuevos de la charla: `chat_tones` (12 tonos con estímulo, magnitud, valor social de partida aprobado por el usuario, ejemplos y palabras clave), `chat_stances` (8 posturas con escape, fuerza inicial y guía) y `chat_scripts` (14 guiones: uno por tono y dos mixtos). `stimulus_classes` 2026.09.4: nueve términos verbales de la charla, sin valor primario (51 entradas). `CATALOG_NAMES` pasa a 22 |
