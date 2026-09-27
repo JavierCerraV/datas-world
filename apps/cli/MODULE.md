@@ -2,8 +2,8 @@
 modulo: cli
 ruta: apps/cli
 estado: en-desarrollo
-specs: [001, 002, 009, 010, 015, 021, 023, 027, 029, 030]
-actualizado: 2026-09-24
+specs: [001, 002, 009, 010, 015, 021, 023, 027, 029, 030, 043]
+actualizado: 2026-09-27
 ---
 
 # Módulo: cli
@@ -106,3 +106,4 @@ Sustituye a los scripts headless usados para calibrar el prototipo.
 | 2026-09-25 | m2/h-cierre | 009 | `ficha.ts` lee cada catálogo una vez por proceso: `temperamentLines` (MF1) los leía del disco por persona y `citizen:report` de todas las personas pasaba de 5 s en la suite |
 | 2026-09-26 | mf/2-funciones | 030 | Prueba de la ficha de todas las personas (030 CA-003) con límite de 60 s: ≈ 1 s sola, pero con el aprendizaje (036) las simulaciones que corren en paralelo en la batería completa la llevan a 5,5 s. Sin cambios de código |
 | 2026-09-26 | mf/4-red | 037 | Comando nuevo `bench:relations` (`bench-relations.ts`): tiempo del valor funcional de un estímulo para 200 personas con 500 relaciones, con redes de 100, 250 y 500 estímulos (037 CA-004) |
+| 2026-09-27 | charla/l4 (L4.2) | 043 | Comando nuevo `chat:battery` (`battery.ts`): los guiones de `chat_scripts` contra N ciudadanos en charlas sandbox, con informe JSON y Markdown (posturas por tono y por guion, coherencia, adherencia, acuerdo del tono, plantillas y varianza de la proporción de escape entre ciudadanos). Proveedor `mock` (determinista, sin horas ni latencias en los archivos) o `config` (`config/llm.json`). `runAsync` para los comandos asíncronos; `main.ts` lo usa. Dependencia nueva `@datas-world/llm-gateway`. 2 pruebas (043 CA-016) |
