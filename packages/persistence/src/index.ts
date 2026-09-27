@@ -33,6 +33,7 @@ export {
   insertChatSession,
   insertChatTurn,
   nextChatSessionId,
+  openChatSessions,
   openInWorldSession,
   updateChatSession,
 } from './chat.ts';

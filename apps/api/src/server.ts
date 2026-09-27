@@ -177,7 +177,13 @@ export function buildApi(opts: ApiOptions): Api {
   });
 
   const poll = () => {
-    if (!reader.refresh()) return;
+    // Un fallo al recargar (base ocupada, estado a medio escribir) no puede tumbar la API: se reintenta al segundo.
+    try {
+      if (!reader.refresh()) return;
+    } catch (e) {
+      app.log.warn(`recarga del mundo fallida: ${(e as Error).message}`);
+      return;
+    }
     const w = reader.world;
     for (const c of clients) {
       sse(c.reply, 'tick', { now: w.now, date: dateOf(w, w.now), status: w.status });

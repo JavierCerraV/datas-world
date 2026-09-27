@@ -1,6 +1,7 @@
 // Visor mínimo (spec 024): mapa, personas, día y noche, inspector, registro de eventos y controles. Solo lee de la
 // API (022); no tiene lógica de simulación (INV-002).
 import { api, control, stream } from './api.ts';
+import { showChatHistory } from './chat-history.ts';
 import { setupChat } from './chat-ui.ts';
 import { eventEs, inspectorTabs } from './format.ts';
 import type { Section } from './format.ts';
@@ -84,13 +85,21 @@ function renderSections(sections: Section[]): string {
 }
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
-let tab: 'estado' | 'historia' | 'funcional' = 'estado';
+let tab: 'estado' | 'historia' | 'funcional' | 'charlas' = 'estado';
 let detail: CitizenDetail | null = null;
+let chatsShownFor: string | null = null;
 function renderInspector(): void {
   if (!detail) return;
   const t = inspectorTabs(detail);
   $('#insp-name').textContent = detail.name;
   for (const b of document.querySelectorAll<HTMLButtonElement>('.tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === tab));
+  // Las charlas no cambian con cada tick: se cargan al entrar en la pestaña o al cambiar de persona.
+  if (tab === 'charlas') {
+    if (chatsShownFor !== detail.id) void showChatHistory($('#insp-body'), detail.id, () => credentials, askAuth);
+    chatsShownFor = detail.id;
+    return;
+  }
+  chatsShownFor = null;
   $('#insp-body').innerHTML =
     tab === 'estado'
       ? renderSections(t.estado)
@@ -251,6 +260,7 @@ $('#insp-close').addEventListener('click', closeInspector);
 for (const b of document.querySelectorAll<HTMLButtonElement>('.tabs button'))
   b.addEventListener('click', () => {
     tab = b.dataset.tab as typeof tab;
+    chatsShownFor = null; // pulsar la pestaña vuelve a cargar las charlas
     renderInspector();
   });
 

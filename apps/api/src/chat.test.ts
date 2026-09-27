@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { ACTIVITY, ACTIVITY_COLUMN, REAL_TIME, stateHash } from '@datas-world/engine';
 import { DEFAULT_CONFIG, Gateway, MemoryRecordStore, mockAdapter } from '@datas-world/llm-gateway';
 import type { GatewayConfig, MockResponder, ModelConfig } from '@datas-world/llm-gateway';
-import { closeDb, openWorldDb } from '@datas-world/persistence';
+import { closeDb, insertChatSession, insertChatTurn, nextChatSessionId, openWorldDb } from '@datas-world/persistence';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { WorldWorker } from '../../worker/src/worker.ts';
 import { buildApi } from './server.ts';
@@ -107,6 +107,33 @@ describe('charla en la API (043)', () => {
     expect((await api.app.inject({ url: `/api/chat/sessions/${id}`, headers: AUTH })).json()).toMatchObject({ status: 'ended', endReason: 'idle' });
   });
 
+  it('R-019.6: una charla en el mundo que quedó abierta (API caída) se cierra al arrancar y se consolida con sus turnos', async () => {
+    const rw = openWorldDb(db);
+    const id = nextChatSessionId(rw);
+    const citizenId = awakeCitizen();
+    insertChatSession(rw, {
+      id, citizenId, visitorId: 'EXT-0001', mode: 'in_world', worldAt: 0, worldHash: 'x', testMode: false, llm: {},
+      status: 'open', createdAt: 't', updatedAt: 't',
+    });
+    insertChatTurn(rw, { sessionId: id, seq: 0, speaker: 'visitor', text: 'hola', data: { tone: 'hostil' }, createdAt: 't' });
+    insertChatTurn(rw, { sessionId: id, seq: 0, speaker: 'citizen', text: 'Mmm.', data: { stance: 'callar' }, createdAt: 't' });
+    closeDb(rw);
+    const second = buildApi({ db, auth, clock: () => '2026-09-27T12:00:00Z', chat: { gateway: new Gateway({ config, adapters: { mock: mockAdapter(respond) }, records: new MemoryRecordStore() }) } });
+    try {
+      const row = (await second.app.inject({ url: `/api/chat/sessions/${id}`, headers: AUTH })).json() as { status: string; endReason: string; inputRef: string };
+      expect(row).toMatchObject({ status: 'ended', endReason: 'interrupted', inputRef: expect.stringMatching(/^cmd:\d+$/) });
+      const cmd = second.reader.db.prepare('SELECT cmd, arg FROM control_commands WHERE id = ?').get(Number(row.inputRef.slice(4))) as { cmd: string; arg: string };
+      expect(cmd.cmd).toBe('chat_session');
+      expect(JSON.parse(cmd.arg)).toMatchObject({ sessionId: id, citizenId, turns: [{ tone: 'hostil', stance: 'callar' }] });
+    } finally {
+      await second.close();
+    }
+    // Deja la orden atendida para no afectar a la prueba siguiente.
+    const w = new WorldWorker(db);
+    w.pump(0);
+    w.shutdown('prueba');
+  });
+
   it('CA-015: en el mundo, la charla pasa por el worker, pone el tiempo real, no admite otra a la vez y se consolida al cerrar', async () => {
     const worker = new WorldWorker(db);
     const prev = worker.runner.speed;
@@ -120,6 +147,7 @@ describe('charla en la API (043)', () => {
       expect(body.availableUntil).toBeGreaterThan(api.reader.world.now - 1);
       const second = await api.app.inject({ method: 'POST', url: '/api/chat/sessions', headers: AUTH, payload: { citizenId, mode: 'in_world' } });
       expect(second.statusCode).toBe(409);
+      expect(second.json()).toMatchObject({ openSessionId: body.id, openCitizenId: citizenId });
       await new Promise((r) => setTimeout(r, 100));
       expect(worker.runner.speed).toBe(REAL_TIME);
       const turn = await api.app.inject({ method: 'POST', url: `/api/chat/sessions/${body.id}/turns`, headers: AUTH, payload: { text: 'Buenas, ¿cómo va todo?', toneTag: 'amable' } });
@@ -129,7 +157,7 @@ describe('charla en la API (043)', () => {
       let held = 0;
       for (let t = 0; t < 50 && held === 0; t++) {
         await new Promise((r) => setTimeout(r, 40));
-        held = (worker.db.prepare("SELECT count(*) AS n FROM events WHERE type = 'CONVERSATION_HELD'").get() as { n: number }).n;
+        held = (worker.db.prepare("SELECT count(*) AS n FROM events WHERE type = 'CONVERSATION_HELD' AND json_extract(payload, '$.sessionId') = ?").get(body.id) as { n: number }).n;
       }
       expect(held).toBe(1);
       expect(worker.runner.speed).toBe(prev);

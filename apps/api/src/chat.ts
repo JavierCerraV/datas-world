@@ -3,12 +3,12 @@
 // pone el mundo en tiempo real mientras dura; la `sandbox` solo lee. Todo con basic auth (cuesta dinero).
 import { createHash } from 'node:crypto';
 import { REAL_TIME, learningParams, stateHash } from '@datas-world/engine';
-import type { EntityId, Ontology, WorldEvent } from '@datas-world/engine';
+import type { ChatSessionInput, EntityId, Ontology, WorldEvent } from '@datas-world/engine';
 import { ChatSession } from '@datas-world/llm-gateway';
 import type { ChatCatalogs, Gateway } from '@datas-world/llm-gateway';
 import {
   appendChatLog, chatLog, chatSessionsOf, chatTurns, enqueueCommand, getChatSession, insertChatSession, insertChatTurn,
-  nextChatSessionId, openInWorldSession, queryEvents, updateChatSession,
+  nextChatSessionId, openChatSessions, openInWorldSession, queryEvents, updateChatSession,
 } from '@datas-world/persistence';
 import type { ChatSessionRow, Db } from '@datas-world/persistence';
 import type { FastifyInstance, FastifyReply } from 'fastify';
@@ -85,20 +85,57 @@ export function registerChatRoutes(app: FastifyInstance, d: ChatDeps): { sweep: 
     return 0;
   }
 
+  /** Consolida en el mundo una charla `in_world` y devuelve la referencia de la orden (R-019.6). */
+  function consolidate(input: ChatSessionInput): string {
+    return `cmd:${enqueueCommand(d.rw, 'chat_session', JSON.stringify(input), d.clock())}`;
+  }
+
   async function close(id: string, reason: string): Promise<ChatSessionRow | undefined> {
     const l = live.get(id);
-    if (!l) return getChatSession(d.rw, id);
-    live.delete(id);
-    const input = await l.session.close();
-    let inputRef: string | undefined;
-    if (l.row.mode === 'in_world') {
-      inputRef = `cmd:${enqueueCommand(d.rw, 'chat_session', JSON.stringify(input), d.clock())}`;
-      if (l.prevSpeed !== undefined && l.prevSpeed !== REAL_TIME) await command('speed', String(l.prevSpeed), false);
+    if (!l) {
+      recoverOrphans(); // abierta en la base pero sin sesión viva: se cierra y se consolida
+      return getChatSession(d.rw, id);
     }
-    updateChatSession(d.rw, id, { status: 'ended', endReason: reason, ...(inputRef ? { inputRef } : {}) }, d.clock());
+    live.delete(id);
+    // El cierre no puede quedarse a medias: si el resumen falla, se consolida sin él y la charla termina igual.
+    const input = await l.session.close().catch(() => l.session.input());
+    let inputRef: string | undefined;
+    try {
+      if (l.row.mode === 'in_world') {
+        inputRef = consolidate(input);
+        if (l.prevSpeed !== undefined && l.prevSpeed !== REAL_TIME) await command('speed', String(l.prevSpeed), false);
+      }
+    } finally {
+      updateChatSession(d.rw, id, { status: 'ended', endReason: reason, ...(inputRef ? { inputRef } : {}) }, d.clock());
+    }
     log(id, 'CHAT_SESSION_ENDED', { sessionId: id, reason, turns: input.turns.length }, [{ state: `fin:${reason}`, weight: 1 }]);
     return getChatSession(d.rw, id);
   }
+
+  /**
+   * Charlas que quedaron abiertas sin sesión viva (la API se cerró o se cayó durante la charla): se cierran y,
+   * si eran en el mundo, se consolidan con los turnos guardados para que el ciudadano las recuerde (R-019.6).
+   */
+  function recoverOrphans(): void {
+    for (const row of openChatSessions(d.rw)) {
+      if (live.has(row.id)) continue;
+      const turns = chatTurns(d.rw, row.id);
+      const pairs = turns.filter((t) => t.speaker === 'citizen').flatMap((c) => {
+        const v = turns.find((t) => t.speaker === 'visitor' && t.seq === c.seq);
+        const tone = v?.data.tone;
+        const stance = c.data.stance;
+        return typeof tone === 'string' && typeof stance === 'string' ? [{ tone, stance }] : [];
+      });
+      let inputRef: string | undefined;
+      if (row.mode === 'in_world')
+        inputRef = consolidate({ sessionId: row.id, citizenId: row.citizenId as EntityId, visitorId: row.visitorId, turns: pairs });
+      updateChatSession(d.rw, row.id, { status: 'ended', endReason: 'interrupted', ...(inputRef ? { inputRef } : {}) }, d.clock());
+      log(row.id, 'CHAT_SESSION_ENDED', { sessionId: row.id, reason: 'interrupted', turns: pairs.length }, [{ state: 'fin:interrupted', weight: 1 }]);
+      const prev = chatLog(d.rw, row.id).find((e) => e.type === 'CHAT_SESSION_STARTED')?.payload as { prevSpeed?: number } | undefined;
+      if (row.mode === 'in_world' && prev?.prevSpeed !== undefined && prev.prevSpeed !== REAL_TIME) void command('speed', String(prev.prevSpeed), false);
+    }
+  }
+  recoverOrphans();
 
   app.post('/api/chat/sessions', async (req, reply) => {
     if (!guard(req.headers.authorization, reply)) return reply;
@@ -108,8 +145,9 @@ export function registerChatRoutes(app: FastifyInstance, d: ChatDeps): { sweep: 
     const person = d.reader.world.citizens.get(b.data.citizenId as EntityId);
     if (!person || person.status !== 'active') return reply.code(404).send({ error: 'no existe' });
     const inWorld = b.data.mode === 'in_world';
-    if (inWorld && (openInWorldSession(d.rw) || [...live.values()].some((l) => l.row.mode === 'in_world')))
-      return reply.code(409).send({ error: 'ya hay una charla en el mundo abierta' });
+    const busy = [...live.values()].find((l) => l.row.mode === 'in_world')?.row ?? openInWorldSession(d.rw);
+    if (inWorld && busy)
+      return reply.code(409).send({ error: 'ya hay una charla en el mundo abierta', openSessionId: busy.id, openCitizenId: busy.citizenId });
     const id = nextChatSessionId(d.rw);
     let prevSpeed: number | undefined;
     let availableUntil: number | undefined;
@@ -145,7 +183,7 @@ export function registerChatRoutes(app: FastifyInstance, d: ChatDeps): { sweep: 
       status: 'open', ...(availableUntil !== undefined ? { availableUntil } : {}), createdAt: d.clock(), updatedAt: d.clock(),
     };
     insertChatSession(d.rw, row);
-    log(id, 'CHAT_SESSION_STARTED', { sessionId: id, citizenId: row.citizenId, visitorId: VISITOR, mode: row.mode, worldAt: row.worldAt, worldHash: hash, testMode: row.testMode, llm: row.llm }, [{ state: 'visitante', weight: 1 }]);
+    log(id, 'CHAT_SESSION_STARTED', { sessionId: id, citizenId: row.citizenId, visitorId: VISITOR, mode: row.mode, worldAt: row.worldAt, worldHash: hash, testMode: row.testMode, llm: row.llm, ...(prevSpeed !== undefined ? { prevSpeed } : {}) }, [{ state: 'visitante', weight: 1 }]);
     live.set(id, { session, row, ...(prevSpeed !== undefined ? { prevSpeed } : {}), lastMs: d.nowMs(), busy: false });
     return { id, mode: row.mode, status: 'open', ...(availableUntil !== undefined ? { availableUntil } : {}), view: session.view };
   });
@@ -200,7 +238,7 @@ export function registerChatRoutes(app: FastifyInstance, d: ChatDeps): { sweep: 
       l.busy = false;
       l.lastMs = d.nowMs();
     }
-    if (l.session.ended) await close(id, forced ? 'obligation' : 'citizen');
+    if (l.session.ended) await close(id, forced ? 'obligation' : 'citizen').catch((e: Error) => app.log.error(e));
     return reply;
   });
 
@@ -229,11 +267,16 @@ export function registerChatRoutes(app: FastifyInstance, d: ChatDeps): { sweep: 
 
   /** R-019.5: cierra por inactividad y, en el mundo, por su próximo compromiso aunque el visitante no escriba. */
   const sweep = async () => {
-    d.reader.refresh();
-    for (const [id, l] of [...live]) {
-      if (l.busy) continue;
-      if (d.nowMs() - l.lastMs > IDLE_END_MIN * 60_000) await close(id, 'idle');
-      else if (l.row.mode === 'in_world' && l.row.availableUntil !== undefined && d.reader.world.now >= l.row.availableUntil) await close(id, 'obligation');
+    // Se llama con `void` cada 30 s: un rechazo sin atrapar tumbaría el proceso de la API.
+    try {
+      d.reader.refresh();
+      for (const [id, l] of [...live]) {
+        if (l.busy) continue;
+        if (d.nowMs() - l.lastMs > IDLE_END_MIN * 60_000) await close(id, 'idle');
+        else if (l.row.mode === 'in_world' && l.row.availableUntil !== undefined && d.reader.world.now >= l.row.availableUntil) await close(id, 'obligation');
+      }
+    } catch (e) {
+      app.log.warn(`revisión de charlas fallida: ${(e as Error).message}`);
     }
   };
   return { sweep };

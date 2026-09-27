@@ -51,6 +51,11 @@ export function setupChat(d: ChatUiDeps): void {
     status('Abriendo la charla…');
     let r = await openChat(d.auth, c.id, mode, test);
     if (r.status === 401 && d.askAuth()) r = await openChat(d.auth, c.id, mode, test);
+    // Una charla anterior quedó abierta (otra pestaña, o se cerró el diálogo a medias): se ofrece cerrarla.
+    if (r.status === 409 && r.openSessionId && window.confirm(`Hay otra charla en el mundo abierta (${r.openSessionId}). ¿Cerrarla y abrir esta?`)) {
+      await endChat(d.auth, r.openSessionId);
+      r = await openChat(d.auth, c.id, mode, test);
+    }
     if (r.status === 409) return status('Ya hay una charla en el mundo abierta. Ciérrala antes de abrir otra.');
     if (r.status === 503) return status(r.error ?? 'No se pudo abrir la charla (¿está corriendo el worker?).');
     if (!r.body) return status(`No se pudo abrir la charla (${r.status}).`);

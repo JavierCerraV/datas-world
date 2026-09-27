@@ -170,6 +170,25 @@ dd {
   display: block;
   color: var(--muted);
 }
+.chats {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+}
+.chats > li {
+  border-bottom: 1px solid var(--line);
+  padding: 6px 0;
+}
+.chats summary {
+  cursor: pointer;
+}
+.chats .chat-msgs {
+  padding: 8px 0;
+}
+.chats .msg {
+  max-width: 92%;
+}
 .logbox {
   flex: 1;
   min-height: 0;

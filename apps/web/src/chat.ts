@@ -93,10 +93,10 @@ export function parseSse(buffer: string): { messages: { event: string; data: unk
 type Auth = () => string | null;
 const headers = (auth: Auth) => ({ 'content-type': 'application/json', ...(auth() ? { authorization: `Basic ${auth()}` } : {}) });
 
-export async function openChat(auth: Auth, citizenId: string, mode: 'in_world' | 'sandbox', testMode: boolean): Promise<{ status: number; body?: OpenResult; error?: string }> {
+export async function openChat(auth: Auth, citizenId: string, mode: 'in_world' | 'sandbox', testMode: boolean): Promise<{ status: number; body?: OpenResult; error?: string; openSessionId?: string }> {
   const r = await fetch('/api/chat/sessions', { method: 'POST', headers: headers(auth), body: JSON.stringify({ citizenId, mode, testMode }) });
-  const j = (await r.json().catch(() => ({}))) as OpenResult & { error?: string };
-  return r.ok ? { status: r.status, body: j } : { status: r.status, ...(j.error ? { error: j.error } : {}) };
+  const j = (await r.json().catch(() => ({}))) as OpenResult & { error?: string; openSessionId?: string };
+  return r.ok ? { status: r.status, body: j } : { status: r.status, ...(j.error ? { error: j.error } : {}), ...(j.openSessionId ? { openSessionId: j.openSessionId } : {}) };
 }
 
 /** Un turno: llama a `on` con cada mensaje (`stance`, `token`, `done`, `error`) según llega. */

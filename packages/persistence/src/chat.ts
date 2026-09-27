@@ -80,6 +80,11 @@ export function openInWorldSession(db: Db): ChatSessionRow | undefined {
   return r ? toSession(r) : undefined;
 }
 
+/** Todas las charlas abiertas (al arrancar la API ninguna tiene sesión viva: quedaron colgadas). */
+export function openChatSessions(db: Db): ChatSessionRow[] {
+  return (db.prepare("SELECT * FROM chat_sessions WHERE status = 'open' ORDER BY id").all() as SessionDb[]).map(toSession);
+}
+
 export function insertChatTurn(db: Db, t: ChatTurnRow): void {
   db.prepare('INSERT OR REPLACE INTO chat_turns (session_id, seq, speaker, text, data, created_at) VALUES (?, ?, ?, ?, ?, ?)')
     .run(t.sessionId, t.seq, t.speaker, t.text, JSON.stringify(t.data), t.createdAt);

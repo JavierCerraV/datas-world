@@ -39,7 +39,7 @@ Desde `@datas-world/llm-gateway`:
 | `expressionRequest`, `instructions`, `renderView`, `stancePart` | Prompt de la expresión: instrucciones y vista cacheables; postura y estado vivo aparte |
 | `classifyTone`, `lexicalTone` | Tono del turno: etiqueta, clasificador LLM o reglas léxicas |
 | `verifyReply` | Afirmaciones marcadas contra la vista y adherencia a la postura |
-| `ChatSession` (`turn`, `close`), `TEMPLATES`, `ChatEndedError` | Sesión de charla: tono, postura, `onStance`, texto en streaming, verificación en segundo plano y entrada `chat_session` al cerrar |
+| `ChatSession` (`turn`, `close`, `input`), `TEMPLATES`, `ChatEndedError` | Sesión de charla: tono, postura, `onStance`, texto en streaming, verificación en segundo plano y entrada `chat_session` al cerrar |
 
 ## 4. Diseño interno y decisiones
 - **SDK oficial para Claude.** El adaptador de Anthropic usa `@anthropic-ai/sdk`: `messages.stream` con `finalMessage()` y `messages.create`. Haiku 4.5 no lleva pensamiento adaptativo ni `effort`, y admite `temperature`.
@@ -78,3 +78,4 @@ No aplica: el prototipo no usa LLM.
 |---|---|---|---|
 | 2026-09-23 | kit de arranque | — | Documento creado (sin código) |
 | 2026-09-27 | charla/l2-pasarela (L2) | 026, 043 | Primera implementación: configuración por propósito, `Gateway` (registro, presupuesto, tiempo máximo, reparación, coste y métricas), adaptadores Anthropic (SDK oficial), compatible con OpenAI y `mock`; capa de charla (vista, prompt, clasificador, verificador y `ChatSession`). 18 pruebas |
+| 2026-09-27 | claude/wonderful-carson-4c4i3k (arreglo de la charla) | 043 | `ChatSession.input()`: la entrada de consolidación sin resumen, para cerrar aunque falle la llamada `summarize` |

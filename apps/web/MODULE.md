@@ -29,6 +29,8 @@ Aplicación: `pnpm dev` (worker + API + visor; `scripts/dev.mjs`) y abrir `http:
 | `src/logic.ts` | Lógica pura: `TILE_COLORS`, `styleOf`, `hash`, `lookOf` (R-006), `nightAlpha` (R-007), `timeOf`, `interpolate` (R-002), `spread` |
 | `src/format.ts` | Formateo en español: `ACTIVITY_ES`, `EVENT_ES`, `stimulusEs`, `causeEs`, `eventEs`, `inspectorTabs` (R-003) |
 | `src/render.ts` | Canvas: `drawMap` (tiles y edificios, una vez) y `drawPerson` |
+| `src/chat.ts`, `src/chat-ui.ts` | Charla (043 R-017): cliente de `/api/chat/*`, formato y diálogo |
+| `src/chat-history.ts` | Pestaña «Charlas» de la ficha: `renderChatList`, `renderTranscript`, `showChatHistory` (carga cada transcripción al desplegarla) |
 | `src/main.ts` | Aplicación: cámara (arrastrar, rueda, flechas), clic en una persona, inspector, registro, controles y teclado (R-005) |
 | `vite.config.ts` | Vite con proxy de `/api` a la API local |
 
@@ -61,3 +63,4 @@ Mapa, colores, figuras y día y noche portados del prototipo (`prototipo/index.h
 | 2026-09-26 | visor/web (V2) | 024, 022 | Primera implementación del visor mínimo: mapa, personas, día y noche, cámara, inspector (Estado, Historia, Funcional), registro en vivo, controles y teclado. `pnpm dev` (`scripts/dev.mjs`) |
 | 2026-09-27 | visor/web (V2.5) | 024 | CA-001 y CA-003 aceptados en la revisión del usuario |
 | 2026-09-27 | charla/l4 (L4.1) | 043, 024 | Vista de chat (`chat.ts`, `chat-ui.ts`): botón «Charlar» en la ficha y diálogo con inicio (modo en el mundo o sandbox, modo prueba), conversación en streaming (SSE sobre `fetch`, porque es un POST), tono y postura de cada turno con sus motivos y probabilidades, marcas de coherencia al llegar la verificación, panel «Lo que sabe» y «Despedirse». Estilo de laboratorio sobre las variables existentes; en móvil ocupa la pantalla. Los atajos del mapa no actúan al escribir ni con la charla abierta. La velocidad de tiempo real entra en la lista de velocidades. 3 pruebas |
+| 2026-09-27 | claude/wonderful-carson-4c4i3k (pestaña Charlas) | 043, 024 | Pestaña **Charlas** en la ficha (`chat-history.ts`): charlas guardadas de la persona, la más reciente primero, con fecha, modo y cómo terminó; al desplegar una, su transcripción con el tono y la postura de cada turno. Se carga al entrar en la pestaña, no con cada tick. Si queda otra charla en el mundo abierta, el diálogo ofrece cerrarla. 2 pruebas |

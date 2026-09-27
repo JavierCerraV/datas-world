@@ -217,6 +217,8 @@ interface ChatScript { key: string; label: string; turns: { text: string; tone: 
   - el modo prueba, con su selector de tono;
   - el modo de la sesión (`in_world` o `sandbox`).
 
+  La ficha tiene además una pestaña **Charlas** (decisión del usuario, 2026-09-27) con las charlas guardadas de la persona, la más reciente primero: fecha, modo, cómo terminó y, al desplegarla, la transcripción con el tono de cada mensaje del visitante y la postura de cada respuesta. Sirve para revisarlas después.
+
   La web no decide nada.
 - **R-018** [M] — **El visitante en el mundo.** El visitante es una entidad externa `EXT-0001` (no es un `CIT`, no vive ni se mueve en el mundo). Para cada ciudadano es un estímulo con función aprendida: la 036 guarda esa función como la de cualquier estímulo. Si varias personas usan el laboratorio, cada una puede tener su propio `EXT-`.
 - **R-019** [M] — **Charla casual; el mundo sigue su curso** (decisión del usuario, 2026-09-27). Una charla `in_world` es una conversación casual, como encontrarse con alguien: no tiene duración acordada. Las sesiones con duración y condiciones pactadas son de la capa clínica (034).
@@ -235,6 +237,8 @@ interface ChatScript { key: string; label: string; turns: { text: string; tone: 
   6. **Consolidación.** Al cerrar, la API registra la entrada externa `chat_session` con los turnos, los tonos, las posturas y las referencias a los textos. El worker la aplica con la función pura `consolidateChat(state, input, rng)`, que emite los eventos y los parches de R-020 a R-022 y devuelve a la persona a su día.
 
   El replay del mundo re-inyecta `chat_open` y `chat_session` en su `(at, seq)` y obtiene el mismo resultado sin llamar al LLM. Solo puede haber una charla `in_world` abierta a la vez.
+
+  Una charla que quedó abierta sin sesión viva (la API se cerró o se cayó durante la charla) se cierra al arrancar la API con el motivo `interrupted` y, si era `in_world`, se consolida con los turnos guardados: la persona la recuerda igual. Si el visitante intenta abrir otra, el visor le ofrece cerrar la anterior.
 - **R-020** [M] — **Recuerdo.** La consolidación emite `CONVERSATION_HELD`, con:
   - la persona y el visitante como participantes;
   - un resumen (plantilla con los tonos y posturas dominantes, o resumen del LLM ya registrado);
@@ -377,3 +381,4 @@ Por sesión, por ciudadano y por guion (informe de la batería y panel de la vis
 | 2026-09-27 | 0.6 | Decisión del usuario (opción A) al empezar L1: la función de un tono es `prior + netValue` (base social modulada por la historia), no una cadena de respaldos. Motivo: `netValue` ya incluye la generalización y, entre términos verbales, la ontología actual generaliza casi por completo (aprobación → insulto 0,92), de modo que la base no se habría usado nunca. Sin cambios en CA |
 | 2026-09-27 | 0.6 | Precisión de la implementación del bloque L2 (R-010, R-012): la expresión devuelve texto en streaming, no JSON, para que el chat sea fluido; las afirmaciones las extrae el verificador después (R-012), no la expresión. El clasificador y el verificador usan salidas estructuradas validadas con Zod (026 R-010). La vista incluye los nacimientos y muertes de la familia cercana, que la persona sabe por parentesco (R-003). Sin cambios en CA |
 | 2026-09-27 | 0.6 | Precisiones de la implementación del bloque L3: las entradas `chat_open` y `chat_session` viajan como órdenes de `control_commands` con su payload JSON, y el worker las aplica con manejadores registrados en el Runner (validar sin cambiar nada y luego aplicar); quien charla tiene la columna `chat.until` y la actividad `conversation`, y el bucle lo deja fuera de las fases de decisión y de acciones mientras dura (sus necesidades siguen y charlar cuenta como compañía); el tiempo real es la velocidad 1/60x (002 R-003); si la persona está dormida, la apertura responde `declined` con el motivo; `sweep` cierra por inactividad y, en el mundo, por compromiso aunque el visitante no escriba. Sin cambios en CA |
+| 2026-09-27 | 0.6 | Tras la prueba del usuario (la charla quedaba abierta al despedirse, sin recuerdo ni cambio de estrés): R-019.6 añade el cierre de las charlas que quedan abiertas sin sesión viva (motivo `interrupted`, consolidadas con los turnos guardados). R-017 añade la pestaña **Charlas** de la ficha para revisar las charlas guardadas (decisión del usuario). La causa del fallo era de persistencia (027 CA-004: la carga del mundo no usaba una transacción de lectura). Sin cambios en CA |

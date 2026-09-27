@@ -139,6 +139,12 @@ export class ChatSession {
     };
   }
 
+  /** La entrada que consolidará el worker, sin resumen (plantilla del motor). */
+  input(): ChatSessionInput {
+    this.ended = true;
+    return { sessionId: this.#o.sessionId, citizenId: this.#o.citizenId as EntityId, visitorId: this.#o.visitorId, turns: [...this.#turns] };
+  }
+
   /** Cierra la charla (R-019.6): el resumen para el recuerdo y la entrada que consolidará el worker. */
   async close(): Promise<ChatSessionInput> {
     this.ended = true;

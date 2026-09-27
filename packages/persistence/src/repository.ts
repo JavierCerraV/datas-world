@@ -205,8 +205,16 @@ export class WorldRepository {
     return written;
   }
 
-  /** Reconstruye el mundo desde el estado actual y comprueba que su hash es el guardado. */
+  /**
+   * Reconstruye el mundo desde el estado actual y comprueba que su hash es el guardado. Todo se lee en una
+   * transacción: con un escritor activo (el worker), cada SELECT suelto vería un flush distinto (WAL) y la carga
+   * mezclaría dos estados (CA-004).
+   */
   loadWorld(): World {
+    return this.db.transaction(() => this.#loadWorld())();
+  }
+
+  #loadWorld(): World {
     const id = this.#meta('world_id');
     if (id === undefined) throw new Error('La base no contiene ningún mundo');
     const capabilities = JSON.parse(this.#meta('capabilities')!) as unknown[];
