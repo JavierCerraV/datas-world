@@ -23,6 +23,7 @@ const REASONS: Record<string, string> = {
   obligation: 'tenía un compromiso',
   idle: 'sin mensajes',
   interrupted: 'interrumpida (la API se cerró)',
+  replaced: 'la cerraste al abrir otra',
 };
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);

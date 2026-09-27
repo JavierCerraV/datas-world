@@ -116,7 +116,8 @@ export function registerChatRoutes(app: FastifyInstance, d: ChatDeps): { sweep: 
    * Charlas que quedaron abiertas sin sesión viva (la API se cerró o se cayó durante la charla): se cierran y,
    * si eran en el mundo, se consolidan con los turnos guardados para que el ciudadano las recuerde (R-019.6).
    */
-  function recoverOrphans(): void {
+  function recoverOrphans(): number | undefined {
+    let restored: number | undefined;
     for (const row of openChatSessions(d.rw)) {
       if (live.has(row.id)) continue;
       const turns = chatTurns(d.rw, row.id);
@@ -132,10 +133,31 @@ export function registerChatRoutes(app: FastifyInstance, d: ChatDeps): { sweep: 
       updateChatSession(d.rw, row.id, { status: 'ended', endReason: 'interrupted', ...(inputRef ? { inputRef } : {}) }, d.clock());
       log(row.id, 'CHAT_SESSION_ENDED', { sessionId: row.id, reason: 'interrupted', turns: pairs.length }, [{ state: 'fin:interrupted', weight: 1 }]);
       const prev = chatLog(d.rw, row.id).find((e) => e.type === 'CHAT_SESSION_STARTED')?.payload as { prevSpeed?: number } | undefined;
-      if (row.mode === 'in_world' && prev?.prevSpeed !== undefined && prev.prevSpeed !== REAL_TIME) void command('speed', String(prev.prevSpeed), false);
+      if (row.mode === 'in_world' && prev?.prevSpeed !== undefined) {
+        restored = prev.prevSpeed;
+        if (prev.prevSpeed !== REAL_TIME) void command('speed', String(prev.prevSpeed), false);
+      }
     }
+    return restored;
   }
   recoverOrphans();
+
+  /**
+   * Hay un solo visitante: abrir otra charla en el mundo cierra la anterior (motivo `replaced`, consolidada), sea
+   * una viva que quedó sin despedida (diálogo cerrado con Esc, página recargada) o una huérfana en la base.
+   * Devuelve la velocidad que había antes de la charla anterior: la nueva la hereda para restaurarla al cerrar
+   * (la orden de restaurar aún no se ha aplicado, así que el registro todavía dice «tiempo real»).
+   */
+  async function replacePrevious(): Promise<{ busy: true } | { busy: false; prevSpeed?: number }> {
+    const prev = [...live.values()].find((l) => l.row.mode === 'in_world');
+    if (prev?.busy) return { busy: true };
+    if (prev) {
+      await close(prev.row.id, 'replaced');
+      return { busy: false, ...(prev.prevSpeed !== undefined ? { prevSpeed: prev.prevSpeed } : {}) };
+    }
+    const restored = openInWorldSession(d.rw) ? recoverOrphans() : undefined;
+    return { busy: false, ...(restored !== undefined ? { prevSpeed: restored } : {}) };
+  }
 
   app.post('/api/chat/sessions', async (req, reply) => {
     if (!guard(req.headers.authorization, reply)) return reply;
@@ -145,14 +167,16 @@ export function registerChatRoutes(app: FastifyInstance, d: ChatDeps): { sweep: 
     const person = d.reader.world.citizens.get(b.data.citizenId as EntityId);
     if (!person || person.status !== 'active') return reply.code(404).send({ error: 'no existe' });
     const inWorld = b.data.mode === 'in_world';
-    const busy = [...live.values()].find((l) => l.row.mode === 'in_world')?.row ?? openInWorldSession(d.rw);
-    if (inWorld && busy)
-      return reply.code(409).send({ error: 'ya hay una charla en el mundo abierta', openSessionId: busy.id, openCitizenId: busy.citizenId });
-    const id = nextChatSessionId(d.rw);
     let prevSpeed: number | undefined;
+    if (inWorld) {
+      const r = await replacePrevious();
+      if (r.busy) return reply.code(409).send({ error: 'la charla anterior está a mitad de un turno; espera a que responda' });
+      prevSpeed = r.prevSpeed;
+    }
+    const id = nextChatSessionId(d.rw);
     let availableUntil: number | undefined;
     if (inWorld) {
-      prevSpeed = speedOf(d.reader.db);
+      prevSpeed ??= speedOf(d.reader.db);
       const done = await command('chat_open', JSON.stringify({ citizenId: b.data.citizenId, visitorId: VISITOR, sessionId: id }));
       if (done !== 1) return reply.code(503).send({ error: 'el worker no atendió la apertura; ¿está corriendo?' });
       // El worker marca la orden antes de guardar sus eventos: se espera al evento de la apertura.

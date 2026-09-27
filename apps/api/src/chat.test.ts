@@ -134,10 +134,18 @@ describe('charla en la API (043)', () => {
     w.shutdown('prueba');
   });
 
-  it('CA-015: en el mundo, la charla pasa por el worker, pone el tiempo real, no admite otra a la vez y se consolida al cerrar', async () => {
+  it('CA-015: en el mundo, la charla pasa por el worker, pone el tiempo real, una nueva sustituye a la anterior y se consolida al cerrar', async () => {
     const worker = new WorldWorker(db);
     const prev = worker.runner.speed;
     const timer = setInterval(() => worker.pump(20), 20);
+    const heldFor = async (sessionId: string) => {
+      let held = 0;
+      for (let t = 0; t < 50 && held === 0; t++) {
+        await new Promise((r) => setTimeout(r, 40));
+        held = (worker.db.prepare("SELECT count(*) AS n FROM events WHERE type = 'CONVERSATION_HELD' AND json_extract(payload, '$.sessionId') = ?").get(sessionId) as { n: number }).n;
+      }
+      return held;
+    };
     try {
       const citizenId = awakeCitizen();
       const open = await api.app.inject({ method: 'POST', url: '/api/chat/sessions', headers: AUTH, payload: { citizenId, mode: 'in_world', testMode: true } });
@@ -145,22 +153,27 @@ describe('charla en la API (043)', () => {
       const body = open.json() as { id: string; status: string; availableUntil: number };
       expect(body.status).toBe('open');
       expect(body.availableUntil).toBeGreaterThan(api.reader.world.now - 1);
-      const second = await api.app.inject({ method: 'POST', url: '/api/chat/sessions', headers: AUTH, payload: { citizenId, mode: 'in_world' } });
-      expect(second.statusCode).toBe(409);
-      expect(second.json()).toMatchObject({ openSessionId: body.id, openCitizenId: citizenId });
       await new Promise((r) => setTimeout(r, 100));
       expect(worker.runner.speed).toBe(REAL_TIME);
       const turn = await api.app.inject({ method: 'POST', url: `/api/chat/sessions/${body.id}/turns`, headers: AUTH, payload: { text: 'Buenas, ¿cómo va todo?', toneTag: 'amable' } });
       expect(events(turn.body).at(-1)!.event).toBe('done');
-      const end = await api.app.inject({ method: 'POST', url: `/api/chat/sessions/${body.id}/end`, headers: AUTH });
+
+      // El diálogo se cerró sin despedirse (Esc): abrir otra charla cierra y consolida la anterior.
+      const second = await api.app.inject({ method: 'POST', url: '/api/chat/sessions', headers: AUTH, payload: { citizenId, mode: 'in_world' } });
+      expect(second.statusCode).toBe(200);
+      const body2 = second.json() as { id: string; status: string };
+      expect(body2).toMatchObject({ status: 'open' });
+      expect(body2.id).not.toBe(body.id);
+      expect((await api.app.inject({ url: `/api/chat/sessions/${body.id}`, headers: AUTH })).json()).toMatchObject({ status: 'ended', endReason: 'replaced' });
+      expect(await heldFor(body.id)).toBe(1);
+      await new Promise((r) => setTimeout(r, 100));
+      expect(worker.runner.speed).toBe(REAL_TIME);
+
+      const end = await api.app.inject({ method: 'POST', url: `/api/chat/sessions/${body2.id}/end`, headers: AUTH });
       expect(end.json()).toMatchObject({ status: 'ended', inputRef: expect.stringMatching(/^cmd:\d+$/) });
-      let held = 0;
-      for (let t = 0; t < 50 && held === 0; t++) {
-        await new Promise((r) => setTimeout(r, 40));
-        held = (worker.db.prepare("SELECT count(*) AS n FROM events WHERE type = 'CONVERSATION_HELD' AND json_extract(payload, '$.sessionId') = ?").get(body.id) as { n: number }).n;
-      }
-      expect(held).toBe(1);
-      expect(worker.runner.speed).toBe(prev);
+      expect(await heldFor(body2.id)).toBe(1);
+      await new Promise((r) => setTimeout(r, 100));
+      expect(worker.runner.speed).toBe(prev); // hereda la velocidad de antes de la primera charla
     } finally {
       clearInterval(timer);
       worker.shutdown('prueba');

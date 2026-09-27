@@ -118,7 +118,8 @@ export async function sendTurn(auth: Auth, id: string, text: string, toneTag: st
 }
 
 export async function endChat(auth: Auth, id: string): Promise<number> {
-  return (await fetch(`/api/chat/sessions/${id}/end`, { method: 'POST', headers: headers(auth) })).status;
+  // `keepalive`: la petición sale aunque se esté cerrando la página.
+  return (await fetch(`/api/chat/sessions/${id}/end`, { method: 'POST', headers: headers(auth), keepalive: true })).status;
 }
 
 /** Afirmaciones y chequeo de la postura de un turno del ciudadano, cuando la verificación ya llegó. */

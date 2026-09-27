@@ -24,7 +24,7 @@ El ciudadano habla con Claude Haiku 4.5. Sin clave, la charla funciona igual, pe
 
 1. Haz clic en una persona del mapa. En su ficha, pulsa **Charlar**.
 2. Elige el modo:
-   - **En el mundo:** la charla queda en su memoria. Aprende de ella (con topes: una charla no le cambia la vida) y su ánimo cambia un poco. Mientras charlan, el mundo avanza en **tiempo real** (1 minuto del mundo por minuto) y los demás siguen su vida. Al cerrar vuelve la velocidad anterior. Solo puede haber una charla en el mundo a la vez.
+   - **En el mundo:** la charla queda en su memoria. Aprende de ella (con topes: una charla no le cambia la vida) y su ánimo cambia un poco. Mientras charlan, el mundo avanza en **tiempo real** (1 minuto del mundo por minuto) y los demás siguen su vida. Al cerrar vuelve la velocidad anterior. Solo puede haber una charla en el mundo a la vez: si abres otra, la anterior se cierra sola (y la persona la recuerda).
    - **Sandbox:** no cambia nada del mundo. Sirve para probar sin dejar huella.
 3. Si marcas **modo prueba**, puedes etiquetar el tono de cada mensaje. Si no lo etiquetas, lo clasifica Haiku.
 4. Pulsa **Iniciar charla**.
@@ -48,7 +48,7 @@ La persona acepta según su situación:
 - El panel **Por qué respondió así** muestra los motivos de la postura y las probabilidades de las demás.
 - El panel **Lo que sabe** es todo lo que Haiku recibe de la persona: su vida tal como la vivió. No sabe nada que no haya vivido.
 
-La charla termina cuando pulsas **Despedirse** o cuando la persona:
+La charla termina cuando pulsas **Despedirse**, cuando cierras la ventana de la charla (✕ o Esc) o recargas la página, o cuando la persona:
 - decide irse (postura *terminar*);
 - tiene que irse a un compromiso;
 - se cansa de esperar tu mensaje (10 minutos sin escribir).

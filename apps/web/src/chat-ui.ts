@@ -29,6 +29,7 @@ export function setupChat(d: ChatUiDeps): void {
     $('#chat-why').innerHTML = '';
     $('#chat-knows').innerHTML = '';
     $('#chat-mode').textContent = '';
+    $<HTMLButtonElement>('#chat-send').disabled = false; // la charla anterior pudo terminar con el botón desactivado
     status('');
   };
 
@@ -51,12 +52,8 @@ export function setupChat(d: ChatUiDeps): void {
     status('Abriendo la charla…');
     let r = await openChat(d.auth, c.id, mode, test);
     if (r.status === 401 && d.askAuth()) r = await openChat(d.auth, c.id, mode, test);
-    // Una charla anterior quedó abierta (otra pestaña, o se cerró el diálogo a medias): se ofrece cerrarla.
-    if (r.status === 409 && r.openSessionId && window.confirm(`Hay otra charla en el mundo abierta (${r.openSessionId}). ¿Cerrarla y abrir esta?`)) {
-      await endChat(d.auth, r.openSessionId);
-      r = await openChat(d.auth, c.id, mode, test);
-    }
-    if (r.status === 409) return status('Ya hay una charla en el mundo abierta. Ciérrala antes de abrir otra.');
+    // La API cierra sola la charla anterior; solo responde 409 si esa charla está a mitad de un turno.
+    if (r.status === 409) return status('La charla anterior está terminando un turno. Espera unos segundos y vuelve a intentarlo.');
     if (r.status === 503) return status(r.error ?? 'No se pudo abrir la charla (¿está corriendo el worker?).');
     if (!r.body) return status(`No se pudo abrir la charla (${r.status}).`);
     if (r.body.status === 'declined') return status(`${c.name} no puede charlar ahora: ${r.body.reason ?? 'sin motivo'}.`);
@@ -122,16 +119,18 @@ export function setupChat(d: ChatUiDeps): void {
   });
 
   const finish = async () => {
-    if (session?.id) await endChat(d.auth, session.id);
+    const id = session?.id;
     session = null;
+    if (id) await endChat(d.auth, id);
   };
   $('#chat-end').addEventListener('click', async () => {
     await finish();
     status('Te despediste. La charla terminó.');
     $<HTMLButtonElement>('#chat-send').disabled = true;
   });
-  $('#chat-close').addEventListener('click', async () => {
-    await finish();
-    dialog.close();
-  });
+  $('#chat-close').addEventListener('click', () => dialog.close());
+  // Cerrar el diálogo por cualquier vía (✕, Esc) o salir de la página es despedirse: si no, la charla seguía
+  // abierta en la API y no dejaba abrir otra.
+  dialog.addEventListener('close', () => void finish());
+  window.addEventListener('pagehide', () => void finish());
 }
