@@ -27,6 +27,13 @@ const due = (cadence: Cadence, now: number) =>
 /** R-011: en M2, todas las personas activas están en nivel 2 (los niveles 0, 1, 3 y 4 llegan después). */
 export const levelOf = (_world: World, _row: number): SimLevel => 2;
 
+/**
+ * 043 R-019.2: quien está charlando con un visitante (`chat.until` > ahora) no pasa por las fases de decisión ni de
+ * acciones (rutina, selección, desplazamientos); sus necesidades y lo demás siguen su curso.
+ */
+const CHAT_UNTIL = 'chat.until';
+const ENGAGED_PHASES: ReadonlySet<string> = new Set(['decision', 'actions']);
+
 /** Filas de las personas activas (no antepasados ni dados de baja), en orden ascendente. */
 function activeRows(world: World): number[] {
   const active = world.components.u8.active!;
@@ -49,14 +56,16 @@ export function runSystems(world: World, rng: Rng, registry: SystemRegistry, opt
   const level = (row: number) => opts.level ?? levelOf(world, row);
   const events: WorldEvent[] = [];
 
+  const until = world.components.i32[CHAT_UNTIL];
   for (const phase of PHASES) {
     const now = world.now;
     const outputs: [System, SystemOutput][] = [];
+    const phaseRows = until && ENGAGED_PHASES.has(phase) ? rows.filter((row) => !(until[row]! > now)) : rows;
     for (const s of systems) {
       if (s.phase !== phase || !due(s.cadence, now)) continue;
       const r = rng.fork(`sys:${s.id}`).fork(now);
-      const full = rows.filter((row) => level(row) >= s.minLevel);
-      const coarse = rows.filter((row) => level(row) < s.minLevel);
+      const full = phaseRows.filter((row) => level(row) >= s.minLevel);
+      const coarse = phaseRows.filter((row) => level(row) < s.minLevel);
       const ctx = (citizens: number[]): TickCtx => ({ now, citizens, level, events });
       outputs.push([s, s.run(view, ctx(full), r)]);
       if (s.runCoarse && coarse.length > 0) outputs.push([s, s.runCoarse(view, ctx(coarse), r.fork('coarse'))]);

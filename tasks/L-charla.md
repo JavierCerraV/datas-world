@@ -35,10 +35,10 @@ Specs: 043 v0.3 (aprobada). Usa las implementadas (014, 030) y las aprobadas (02
 - [x] L2.5 Criterios: CA-002, CA-003, CA-009, CA-010, CA-011, CA-012 y CA-018.
 
 ## Bloque L3 — Persistencia, API y worker
-- [ ] L3.1 Tablas del chat fuera del hash y entradas externas `chat_open` y `chat_session` (R-001, R-019).
-- [ ] L3.2 Endpoints `/api/chat/*` con SSE y basic auth (R-016); tiempo real durante la sesión y velocidad anterior al cerrar.
-- [ ] L3.3 El worker aplica las entradas; replay sin red. Actividad `conversation` en `act.kind`, respetada por rutinas y selección mientras dura la charla; cierre por compromiso o inactividad (R-019.5).
-- [ ] L3.4 Criterios: CA-001, CA-014, CA-015 y CA-017.
+- [x] L3.1 Tablas del chat fuera del hash y entradas externas `chat_open` y `chat_session` (R-001, R-019).
+- [x] L3.2 Endpoints `/api/chat/*` con SSE y basic auth (R-016); tiempo real durante la sesión y velocidad anterior al cerrar.
+- [x] L3.3 El worker aplica las entradas; replay sin red. Actividad `conversation` en `act.kind`, respetada por rutinas y selección mientras dura la charla; cierre por compromiso o inactividad (R-019.5).
+- [x] L3.4 Criterios: CA-001, CA-014, CA-015 y CA-017.
 
 ## Bloque L4 — Visor y batería
 - [ ] L4.1 Vista de chat del visor (R-017), según el diseño aprobado.

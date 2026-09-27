@@ -8,6 +8,8 @@ export type { PersonCtx } from './stance.ts';
 export { FLEXIBLE_FROM, chatAvailability, openingEvent } from './availability.ts';
 export type { Availability } from './availability.ts';
 export { consolidateChat } from './consolidate.ts';
+export { CHAT_UNTIL, chatInputHandlers, defineChatColumns } from './inputs.ts';
+export type { ChatOpenInput } from './inputs.ts';
 export type { ChatSessionInput, Consolidation } from './consolidate.ts';
 export type {
   ChatCatalog, ChatContribution, ChatSource, ChatSummary, ConversationState, LiveState, StanceChoice, StanceDef,

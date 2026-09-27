@@ -199,6 +199,12 @@ importers:
       '@datas-world/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@datas-world/generators':
+        specifier: workspace:*
+        version: link:../../packages/generators
+      '@datas-world/llm-gateway':
+        specifier: workspace:*
+        version: link:../../packages/llm-gateway
       '@datas-world/persistence':
         specifier: workspace:*
         version: link:../../packages/persistence

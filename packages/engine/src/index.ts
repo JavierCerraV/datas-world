@@ -92,7 +92,7 @@ export { deserializeWorld, serializeWorld, stateHash } from './serialize.ts';
 export type { WorldSnapshot } from './serialize.ts';
 
 export { applyExternalInput, tick } from './tick.ts';
-export type { ExternalInput, InputResult, ScheduledHandler } from './tick.ts';
+export type { ExternalInput, InputHandler, InputResult, ScheduledHandler } from './tick.ts';
 
 export { PHASES } from './simulation/system.ts';
 export type {
@@ -129,7 +129,7 @@ export type { ObjectTransfer } from './objects.ts';
 export { checkProfile, profileEntry, profileNumber, profileValue } from './profile.ts';
 export type { CountryProfile, ProfileEntry, ProfileScope, ProfileStatus, ProfileValue } from './profile.ts';
 
-export { Runner } from './runner.ts';
+export { REAL_TIME, Runner } from './runner.ts';
 export type { Speed } from './runner.ts';
 
 export { ACTIVITY, ACTIVITY_COLUMN } from './activity.ts';
@@ -327,7 +327,10 @@ export type { NewRule, Rule, RuleKind } from './rules/index.ts';
 
 export {
   CHAT_DEFAULTS,
+  CHAT_UNTIL,
   FLEXIBLE_FROM,
+  chatInputHandlers,
+  defineChatColumns,
   STANCE_PREFIX,
   chatAvailability,
   citizenAnswered,
@@ -349,6 +352,7 @@ export type {
   Availability,
   ChatCatalog,
   ChatContribution,
+  ChatOpenInput,
   ChatParams,
   ChatSessionInput,
   ChatSource,

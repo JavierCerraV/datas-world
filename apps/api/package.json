@@ -6,6 +6,8 @@
   "description": "API HTTP y SSE de solo lectura",
   "dependencies": {
     "@datas-world/engine": "workspace:*",
+    "@datas-world/generators": "workspace:*",
+    "@datas-world/llm-gateway": "workspace:*",
     "@datas-world/persistence": "workspace:*",
     "fastify": "^5.12.5",
     "zod": "^4.6.5"

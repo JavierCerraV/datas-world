@@ -33,8 +33,9 @@ interface EventTypeDef<P> {
 }
 
 const isObj = (p: unknown): p is Record<string, unknown> => typeof p === 'object' && p !== null && !Array.isArray(p);
-const SPEEDS = [0, 1, 10, 100, 1000];
+const SPEEDS = [0, 1 / 60, 1, 10, 100, 1000];
 const speedOk = (v: unknown) => typeof v === 'number' && SPEEDS.includes(v);
+const speedText = (v: number) => (v === 1 / 60 ? 'tiempo real' : `${v}x`);
 const needObj = (p: unknown, fields: Record<string, (v: unknown) => boolean>): string | null => {
   if (!isObj(p)) return 'se espera un objeto';
   for (const [k, ok] of Object.entries(fields)) if (!ok(p[k])) return `campo "${k}" inválido`;
@@ -70,7 +71,7 @@ export const EVENT_TYPES = Object.freeze({
     baseImportance: 0.05,
     spontaneous: false,
     check: (p) => needObj(p, { from: speedOk, to: speedOk }),
-    text: (e) => `La velocidad cambia de ${e.payload.from}x a ${e.payload.to}x.`,
+    text: (e) => `La velocidad cambia de ${speedText(e.payload.from)} a ${speedText(e.payload.to)}.`,
   }),
   WORLD_PAUSED: def<{ reason: string }>({
     baseImportance: 0.05,

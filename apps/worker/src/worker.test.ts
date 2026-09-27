@@ -2,8 +2,9 @@ import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createWorld, stateHash } from '@datas-world/engine';
+import { REAL_TIME, createWorld, stateHash } from '@datas-world/engine';
 import type { WorldConfig } from '@datas-world/engine';
+import { generateWorld, lifeRunner } from '@datas-world/generators';
 import {
   FLUSH_TICKS,
   WorldRepository,
@@ -78,6 +79,39 @@ describe('worker: avance y persistencia por lotes (027 R-002, R-004)', () => {
     w.shutdown('prueba');
     expect(inspect((r) => r.countSnapshots())).toBeGreaterThanOrEqual(4); // arranque + 3 días (+ cierre)
   });
+});
+
+describe('worker: charla en el mundo (043 R-019)', () => {
+  it('aplica chat_open y chat_session como entradas externas y persiste sus eventos; rechaza una charla inválida', () => {
+    // Un mundo generado, a las 18:00 del primer día, en su propia base.
+    const chatPath = join(dir, 'charla.db');
+    const gen = generateWorld({ seed: 482917 });
+    const r = lifeRunner(gen.world);
+    r.resume('prueba');
+    while (gen.world.now % 1440 !== 18 * 60) r.advanceTicks(1);
+    const db = openWorldDb(chatPath);
+    new WorldRepository(db).flush({ world: gen.world, events: [...gen.events, ...r.drainEvents()] });
+    closeDb(db);
+
+    const w = new WorldWorker(chatPath);
+    enqueueCommand(w.db, 'pause', null, 't');
+    enqueueCommand(w.db, 'speed', String(REAL_TIME), 't');
+    enqueueCommand(w.db, 'chat_open', JSON.stringify({ citizenId: 'CIT-000019', visitorId: 'EXT-0001', sessionId: 'CHS-000001' }), 't');
+    enqueueCommand(w.db, 'chat_session', JSON.stringify({ sessionId: 'CHS-000001', citizenId: 'CIT-000019', visitorId: 'EXT-0001', turns: [{ tone: 'inventado', stance: 'abrirse' }] }), 't');
+    enqueueCommand(w.db, 'chat_session', JSON.stringify({ sessionId: 'CHS-000001', citizenId: 'CIT-000019', visitorId: 'EXT-0001', turns: [{ tone: 'amable', stance: 'abrirse' }] }), 't');
+    w.pump(0);
+    expect(w.runner.speed).toBe(REAL_TIME);
+    expect(w.db.prepare('SELECT cmd, done FROM control_commands ORDER BY id').all()).toEqual([
+      { cmd: 'pause', done: 1 },
+      { cmd: 'speed', done: 1 },
+      { cmd: 'chat_open', done: 1 },
+      { cmd: 'chat_session', done: -1 },
+      { cmd: 'chat_session', done: 1 },
+    ]);
+    const types = (w.db.prepare("SELECT type FROM events WHERE type LIKE 'CONVERSATION%' OR type = 'LEARNED_FROM_CONVERSATION' ORDER BY seq").all() as { type: string }[]).map((x) => x.type);
+    expect(types).toEqual(['CONVERSATION_STARTED', 'CONVERSATION_HELD', 'LEARNED_FROM_CONVERSATION']);
+    w.shutdown('prueba');
+  }, 60_000);
 });
 
 describe('worker: órdenes de control', () => {

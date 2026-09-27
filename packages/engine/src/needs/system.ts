@@ -70,7 +70,8 @@ function step(view: WorldView, ctx: TickCtx): SystemOutput {
     }
     const traits = legacyTraits(view, row); // @deprecated: sustituido por funciones y carga aversiva en MF2 y MF6
     const extraversion = traits.extraversion;
-    const company = loc ? (awakeAt.get(loc[row]!) ?? 0) > 1 : COMPANY.has(act);
+    // 043 R-019.2: charlar con un visitante del laboratorio también es estar acompañado.
+    const company = act === ACTIVITY.conversation || (loc ? (awakeAt.get(loc[row]!) ?? 0) > 1 : COMPANY.has(act));
     if (!rest && company) social += R.socialCompany! * dt;
     else social -= (rest ? R.socialRest! : R.socialAlone! * (0.5 + extraversion)) * dt;
     if (FUN.has(act)) fun += R.funLeisure! * dt;

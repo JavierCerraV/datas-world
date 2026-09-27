@@ -2,7 +2,7 @@
 modulo: persistence
 ruta: packages/persistence
 estado: en-desarrollo
-specs: [027, 015]
+specs: [027, 015, 043, 026]
 actualizado: 2026-09-24
 ---
 
@@ -100,3 +100,4 @@ No aplica (el prototipo no persiste).
 | 2026-09-24 | m1/hash-puntos-control | 027 | R-012, aprobada por el usuario: `FlushBatch.checkpoint`, `saveSnapshot` como punto de control, `repo.recovered` y `WorldSession.flush(checkpoint)`, con punto de control al final de `advanceTicks`. 30 días con población: de 12 s a 2,4 s, mismo hash. 1 prueba nueva; la de estado alterado usa un punto de control |
 | 2026-09-25 | m2/f-economia | 027, 015 | El repositorio guarda y carga las cuentas del sistema (`World.accounts`, 015) en la clave `accounts` de `meta`, en cada guardado; los mundos sin economía no la tienen |
 | 2026-09-26 | visor/minimo (V1) | 022 | `EventQuery`: `afterId` (eventos registrados después de un id, para el SSE) y `latest` (los `limit` más recientes, en orden de inserción) |
+| 2026-09-27 | charla/l3-mundo (L3) | 043, 026 | Migración 002: `chat_sessions`, `chat_turns`, `chat_log` (append-only) y `llm_records`, fuera del estado del mundo; funciones del chat y `SqliteRecordStore`. Órdenes `chat_open` y `chat_session`. `db.test.ts` pasa a la versión 2 del esquema; 2 pruebas nuevas |

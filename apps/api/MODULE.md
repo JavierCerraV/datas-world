@@ -2,7 +2,7 @@
 modulo: api
 ruta: apps/api
 estado: en-desarrollo
-specs: [022]
+specs: [022, 043, 026]
 actualizado: 2026-09-26
 ---
 
@@ -59,3 +59,4 @@ Expone lo que el inspector del prototipo muestra (menos relaciones, memoria y cr
 | 2026-09-23 | kit de arranque | — | Documento creado (sin código) |
 | 2026-09-23 | m0/a-tooling (A5) | — | Solo `package.json` del workspace. Sin `src/` hasta que su spec esté aprobada (el guardarraíl lo bloquea) |
 | 2026-09-26 | visor/minimo (V1) | 022 | Primera implementación: `views.ts`, `reader.ts`, `server.ts` (Fastify, SSE, controles con basic auth) y `main.ts`. Dependencias: `fastify`, `zod`, `@datas-world/engine` |
+| 2026-09-27 | charla/l3-mundo (L3) | 043, 026, 022 | Charla con ciudadanos (`chat.ts`): rutas `/api/chat/sessions` para abrir, turnos por SSE (`stance` → `token` → `done`), cerrar, consultar y listar, todas con basic auth. La charla en el mundo encola `chat_open` y `chat_session` para el worker y pone el tiempo real mientras dura. `sweep` cierra por inactividad o por compromiso. Pasarela de fábrica con `config/llm.json`, cliente de Anthropic creado al primer uso y `llm_records` en SQLite. Conexión de escritura solo para los datos del laboratorio y las órdenes. Dependencias nuevas: `@datas-world/llm-gateway` y `@datas-world/generators` (catálogos y ontología). 4 pruebas (043 CA-001, CA-015, CA-017, CA-018) |

@@ -2,7 +2,8 @@
 // En M0 solo la CLI encola órdenes (decisión del usuario, bloque E); la API lo revisará en M5.
 import type { Db } from './db.ts';
 
-export const CONTROL_COMMANDS = ['pause', 'resume', 'speed', 'step', 'stop'] as const;
+/** `chat_open` y `chat_session` llevan su payload en JSON y el worker los aplica como entradas externas (043 R-019). */
+export const CONTROL_COMMANDS = ['pause', 'resume', 'speed', 'step', 'stop', 'chat_open', 'chat_session'] as const;
 export type ControlCommandName = (typeof CONTROL_COMMANDS)[number];
 
 export interface ControlCommand {

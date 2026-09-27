@@ -68,6 +68,11 @@ export class WorldWorker {
           return true;
         case 'stop':
           return true;
+        // 043 R-019: la charla en el mundo entra como entrada externa (y así el replay la reproduce).
+        case 'chat_open':
+        case 'chat_session':
+          this.runner.submit(c.cmd, JSON.parse(c.arg ?? '{}'));
+          return true;
         default:
           return false;
       }

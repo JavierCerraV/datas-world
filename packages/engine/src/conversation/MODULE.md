@@ -105,3 +105,4 @@ No aplica: el prototipo no tiene charla.
 |---|---|---|---|
 | 2026-09-27 | charla/l1-motor (L1.1) | 043 | Documento creado desde la plantilla (sin código) |
 | 2026-09-27 | charla/l1-motor (L1.2 a L1.6) | 043, 036, 038, 040 | Primera implementación: función del tono (`prior + netValue`), visitante, carga, aprendizaje en la charla, fuentes y elección de la postura, disponibilidad de la charla casual y consolidación acotada con `CONVERSATION_HELD` y `LEARNED_FROM_CONVERSATION`. 11 pruebas |
+| 2026-09-27 | charla/l3-mundo (L3) | 043 | `inputs.ts`: manejadores `chat_open` (disponibilidad, `CONVERSATION_STARTED` o `CONVERSATION_DECLINED`, columna `chat.until` y actividad `conversation`) y `chat_session` (consolidación y vuelta a su día); `defineChatColumns` |

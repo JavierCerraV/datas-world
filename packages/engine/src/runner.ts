@@ -4,13 +4,15 @@ import { MINUTES_PER_DAY } from './calendar.ts';
 import type { WorldEvent } from './events.ts';
 import type { Rng } from './rng.ts';
 import { applyExternalInput, tick } from './tick.ts';
-import type { ExternalInput, ScheduledHandler } from './tick.ts';
+import type { ExternalInput, InputHandler, ScheduledHandler } from './tick.ts';
 import type { LoopOptions } from './simulation/loop.ts';
 import { EMPTY_REGISTRY } from './simulation/registry.ts';
 import type { SystemRegistry } from './simulation/registry.ts';
 import type { World } from './world.ts';
 
-export type Speed = 0 | 1 | 10 | 100 | 1000;
+/** 002 R-003: `REAL_TIME` (1/60) es 1 min de mundo por minuto real; lo usa la charla en el mundo (043 R-019.3). */
+export type Speed = 0 | 0.016666666666666666 | 1 | 10 | 100 | 1000;
+export const REAL_TIME = (1 / 60) as Speed;
 
 export class Runner {
   readonly world: World;
@@ -27,18 +29,20 @@ export class Runner {
 
   readonly #systems: SystemRegistry;
   readonly #loop: LoopOptions;
+  readonly #inputs: Readonly<Record<string, InputHandler>>;
 
   constructor(
     world: World,
     rng: Rng,
     handlers: Readonly<Record<string, ScheduledHandler>> = {},
-    opts: { systems?: SystemRegistry; loop?: LoopOptions } = {},
+    opts: { systems?: SystemRegistry; loop?: LoopOptions; inputs?: Readonly<Record<string, InputHandler>> } = {},
   ) {
     this.world = world;
     this.#rng = rng;
     this.#handlers = handlers;
     this.#systems = opts.systems ?? EMPTY_REGISTRY;
     this.#loop = opts.loop ?? {};
+    this.#inputs = opts.inputs ?? {};
   }
 
   get speed(): Speed {
@@ -63,7 +67,7 @@ export class Runner {
   }
 
   #apply(input: ExternalInput): WorldEvent[] {
-    const r = applyExternalInput(this.world, input);
+    const r = applyExternalInput(this.world, input, this.#inputs);
     if (!r.ok) throw new Error(`Entrada externa rechazada (${input.kind}): ${r.reason}`);
     if (input.kind === 'set_speed') this.#speed = (input.payload as { to: Speed }).to;
     this.#applied.push(input);

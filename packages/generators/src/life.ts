@@ -2,8 +2,11 @@
 // usan la CLI, el worker, el bench y las validaciones. Vive en los generadores porque necesita los catálogos (la
 // tabla de esparcimiento del motor de decisiones, 017) y el motor no hace E/S.
 import {
+  CHAT_DEFAULTS,
   NEEDS_SYSTEMS,
   Runner,
+  chatInputHandlers,
+  learningParams,
   WORK_SYSTEMS,
   createActionValidator,
   createDecisionSystem,
@@ -16,7 +19,7 @@ import {
   routinesSystem,
   rulesSystem,
 } from '@datas-world/engine';
-import type { Capability, LoopOptions, SystemRegistry, World } from '@datas-world/engine';
+import type { Capability, ChatCatalog, LoopOptions, SystemRegistry, World } from '@datas-world/engine';
 import { loadCatalogs } from './catalogs/load.ts';
 import type { Catalogs } from './catalogs/load.ts';
 import { leisureTable } from './leisure/params.ts';
@@ -50,8 +53,23 @@ export function lifeSystems(world: World, catalogs: Catalogs = loadCatalogs()): 
   };
 }
 
-/** Runner con la vida diaria y el azar de la semilla del mundo (023). */
-export function lifeRunner(world: World, catalogs?: Catalogs, loop: LoopOptions = {}): Runner {
+/** Tonos y posturas de la charla (043) en la forma del motor, desde los catálogos `chat_tones` y `chat_stances`. */
+export function chatEngineCatalog(catalogs: Catalogs): ChatCatalog {
+  const n = (v: unknown) => (typeof v === 'number' ? v : 0);
+  return {
+    tones: catalogs.chat_tones.entries.map((e) => ({ key: e.key, stimulus: String(e.attrs?.stimulus ?? ''), magnitude: n(e.attrs?.magnitude), prior: n(e.attrs?.prior) })),
+    stances: catalogs.chat_stances.entries.map((e) => ({ key: e.key, escape: n(e.attrs?.escape), w0: n(e.attrs?.w0) })),
+  };
+}
+
+/** Runner con la vida diaria, el azar de la semilla del mundo (023) y las entradas de la charla (043 R-019). */
+export function lifeRunner(world: World, catalogs: Catalogs = loadCatalogs(), loop: LoopOptions = {}): Runner {
   const life = lifeSystems(world, catalogs);
-  return new Runner(world, createRng(world.config.seed), {}, { systems: life.systems, loop: { ...life.loop, ...loop } });
+  const inputs = chatInputHandlers({
+    cat: chatEngineCatalog(catalogs),
+    onto: buildOntology(catalogs),
+    P: learningParams(world.config.profile, world.config.epoch.slice(0, 10)),
+    params: CHAT_DEFAULTS,
+  });
+  return new Runner(world, createRng(world.config.seed), {}, { systems: life.systems, loop: { ...life.loop, ...loop }, inputs });
 }

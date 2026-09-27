@@ -155,3 +155,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-26 | mf/4-red | 037 | Módulo nuevo `src/relations/` (capa 3: red relacional). `Citizen.network`. `index.ts` exporta su API y `directValue` |
 | 2026-09-26 | mf/5-reglas-valores | 038 | Módulo nuevo `src/rules/` (capa 4: reglas y valores). `Citizen.rules`. `index.ts` exporta su API |
 | 2026-09-27 | charla/l1-motor (L1) | 043 | Módulo nuevo `src/conversation/` (charla con ciudadanos: tono, postura, disponibilidad y consolidación). Eventos nuevos `CONVERSATION_STARTED`, `CONVERSATION_DECLINED`, `CONVERSATION_HELD` y `LEARNED_FROM_CONVERSATION`. `index.ts` exporta su API |
+| 2026-09-27 | charla/l3-mundo (L3) | 043, 002, 021 | Velocidad de tiempo real `REAL_TIME` (1/60x, 002 R-003). Registro de manejadores de entradas externas (`InputHandler`; opción `inputs` del `Runner`) en dos fases: validar sin cambiar nada y luego aplicar. Actividad `conversation` (código 16) |
