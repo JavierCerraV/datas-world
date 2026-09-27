@@ -18,6 +18,8 @@ export const ACTIVITY = Object.freeze({
   errands: 13,
   sick: 14,
   wash: 15,
+  /** Charlando con un visitante del laboratorio (043 R-019.2). */
+  conversation: 16,
 } as const);
 export type ActivityKind = keyof typeof ACTIVITY;
 

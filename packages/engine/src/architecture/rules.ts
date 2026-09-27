@@ -36,7 +36,7 @@ export const POLICY: ArchitecturePolicy = Object.freeze({
     'packages/generators/src/architecture/',
     'apps/cli/src/ficha.ts', // informe: el temperamento como descriptor (009 R-003)
   ],
-  selectionModules: ['packages/engine/src/decision/', 'packages/engine/src/selection/'],
+  selectionModules: ['packages/engine/src/decision/', 'packages/engine/src/selection/', 'packages/engine/src/conversation/'],
   legacyFiles: ['packages/engine/src/temperament/legacy.ts', 'packages/generators/src/personality/legacy.ts'],
   legacyImporters: {
     'packages/engine/src/needs/columns.ts': 'MF6.4',

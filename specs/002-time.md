@@ -40,7 +40,7 @@ interface ScheduledItem {
 ## 4. Reglas
 - **R-001** — El calendario es gregoriano sin zonas horarias ni horario de verano. Festivos definidos en `WorldConfig` (lista por fecha).
 - **R-002** — Cada tick suma `tickMinutes`. El resultado de la simulación **no depende de la velocidad**: la velocidad solo determina cuántos ticks se ejecutan por segundo real.
-- **R-003** — Velocidad objetivo: 1x = 1 min de mundo por segundo real (≈ 0,2 ticks/s con tick de 5 min); 1000x = 1 000 min/s. Si la CPU no alcanza la velocidad pedida, el worker ejecuta tan rápido como pueda y lo reporta (`effectiveSpeed`).
+- **R-003** — Velocidad objetivo: 1x = 1 min de mundo por segundo real (≈ 0,2 ticks/s con tick de 5 min); 1000x = 1 000 min/s. Además existe el **tiempo real** (1/60x): 1 min de mundo por minuto real. Lo usa la charla en el mundo (043 R-019.3). Si la CPU no alcanza la velocidad pedida, el worker ejecuta tan rápido como pueda y lo reporta (`effectiveSpeed`).
 - **R-004** — El scheduler es una cola de prioridad por `(at, id)`; nunca por orden de inserción implícito.
 - **R-005** — "Avanzar N días" ejecuta los ticks sin pausas de tiempo real y sin emitir notificaciones intermedias salvo progreso cada 5 %.
 - **R-006** — "Paso" ejecuta exactamente un tick y deja el mundo en pausa.
@@ -79,3 +79,4 @@ interface ScheduledItem {
 | 2026-09-24 | 0.1 | Estado → aprobada |
 | 2026-09-23 | 0.1 | Precisiones de la implementación (bloque C): R-007 (epoch a medianoche, tick divisor de 1440, cuándo se emite `DAY_STARTED`) y R-008 (el motor recibe el tiempo real, no lo lee). Sin cambios en CA |
 | 2026-09-24 | 0.1 | Estado → implementada |
+| 2026-09-27 | 0.1 | R-003: velocidad de tiempo real (1/60x, `REAL_TIME`), requerida por la 043 R-019.3 (charla en el mundo, aprobada por el usuario). Sin cambios en CA |

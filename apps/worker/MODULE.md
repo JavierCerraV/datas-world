@@ -71,3 +71,4 @@ Equivale al bucle `requestAnimationFrame` + `tick` del prototipo.
 | 2026-09-24 | chore/nombre-datas-world | — | El nombre del mundo en las configuraciones de prueba y por defecto pasa de "Villa Cordillera" a "Data's World" (decisión del usuario). Sin cambios de comportamiento |
 | 2026-09-24 | m1/hash-puntos-control | 027 | Una orden de control aplicada (pausa, velocidad…) hace un flush con punto de control (027 R-012). El cierre ya guardaba instantánea, que también lo es |
 | 2026-09-25 | m2/h-cierre | 021 | El worker avanza con la vida diaria (`lifeRunner` de los generadores, que pasan a ser dependencia del worker); un mundo de M1 solo avanza el reloj |
+| 2026-09-27 | charla/l3-mundo (L3) | 043 | Atiende las órdenes `chat_open` y `chat_session` (payload JSON) como entradas externas del Runner, que el replay reproduce. 1 prueba nueva |
