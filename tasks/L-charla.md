@@ -56,7 +56,8 @@ Specs: 043 v0.3 (aprobada). Usa las implementadas (014, 030) y las aprobadas (02
 - [x] L5.3 Intenciones, tensión del vínculo, llamada y encuentro en el bucle (R-006 a R-009).
 - [x] L5.3b Umbral de intención 0,35 → 0,2 (opción A del usuario): con 0,35 nadie actuaba (PA-139).
 - [ ] Pendiente para más adelante: que la historia generada (030) enseñe la traición y el abandono (padres que se separan, infidelidades), para que la reacción varíe entre personas (044 R-003).
-- [ ] L5.4 Replay, sandbox y criterios CA-001 a CA-008; guion «revelación sobre la pareja» en la batería.
+- [x] L5.4 Replay, sandbox y criterios CA-001 a CA-008; guion «revelación sobre la pareja» en la batería; `citizen:report` con la cadena.
+- [ ] L5.5 Decidir con el usuario: en el guion de su ejemplo nadie actúa (impacto 0,17 a 0,18 < 0,2). Propuesta: umbral de intención sobre la preocupación (función × cercanía), sin la credibilidad.
 
 ## Pendiente para más adelante (decisión del usuario, 2026-09-27)
 - [ ] Voz propia de cada ciudadano (PA-141): hoy todos responden con las mismas palabras («hermano») y, cuando se molestan, cortan igual. Hace falta variación según su historia. Requiere una modificación de la 043.

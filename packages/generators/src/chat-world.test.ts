@@ -25,7 +25,8 @@ const TURNS = [
   { tone: 'hostil', stance: 'terminar' },
 ];
 
-describe('charla en el mundo (043 R-019 a R-022)', () => {
+// Cada prueba genera y hace vivir el mundo de la semilla: con toda la suite en paralelo supera los 5 s por defecto.
+describe('charla en el mundo (043 R-019 a R-022)', { timeout: 60_000 }, () => {
   it('abrir: la persona pasa a charlar y la rutina no la mueve; el resto del mundo sigue su curso', () => {
     const world = eveningWorld();
     const r = lifeRunner(world);

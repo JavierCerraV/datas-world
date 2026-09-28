@@ -6,11 +6,13 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { parseArgs } from 'node:util';
-import { learningParams, stateHash } from '@datas-world/engine';
-import type { EntityId } from '@datas-world/engine';
-import { buildOntology, loadCatalogs } from '@datas-world/generators';
-import { ChatSession, DEFAULT_CONFIG, Gateway, MemoryRecordStore, anthropicAdapter, chatCatalogs, mockAdapter, parseConfig } from '@datas-world/llm-gateway';
-import type { GatewayConfig, MockResponder, ProviderAdapter } from '@datas-world/llm-gateway';
+import { CHAT_DEFAULTS, consolidateChat, idNumber, learningParams, makeEvent, sensitivityOf, stateHash } from '@datas-world/engine';
+import type { EntityId, WorldView } from '@datas-world/engine';
+import { buildOntology, chatEngineCatalog, loadCatalogs } from '@datas-world/generators';
+import {
+  ChatSession, DEFAULT_CONFIG, Gateway, MemoryRecordStore, anthropicAdapter, chatCatalogs, lexicalClaims, mockAdapter, parseConfig,
+} from '@datas-world/llm-gateway';
+import type { ChatCatalogs, GatewayConfig, MockResponder, ProviderAdapter } from '@datas-world/llm-gateway';
 import { WorldRepository, openReadonly, queryEvents } from '@datas-world/persistence';
 import { existsSync, readFileSync } from 'node:fs';
 import { DEFAULT_DB, UsageError, withDb } from './common.ts';
@@ -18,21 +20,25 @@ import type { Io } from './common.ts';
 
 const ESCAPE = new Set(['evadir', 'poner_limite', 'contraatacar', 'callar', 'terminar']);
 
-/** Proveedor determinista: la expresión repite la postura pedida; la verificación no marca nada. */
-const mockResponder: MockResponder = (c) => {
+/**
+ * Proveedor determinista: la expresión repite la postura pedida; la verificación no marca nada; el clasificador
+ * devuelve las afirmaciones sobre terceros de las reglas léxicas (044 R-001).
+ */
+const mockResponder = (cats: ChatCatalogs): MockResponder => (c) => {
   const sys = c.system.map((p) => p.text).join('\n');
-  if (sys.startsWith('Clasifica el tono')) return '{"tone":"neutro"}';
+  if (sys.startsWith('Clasifica el tono'))
+    return JSON.stringify({ tone: 'neutro', claims: lexicalClaims(cats.claims, cats.relations, c.messages.at(-1)?.text ?? '') });
   if (sys.startsWith('Revisas la respuesta')) return '{"claims":[],"stance":"ok"}';
   if (sys.startsWith('Resume en una sola frase')) return 'Charla de prueba.';
   const stance = /POSTURA PARA ESTE TURNO: ([^.]+)\./.exec(sys)?.[1] ?? 'sin postura';
   return `[${stance}] respuesta simulada.`;
 };
 
-function gatewayFor(provider: string): Gateway {
+function gatewayFor(provider: string, cats: ChatCatalogs): Gateway {
   if (provider === 'mock') {
     const m = { provider: 'mock' as const, model: 'mock', temperature: 0, maxOutputTokens: 300, timeoutMs: 5_000 };
     const config: GatewayConfig = { ...DEFAULT_CONFIG, purposes: { ...DEFAULT_CONFIG.purposes, dialogue: m, classify: m, verify: m, summarize: m } };
-    return new Gateway({ config, adapters: { mock: mockAdapter(mockResponder) }, records: new MemoryRecordStore(100_000) });
+    return new Gateway({ config, adapters: { mock: mockAdapter(mockResponder(cats)) }, records: new MemoryRecordStore(100_000) });
   }
   const path = 'config/llm.json';
   const config = existsSync(path) ? parseConfig(JSON.parse(readFileSync(path, 'utf8'))) : DEFAULT_CONFIG;
@@ -64,7 +70,7 @@ export async function chatBattery(args: string[], io: Io): Promise<void> {
   const onto = buildOntology(catalogs);
   const scripts = v.scripts === 'all' ? cats.scripts : cats.scripts.filter((s) => v.scripts!.split(',').includes(s.key));
   if (scripts.length === 0) throw new UsageError(`guiones desconocidos: ${v.scripts}`);
-  const gateway = gatewayFor(v.provider!);
+  const gateway = gatewayFor(v.provider!, cats);
 
   const { world, events } = withDb(openReadonly(v.db!), (db) => {
     const w = new WorldRepository(db).loadWorld();
@@ -78,20 +84,38 @@ export async function chatBattery(args: string[], io: Io): Promise<void> {
 
   type Row = { citizen: string; script: string; tone: string; toneLlm: string | null; stance: string; expression: string; claims: Record<string, number>; stanceCheck: string };
   const rows: Row[] = [];
+  // 044 §9: lo que dijo sobre terceros y qué haría la persona después, sin tocar el mundo (contadores copiados).
+  const said = { heard: 0, impacts: [] as number[], discarded: {} as Record<string, number>, intentions: [] as string[] };
+  const engineCat = chatEngineCatalog(catalogs);
+  const counters = structuredClone(world.counters);
   for (const citizenId of ids) {
     for (const sc of scripts) {
       const seed = Number.parseInt(createHash('sha256').update(`${hash}:${citizenId}:${sc.key}`).digest('hex').slice(0, 8), 16);
       const s = new ChatSession({ gateway, catalogs: cats, onto, P, view: world, citizenId, events, sessionId: `BAT-${sc.key}`, visitorId: 'EXT-BATERIA', seed, now: world.now });
+      let aboutOthers = 0;
       for (const t of sc.turns) {
         if (s.ended) break;
         const out = await s.turn(t.text, { toneTag: t.tone });
+        for (const c of out.claims) {
+          if (c.discarded) said.discarded[c.discarded] = (said.discarded[c.discarded] ?? 0) + 1;
+          else aboutOthers++;
+        }
         const ver = await out.verification;
         const claims: Record<string, number> = { supported: 0, contradicted: 0, unsupported: 0 };
         for (const c of ver.claims) claims[c.verdict] = (claims[c.verdict] ?? 0) + 1;
         rows.push({ citizen: citizenId, script: sc.key, tone: t.tone, toneLlm: out.tone.toneLlm ?? null, stance: out.choice.stance, expression: out.expression, claims, stanceCheck: ver.stanceCheck });
       }
+      if (aboutOthers === 0) continue;
+      const row = idNumber(citizenId as EntityId);
+      const r = consolidateChat(world as unknown as WorldView, s.input(), engineCat, { onto, P, sens: sensitivityOf(world, row) }, CHAT_DEFAULTS, world.now, [], (e) => makeEvent(counters, world.now, e));
+      said.heard += r.events.filter((e) => e.type === 'CHAT_CLAIM_HEARD').length;
+      for (const e of r.events) if (e.type === 'CHAT_CLAIM_BELIEVED') said.impacts.push((e.payload as { impact: number }).impact);
+      for (const e of r.events) if (e.type === 'INTENTION_FORMED') said.intentions.push((e.payload as { kind: string }).kind);
     }
   }
+  const intentionShare = share(said.intentions);
+  const range = (xs: number[]) => (xs.length ? `${Math.min(...xs).toFixed(2)} a ${Math.max(...xs).toFixed(2)}` : '—');
+  const generic = said.intentions.length >= 5 && Object.values(intentionShare).some((p) => p > 0.8);
 
   const byTone = Object.fromEntries(cats.tones.map((t) => [t.key, share(rows.filter((r) => r.tone === t.key).map((r) => r.stance))]));
   const byScript = Object.fromEntries(scripts.map((sc) => {
@@ -116,6 +140,10 @@ export async function chatBattery(args: string[], io: Io): Promise<void> {
     toneAgreement: withLlm.length ? Math.round((withLlm.filter((r) => r.toneLlm === r.tone).length / withLlm.length) * 1000) / 1000 : null,
     templates: rows.filter((r) => r.expression === 'template').length,
     byTone, byScript,
+    consequences: {
+      heard: said.heard, believed: said.impacts.length, impactRange: range(said.impacts), discarded: said.discarded,
+      intentions: intentionShare, formed: said.intentions.length, generic,
+    },
   };
   const md = [
     '# Batería de charla (spec 043 R-015)', '',
@@ -129,6 +157,10 @@ export async function chatBattery(args: string[], io: Io): Promise<void> {
     ...Object.entries(byTone).filter(([, s]) => Object.keys(s).length > 0).map(([t, s]) => `| ${t} | ${Object.entries(s).map(([k, p]) => `${k} ${Math.round(p * 100)} %`).join(', ')} |`),
     '', '## Diferencias entre ciudadanos', '', '| Guion | Varianza de la proporción de escape |', '|---|---|',
     ...Object.entries(byScript).map(([k, s]) => `| ${k} | ${s.escapeVarianceAcrossCitizens} |`), '',
+    '## Lo que dijo sobre terceros (spec 044)', '',
+    `- Afirmaciones oídas: ${said.heard}; creídas: ${said.impacts.length} (impacto ${range(said.impacts)}); descartadas: ${Object.entries(said.discarded).map(([k, n]) => `${n} (${k})`).join(', ') || 'ninguna'}.`,
+    `- Intenciones (${said.intentions.length}): ${Object.entries(intentionShare).map(([k, p]) => `${k} ${Math.round(p * 100)} %`).join(', ') || 'ninguna'}.`,
+    ...(generic ? ['- **Alerta:** una sola intención supera el 80 %: el personaje es genérico (044 §9).'] : []), '',
   ].join('\n');
   mkdirSync(dirname(v.out!), { recursive: true });
   writeFileSync(`${v.out}.json`, `${JSON.stringify(report, null, 2)}\n`);

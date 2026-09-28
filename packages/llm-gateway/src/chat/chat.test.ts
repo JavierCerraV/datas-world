@@ -1,4 +1,4 @@
-import { LEARNING_DEFAULTS } from '@datas-world/engine';
+import { LEARNING_DEFAULTS, stateHash } from '@datas-world/engine';
 import type { WorldEvent, WorldView } from '@datas-world/engine';
 import { buildOntology, generateWorld, loadCatalogs } from '@datas-world/generators';
 import { describe, expect, it } from 'vitest';
@@ -208,8 +208,13 @@ describe('charla: afirmaciones sobre terceros (044 R-001)', () => {
 
   it('el turno de la charla lleva las afirmaciones detectadas; sin catálogo, la charla sigue igual', async () => {
     const g = new Gateway({ config: cfg(), adapters: { mock: mockAdapter(byPurpose({ classify: '{"tone":"invasivo","claims":[{"predicate":"infiel","about":"pareja"}]}' })) } });
+    const before = stateHash(gen.world);
     const t = await session(g).turn('Su esposa lo engaña');
     expect(t.tone.visitorClaims).toEqual([{ predicate: 'infiel', about: 'pareja' }]);
+    // 044 CA-007: la sesión evalúa la afirmación (lo que muestra el panel) sin tocar el mundo.
+    expect(t.claims).toHaveLength(1);
+    expect(t.claims[0]!.discarded ?? (t.claims[0]!.credibility >= 0 && t.claims[0]!.impact >= 0)).toBeTruthy();
+    expect(stateHash(gen.world)).toBe(before);
     const plain = chatCatalogs({ chat_tones: catalogs.chat_tones, chat_stances: catalogs.chat_stances, chat_scripts: catalogs.chat_scripts });
     const r = await classifyTone(new Gateway({ config: cfg(), adapters: { mock: mockAdapter(byPurpose()) } }), plain, 'Su esposa lo engaña');
     expect(r.visitorClaims).toEqual([]);

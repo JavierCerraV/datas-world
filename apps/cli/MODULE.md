@@ -2,7 +2,7 @@
 modulo: cli
 ruta: apps/cli
 estado: en-desarrollo
-specs: [001, 002, 009, 010, 015, 021, 023, 027, 029, 030, 043]
+specs: [001, 002, 009, 010, 015, 021, 023, 027, 029, 030, 043, 044]
 actualizado: 2026-09-27
 ---
 
@@ -22,6 +22,7 @@ Herramientas de línea de comandos: crear mundo, avanzar N días, informes, expo
 | 027 | CA-001 y CA-006 con población: guardar y cargar da el hash generado; R-011: mundo de ejemplo `docs/validaciones/mundos/m1-482917.db` que se carga y avanza | — |
 | 029 | CA-003 (`world:info` lista las cifras por confirmar); §9: `world:report` frente al perfil | — |
 | 030 | CA-003 (`citizen:report` con padres y abuelos), CA-006 (`world:history --from 1948 --to 1958`), CA-007 (`bench --check`: `world:new` < 5 s y base < 2 MB) | — |
+| 044 | CA-005 (`citizen:report` explica el conflicto con su cadena hasta la charla); §9 en `chat:battery` (afirmaciones, impacto, intenciones y alerta de personaje genérico) | — |
 
 
 ## 3. API pública
@@ -33,7 +34,7 @@ Desde la raíz, `pnpm cli <comando>` (`src/main.ts`). Base por defecto: `data/wo
 | `world:report [--history] [--json] [--db RUTA]` | Población, hogares y empleo frente al perfil (mundo, perfil, desviación, estado de la cifra) y las cifras `por_confirmar`. `--history`: nacimientos, muertes, edad media al morir, migraciones y fundaciones por década (030 §9) |
 | `world:map [--db RUTA]` | El mapa en texto: `·` calle, `"` parque, `v` vivienda, una letra por lugar con su leyenda y los barrios con su estrato |
 | `world:history [--from AAAA] [--to AAAA] [--type T,…] [--citizen CIT] [--place PLC\|ORG] [--limit N] [--no-causes] [--db RUTA]` | Eventos del registro en orden cronológico, con nombres en lugar de ids y sus causas (el nombre del hecho histórico, el evento causante o el estado) |
-| `citizen:report CIT [--db RUTA]` | Ficha (nacimiento, lugar, hogar, ocupación), familia (padres, abuelos, bisabuelos si los hay, hijos; "desconocido" si faltan) y línea de vida |
+| `citizen:report CIT [--db RUTA]` | Ficha (nacimiento, lugar, hogar, ocupación), familia (padres, abuelos, bisabuelos si los hay, hijos; "desconocido" si faltan) y línea de vida. Si la persona tiene creencias, intenciones, vínculos o conflictos (044), una sección con cada uno y, por conflicto, la cadena de causas completa (`causalChain`, `conflict.ts`) |
 | `world:advance --days N [--db RUTA]` | Toma el cerrojo de escritor (falla si el worker está en marcha), avanza con `WorldSession` (flush cada `FLUSH_TICKS`, instantánea diaria) y muestra el progreso cada 5 % por stderr |
 | `world:info [--json] [--db RUTA]` | Abre en solo lectura; carga el mundo (verifica el hash) y muestra fecha, estado, capacidades, eventos, instantáneas, hash, tamaño y escritor |
 | `chat:stats [--json] [--db RUTA]` | Solo lectura (043 R-023, L4.3): latencia del primer token y de la respuesta completa (p50, p95) de las respuestas con LLM frente a los objetivos, y coste total, por charla y por propósito desde `llm_records` |
@@ -109,3 +110,4 @@ Sustituye a los scripts headless usados para calibrar el prototipo.
 | 2026-09-26 | mf/4-red | 037 | Comando nuevo `bench:relations` (`bench-relations.ts`): tiempo del valor funcional de un estímulo para 200 personas con 500 relaciones, con redes de 100, 250 y 500 estímulos (037 CA-004) |
 | 2026-09-27 | charla/l4 (L4.2) | 043 | Comando nuevo `chat:battery` (`battery.ts`): los guiones de `chat_scripts` contra N ciudadanos en charlas sandbox, con informe JSON y Markdown (posturas por tono y por guion, coherencia, adherencia, acuerdo del tono, plantillas y varianza de la proporción de escape entre ciudadanos). Proveedor `mock` (determinista, sin horas ni latencias en los archivos) o `config` (`config/llm.json`). `runAsync` para los comandos asíncronos; `main.ts` lo usa. Dependencia nueva `@datas-world/llm-gateway`. 2 pruebas (043 CA-016) |
 | 2026-09-27 | claude/wonderful-carson-4c4i3k (L4.3) | 043 | Comando nuevo `chat:stats` (`chat-stats.ts`): latencia p50/p95 de las respuestas con LLM frente a `FIRST_TOKEN_P50_MS` y `TOTAL_P95_MS`, y coste total, por charla y por propósito desde `llm_records`. Solo lectura, para medir las charlas reales del usuario. 1 prueba |
+| 2026-09-27 | charla/l5 (L5.4) | 044 | `citizen:report` añade la sección «Creencias, intenciones y vínculos» con la cadena de cada conflicto hasta la charla (`conflict.ts`, CA-005). `chat:battery`: el `mock` devuelve las afirmaciones léxicas; por guion con afirmaciones se simula la consolidación sin tocar el mundo y el informe muestra oídas, creídas (con su impacto), descartadas por motivo e intenciones, con alerta si una supera el 80 % (§9). Guion nuevo `revelacion.pareja`. 1 prueba nueva y la de la batería ampliada |
