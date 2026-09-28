@@ -12,6 +12,9 @@ import type { RelationalNetwork } from '../relations/types.ts';
 import { variabilityOf } from '../functions/history.ts';
 import { createRng } from '../rng.ts';
 import type { Belief, Intention } from '../world.ts';
+import { PRIVATE_DEFAULTS } from '../private/params.ts';
+import { activate } from '../private/pnr.ts';
+import type { MindState } from '../private/types.ts';
 import { claimsHeard } from './claims.ts';
 import { canCall, chooseIntention, intentionOptions, together } from './intentions.ts';
 import type { ChatParams, ClaimParams } from './params.ts';
@@ -133,6 +136,7 @@ export function consolidateChat(
   // 044 §5: lo que oyó de cada tercero y, si lo cree, la creencia con sus fuentes (función, red o valor).
   const beliefs: Belief[] = [...(person?.beliefs ?? [])].map((b) => ({ ...b }));
   const strongest = new Map<EntityId, { a: ClaimAssessment; believedId: EntityId }>();
+  const mind: MindState = JSON.parse(JSON.stringify(person?.mind ?? { active: [] })) as MindState;
   for (const { seq, a } of heard) {
     const about = a.about as EntityId;
     const both = [...participants, { id: about, role: 'tercero' }];
@@ -160,6 +164,9 @@ export function consolidateChat(
     const belief: Belief = { about, predicate: a.predicate, source: input.visitorId, credibility: a.credibility, at: now, cause: b.id };
     if (i >= 0) beliefs[i] = belief;
     else beliefs.push(belief);
+    // 039 (decisión 5): lo que cree y le duele queda en su mente como pensamiento, con la función de cuánto le
+    // importa; si la carga alcanza la entrada, el sistema `private` abre un episodio de PNR.
+    if (a.value < 0) activate(mind, { s: cat.claims?.find((x) => x.key === a.predicate)?.stimulus ?? a.predicate, fn: -a.concern, from: a.predicate, at: now, cause: b.id }, PRIVATE_DEFAULTS);
     // R-006 (L5.5): actúa si le importa lo bastante, aunque dude; la duda decide cómo (preguntar), no si actúa.
     if (a.value < 0 && a.concern >= cp.intentThreshold) {
       const prev = strongest.get(about);
@@ -174,7 +181,10 @@ export function consolidateChat(
   const patches: Patch[] = [
     {
       op: 'entity', id: input.citizenId,
-      fields: { functions: store, ...(heard.length > 0 ? { beliefs } : {}), ...(intentions.events.length > 0 ? { intentions: intentions.list } : {}) },
+      fields: {
+        functions: store, ...(heard.length > 0 ? { beliefs } : {}), ...(intentions.events.length > 0 ? { intentions: intentions.list } : {}),
+        ...(JSON.stringify(mind) !== JSON.stringify(person?.mind ?? { active: [] }) ? { mind } : {}),
+      },
     },
     { op: 'set', type: 'f32', column: 'state.mood', row, value: clamp01(mood + delta) },
     { op: 'set', type: 'f32', column: 'state.stress', row, value: clamp01(stress - delta + claimStress) },

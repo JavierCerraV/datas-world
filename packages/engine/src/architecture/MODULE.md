@@ -2,7 +2,7 @@
 modulo: architecture
 ruta: packages/engine/src/architecture
 estado: en-desarrollo
-specs: [009, 035]
+specs: [009, 035, 039]
 actualizado: 2026-09-25
 ---
 
@@ -64,3 +64,4 @@ No aplica.
 | 2026-09-25 | mf/2-funciones (MF2.5) | 035, 009 | `POLICY`: `functions/` es lector registrado de `tmp.*`; `needs/emotions.ts` deja de importar el adaptador |
 | 2026-09-26 | mf/3-seleccion (MF3.4) | 040, 009 | `POLICY.legacyImporters` ya no incluye `decision/options.ts`, `decision/system.ts` ni `routines/system.ts`. La prueba usa `needs/system.ts` como importador vigente y comprueba que `decision/system.ts` queda no autorizado (040 CA-004) |
 | 2026-09-27 | charla/l1-motor (L1) | 043, 009 | `POLICY.selectionModules` incluye `conversation/`: la postura de la charla es selección de conducta (043 INV-003). También en `eslint.config.js` |
+| 2026-09-28 | mf/6-privados (MF6.4) | 039, 035 | `legacyImporters` ya no incluye `needs/columns.ts` ni `needs/system.ts`: las necesidades no leen rasgos. La prueba del adaptador usa `routines/columns.ts` (caduca en MF7.3) y comprueba que las necesidades ya no pueden importarlo |

@@ -2,7 +2,7 @@
 import { illnessSystem, sleepSystem } from './illness.ts';
 import { needsSystem } from './system.ts';
 
-export { EMOTIONS, NEEDS, NEEDS_COLUMNS, defineNeedsColumns, initNeeds, stability } from './columns.ts';
+export { EMOTIONS, MOOD_BASELINE, NEEDS, NEEDS_COLUMNS, defineNeedsColumns, initNeeds } from './columns.ts';
 export { EVENT_EMOTIONS, emotionPatches } from './emotions.ts';
 export { illnessSystem, sleepSystem } from './illness.ts';
 export { acuteKeys, needsParams } from './params.ts';

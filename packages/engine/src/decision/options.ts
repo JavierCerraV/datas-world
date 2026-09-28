@@ -21,6 +21,10 @@ import type { MobilityParams } from '../mobility/params.ts';
 import { planTrip } from '../mobility/trip.ts';
 import type { Rng } from '../rng.ts';
 import type { DayInfo } from '../routines/day.ts';
+import { AVOIDANCE_W0 } from '../private/params.ts';
+import type { AvoidanceResponse } from '../private/params.ts';
+import { loadOf, responseStrength } from '../private/pnr.ts';
+import type { MindState } from '../private/types.ts';
 import { planAt } from '../routines/plan.ts';
 import type { ActionRequest, WorldView } from '../simulation/system.ts';
 import { activityOf } from './columns.ts';
@@ -28,7 +32,10 @@ import type { LeisureTable } from './columns.ts';
 import { strengthContribution } from './select.ts';
 
 /** Fuentes de control de la 040 R-003 (sin reglas verbales, valores ni contexto social hasta MF5 y M3). */
-export type ControlSource = 'reforzador' | 'fuerza' | 'demorado' | 'regla' | 'valor' | 'aversion' | 'coste';
+export type ControlSource = 'reforzador' | 'fuerza' | 'demorado' | 'regla' | 'valor' | 'aversion' | 'coste' | 'alivio';
+
+/** 039 R-004 [M]: peso del alivio esperado (carga del episodio × fuerza de la evitación) frente a las demás fuentes. */
+export const RELIEF_WEIGHT = 2;
 
 export interface SourceContribution {
   source: ControlSource;
@@ -200,13 +207,22 @@ export function buildOptions(c: DecisionCtx, rng: Rng): Option[] {
       { source: 'reforzador', contribution: 1.5 * (1 - hunger) + (4 * Math.max(0, 0.25 - hunger)) / 0.25, ref: 'need.hunger' },
     ]);
 
-  // Dormir un rato en casa si está agotada.
-  if (energy < 0.3 && home)
-    add('rest', { activity: 'sleep', until: Math.min(now + 60, cap), cost: 0 }, [{ source: 'reforzador', contribution: 0.3 + 2 * (0.3 - energy), ref: 'need.energy' }], home);
-
-  // Aficiones de la ficha (032 R-006), en orden de clave.
   const person = view.citizens.get(id);
   const store = person?.functions as FunctionStore | undefined; // solo se lee (netValue no muta)
+  // 039 R-004: en pleno episodio de PNR, dormir o distraerse prometen alivio según lo reforzada que esté esa evitación.
+  const mind = person?.mind as MindState | undefined;
+  const load = mind?.episode ? loadOf(mind) : 0;
+  const relief = (r: AvoidanceResponse): SourceContribution[] =>
+    load > 0 ? [{ source: 'alivio', contribution: RELIEF_WEIGHT * load * responseStrength(store, r, AVOIDANCE_W0), ref: r }] : [];
+
+  // Dormir un rato en casa si está agotada (o, en un episodio, para no pensar).
+  if ((energy < 0.3 || load > 0) && home)
+    add('rest', { activity: 'sleep', until: Math.min(now + 60, cap), cost: 0 }, [
+      { source: 'reforzador', contribution: energy < 0.3 ? 0.3 + 2 * (0.3 - energy) : 0, ref: 'need.energy' },
+      ...relief('evit.dormir'),
+    ], home);
+
+  // Aficiones de la ficha (032 R-006), en orden de clave.
   const relNet = person?.network as RelationalNetwork | undefined;
   const net = networkOf(view);
   for (const interest of [...(person?.leisure ?? [])].sort((a, b) => (a.key < b.key ? -1 : 1))) {
@@ -256,6 +272,7 @@ export function buildOptions(c: DecisionCtx, rng: Rng): Option[] {
     ];
     const av = aversion(c, store, relNet, [`actividad.${interest.key}`, ...(placeKind ? [`lugar.${placeKind}`] : [])], placeKind ? `lugar.${placeKind}` : '');
     if (av) sources.push(av);
+    sources.push(...relief('evit.distraccion'));
     // 038 R-006: la actividad señala un valor (subred jerárquica con raíz en un dominio vital).
     if (relNet && c.onto && c.learning) {
       const directOf = (s: string) => directValue(store, c.onto!, s, '', c.now, c.learning!);

@@ -51,9 +51,7 @@ Coste: 15 columnas ≈ 56 B por persona.
 
 ## 4. Reglas
 - **R-001 (decaimiento)** — Cada necesidad decae por hora con su tasa del perfil (`needs.decay.*`). La energía cae 0,045/h despierto y 0,058/h en esfuerzo (prototipo). Las necesidades se satisfacen con acciones (comer, dormir, ducharse, socializar, esparcimiento de la 032).
-- **R-002 (estrés)** — El estrés sube con necesidades insatisfechas, conflictos (012, M3), deudas (015 R-004), incertidumbre laboral y enfermedad. La modulación es:
-  - × (0,5 + neuroticismo);
-  - × (1,5 − resiliencia).
+- **R-002 (estrés)** — El estrés sube con necesidades insatisfechas, conflictos (012, M3), deudas (015 R-004), incertidumbre laboral y enfermedad. Desde MF6.4 (039, decisión 6 del usuario) no hay modulación por rasgo: el objetivo del estrés es la base, más los estresores presentes, más la carga de los eventos privados (039). Las diferencias entre personas salen de lo que viven y de lo que piensan.
 
   Baja con descanso, apoyo social y esparcimiento (032).
 - **R-003 (ánimo)** — El ánimo es una media móvil de la valencia emocional y la satisfacción de necesidades, con retorno lento a `moodBaseline` (media vida `MOOD_RETURN_DAYS`).
@@ -125,3 +123,4 @@ Distribuciones de necesidades, emociones, estrés y ánimo en la prueba de 100 p
 | 2026-09-26 | 0.2 | Bloque MF2 (036, ADR-007): la intensidad de las emociones por evento (R-005) ya no la modula el neuroticismo, sino la activación basal (`tmp.arousalBaseline`) y la función aprendida del estímulo principal del evento: `0,75 + 0,5·|v|`. Sin cambios en CA |
 | 2026-09-26 | 0.2 | Bloque MF3 (040 R-010): el exceso de sueño por falta de energía ya no depende de la responsabilidad sino del descuento aprendido (`1,3 − 1/(1 + 5k)`); `OVERSLEPT` cita `descuento`. CA-001 sigue verde. Sin cambios en CA |
 | 2026-09-26 | 0.2 | Bloque MF4 (037 R-006): la ganancia de las emociones por evento usa el valor funcional del estímulo principal (aprendido o derivado por la red relacional). Sin cambios en CA |
+| 2026-09-28 | 0.2 | MF6.4 (039, decisión 6 del usuario): R-002 sin modulación por neuroticismo ni resiliencia. El objetivo del estrés es `base + 0,5 × inestabilidad + estresores + 0,5 × carga privada`: el término de inestabilidad queda con el valor medio de la población para no mover la media del mundo. La soledad sin compañía pesa según la saliencia social de la 036, y la línea base del ánimo es 0,55 para todos hasta MF7. `STRESS_PEAK` cita la carga privada. Paridad en `docs/validaciones/MF6-paridad-prototipo.md`: el estrés medio queda en rango (0,251); ánimo, empleo y enfermedades como en MF5. Sin cambios en CA |

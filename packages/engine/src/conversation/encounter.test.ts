@@ -113,12 +113,12 @@ describe('llamada, encuentro y vínculo (044 R-006 a R-008)', () => {
     expect(other.world.citizens.get(other.ana)!.intentions).toHaveLength(1);
   });
 
-  it('rumiar sostiene el estrés cada hora y la intención caduca con su evento', () => {
+  it('rumiar no hace nada en el bucle de la 044 (el PNR es de la 039) y la intención caduca con su evento', () => {
     const { world, ana, luis } = couple();
     intend(world, ana, { kind: 'rumiar', target: luis, topic: 'infiel', urgency: 0.4, expiresAt: world.now + 120 });
     const s0 = stress(world, ana);
-    tick(world);
-    expect(stress(world, ana)).toBeCloseTo(s0 + P.ruminationPerHour, 5);
+    expect(tick(world)).toEqual([]);
+    expect(stress(world, ana)).toBe(s0);
     world.now += 120;
     const [expired] = tick(world);
     expect(expired!.type).toBe('INTENTION_EXPIRED');

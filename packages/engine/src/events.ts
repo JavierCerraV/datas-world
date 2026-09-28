@@ -317,6 +317,26 @@ export const EVENT_TYPES = Object.freeze({
       }),
     text: (e) => `${e.payload.citizenId} aprende de la charla ${e.payload.sessionId} (${e.payload.deltas.length} cambios).`,
   }),
+  // Eventos privados (spec 039 §5): el episodio de PNR, no un estado; el pensamiento derivado solo en nivel ≥ 4.
+  PNR_EPISODE: def<{ citizenId: string; trigger: string; steps: number; minutes: number; ended: string; peak: number }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) =>
+      needObj(p, {
+        citizenId: str, trigger: str, steps: (v) => int(v) && (v as number) > 0, minutes: (v) => int(v) && (v as number) >= 0,
+        ended: (v) => ['bajo', 'evitacion', 'yo', 'tope'].includes(v as string), peak: (v) => typeof v === 'number' && v >= 0 && v <= 1,
+      }),
+    text: (e) => {
+      const how: Record<string, string> = { bajo: 'se le pasó', evitacion: 'lo cortó distrayéndose o durmiendo', yo: 'tomó distancia del pensamiento', tope: 'se agotó' };
+      return `${e.payload.citizenId} le dio vueltas a ${e.payload.trigger} durante ${e.payload.minutes} min (${e.payload.steps} pensamientos); ${how[e.payload.ended] ?? e.payload.ended}.`;
+    },
+  }),
+  THOUGHT_DERIVED: def<{ citizenId: string; from: string; to: string; relation: string; fn: number }>({
+    baseImportance: 0.05,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, from: str, to: str, relation: str, fn: (v) => typeof v === 'number' && v >= -1 && v <= 1 }),
+    text: (e) => `${e.payload.citizenId} pasa de pensar en ${e.payload.from} a pensar en ${e.payload.to} (${e.payload.relation}).`,
+  }),
   // Consecuencias de la charla (spec 044): lo que el visitante dijo sobre un tercero cercano.
   CHAT_CLAIM_HEARD: def<{ citizenId: string; about: string; predicate: string; seq: number; sessionId: string }>({
     baseImportance: 0.3,

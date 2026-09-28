@@ -9,6 +9,7 @@ import { makeEvent } from './events.ts';
 import type { WorldEvent } from './events.ts';
 import { allocateId, emptyCounters, idKind, idNumber } from './ids.ts';
 import type { Counters, EntityId, WorldId } from './ids.ts';
+import type { MindState } from './private/types.ts';
 import type { FunctionStore } from './functions/types.ts';
 import type { RelationalNetwork } from './relations/types.ts';
 import type { Rule } from './rules/rules.ts';
@@ -110,6 +111,8 @@ export interface Citizen extends BaseEntity {
   bonds?: Bond[];
   /** Intenciones pendientes tras una charla (044 R-006); el bucle las ejecuta o las deja caducar. */
   intentions?: Intention[];
+  /** Eventos privados activos y episodio de PNR en curso (039); vacío si no piensa en nada aversivo. */
+  mind?: MindState;
 }
 
 /** Intención tras la charla (044 §3). */

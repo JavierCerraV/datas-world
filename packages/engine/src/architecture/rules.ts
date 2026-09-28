@@ -39,8 +39,7 @@ export const POLICY: ArchitecturePolicy = Object.freeze({
   selectionModules: ['packages/engine/src/decision/', 'packages/engine/src/selection/', 'packages/engine/src/conversation/'],
   legacyFiles: ['packages/engine/src/temperament/legacy.ts', 'packages/generators/src/personality/legacy.ts'],
   legacyImporters: {
-    'packages/engine/src/needs/columns.ts': 'MF6.4',
-    'packages/engine/src/needs/system.ts': 'MF6.4',
+    // MF6.4 (039): las necesidades ya no leen rasgos (estrés desde la carga, soledad por la saliencia social).
     'packages/engine/src/routines/columns.ts': 'MF7.3',
     'packages/engine/src/index.ts': 'MF7.4',
     'packages/generators/src/health/habits.ts': 'MF7.3',

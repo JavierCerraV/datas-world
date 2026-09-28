@@ -1,10 +1,10 @@
 ---
 id: 039
 nombre: private-events
-estado: borrador
+estado: aprobada
 hito: MF (bloque MF6)
 depende_de: [035, 036, 037, 038]
-version: 0.1
+version: 0.2
 ---
 
 # 039 — Eventos privados, PNR, evitación experiencial y flexibilidad (capa 5)
@@ -97,10 +97,22 @@ interface PnrEpisode { trigger: StimulusId | EntityId; steps: number; aversiveLo
 | Tope de pasos por hora | 12 | [M] |
 | Eventos privados activos | 16 | [M], PA-130 |
 
+## 9. Decisiones del usuario (2026-09-28)
+Aprobadas las 6 propuestas:
+1. **PNR como episodio, no como rasgo** (R-002, R-003): entra con carga ≥ `PNR_ENTER` = 0,5 y sale con carga < `PNR_EXIT` = 0,25, con una evitación que la reduce o al llegar al tope de 12 pasos por hora (PA-115).
+2. **Carga** (PA-116): suma de las funciones aversivas de los eventos privados activos, con techo 1; como mucho 16 activos a la vez.
+3. **Evitación** (R-004, PA-117, PA-023): distraerse, dormir, consumir (alcohol o tabaco si la ficha de salud lo tiene, 031), evitar a alguien y suprimir. Se aprende por reforzamiento negativo inmediato (alivio), con los costes demorados descontados (036 R-009).
+4. **Flexibilidad** (R-006, R-007): la respuesta de enmarque jerárquico con «Yo» empieza débil y igual para todos hasta MF7 (041), que le dará historia. Se fortalece si va seguida de contacto con reforzadores de valor.
+5. **Conexión con la 044:** la intención `rumiar` deja de sumar estrés fijo por hora (`ruminationPerHour`); la creencia dispara eventos privados y, si la carga alcanza `PNR_ENTER`, un episodio de PNR real.
+6. **Estrés y ánimo (MF6.4):** el estrés y el ánimo de la 010 salen de la carga aversiva y apetitiva presente; se retira del adaptador la modulación de estresores por neuroticismo y resiliencia. Cambia la dinámica del mundo: se revisa la paridad con el prototipo (`validate:parity`).
+
 ## 10. Preguntas abiertas
-PA-023 a PA-026 (§11.6), PA-036 a PA-039 (§11.8), PA-115 a PA-117.
+PA-023 a PA-026 (§11.6), PA-036 a PA-039 (§11.8), PA-115 a PA-117. Los valores de partida quedan decididos (§9); su calibración sigue abierta.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-25 | 0.1 | Borrador (Fase A, ADR-007) |
+| 2026-09-28 | 0.2 | Decisiones del usuario (§9): PNR como episodio con entrada 0,5, salida 0,25, evitación o tope de 12 pasos por hora; carga con techo 1 y 16 eventos activos; catálogo de evitación; flexibilidad débil hasta MF7; el `rumiar` de la 044 pasa a PNR real; estrés y ánimo desde la carga (MF6.4) |
+| 2026-09-28 | 0.2 | Estado → aprobada |
+| 2026-09-28 | 0.2 | Precisiones de la implementación (MF6): (1) R-001: disparan los hechos del tick con λ < 0 en las reglas de la 036, por cada estímulo presente con función aversiva para esa persona (en un despido, «despido» y no «trabajo»), y las creencias de la charla (044) con `−preocupación`. (2) R-002: el paso deriva desde el foco (el pensamiento más aversivo) el estímulo de función transformada más aversiva (`factor × función × fuerza`); sin a dónde ir, se repite y se habitúa un 10 %. Quedarse con el pensamiento es exposición: un ensayo de extinción del disparador por paso. (3) R-004: la evitación es el paso a dormir o a distraerse durante el episodio. Suprime la mitad de la carga, y el alivio (normalizado por `PNR_ENTER`) refuerza la respuesta. Mientras sigue, lo pensado se desvanece sin extinguirse. En la selección, la fuente `alivio` (040). Consumir, evitar a alguien y suprimir quedan pendientes. (4) R-006, R-007: «Yo» se emite con probabilidad igual a su fuerza (0,1 hasta MF7). Conserva la mitad de la función y cierra el episodio; se refuerza con resultado 1 si hay un dominio vital apetitivo y se extingue con 0 si no. (5) Fuera de un episodio, los pensamientos se desvanecen con media vida de 3 h. Resultados: 042 V-10 en `docs/validaciones` y `lab/private.test.ts`; en 30 días de vida normal del mundo de la semilla 482917 no hay episodios (carga máxima 0,06): los hechos del mundo actual pesan poco. Sin cambios en CA |

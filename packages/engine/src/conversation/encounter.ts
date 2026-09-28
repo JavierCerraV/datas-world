@@ -38,8 +38,8 @@ export const tensionNow = (b: Bond, now: number, p: ClaimParams): number => clam
 const inChat = (view: WorldView, id: EntityId, now: number) => (view.components.i32[CHAT_UNTIL]?.[idNumber(id)] ?? 0) > now;
 const activeCitizen = (view: WorldView, id: EntityId) => view.citizens.get(id)?.status === 'active';
 
-/** Fase `actions`: caducan las intenciones viejas, se hacen las llamadas y quien rumia sostiene su estrés. */
-export function createCallSystem(p: ClaimParams): System {
+/** Fase `actions`: caducan las intenciones viejas y se hacen las llamadas (rumiar lo lleva la 039). */
+export function createCallSystem(_p: ClaimParams): System {
   return {
     id: 'intentions', phase: 'actions', order: 90, capability: 'learning', cadence: 'tick', minLevel: 0,
     run: (view: WorldView, ctx: TickCtx): SystemOutput => {
@@ -50,7 +50,6 @@ export function createCallSystem(p: ClaimParams): System {
         const list = view.citizens.get(id)?.intentions;
         if (!list?.length) continue;
         const keep: Intention[] = [];
-        let rumination = 0;
         for (const it of list) {
           const who = [{ id, role: 'persona' }, { id: it.target, role: 'tercero' }];
           if (ctx.now >= it.expiresAt || !activeCitizen(view, it.target)) {
@@ -61,11 +60,10 @@ export function createCallSystem(p: ClaimParams): System {
             events.push({ type: 'PHONE_CALL_MADE', payload: { from: id, to: it.target, reason: it.topic, urgency: it.urgency }, causes: [{ event: it.cause, weight: 1 }], participants: who });
             continue;
           }
-          if (it.kind === 'rumiar' && ctx.now % 60 === 0) rumination += p.ruminationPerHour;
+          // Rumiar no hace nada aquí: la creencia ya está en su mente y el PNR lo lleva la 039 (decisión 5).
           keep.push({ ...it });
         }
         if (keep.length !== list.length) patches.push({ op: 'entity', id, fields: { intentions: keep } });
-        if (rumination > 0) patches.push({ op: 'set', type: 'f32', column: 'state.stress', row, value: clamp01((view.components.f32['state.stress']?.[row] ?? 0) + rumination) });
       }
       return { patches, events };
     },

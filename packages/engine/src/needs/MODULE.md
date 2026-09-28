@@ -2,7 +2,7 @@
 modulo: needs
 ruta: packages/engine/src/needs
 estado: en-desarrollo
-specs: [010, 009, 021, 031, 035]
+specs: [010, 009, 021, 031, 035, 039]
 actualizado: 2026-09-25
 ---
 
@@ -85,3 +85,10 @@ Porta `updateNeeds` (tasas de energía, hambre y soledad; objetivos de estrés y
 | 2026-09-25 | m2/h-cierre | 010, 016 | Compañía por ocupación (R-001, prototipo `updateNeeds`): despierto y con otra persona despierta en el mismo lugar (`loc.place`, 016); sin posiciones, la aproximación por actividad del bloque B. Con la aproximación, descansar en casa con la familia contaba como soledad y el ánimo medio de un año caía a 0,28–0,32; con la ocupación, 0,46–0,48 (010 CA-002) |
 | 2026-09-25 | mf/2-funciones (MF2.5) | 010, 036, 009 | Las emociones por evento ya no leen el neuroticismo (adaptador): su ganancia es `elicitationGain` (activación basal × lo que el estímulo ya significa para la persona). La prueba de 010 CA-005 compara activación basal 0,2 y 0,8 |
 | 2026-09-27 | charla/l3-mundo (L3) | 043 | Charlar con un visitante (actividad `conversation`) cuenta como compañía |
+| 2026-09-28 | mf/6-privados (MF6.4) | 039, 010 | Sin el adaptador de rasgos (decisión 6 del usuario):
+- el objetivo del estrés es `base + 0,5 × inestabilidad + estresores + 0,5 × carga de los eventos privados`, igual para todos: se quitan las diferencias por neuroticismo y resiliencia y se conserva la media del mundo;
+- la soledad sin compañía pesa según la saliencia social de la 036 (`sensitivityOf`), en vez de la extraversión;
+- la línea base del ánimo es 0,55 para todos (`MOOD_BASELINE`), hasta MF7;
+- `STRESS_PEAK` cita la carga privada y el disparador del episodio, en lugar del neuroticismo.
+
+Paridad: `docs/validaciones/MF6-paridad-prototipo.md` (estrés 0,251, ya en rango; ánimo, empleo y enfermedades como en MF5). 2 pruebas ajustadas |
