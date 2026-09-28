@@ -8,19 +8,25 @@ import type { FunctionStore } from '../functions/types.ts';
 import { idNumber } from '../ids.ts';
 import type { EntityId } from '../ids.ts';
 import type { Patch, WorldView } from '../simulation/system.ts';
+import type { RelationalNetwork } from '../relations/types.ts';
+import type { Belief } from '../world.ts';
+import { claimsHeard } from './claims.ts';
 import type { ChatParams } from './params.ts';
-import { STANCE_PREFIX } from './params.ts';
+import { CLAIM_DEFAULTS, STANCE_PREFIX } from './params.ts';
 import { citizenAnswered, startConversation, summarize, visitorSaid } from './tone.ts';
 import type { LearnerCtx } from './tone.ts';
-import type { ChatCatalog, ChatSummary } from './types.ts';
+import type { ChatCatalog, ChatSummary, ClaimAssessment, HeardClaim } from './types.ts';
 
 /** Payload de la entrada externa `chat_session` (R-019.6). */
 export interface ChatSessionInput {
   sessionId: string;
   citizenId: EntityId;
   visitorId: string;
-  /** Turnos en orden: el tono del visitante y la postura con que respondió el ciudadano. */
-  turns: { tone: string; stance: string }[];
+  /**
+   * Turnos en orden: el tono del visitante, sus afirmaciones sobre terceros ya validadas (044 R-001, R-010) y la
+   * postura con que respondió el ciudadano.
+   */
+  turns: { tone: string; stance: string; claims?: HeardClaim[] }[];
   /** Resumen ya registrado de la pasarela (`summarize`, 026); si falta, se usa la plantilla. */
   summary?: string;
 }
@@ -76,13 +82,18 @@ export function consolidateChat(
   const row = idNumber(input.citizenId);
   const orig = storeOf(view, row);
   const s = startConversation(orig, input.visitorId);
-  for (const t of input.turns) {
+  const cp = params.claims ?? CLAIM_DEFAULTS;
+  const person = view.citizens.get(input.citizenId);
+  const ctx = { ...lc, net: person?.network as RelationalNetwork | undefined };
+  const heard: { seq: number; a: ClaimAssessment }[] = [];
+  input.turns.forEach((t, seq) => {
     const tone = cat.tones.find((x) => x.key === t.tone);
     if (!tone) throw new Error(`chat_session ${input.sessionId}: tono desconocido (${t.tone})`);
     if (!cat.stances.some((x) => x.key === t.stance)) throw new Error(`chat_session ${input.sessionId}: postura desconocida (${t.stance})`);
     visitorSaid(s, lc, cat, tone, now, params);
+    if (t.claims?.length) for (const a of claimsHeard(s, ctx, view, input.citizenId, cat, t.claims, now, cp)) if (!a.discarded) heard.push({ seq, a });
     citizenAnswered(s, t.stance);
-  }
+  });
   const w0 = (key: string) => cat.stances.find((x) => `${STANCE_PREFIX}${x.key}` === key)?.w0 ?? 0;
   const { store, deltas } = cappedStore(orig, s.store, w0, params.maxLearningDelta);
   prune(store, lc.P);
@@ -92,11 +103,9 @@ export function consolidateChat(
   const mood = f['state.mood']?.[row] ?? 0.5;
   const stress = f['state.stress']?.[row] ?? 0;
   const delta = Math.max(-params.maxMoodDelta, Math.min(params.maxMoodDelta, params.moodK * summary.valence * summary.intensity));
-  const patches: Patch[] = [
-    { op: 'entity', id: input.citizenId, fields: { functions: store } },
-    { op: 'set', type: 'f32', column: 'state.mood', row, value: clamp01(mood + delta) },
-    { op: 'set', type: 'f32', column: 'state.stress', row, value: clamp01(stress - delta) },
-  ];
+  // 044 R-005: una revelación creída pesa más que un mal tono, con su propio tope.
+  const believed = heard.filter((h) => h.a.credibility >= cp.beliefMin);
+  const claimStress = Math.min(cp.maxClaimStressDelta, cp.stressK * believed.reduce((acc, h) => acc + (h.a.value < 0 ? h.a.impact : 0), 0));
 
   const participants = [{ id: input.citizenId, role: 'persona' }];
   const held = emit({
@@ -117,5 +126,42 @@ export function consolidateChat(
       causes: [{ event: held.id, weight: 1 }],
       participants,
     }));
+
+  // 044 §5: lo que oyó de cada tercero y, si lo cree, la creencia con sus fuentes (función, red o valor).
+  const beliefs: Belief[] = [...(person?.beliefs ?? [])].map((b) => ({ ...b }));
+  for (const { seq, a } of heard) {
+    const about = a.about as EntityId;
+    const both = [...participants, { id: about, role: 'tercero' }];
+    const e = emit({
+      type: 'CHAT_CLAIM_HEARD',
+      payload: { citizenId: input.citizenId, about, predicate: a.predicate, seq, sessionId: input.sessionId },
+      causes: [{ event: held.id, weight: 1 }],
+      participants: both,
+    });
+    events.push(e);
+    if (a.credibility < cp.beliefMin) continue;
+    const stim = cat.claims?.find((x) => x.key === a.predicate)?.stimulus ?? a.predicate;
+    const b = emit({
+      type: 'CHAT_CLAIM_BELIEVED',
+      payload: { citizenId: input.citizenId, about, predicate: a.predicate, credibility: a.credibility, impact: a.impact },
+      causes: [
+        { event: e.id, weight: 1 },
+        { state: a.valueSource === 'derived' ? `fuente.red:${a.derivedFrom}` : `fuente.funcion:${stim}`, entity: input.citizenId, weight: 0.5 },
+        ...(a.opposedValue ? [{ state: `fuente.valor:${a.opposedValue}`, entity: input.citizenId, weight: 0.3 }] : []),
+      ],
+      participants: both,
+    });
+    events.push(b);
+    const i = beliefs.findIndex((x) => x.about === about && x.predicate === a.predicate);
+    const belief: Belief = { about, predicate: a.predicate, source: input.visitorId, credibility: a.credibility, at: now, cause: b.id };
+    if (i >= 0) beliefs[i] = belief;
+    else beliefs.push(belief);
+  }
+
+  const patches: Patch[] = [
+    { op: 'entity', id: input.citizenId, fields: { functions: store, ...(heard.length > 0 ? { beliefs } : {}) } },
+    { op: 'set', type: 'f32', column: 'state.mood', row, value: clamp01(mood + delta) },
+    { op: 'set', type: 'f32', column: 'state.stress', row, value: clamp01(stress - delta + claimStress) },
+  ];
   return { patches, events, summary, deltas };
 }

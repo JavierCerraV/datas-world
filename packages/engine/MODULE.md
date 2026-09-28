@@ -2,7 +2,7 @@
 modulo: engine
 ruta: packages/engine
 estado: en-desarrollo
-specs: [001, 002, 003, 004, 005, 006, 007, 008, 009, 014, 023, 029, 030, 035, 043]
+specs: [001, 002, 003, 004, 005, 006, 007, 008, 009, 014, 023, 029, 030, 035, 043, 044]
 actualizado: 2026-09-24
 ---
 
@@ -156,3 +156,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-26 | mf/5-reglas-valores | 038 | Módulo nuevo `src/rules/` (capa 4: reglas y valores). `Citizen.rules`. `index.ts` exporta su API |
 | 2026-09-27 | charla/l1-motor (L1) | 043 | Módulo nuevo `src/conversation/` (charla con ciudadanos: tono, postura, disponibilidad y consolidación). Eventos nuevos `CONVERSATION_STARTED`, `CONVERSATION_DECLINED`, `CONVERSATION_HELD` y `LEARNED_FROM_CONVERSATION`. `index.ts` exporta su API |
 | 2026-09-27 | charla/l3-mundo (L3) | 043, 002, 021 | Velocidad de tiempo real `REAL_TIME` (1/60x, 002 R-003). Registro de manejadores de entradas externas (`InputHandler`; opción `inputs` del `Runner`) en dos fases: validar sin cambiar nada y luego aplicar. Actividad `conversation` (código 16) |
+| 2026-09-27 | charla/l5 (L5.2) | 044 | Eventos nuevos `CHAT_CLAIM_HEARD` y `CHAT_CLAIM_BELIEVED`. `Citizen.beliefs` (creencia mínima: sobre quién, qué, fuente, credibilidad, minuto y evento causa) y `Citizen.bonds` (tensión y confianza de los vínculos tocados, 044 P3: en la persona hasta la 012). `index.ts` exporta la API de las afirmaciones del módulo `conversation` y los tipos `Belief` y `Bond` |

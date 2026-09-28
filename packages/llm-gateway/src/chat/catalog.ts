@@ -1,6 +1,6 @@
 // Catálogos de la charla (043 §3) en la forma que usan el motor y la pasarela. Llegan ya cargados y validados
 // (`@datas-world/generators`, `loadCatalogs`); aquí solo se leen sus atributos.
-import type { ChatCatalog } from '@datas-world/engine';
+import type { ChatCatalog, RelationResolve } from '@datas-world/engine';
 
 interface Entry {
   key: string;
@@ -89,6 +89,8 @@ export function chatCatalogs(c: {
     engine: {
       tones: tones.map(({ key, stimulus, magnitude, prior }) => ({ key, stimulus, magnitude, prior })),
       stances: stances.map(({ key, escape, w0 }) => ({ key, escape, w0 })),
+      claims: claims.map(({ key, stimulus, magnitude, prior, about }) => ({ key, stimulus, magnitude, prior, about })),
+      relations: relations.map(({ key, resolve, closeness }) => ({ key, resolve: resolve as RelationResolve, closeness })),
     },
   };
 }

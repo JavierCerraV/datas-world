@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { STANCES, TONES, parseSse, sourceLabel, stanceLabel, toneLabel, topProbabilities, verdictMark } from './chat.ts';
+import { STANCES, TONES, claimLine, parseSse, sourceLabel, stanceLabel, toneLabel, topProbabilities, verdictMark } from './chat.ts';
 
 describe('vista de chat (043 R-017)', () => {
   it('lee los mensajes SSE aunque lleguen partidos en trozos', () => {
@@ -23,5 +23,12 @@ describe('vista de chat (043 R-017)', () => {
   it('resume las posturas más probables', () => {
     expect(topProbabilities([{ stance: 'evadir', p: 0.21 }, { stance: 'poner_limite', p: 0.46 }, { stance: 'callar', p: 0.14 }, { stance: 'abrirse', p: 0.05 }]))
       .toBe('poner un límite 46 %, evadir 21 %, callar 14 %');
+  });
+
+  it('explica lo que oyó sobre un tercero, o por qué no cuenta (044 R-011)', () => {
+    expect(claimLine({ predicate: 'infiel', relation: 'pareja', about: 'CIT-000031', credibility: 0.62, impact: 0.481 }))
+      .toBe('Oyó que su pareja (CIT-000031) le es infiel · la cree 62 % · le afecta 0.48');
+    expect(claimLine({ predicate: 'infiel', relation: 'pareja', discarded: 'no tiene pareja', credibility: 0, impact: 0 }))
+      .toBe('Dijo que su pareja le es infiel: no cuenta (no tiene pareja)');
   });
 });

@@ -104,6 +104,31 @@ export interface Citizen extends BaseEntity {
   rules?: Rule[];
   /** Llegadas tarde a su trabajo en la ventana de advertencias (006 R-005), con el evento de cada una. */
   jobRecord?: { lates: { eventId: EntityId; at: WorldMinute; minutes: number }[] };
+  /** Creencias mínimas sobre otros (044 §3, forma reducida de la 025): lo que cree, no lo que es. */
+  beliefs?: Belief[];
+  /** Tensión y confianza de los vínculos tocados (044 R-007, P3: en la persona hasta la 012), en orden de id. */
+  bonds?: Bond[];
+}
+
+/** Creencia mínima (044 §3): la persona cree `predicate` de `about`, porque se lo dijo `source`. */
+export interface Belief {
+  about: EntityId;
+  predicate: string;
+  /** `EXT-0001` (el visitante) o un `CIT-…`. */
+  source: string;
+  /** [0,1]. */
+  credibility: number;
+  at: WorldMinute;
+  /** Evento `CHAT_CLAIM_BELIEVED` que la creó. */
+  cause: EntityId;
+}
+
+/** Vínculo con otra persona (044 R-007): tensión y confianza en [0,1]. */
+export interface Bond {
+  with: EntityId;
+  tension: number;
+  trust: number;
+  at: WorldMinute;
 }
 
 /** Afición de la ficha de esparcimiento (spec 032): clave de `leisure_activities`, afinidad y frecuencia. */

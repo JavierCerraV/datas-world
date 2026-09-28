@@ -82,7 +82,9 @@ Coste de memoria: unas pocas creencias e intenciones por persona que charló (< 
   El motor resuelve la relación a una persona real **desde la vista del ciudadano** (su hogar, su familia y su trabajo). Si no la conoce (no tiene pareja, por ejemplo), la afirmación se descarta con el motivo. Sin LLM hay reglas léxicas de respaldo, como en los tonos.
 - **R-002** [T] idea / [M] fórmula — **Credibilidad.** Cuánto cree lo que oyó (PA-138):
 
-  `credibilidad = clamp(CRED_BASE + CRED_SOURCE × v(ext.EXT) + CRED_TRUST × (confianza − 0,5) − CRED_CONTRA × contradicción)`
+  `credibilidad = clamp(CRED_BASE + CRED_SOURCE × v(ext.EXT) ± CRED_TRUST × (confianza − 0,5) − CRED_CONTRA × contradicción)`
+
+  El signo del término de confianza es el del valor de partida de la afirmación: confiar en el tercero hace más creíble lo bueno («te extraña») y menos creíble lo malo («te es infiel»).
 
   - `v(ext.EXT)`: la función aprendida del visitante (043 R-018). Si viene siendo hostil, se le cree menos.
   - `confianza`: la del vínculo con el tercero (R-007).
@@ -178,3 +180,4 @@ Resueltas por el usuario el 2026-09-27 (todas según la propuesta):
 | 2026-09-27 | 0.2 | Preguntas P1 a P5 resueltas por el usuario según la propuesta: 8 afirmaciones en `chat_claims`; celular desde los 14 años según el estrato; tensión mínima guardada en la persona hasta la 012; el tercero aprende sobre el visitante en el encuentro; spec propia |
 | 2026-09-28 | 0.2 | Estado → aprobada |
 | 2026-09-27 | 0.2 | Precisiones de L5.1: la clave `te_extraña` se escribe `te_extrana` (las claves de catálogo no admiten ñ). Las relaciones (`pareja`, `madre`, `padre`, `hijo`, `hermano`, `jefe`, `companero`) van en un catálogo propio, `chat_relations`, con cómo resolverlas desde la vista y su cercanía por defecto para R-003. El celular reutiliza el tipo `tecnologia.telefono` (005) en vez de crear otro, con `callAccess` por estrato. Estímulos verbales nuevos en la 036: `verbal.abandono`, `verbal.afecto`, `verbal.desprecio` y `verbal.traicion`. Las afirmaciones salen en la misma llamada del clasificador de tono, sin coste extra. Sin cambios en CA |
+| 2026-09-27 | 0.2 | Precisiones de L5.2: (1) R-002: el término de confianza lleva el signo del valor de partida; con signo fijo, confiar en la pareja haría más creíble que es infiel. (2) R-001: si hay varios hijos, hermanos o compañeros, se toma el primero por id hasta que la 012 dé el más cercano; el jefe es quien ocupa el puesto supervisor. (3) R-002: la contradicción con su historia queda en 0 hasta la memoria episódica (013). (4) R-005: el estrés de la revelación solo viene de lo creído; lo no creído pesa únicamente por hacer más tensa la charla (043 R-022). (5) R-007: confianza de partida 0,6 con la familia y 0,5 con los demás [M] (PA-140). Parámetros en `ChatParams.claims`. Sin cambios en CA |

@@ -77,6 +77,31 @@ describe('charla en el mundo (043 R-019 a R-022)', () => {
     expect(stateHash(copy)).toBe(expected);
   });
 
+  it('044 CA-006: una charla con una afirmación sobre su hijo deja la creencia, y el replay da el mismo estado sin LLM', () => {
+    const world = eveningWorld();
+    const snap = serializeWorld(world);
+    const r = lifeRunner(world);
+    r.submit('chat_open', { citizenId: SANTIAGO, visitorId: 'EXT-0001', sessionId: 'CHS-000001' });
+    r.advanceTicks(2);
+    const turns = [TURNS[0]!, { tone: 'desagradable', stance: 'poner_limite', claims: [{ predicate: 'habla_mal_de_ti', about: 'hijo' }] }];
+    const closed = r.submit('chat_session', { sessionId: 'CHS-000001', citizenId: SANTIAGO, visitorId: 'EXT-0001', turns }).events;
+    const heard = closed.find((e) => e.type === 'CHAT_CLAIM_HEARD');
+    expect(heard, JSON.stringify(closed.map((e) => e.type))).toBeDefined();
+    const son = (heard!.payload as { about: string }).about;
+    const kid = world.citizens.get(son as never)!;
+    expect(kid.motherId === SANTIAGO || kid.fatherId === SANTIAGO).toBe(true);
+    r.advanceTicks(3);
+    const expected = stateHash(world);
+
+    const copy = deserializeWorld(snap);
+    const replay = lifeRunner(copy);
+    replay.enqueueReplay(r.inputs());
+    replay.flushReplay();
+    replay.advanceTicks(5);
+    expect(stateHash(copy)).toBe(expected);
+    expect(copy.citizens.get(SANTIAGO as never)!.beliefs).toEqual(world.citizens.get(SANTIAGO as never)!.beliefs);
+  });
+
   it('002 R-003: la velocidad de tiempo real se acepta y su evento lo dice', () => {
     const world = eveningWorld();
     const ev = lifeRunner(world).setSpeed(REAL_TIME).find((e) => e.type === 'SPEED_CHANGED')!;

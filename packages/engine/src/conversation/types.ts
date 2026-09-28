@@ -23,10 +23,62 @@ export interface StanceDef {
   w0: number;
 }
 
+/** Afirmación sobre un tercero (`chat_claims`, 044 R-001, R-003). */
+export interface ClaimDef {
+  key: string;
+  /** Estímulo verbal de la 036 que presenta la afirmación. */
+  stimulus: string;
+  magnitude: number;
+  /** Valor social de partida, en [−1,1] [M]. */
+  prior: number;
+  /** Relaciones de `chat_relations` a las que se puede referir. */
+  about: readonly string[];
+}
+
+/** Cómo se encuentra a la persona real desde la vista del ciudadano (044 R-001). */
+export type RelationResolve = 'partner' | 'mother' | 'father' | 'child' | 'sibling' | 'boss' | 'coworker';
+
+/** Relación con el tercero (`chat_relations`). */
+export interface RelationDef {
+  key: string;
+  resolve: RelationResolve;
+  /** Cercanía por defecto en [0,1] (R-003), hasta la 012. */
+  closeness: number;
+}
+
 export interface ChatCatalog {
   tones: readonly ToneDef[];
   /** En el orden del catálogo (orden de clave): es el orden de las candidatas. */
   stances: readonly StanceDef[];
+  /** Vacíos o ausentes: la charla funciona sin consecuencias (044). */
+  claims?: readonly ClaimDef[];
+  relations?: readonly RelationDef[];
+}
+
+/** Afirmación del visitante tal como llega del clasificador (044 R-001). */
+export interface HeardClaim {
+  predicate: string;
+  /** Clave de `chat_relations`. */
+  about: string;
+}
+
+/** Evaluación de una afirmación (044 R-001 a R-004): de quién habla, cuánto la cree y cuánto le pega. */
+export interface ClaimAssessment {
+  predicate: string;
+  relation: string;
+  /** La persona real; falta si la afirmación se descarta. */
+  about?: string;
+  /** Motivo del descarte: no conoce a esa persona, o la afirmación no existe en el catálogo. */
+  discarded?: string;
+  credibility: number;
+  /** Función del estímulo para esta persona, en [−1,1] (`prior` + historia). */
+  value: number;
+  impact: number;
+  /** De dónde sale la función: aprendida directa o derivada por la red (037), con el estímulo de origen. */
+  valueSource: 'direct' | 'derived';
+  derivedFrom?: string;
+  /** Raíz del valor al que se opone (038), si la hay. */
+  opposedValue?: string;
 }
 
 /** Fuentes de la postura: las de la 040 más el escape de la carga y la operación motivadora (R-007, R-008). */
@@ -47,6 +99,8 @@ export interface TurnRecord {
   visitorValue: number;
   aversiveLoad: number;
   stance?: string;
+  /** Afirmaciones del visitante en este turno (044). */
+  claims?: ClaimAssessment[];
 }
 
 /**

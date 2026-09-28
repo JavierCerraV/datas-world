@@ -317,6 +317,23 @@ export const EVENT_TYPES = Object.freeze({
       }),
     text: (e) => `${e.payload.citizenId} aprende de la charla ${e.payload.sessionId} (${e.payload.deltas.length} cambios).`,
   }),
+  // Consecuencias de la charla (spec 044): lo que el visitante dijo sobre un tercero cercano.
+  CHAT_CLAIM_HEARD: def<{ citizenId: string; about: string; predicate: string; seq: number; sessionId: string }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, about: str, predicate: str, seq: (v) => int(v) && (v as number) >= 0, sessionId: str }),
+    text: (e) => `${e.payload.citizenId} oyó en la charla ${e.payload.sessionId} que ${e.payload.about}: ${e.payload.predicate.replace(/_/g, ' ')}.`,
+  }),
+  CHAT_CLAIM_BELIEVED: def<{ citizenId: string; about: string; predicate: string; credibility: number; impact: number }>({
+    baseImportance: 0.5,
+    spontaneous: false,
+    check: (p) =>
+      needObj(p, {
+        citizenId: str, about: str, predicate: str,
+        credibility: (v) => typeof v === 'number' && v >= 0 && v <= 1, impact: (v) => typeof v === 'number' && v >= 0 && v <= 1,
+      }),
+    text: (e) => `${e.payload.citizenId} cree que ${e.payload.about}: ${e.payload.predicate.replace(/_/g, ' ')} (credibilidad ${e.payload.credibility}).`,
+  }),
   // Historia generada (spec 030), de 1900 al presente.
   TOWN_FOUNDED: def<{ placeId: string; name: string; year: number }>({
     baseImportance: 1,

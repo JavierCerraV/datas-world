@@ -17,6 +17,8 @@ export interface ChatParams {
   maxMoodDelta: number;
   /** R-022: `k` del efecto emocional, `k × valencia × intensidad`. */
   moodK: number;
+  /** Consecuencias de lo dicho sobre terceros (044); si falta, `CLAIM_DEFAULTS`. */
+  claims?: ClaimParams;
 }
 
 export const CHAT_DEFAULTS: ChatParams = Object.freeze({
@@ -28,6 +30,38 @@ export const CHAT_DEFAULTS: ChatParams = Object.freeze({
   maxLearningDelta: 0.1,
   maxMoodDelta: 0.15,
   moodK: 0.3,
+});
+
+/** Parámetros de las consecuencias de la charla (spec 044 §8). Todos [M]. */
+export interface ClaimParams {
+  /** R-002 (PA-138): credibilidad de partida y pesos de la fuente (el visitante), la confianza y la contradicción. */
+  credBase: number;
+  credSource: number;
+  credTrust: number;
+  credContra: number;
+  /** §5: credibilidad mínima para que la afirmación quede como creencia (`BELIEF_MIN`). */
+  beliefMin: number;
+  /** R-003: cuánto amplifica el impacto que la afirmación se oponga a un valor (038 R-007). */
+  valueAmp: number;
+  /** R-005 (PA-139): `STRESS_K` y tope propio `MAX_CLAIM_STRESS_DELTA` (mayor que `maxMoodDelta`). */
+  stressK: number;
+  maxClaimStressDelta: number;
+  /** R-007 [M]: confianza de partida de un vínculo aún no tocado, familiar u otro (hasta la 012; PA-140). */
+  trust0Family: number;
+  trust0Other: number;
+}
+
+export const CLAIM_DEFAULTS: ClaimParams = Object.freeze({
+  credBase: 0.4,
+  credSource: 0.3,
+  credTrust: 0.4,
+  credContra: 0.6,
+  beliefMin: 0.3,
+  valueAmp: 0.5,
+  stressK: 0.5,
+  maxClaimStressDelta: 0.35,
+  trust0Family: 0.6,
+  trust0Other: 0.5,
 });
 
 /** Prefijo de las respuestas conversacionales en el almacén de funciones (036 R-002). */

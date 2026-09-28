@@ -19,7 +19,7 @@ import {
   routinesSystem,
   rulesSystem,
 } from '@datas-world/engine';
-import type { Capability, ChatCatalog, LoopOptions, SystemRegistry, World } from '@datas-world/engine';
+import type { Capability, ChatCatalog, LoopOptions, RelationResolve, SystemRegistry, World } from '@datas-world/engine';
 import { loadCatalogs } from './catalogs/load.ts';
 import type { Catalogs } from './catalogs/load.ts';
 import { leisureTable } from './leisure/params.ts';
@@ -59,6 +59,14 @@ export function chatEngineCatalog(catalogs: Catalogs): ChatCatalog {
   return {
     tones: catalogs.chat_tones.entries.map((e) => ({ key: e.key, stimulus: String(e.attrs?.stimulus ?? ''), magnitude: n(e.attrs?.magnitude), prior: n(e.attrs?.prior) })),
     stances: catalogs.chat_stances.entries.map((e) => ({ key: e.key, escape: n(e.attrs?.escape), w0: n(e.attrs?.w0) })),
+    // Consecuencias de lo dicho sobre terceros (044 R-001, R-003).
+    claims: catalogs.chat_claims.entries.map((e) => ({
+      key: e.key, stimulus: String(e.attrs?.stimulus ?? ''), magnitude: n(e.attrs?.magnitude), prior: n(e.attrs?.prior),
+      about: Array.isArray(e.attrs?.about) ? (e.attrs.about as string[]) : [],
+    })),
+    relations: catalogs.chat_relations.entries.map((e) => ({
+      key: e.key, resolve: String(e.attrs?.resolve ?? '') as RelationResolve, closeness: n(e.attrs?.closeness),
+    })),
   };
 }
 

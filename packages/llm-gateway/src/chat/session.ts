@@ -2,11 +2,12 @@
 // (clasificar, expresar y verificar). Orden de cada turno (R-016, R-023): tono → postura (local, < 10 ms) →
 // `onStance` → texto en streaming → la verificación queda en segundo plano.
 import {
-  CHAT_DEFAULTS, createRng, formatId, rulesOf, selectStance, sensitivityOf, startConversation, storeOf, variabilityOf, visitorSaid,
+  CHAT_DEFAULTS, CLAIM_DEFAULTS, claimsHeard, createRng, formatId, rulesOf, selectStance, sensitivityOf, startConversation, storeOf,
+  variabilityOf, visitorSaid,
 } from '@datas-world/engine';
 import type {
-  ChatParams, ChatSessionInput, ConversationState, EntityId, LearningParams, LiveState, Ontology, PersonCtx, Rng, StanceChoice,
-  WorldEvent, WorldView,
+  ChatParams, ChatSessionInput, ClaimAssessment, ConversationState, EntityId, HeardClaim, LearningParams, LiveState, Ontology,
+  PersonCtx, Rng, StanceChoice, WorldEvent, WorldView,
 } from '@datas-world/engine';
 import type { Gateway } from '../gateway.ts';
 import type { ChatCatalogs, StanceInfo } from './catalog.ts';
@@ -61,13 +62,15 @@ export interface TurnOptions {
   /** Fin por compromiso o por tiempo (R-019.5): la postura es esa. */
   forced?: string;
   now?: number;
-  onStance?: (s: { tone: ToneResult; choice: StanceChoice }) => void;
+  onStance?: (s: { tone: ToneResult; choice: StanceChoice; claims: ClaimAssessment[] }) => void;
   onText?: (chunk: string) => void;
 }
 
 export interface TurnOutcome {
   seq: number;
   tone: ToneResult;
+  /** Afirmaciones sobre terceros: de quién, credibilidad e impacto, o por qué se descartaron (044, R-011). */
+  claims: ClaimAssessment[];
   choice: StanceChoice;
   reply: string;
   expression: 'llm' | 'template';
@@ -85,7 +88,7 @@ export class ChatSession {
   #o: ChatSessionOptions;
   #pc: PersonCtx;
   #rng: Rng;
-  #turns: { tone: string; stance: string }[] = [];
+  #turns: { tone: string; stance: string; claims?: HeardClaim[] }[] = [];
 
   constructor(o: ChatSessionOptions) {
     this.#o = o;
@@ -114,10 +117,15 @@ export class ChatSession {
     const toneDef = catalogs.engine.tones.find((x) => x.key === tone.tone);
     if (!toneDef) throw new Error(`Tono desconocido: ${tone.tone}`);
     visitorSaid(this.state, this.#pc, catalogs.engine, toneDef, now, this.params);
+    // 044 R-004: lo que dijo de un tercero entra en la carga de este turno, antes de elegir la postura.
+    const claims = claimsHeard(
+      this.state, this.#pc, this.#o.view, this.#o.citizenId as EntityId, catalogs.engine, tone.visitorClaims, now, this.params.claims ?? CLAIM_DEFAULTS,
+    );
+    const valid = claims.filter((c) => !c.discarded).map((c) => ({ predicate: c.predicate, about: c.relation }));
     const live = t.live ?? { energy: this.view.state.needs['energía'] ?? 1, stress: this.view.state.stress };
     const seq = this.state.turns.length;
     const choice = selectStance(this.state, this.#pc, catalogs.engine, toneDef, live, now, this.params, this.#rng.fork(seq), t.forced);
-    t.onStance?.({ tone, choice });
+    t.onStance?.({ tone, choice, claims });
     this.transcript.push({ speaker: 'visitor', text });
     const stance = catalogs.stances.find((s) => s.key === choice.stance) as StanceInfo;
     const r = await gw.run(expressionRequest(this.view, this.transcript, choice, stance, t.onText));
@@ -129,10 +137,10 @@ export class ChatSession {
       t.onText?.(reply);
     }
     this.transcript.push({ speaker: 'citizen', text: reply });
-    this.#turns.push({ tone: tone.tone, stance: choice.stance });
+    this.#turns.push({ tone: tone.tone, stance: choice.stance, ...(valid.length > 0 ? { claims: valid } : {}) });
     if (choice.stance === 'terminar') this.ended = true;
     return {
-      seq, tone, choice, reply, expression,
+      seq, tone, claims, choice, reply, expression,
       ...(expression === 'llm' ? { llmRef: r.recordKey } : {}),
       latencyMs: { ...(r.latencyMs.firstToken !== undefined ? { firstToken: r.latencyMs.firstToken } : {}), total: performance.now() - t0 },
       verification: expression === 'llm' ? verifyReply(gw, this.view, stance, reply) : Promise.resolve({ claims: [], stanceCheck: 'unchecked' }),
