@@ -142,13 +142,30 @@ export interface Belief {
   cause: EntityId;
 }
 
-/** Vínculo con otra persona (044 R-007): tensión y confianza en [0,1]. */
+/**
+ * Vínculo dirigido con otra persona (012 §3; amplía el de la 044 R-007): tensión, confianza y familiaridad en [0,1].
+ * El afecto no está aquí: es la función de `cit.<with>` en el almacén de la persona (012 INV-003).
+ */
 export interface Bond {
   with: EntityId;
   tension: number;
   trust: number;
   at: WorldMinute;
+  /** Cuánto se conocen (012 R-003); sin él, 0 (vínculos creados por la 044). */
+  familiarity?: number;
+  /** Etiquetas (012 R-004), en orden de clave. */
+  labels?: BondLabel[];
+  encounters?: number;
+  lastEncounter?: WorldMinute;
+  /** Última discusión (012 R-005, enfriamiento). */
+  lastArgument?: WorldMinute;
+  /** Desde cuándo la pareja está mal: función baja y tensión alta (012 R-006). */
+  strainedSince?: WorldMinute;
+  /** Los últimos eventos del vínculo (encuentro, discusión, amistad), para las causas de lo que siga (012 R-009). */
+  events?: string[];
 }
+
+export type BondLabel = 'amigo' | 'companero' | 'conocido' | 'ex' | 'familia' | 'pareja';
 
 /** Afición de la ficha de esparcimiento (spec 032): clave de `leisure_activities`, afinidad y frecuencia. */
 export interface LeisureInterest {

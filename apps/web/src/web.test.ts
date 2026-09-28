@@ -96,6 +96,25 @@ describe('024 CA-002: el inspector muestra la ficha de /api/citizens/:id', () =>
     expect(f).toContain('llegar tarde lleva a despido: 60 %');
   });
 
+  it('012 R6: los vínculos con el afecto de cada lado y el apego como métrica', () => {
+    const t = inspectorTabs({
+      ...detail,
+      bonds: [
+        { id: 'CIT-000002', name: 'Luis Rojas', labels: ['familia', 'pareja'], familiarity: 0.93, tension: 0.3, trust: 0.6, encounters: 40, affection: 0.21, affectionBack: -0.05 },
+        { id: 'CIT-000009', name: 'Marta Díaz', labels: ['amigo', 'conocido'], familiarity: 0.5, tension: 0, trust: 0.5, encounters: 12, affection: 0.18, affectionBack: 0.16 },
+      ],
+      attachment: { security: 0.62, avoidance: 0.35, style: 'seguro' },
+    });
+    const bonds = t.estado.find((s) => s.title === 'Vínculos')!.rows.map((r) => `${r.label}: ${r.value}`);
+    expect(bonds).toEqual([
+      'Luis Rojas (familia, pareja): trato 93 % · afecto +21 / -5 · tensión 30 %',
+      'Marta Díaz (amistad): trato 50 % · afecto +18 / +16',
+    ]);
+    const f = t.funcional.flatMap((s) => s.rows.map((r) => `${r.label}: ${r.value}`));
+    expect(f).toContain('Estilo: seguro');
+    expect(f).toContain('Seguridad con quienes le criaron: 62 %');
+  });
+
   it('estímulos, causas y eventos legibles', () => {
     expect(stimulusEs('actividad.deporte.futbol')).toBe('futbol (actividad)');
     expect(stimulusEs('dominio.amistad')).toBe('amistad (valor)');

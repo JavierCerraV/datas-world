@@ -1,6 +1,6 @@
 // Vistas de solo lectura del mundo para la API (spec 022): funciones puras sobre un `World` cargado de la base.
 // No cambian el estado (R-001) y no leen el reloj.
-import { ACTIVITY, ACTIVITY_COLUMN, formatId, idNumber, kindOf, ruleContribution, toCalendar } from '@datas-world/engine';
+import { ACTIVITY, ACTIVITY_COLUMN, affectionFor, attachmentOf, formatId, idNumber, kindOf, ruleContribution, toCalendar } from '@datas-world/engine';
 import type { EntityId, Place, World, WorldEvent } from '@datas-world/engine';
 
 const YEAR = 365.25 * 1440;
@@ -162,6 +162,16 @@ export function citizenDetail(world: World, id: EntityId, events: readonly World
     responses: [...(c.functions?.r ?? [])].sort((a, b) => b.w - a.w).slice(0, 8).map((x) => ({ response: x.r, strength: round(x.w) })),
     rules: (c.rules ?? []).map((r) => ({ response: r.resp, consequence: r.cons, kind: kindOf(r), speaker: r.speaker ?? null, strength: round(r.s), contrast: round(r.contrast), contribution: round(ruleContribution(r)) })),
     relations: (c.network?.e ?? []).map((r) => ({ a: r.a, b: r.b, type: r.t, strength: round(r.s), context: r.crel ?? null })),
+    // Vínculos (012): el afecto de cada lado sale del almacén de cada uno (INV-003).
+    bonds: [...(c.bonds ?? [])]
+      .sort((a, b) => (b.familiarity ?? 0) - (a.familiarity ?? 0) || (a.with < b.with ? -1 : 1))
+      .slice(0, 15)
+      .map((b) => ({
+        id: b.with, name: nameOf(world, b.with), labels: b.labels ?? [], familiarity: round(b.familiarity ?? 0), tension: round(b.tension), trust: round(b.trust),
+        encounters: b.encounters ?? 0, affection: round(affectionFor(c.functions, b.with)), affectionBack: round(affectionFor(world.citizens.get(b.with)?.functions, id)),
+      })),
+    // Apego como métrica (012 P4), para la capa clínica.
+    attachment: attachmentOf(c.functions, [c.motherId, c.fatherId].filter((x): x is EntityId => !!x)),
     events: events.map((e) => eventView(world, e)),
   };
 }

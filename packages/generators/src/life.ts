@@ -16,6 +16,8 @@ import {
   createLearningSystem,
   createRegistry,
   createRng,
+  relationshipSystems,
+  RELATIONSHIP_DEFAULTS,
   economySystem,
   mobilitySystem,
   relationsSystem,
@@ -29,7 +31,7 @@ import { leisureTable } from './leisure/params.ts';
 import { buildOntology } from './stimuli/ontology.ts';
 
 /** Capacidades de la vida diaria (peldaño 1, ADR-005): las que activa `generateWorld` por defecto. */
-export const LIFE_CAPABILITIES: readonly Capability[] = Object.freeze(['clock', 'needs', 'routines', 'mobility', 'economy', 'learning']);
+export const LIFE_CAPABILITIES: readonly Capability[] = Object.freeze(['clock', 'needs', 'routines', 'mobility', 'economy', 'learning', 'relationships']);
 
 /**
  * Sistemas en orden de fase (021): necesidades, enfermedad y sueño (010), rutina (011), decisiones (017),
@@ -55,6 +57,8 @@ export function lifeSystems(world: World, catalogs: Catalogs = loadCatalogs()): 
       createPrivateSystem(onto),
       // Consecuencias de la charla (044 R-006 a R-009): llamadas, encuentros y vínculos.
       ...consequenceSystems(chatEngineCatalog(catalogs), CLAIM_DEFAULTS),
+      // Relaciones (012): encuentros cotidianos con las posturas de la charla, vínculos, parejas, rupturas y olvido.
+      ...relationshipSystems({ cat: chatEngineCatalog(catalogs), onto, chat: CHAT_DEFAULTS, claim: CLAIM_DEFAULTS, p: RELATIONSHIP_DEFAULTS }),
     ]),
     loop: { validate: createActionValidator(table) },
   };

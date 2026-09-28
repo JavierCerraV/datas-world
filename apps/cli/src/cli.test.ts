@@ -125,5 +125,6 @@ describe('023 CA-001 entre procesos, con la población de M1', () => {
     cli('world:new', '--seed', '482917', '--population', '100', '--db', db);
     cli('world:advance', '--days', '30', '--db', db);
     expect(info().hash).toBe(a.hash); // y el mismo que dentro de este proceso
-  }, 120_000);
+    // Tres mundos de 30 días (dos procesos y este); con las relaciones (012) y la suite en paralelo pasa de 2 min.
+  }, 300_000);
 });

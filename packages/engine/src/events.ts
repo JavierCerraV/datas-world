@@ -323,6 +323,50 @@ export const EVENT_TYPES = Object.freeze({
       }),
     text: (e) => `${e.payload.citizenId} aprende de la charla ${e.payload.sessionId} (${e.payload.deltas.length} cambios).`,
   }),
+  // Relaciones (spec 012 §5): encuentros, amistades, discusiones, parejas, rupturas y olvidos.
+  MET: def<{ a: string; b: string; placeId: string }>({
+    baseImportance: 0.1,
+    spontaneous: false,
+    check: (p) => needObj(p, { a: str, b: str, placeId: str }),
+    text: (e) => `${e.payload.a} y ${e.payload.b} se conocen en ${e.payload.placeId}.`,
+  }),
+  // Solo los encuentros que chocan (suben la tensión): son las causas de las discusiones y las rupturas (R-009).
+  ENCOUNTER: def<{ a: string; b: string; stanceA: string; stanceB: string }>({
+    baseImportance: 0.05,
+    spontaneous: false,
+    check: (p) => needObj(p, { a: str, b: str, stanceA: str, stanceB: str }),
+    text: (e) => `${e.payload.a} y ${e.payload.b} tienen un roce (${e.payload.stanceA.replace(/_/g, ' ')} / ${e.payload.stanceB.replace(/_/g, ' ')}).`,
+  }),
+  FRIENDSHIP_FORMED: def<{ a: string; b: string }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { a: str, b: str }),
+    text: (e) => `${e.payload.a} considera a ${e.payload.b} su amigo o amiga.`,
+  }),
+  ARGUMENT: def<{ a: string; b: string; stanceA: string; stanceB: string; tension: number }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { a: str, b: str, stanceA: str, stanceB: str, tension: (v) => typeof v === 'number' && v >= 0 && v <= 1 }),
+    text: (e) => `${e.payload.a} y ${e.payload.b} discuten (${e.payload.stanceA.replace(/_/g, ' ')} / ${e.payload.stanceB.replace(/_/g, ' ')}).`,
+  }),
+  RELATIONSHIP_STARTED: def<{ a: string; b: string }>({
+    baseImportance: 0.6,
+    spontaneous: false,
+    check: (p) => needObj(p, { a: str, b: str }),
+    text: (e) => `${e.payload.a} y ${e.payload.b} empiezan una relación de pareja.`,
+  }),
+  BREAKUP: def<{ a: string; b: string; initiator: string }>({
+    baseImportance: 0.7,
+    spontaneous: false,
+    check: (p) => needObj(p, { a: str, b: str, initiator: str }),
+    text: (e) => `${e.payload.initiator} termina la relación con ${e.payload.initiator === e.payload.a ? e.payload.b : e.payload.a}.`,
+  }),
+  BOND_FORGOTTEN: def<{ a: string; b: string }>({
+    baseImportance: 0.02,
+    spontaneous: false,
+    check: (p) => needObj(p, { a: str, b: str }),
+    text: (e) => `${e.payload.a} ya casi no se acuerda de ${e.payload.b}.`,
+  }),
   // Desarrollo (spec 041 R-007, §5): los episodios de aprendizaje de un año de vida, cada uno con quién intervino y lo
   // que aprendió. Un evento por año (no por episodio) para caber en el presupuesto de disco (CLAUDE.md regla 8); el
   // texto de cada episodio está en el catálogo `development_episodes`, por su clave.

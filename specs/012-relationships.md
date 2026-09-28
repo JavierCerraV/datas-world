@@ -1,10 +1,10 @@
 ---
 id: 012
 nombre: relationships
-estado: borrador
+estado: aprobada
 hito: M3
 depende_de: [007, 008, 014, 016, 021, 023, 036, 037, 038, 040, 041, 043, 044]
-version: 0.2
+version: 0.3
 ---
 
 # 012 — Relaciones asimétricas sobre el motor funcional
@@ -58,13 +58,15 @@ Coste: hasta `MAX_BONDS` = 40 vínculos por persona × ≈ 80 B, más una funci�
 - **R-002** [T] idea / [M] forma — **El intercambio.** En un encuentro, cada uno elige una postura con la selección de la 040 y el catálogo `chat_stances` (043 R-008), sin LLM. El «tono» con que llega el otro es su postura:
   - abrirse, aplacar o responder breve se reciben como aprobación o neutralidad;
   - contraatacar, poner un límite o callar, como crítica, conflicto o frialdad;
-  - lo que cada uno recibe empareja la función de `cit.<otro>` (036 R-001) y refuerza o castiga la postura elegida (036 R-002).
+  - lo que cada uno recibe empareja la función de `cit.<otro>` (036 R-001) y refuerza o castiga la postura elegida (036 R-002);
+  - quien inicia no oye nada del otro antes de elegir: el saludo neutro es su línea base, no algo que el otro le dijo;
+  - contraatacar y poner un límite solo son opciones ante un estímulo aversivo (su estímulo discriminativo): el tono recibido es aversivo, hay tensión viva con el otro (> 0,1) o su función ya era negativa (< −0,1). Sin esa condición, un saludo neutro acababa en choque una de cada cuatro veces.
 
   La misma escena deja vínculos distintos en cada lado (CA-001).
-- **R-003** [M] — **Familiaridad, tensión y confianza.** Cada encuentro sube la familiaridad `FAMILIARITY_GAIN × (1 − familiaridad)`, que decae `FAMILIARITY_DECAY_DAY` sin contacto. Una discusión sube la tensión (tope `MAX_TENSION_DELTA` de la 044); la tensión decae por día. La confianza sube cuando la otra persona le ayuda o se abre, y baja con la traición percibida (044).
+- **R-003** [M] — **Familiaridad, tensión y confianza.** Cada encuentro sube la familiaridad `FAMILIARITY_GAIN × (1 − familiaridad)`, que decae `FAMILIARITY_DECAY_DAY` sin contacto. Un choque (alguno contraataca o pone un límite) sube la tensión `CLASH_TENSION` (tope `MAX_TENSION_DELTA` de la 044); la tensión decae por día, y un encuentro sin choque en que alguno se abre o aplaca repara la fracción `REPAIR` de la tensión viva (sin reparación, las familias que conviven quedaban en un bucle de choques). La confianza sube cuando la otra persona le ayuda o se abre, y baja con la traición percibida (044).
 - **R-004** [M] — **Etiquetas con histéresis.**
   - `conocido` desde el primer encuentro;
-  - `amigo` con familiaridad ≥ `FRIEND_FAM` y función de la otra persona ≥ `FRIEND_FN`, y se pierde bajo umbrales más bajos;
+  - `amigo` con familiaridad ≥ `FRIEND_FAM` y función de la otra persona ≥ `FRIEND_FN`, y se pierde bajo umbrales más bajos; no se aplica a la familia, que ya tiene su etiqueta;
   - `pareja` desde la historia (hogar, 008) o, en adultos sin pareja, con función ≥ `PARTNER_FN` en ambos lados y atracción compatible (P3);
   - `ex` tras una ruptura;
   - `companero` si comparten organización (006);
@@ -85,7 +87,7 @@ Coste: hasta `MAX_BONDS` = 40 vínculos por persona × ≈ 80 B, más una funci�
 | Tipo | Cuándo | Payload | Causas esperadas |
 |---|---|---|---|
 | `MET` | Primer encuentro de un par | `a, b, placeId` | Presencia compartida (lugar y actividad) |
-| `ENCOUNTER` (nivel ≥ 3) | Cada encuentro | `a, b, stanceA, stanceB` | Presencia; fuentes de cada postura |
+| `ENCOUNTER` | Cada roce: un encuentro con choque que no llega a discusión (los demás encuentros no se registran, por disco) | `a, b, stanceA, stanceB` | Presencia; la historia del par |
 | `FRIENDSHIP_FORMED` | Un lado pasa a `amigo` | `a, b` | Los encuentros que subieron la función |
 | `ARGUMENT` | R-005 | `a, b, stanceA, stanceB, tension` | Tensión previa; las posturas |
 | `RELATIONSHIP_STARTED` | Pareja nueva | `a, b` | Encuentros de ambos |
@@ -98,7 +100,7 @@ Coste: hasta `MAX_BONDS` = 40 vínculos por persona × ≈ 80 B, más una funci�
 - **INV-003** — El afecto de A por B se lee solo del almacén de A (una sola fuente de verdad).
 
 ## 7. Criterios de aceptación
-- **CA-001** — *Dado* A con función de B ≥ 0,6, *entonces* es posible y frecuente que la función de A para B sea < 0,3 (asimetría), en 100 personas × 1 año.
+- **CA-001** — *Dado* A con función alta de B (≥ 0,2, en la escala medida de PA-144), *entonces* es frecuente (≥ 10 % de esos pares) que la función de B para A quede por debajo de la mediana (asimetría), en 100 personas × 1 año. (Versión 0.2: «≥ 0,6 y < 0,3»; con la mezcla real de posturas el afecto por otra persona ronda 0,1–0,2 y 0,6 no se alcanza.)
 - **CA-002** — *Dado* 100 personas × 1 año, *entonces* cada persona tiene de media entre 3 y 15 vínculos con familiaridad > 0,3 (el prototipo se pasa: 16).
 - **CA-003** — *Dado* un `BREAKUP`, *entonces* sus causas incluyen al menos 2 eventos previos entre ambos.
 - **CA-004** — *Dadas* dos personas con historias distintas en el mismo lugar, *entonces* la que reforzó abrirse (041) forma más amistades que la que reforzó callar o evadir.
@@ -110,26 +112,34 @@ Coste: hasta `MAX_BONDS` = 40 vínculos por persona × ≈ 80 B, más una funci�
 | `P_ENCOUNTER` | 0,02 por tick | [M], PA-142 |
 | `MAX_ENCOUNTERS_HOUR` | 3 | [M] |
 | `FAMILIARITY_GAIN`, `FAMILIARITY_DECAY_DAY` | 0,05 · 0,005 | [M], PA-143 |
-| `FRIEND_FAM`, `FRIEND_FN` (salida 0,3 y 0,2) | 0,4 · 0,35 | [M], PA-144 |
-| `PARTNER_FN` | 0,6 | [M] |
+| `FRIEND_FAM`, `FRIEND_FN` (salida 0,3 y 0,08) | 0,4 · 0,15 | [M], PA-144 (medido: el afecto de equilibrio ronda 0,1–0,2) |
+| `PARTNER_FN`, `PARTNER_FAM` | 0,2 · 0,5 | [M] (medido: 2 parejas nuevas por año con 100 personas) |
 | `ARGUMENT_TENSION`, `ARGUMENT_COOLDOWN_DAYS` | 0,3 · 2 | [M] (prototipo) |
+| `CLASH_TENSION`, `REPAIR` | 0,1 · 0,2 | [M] (medido: 0,8 discusiones por persona y año) |
 | `BREAKUP_FN`, `BREAKUP_TENSION`, `BREAKUP_DAYS` | −0,2 · 0,6 · 30 | [M], PA-145 |
-| `FORGET_FAM`, `MAX_BONDS` | 0,05 · 40 | [M] |
+| `FORGET_FAM`, `MAX_BONDS` | 0,02 · 40 | [M] (0,05 olvidaba al día siguiente a quien vio una vez) |
 
 ## 9. Métricas y observabilidad
 - Vínculos por persona y su distribución de familiaridad y función; asimetría media por par.
 - Amistades, discusiones, parejas y rupturas por año, frente al prototipo (docs/prototipo-referencia.md: 334 amistades, 50 discusiones, 2 parejas nuevas, ~0 rupturas por mundo y año).
 - Alertas de degeneración: todos amigos de todos, ninguna discusión, funciones saturadas.
 
+## 9 bis. Decisiones del usuario (2026-09-28)
+Aprobadas las cinco propuestas:
+1. **P1:** los encuentros cotidianos usan las posturas de la charla (043) sin LLM: la charla y la vida diaria son el mismo mecanismo.
+2. **P2:** tope de 40 vínculos por persona; se olvidan primero los conocidos sin contacto.
+3. **P3:** parejas nuevas y rupturas en M3, con tasas bajas como el prototipo. La atracción, entre adultos sin pareja y sin orientación sexual por ahora (opción a; la b, con un dato de orientación con fuente, queda para más adelante).
+4. **P4:** el apego no es un rasgo: es una métrica calculada desde la historia (función de los cuidadores en el desarrollo, fuerza de abrirse y de evadir), para la capa clínica.
+5. **P5:** los encuentros entre vecinos sin coincidir en un lugar quedan para más adelante (con la 025).
+
 ## 10. Preguntas abiertas
-- [ ] **P1.** Los encuentros cotidianos usan las posturas de la charla (043) sin LLM. ¿De acuerdo, o prefieres un intercambio más simple (positivo, neutro o negativo)? Propuesta: las posturas, para que la charla y la vida diaria sean el mismo mecanismo.
-- [ ] **P2.** ¿Tope de 40 vínculos por persona, y se olvidan primero los conocidos sin contacto? Propuesta: sí.
-- [ ] **P3.** Parejas nuevas y rupturas en M3: propuesta, sí, con tasas bajas como el prototipo (2 parejas nuevas por año, rupturas > 0). La atracción: ¿solo entre adultos sin pareja, sin considerar orientación sexual por ahora, o con un dato de orientación en la persona (con fuente del DANE si existe)?
-- [ ] **P4.** El apego (seguro, ansioso, evitativo): propuesta, no como rasgo sino como métrica calculada desde la historia (función de los cuidadores en el desarrollo y fuerza de abrirse o evadir), útil para la capa clínica.
-- [ ] **P5.** Los vecinos (misma manzana o edificio) como fuente de encuentros aunque no coincidan en un lugar: propuesta, más adelante (con la 025).
+Resueltas (§9 bis). La calibración sigue abierta: PA-142 a PA-145.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-28 | 0.2 | Reescritura sobre el motor funcional (035 §8, bloque B de M3): la persona como estímulo con función (036), encuentros con las posturas de la charla (043), familiaridad, tensión y confianza (absorbe la 044 R-007), etiquetas con histéresis, rupturas por historia, punto de partida desde el desarrollo (041). Se quitan la extraversión y la compatibilidad de valores |
+| 2026-09-28 | 0.2 | Decisiones del usuario (§9 bis): P1 a P5 aprobadas; en P3, la opción a (sin orientación sexual por ahora) |
+| 2026-09-28 | 0.2 | Estado → aprobada |
+| 2026-09-28 | 0.3 | Lo que reveló la implementación (bloque R de M3, 100 personas × 1 año): el choque necesita un estímulo aversivo (R-002) y quien inicia no empareja al otro con su propio saludo; la tensión se repara en encuentros amables (R-003, `REPAIR`); la amistad no se aplica a la familia (R-004); `ENCOUNTER` registra solo los roces; parámetros medidos (§8) y CA-001 en la escala medida del afecto. Resultados en `docs/validaciones/M3-relaciones.md` |

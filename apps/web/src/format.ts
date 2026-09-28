@@ -67,7 +67,18 @@ export const EVENT_ES: Record<string, string> = {
   CITIZEN_DIED: 'Murió',
   HISTORICAL_CONTEXT: 'Contexto histórico',
   CAPABILITY_ENABLED: 'Nueva capacidad del mundo',
+  MET: 'Conoció a alguien',
+  ENCOUNTER: 'Tuvo un roce',
+  ARGUMENT: 'Discutió',
+  FRIENDSHIP_FORMED: 'Hizo una amistad',
+  RELATIONSHIP_STARTED: 'Empezó una relación de pareja',
+  BREAKUP: 'Terminó una relación',
+  BOND_FORGOTTEN: 'Perdió el contacto',
 };
+
+const LABEL_ES: Record<string, string> = { amigo: 'amistad', companero: 'trabajo', conocido: 'conocido', ex: 'expareja', familia: 'familia', pareja: 'pareja' };
+const STYLE_ES: Record<string, string> = { seguro: 'seguro', evitativo: 'evitativo', ansioso: 'ansioso' };
+const signed = (x: number): string => `${x > 0 ? '+' : ''}${Math.round(x * 100)}`;
 
 const NEED_ES: Record<string, string> = { hunger: 'Alimentación', energy: 'Energía', social: 'Compañía', fun: 'Diversión', hygiene: 'Higiene', safety: 'Seguridad', health: 'Salud' };
 const EMO_ES: Record<string, string> = { joy: 'Alegría', sadness: 'Tristeza', anger: 'Enojo', fear: 'Miedo', shame: 'Vergüenza' };
@@ -158,6 +169,14 @@ export function inspectorTabs(d: CitizenDetail): { estado: Section[]; historia: 
     },
     { title: 'Necesidades', rows: Object.entries(d.needs).map(([k, v]) => ({ label: NEED_ES[k] ?? k, value: pct(v) })) },
     { title: 'Emociones', rows: Object.entries(d.emotions).map(([k, v]) => ({ label: EMO_ES[k] ?? k, value: pct(v) })) },
+    // 012 R6: quién, etiqueta, familiaridad y el afecto de cada lado (el suyo y el que le tienen).
+    {
+      title: 'Vínculos',
+      rows: (d.bonds ?? []).map((b) => ({
+        label: `${b.name ?? b.id}${b.labels.length ? ` (${b.labels.filter((l) => l !== 'conocido' || b.labels.length === 1).map((l) => LABEL_ES[l] ?? l).join(', ')})` : ''}`,
+        value: `trato ${pct(b.familiarity)} · afecto ${signed(b.affection)} / ${signed(b.affectionBack)}${b.tension >= 0.05 ? ` · tensión ${pct(b.tension)}` : ''}`,
+      })),
+    },
   ];
   const historia = [...d.events].reverse().map((e) => ({ line: eventEs(e), causes: e.causes.slice(0, 4).map(causeEs) }));
   const funcional: Section[] = [
@@ -174,6 +193,16 @@ export function inspectorTabs(d: CitizenDetail): { estado: Section[]; historia: 
         { label: 'Exploración (variabilidad)', value: pct(d.learned.variability) },
       ],
     },
+    ...(d.attachment
+      ? [{
+          title: 'Apego (métrica de su historia)',
+          rows: [
+            { label: 'Estilo', value: STYLE_ES[d.attachment.style] ?? d.attachment.style },
+            { label: 'Seguridad con quienes le criaron', value: pct(d.attachment.security) },
+            { label: 'Evitación (evadir frente a abrirse)', value: pct(d.attachment.avoidance) },
+          ],
+        }]
+      : []),
   ];
   return { estado, historia, funcional };
 }

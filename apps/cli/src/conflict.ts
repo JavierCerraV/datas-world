@@ -1,7 +1,7 @@
 // Sección de `citizen:report` para las consecuencias de la charla (spec 044 CA-005): lo que la persona cree de
 // otros, lo que piensa hacer, cómo están sus vínculos y, por cada conflicto, la cadena de causas completa hasta lo
 // que oyó en la charla. Solo lee el estado persistido y el registro de eventos (CLAUDE.md §8).
-import { CLAIM_DEFAULTS, eventText, tensionNow } from '@datas-world/engine';
+import { CLAIM_DEFAULTS, affectionFor, eventText, tensionNow } from '@datas-world/engine';
 import type { Citizen, EntityId, World, WorldEvent } from '@datas-world/engine';
 import { eventsById, queryEvents } from '@datas-world/persistence';
 import type { Db } from '@datas-world/persistence';
@@ -39,8 +39,13 @@ export function conflictLines(world: World, db: Db, c: Citizen): string[] {
     out.push(`  Cree que ${who(world, b.about)}: ${b.predicate.replace(/_/g, ' ')} · se lo dijo ${who(world, b.source)} · credibilidad ${b.credibility.toFixed(2)} · ${dayOf(b.at, epoch)}`);
   for (const it of c.intentions ?? [])
     out.push(`  Piensa ${it.kind} a ${who(world, it.target)} por «${it.topic.replace(/_/g, ' ')}» · urgencia ${it.urgency.toFixed(2)} · hasta ${dayOf(it.expiresAt, epoch)}`);
-  for (const b of c.bonds ?? [])
-    out.push(`  Vínculo con ${who(world, b.with)}: tensión ${tensionNow(b, world.now, CLAIM_DEFAULTS).toFixed(2)} · confianza ${b.trust.toFixed(2)}`);
+  // Vínculos (012): etiquetas, trato y afecto (del almacén de la persona, INV-003), más tensión y confianza (044).
+  const bonds = [...(c.bonds ?? [])].sort((x, y) => (y.familiarity ?? 0) - (x.familiarity ?? 0) || (x.with < y.with ? -1 : 1));
+  for (const b of bonds) {
+    const labels = b.labels?.length ? ` (${b.labels.join(', ')})` : '';
+    const fn = affectionFor(c.functions, b.with);
+    out.push(`  Vínculo con ${who(world, b.with)}${labels}: trato ${(b.familiarity ?? 0).toFixed(2)} · afecto ${fn > 0 ? '+' : ''}${fn.toFixed(2)} · tensión ${tensionNow(b, world.now, CLAIM_DEFAULTS).toFixed(2)} · confianza ${b.trust.toFixed(2)}`);
+  }
   for (const e of conflicts) {
     out.push(`  Por qué: ${dayOf(e.at, epoch)}`);
     for (const [i, x] of causalChain(db, e).entries()) out.push(`    ${i === 0 ? '' : '← '}${withNames(world, eventText(x))}`);

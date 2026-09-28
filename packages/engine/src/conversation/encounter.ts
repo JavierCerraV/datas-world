@@ -139,7 +139,8 @@ export function createBondSystem(p: ClaimParams): System {
       const bonds = new Map<EntityId, Bond[]>();
       const beliefs = new Map<EntityId, Belief[]>();
       const stress = new Map<number, number>();
-      const bondsOf = (id: EntityId) => bonds.get(id) ?? bonds.set(id, (view.citizens.get(id)?.bonds ?? []).map((x) => ({ ...x }))).get(id)!;
+      // Copia profunda: los vínculos de la 012 tienen listas (etiquetas, eventos).
+      const bondsOf = (id: EntityId) => bonds.get(id) ?? bonds.set(id, JSON.parse(JSON.stringify(view.citizens.get(id)?.bonds ?? [])) as Bond[]).get(id)!;
       const beliefsOf = (id: EntityId) => beliefs.get(id) ?? beliefs.set(id, (view.citizens.get(id)?.beliefs ?? []).map((x) => ({ ...x }))).get(id)!;
       const events: SystemEvent[] = [];
       for (const e of found as WorldEvent<{ a: EntityId; b: EntityId; topic: string; responseA: 'acusar' | 'preguntar'; responseB: EncounterResponse; impact: number }>[]) {

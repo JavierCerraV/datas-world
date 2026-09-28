@@ -3,7 +3,7 @@
 // de infancia y el estilo de su familia (compartido por los hermanos), y los que producen los hechos de la 030
 // (duelos, separación, mudanzas, estudios, migración). Se aprenden en orden con los mecanismos de la 036 a la 039, y
 // cada uno queda en el registro como `DEVELOPMENT_EPISODE` con quién intervino y lo que aprendió (R-007).
-import { AVOIDANCE_W0, PRIVATE_DEFAULTS, emptyStore, learningParams, makeEvent, operant, pair, prune, sensitivityOf, teach } from '@datas-world/engine';
+import { AVOIDANCE_W0, PRIVATE_DEFAULTS, emptyStore, learningParams, makeEvent, operant, pair, personStimulus, prune, sensitivityOf, teach } from '@datas-world/engine';
 import type {
   DevelopmentEpisode, EntityId, FunctionStore, LearningParams, Ontology, RelationalNetwork, Rng, Sensitivity, World, WorldEvent,
 } from '@datas-world/engine';
@@ -12,6 +12,7 @@ import { STAGES, episodeDefs, stageOf } from './catalog.ts';
 import type { Effect, EpisodeDef, Stage } from './catalog.ts';
 import { YEAR, aliveAt, devContext, historyIndex, meets } from './context.ts';
 import type { DevContext } from './context.ts';
+import { kinBonds } from './bonds.ts';
 
 const DAY = 1440;
 /** R-001 [M] (decisión 1): episodios por año de 0 a 17 años y de adulto. */
@@ -86,7 +87,9 @@ export interface Learner {
 }
 
 /** Aplica los efectos de un episodio y devuelve lo aprendido (clave y cambio) y el balance respondiente. */
-export function applyEffects(store: FunctionStore, net: RelationalNetwork, effects: readonly Effect[], at: number, speakerStim: string | undefined, L: Learner): { learned: [string, number][]; balance: number } {
+export function applyEffects(
+  store: FunctionStore, net: RelationalNetwork, effects: readonly Effect[], at: number, speakerStim: string | undefined, L: Learner, personStim?: string,
+): { learned: [string, number][]; balance: number } {
   const learned: [string, number][] = [];
   let balance = 0;
   const vOf = (s: string) => store.f.find((f) => f.s === s)?.v ?? 0;
@@ -99,8 +102,11 @@ export function applyEffects(store: FunctionStore, net: RelationalNetwork, effec
       const stim = e.stim === '@speaker' ? speakerStim : e.stim;
       if (!stim || !L.onto.classes.has(stim)) continue;
       const before = vOf(stim);
-      pair(store, L.onto, { stim, ctx: '', now: at, lambda: e.lambda, ...(e.us ? { us: e.us } : {}), ...(e.social ? { social: true } : {}) }, L.P, L.sens);
+      const ev = { ctx: '', now: at, lambda: e.lambda, ...(e.us ? { us: e.us } : {}), ...(e.social ? { social: true } : {}) };
+      pair(store, L.onto, { stim, ...ev }, L.P, L.sens);
       note(stim, vOf(stim) - before);
+      // 012 R-007: lo que vivió con esa persona forma también la función de la persona misma (`cit.<id>`).
+      if (e.stim === '@speaker' && personStim) pair(store, L.onto, { stim: personStim, ...ev }, L.P, L.sens);
       balance += e.lambda;
     } else if (e.op === 'operant') {
       let r = store.r.find((x) => x.r === e.response && x.c === '');
@@ -206,7 +212,8 @@ export function generateDevelopment(world: World, citizenIds: readonly EntityId[
     const years = new Map<number, { items: DevelopmentEpisode[]; causes: Set<EntityId>; speakers: Map<EntityId, string>; touched: Set<string> }>();
     for (const s of plan) {
       const sp = speakerOf(world, c, s.def, s.at, r, s.speakerId);
-      const { learned, balance } = applyEffects(store, net, s.def.effects, s.at, ROLE_STIM[sp.role], L);
+      const whom = sp.id && sp.id !== id && world.citizens.get(sp.id) && !world.citizens.get(sp.id)!.ancestor ? personStimulus(sp.id) : undefined;
+      const { learned, balance } = applyEffects(store, net, s.def.effects, s.at, ROLE_STIM[sp.role], L, whom);
       if (balance > 0) pos += balance;
       else neg -= balance;
       const age = Math.max(0, Math.floor((s.at - c.birth) / YEAR));
@@ -216,6 +223,7 @@ export function generateDevelopment(world: World, citizenIds: readonly EntityId[
       if (s.cause) y.causes.add(s.cause);
       if (sp.id && sp.id !== id) y.speakers.set(sp.id, sp.role);
       for (const [k] of learned) y.touched.add(k);
+      if (whom && store.f.some((f) => f.s === whom)) y.touched.add(whom);
     }
     // Un evento por año de vida con todos sus episodios (R-007), fechado en el último. Participa quien intervino y
     // vive en esa fecha (030 INV-002); los demás (un fallecido en su duelo) siguen en el episodio.
@@ -234,6 +242,8 @@ export function generateDevelopment(world: World, citizenIds: readonly EntityId[
     prune(store, P);
     person.functions = store;
     person.network = net;
+    // 012 R-007: los vínculos familiares de partida (familia y pareja), con la familiaridad de la convivencia.
+    person.bonds = kinBonds(world, id, c.kin);
     // Decisión 4 [M]: el ánimo de base sale del balance de lo vivido (lo que acercó frente a lo que dolió),
     // alrededor del balance típico de la población.
     const f = world.components.f32['state.moodBaseline'];

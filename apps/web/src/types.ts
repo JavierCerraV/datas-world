@@ -70,6 +70,11 @@ export interface CitizenDetail {
   responses: { response: string; strength: number }[];
   rules: { response: string; consequence: string; kind: string; speaker: string | null; strength: number; contrast: number; contribution: number }[];
   relations: { a: string; b: string; type: string; strength: number; context: string | null }[];
+  /** Vínculos (012); opcionales para fichas de mundos anteriores a M3. */
+  bonds?: {
+    id: string; name: string | null; labels: string[]; familiarity: number; tension: number; trust: number; encounters: number; affection: number; affectionBack: number;
+  }[];
+  attachment?: { security: number; avoidance: number; style: string };
   events: EventView[];
 }
 

@@ -3,16 +3,24 @@ import { createRng } from '@datas-world/engine';
 import type { WorldEvent } from '@datas-world/engine';
 import { generateWorld, lifeRunner } from '@datas-world/generators';
 import { describe, expect, it } from 'vitest';
-import { behaviorChain, isChosenBehavior, isComplete } from './explain.ts';
+import { behaviorChain, isChosenBehavior, isComplete, relationshipChain } from './explain.ts';
+
+let cached: { g: ReturnType<typeof generateWorld>; all: WorldEvent[]; byId: Map<string, WorldEvent> } | undefined;
+/** El mundo de la semilla del proyecto tras 30 días, una vez para las dos pruebas. */
+function lived() {
+  if (cached) return cached;
+  const g = generateWorld({ seed: 482917 });
+  const r = lifeRunner(g.world);
+  r.resume('prueba');
+  r.advanceDays(30);
+  const all: WorldEvent[] = [...g.events, ...r.drainEvents()];
+  cached = { g, all, byId: new Map(all.map((e) => [e.id as string, e])) };
+  return cached;
+}
 
 describe('035 CA-001: la cadena completa de una conducta', () => {
   it('para 20 conductas elegidas al azar, la cadena llega a los hechos del registro o del desarrollo sin pasos vacíos', () => {
-    const g = generateWorld({ seed: 482917 });
-    const r = lifeRunner(g.world);
-    r.resume('prueba');
-    r.advanceDays(30);
-    const all: WorldEvent[] = [...g.events, ...r.drainEvents()];
-    const byId = new Map(all.map((e) => [e.id as string, e]));
+    const { g, all, byId } = lived();
     const chosen = all.filter(isChosenBehavior);
     expect(chosen.length).toBeGreaterThan(100);
     const rng = createRng(35);
@@ -26,5 +34,20 @@ describe('035 CA-001: la cadena completa de una conducta', () => {
       if (!isComplete(steps)) incomplete.push(`${e.id}: ${steps.filter((s) => s.lines.length === 0).map((s) => s.step).join(', ')}`);
     }
     expect(incomplete, incomplete.join('\n')).toEqual([]);
+  });
+});
+
+describe('012 CA-005: la cadena de una discusión', () => {
+  it('llega hasta los roces que subieron la tensión, con el vínculo de cada lado', () => {
+    const { g, all, byId } = lived();
+    const args = all.filter((e) => e.type === 'ARGUMENT');
+    expect(args.length).toBeGreaterThan(0);
+    const reached = args.filter((e) => {
+      const steps = relationshipChain(g.world, (id) => byId.get(id), e);
+      expect(steps.map((s) => s.step)).toEqual(['Qué pasa', 'Qué lo explica ahora', 'El vínculo de cada lado', 'Historia del par']);
+      expect(isComplete(steps)).toBe(true);
+      return steps[3]!.lines.some((l) => l.includes('tienen un roce'));
+    });
+    expect(reached.length / args.length).toBeGreaterThanOrEqual(0.5);
   });
 });
