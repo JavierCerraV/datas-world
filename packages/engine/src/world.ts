@@ -108,11 +108,27 @@ export interface Citizen extends BaseEntity {
   beliefs?: Belief[];
   /** Tensión y confianza de los vínculos tocados (044 R-007, P3: en la persona hasta la 012), en orden de id. */
   bonds?: Bond[];
+  /** Intenciones pendientes tras una charla (044 R-006); el bucle las ejecuta o las deja caducar. */
+  intentions?: Intention[];
+}
+
+/** Intención tras la charla (044 §3). */
+export interface Intention {
+  kind: 'llamar' | 'confrontar' | 'rumiar' | 'preguntar';
+  target: EntityId;
+  /** Afirmación que la motiva (`chat_claims`). */
+  topic: string;
+  /** [0,1]: el impacto de la afirmación. */
+  urgency: number;
+  expiresAt: WorldMinute;
+  /** Evento `INTENTION_FORMED`. */
+  cause: EntityId;
 }
 
 /** Creencia mínima (044 §3): la persona cree `predicate` de `about`, porque se lo dijo `source`. */
 export interface Belief {
-  about: EntityId;
+  /** Un `CIT-…` o el visitante (`EXT-…`), p. ej. «un extraño anda diciendo cosas» (R-008.4). */
+  about: string;
   predicate: string;
   /** `EXT-0001` (el visitante) o un `CIT-…`. */
   source: string;

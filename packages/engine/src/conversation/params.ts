@@ -49,6 +49,22 @@ export interface ClaimParams {
   /** R-007 [M]: confianza de partida de un vínculo aún no tocado, familiar u otro (hasta la 012; PA-140). */
   trust0Family: number;
   trust0Other: number;
+  /** R-006 (PA-139): impacto mínimo para formar una intención (`INTENT_THRESHOLD`) y su caducidad (`INTENT_TTL_MIN`). */
+  intentThreshold: number;
+  intentTtlMin: number;
+  /** R-006 [M]: peso de la urgencia en llamar y confrontar, y de la duda (credibilidad media) en preguntar. */
+  urgencyWeight: number;
+  doubtWeight: number;
+  /** R-006 [M]: estrés por hora mientras rumia (el estrés queda alto más tiempo). */
+  ruminationPerHour: number;
+  /** R-007, R-008 (PA-140): cambio máximo de tensión por encuentro y decaimiento diario. */
+  maxTensionDelta: number;
+  tensionDecayDay: number;
+  /** R-008 [M]: fuerza de partida de negar para quien nunca dijo eso, y cuánto baja la creencia una negación creíble. */
+  denyStrength: number;
+  denialDoubt: number;
+  /** R-008.4 [M]: credibilidad de lo que el tercero oye del visitante («un extraño anda diciendo cosas»). */
+  rumorCredibility: number;
 }
 
 export const CLAIM_DEFAULTS: ClaimParams = Object.freeze({
@@ -62,6 +78,16 @@ export const CLAIM_DEFAULTS: ClaimParams = Object.freeze({
   maxClaimStressDelta: 0.35,
   trust0Family: 0.6,
   trust0Other: 0.5,
+  intentThreshold: 0.35,
+  intentTtlMin: 2_880,
+  urgencyWeight: 2,
+  doubtWeight: 1,
+  ruminationPerHour: 0.005,
+  maxTensionDelta: 0.3,
+  tensionDecayDay: 0.05,
+  denyStrength: 0.6,
+  denialDoubt: 0.5,
+  rumorCredibility: 0.8,
 });
 
 /** Prefijo de las respuestas conversacionales en el almacén de funciones (036 R-002). */

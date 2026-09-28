@@ -53,6 +53,8 @@ export interface ChatCatalog {
   /** Vacíos o ausentes: la charla funciona sin consecuencias (044). */
   claims?: readonly ClaimDef[];
   relations?: readonly RelationDef[];
+  /** El celular (`object_kinds`, 044 P2): su tipo y la probabilidad de poder llamar por estrato (`callAccess`). */
+  phone?: { kind: string; callAccess: Readonly<Record<string, number>> };
 }
 
 /** Afirmación del visitante tal como llega del clasificador (044 R-001). */

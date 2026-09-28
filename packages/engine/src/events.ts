@@ -334,6 +334,50 @@ export const EVENT_TYPES = Object.freeze({
       }),
     text: (e) => `${e.payload.citizenId} cree que ${e.payload.about}: ${e.payload.predicate.replace(/_/g, ' ')} (credibilidad ${e.payload.credibility}).`,
   }),
+  INTENTION_FORMED: def<{ citizenId: string; kind: string; target: string; urgency: number; expiresAt: number; topic: string }>({
+    baseImportance: 0.4,
+    spontaneous: false,
+    check: (p) =>
+      needObj(p, {
+        citizenId: str, kind: (v) => ['llamar', 'confrontar', 'rumiar', 'preguntar'].includes(v as string), target: str,
+        urgency: (v) => typeof v === 'number' && v >= 0 && v <= 1, expiresAt: int, topic: str,
+      }),
+    text: (e) => `${e.payload.citizenId} quiere ${e.payload.kind === 'rumiar' ? 'darle vueltas a lo que oyó de' : e.payload.kind === 'llamar' ? 'llamar a' : e.payload.kind === 'preguntar' ? 'preguntarle a' : 'confrontar a'} ${e.payload.target}.`,
+  }),
+  INTENTION_EXPIRED: def<{ citizenId: string; kind: string; target: string }>({
+    baseImportance: 0.1,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, kind: str, target: str }),
+    text: (e) => `${e.payload.citizenId} ya no piensa ${e.payload.kind} a ${e.payload.target}.`,
+  }),
+  PHONE_CALL_MADE: def<{ from: string; to: string; reason: string; urgency: number }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { from: str, to: str, reason: str, urgency: (v) => typeof v === 'number' && v >= 0 && v <= 1 }),
+    text: (e) => `${e.payload.from} llama por celular a ${e.payload.to} (${e.payload.reason.replace(/_/g, ' ')}).`,
+  }),
+  CONFRONTATION: def<{ a: string; b: string; topic: string; via: string; responseA: string; responseB: string; impact: number }>({
+    baseImportance: 0.6,
+    spontaneous: false,
+    check: (p) =>
+      needObj(p, {
+        a: str, b: str, topic: str, via: (v) => v === 'llamada' || v === 'en_persona', responseA: str, responseB: str,
+        impact: (v) => typeof v === 'number' && v >= 0 && v <= 1,
+      }),
+    text: (e) => `${e.payload.a} ${e.payload.responseA === 'preguntar' ? 'le pregunta' : 'le reclama'} a ${e.payload.b} (${e.payload.via === 'llamada' ? 'por teléfono' : 'en persona'}) por ${e.payload.topic.replace(/_/g, ' ')}; ${e.payload.b} responde: ${e.payload.responseB}.`,
+  }),
+  BOND_STRAINED: def<{
+    a: string; b: string; tensionBefore: number; tensionAfter: number; trustBefore: number; trustAfter: number;
+    trustOfBBefore: number; trustOfBAfter: number;
+  }>({
+    baseImportance: 0.5,
+    spontaneous: false,
+    check: (p) => {
+      const u = (v: unknown) => typeof v === 'number' && v >= 0 && v <= 1;
+      return needObj(p, { a: str, b: str, tensionBefore: u, tensionAfter: u, trustBefore: u, trustAfter: u, trustOfBBefore: u, trustOfBAfter: u });
+    },
+    text: (e) => `La relación entre ${e.payload.a} y ${e.payload.b} se tensa (${e.payload.tensionBefore} → ${e.payload.tensionAfter}).`,
+  }),
   // Historia generada (spec 030), de 1900 al presente.
   TOWN_FOUNDED: def<{ placeId: string; name: string; year: number }>({
     baseImportance: 1,

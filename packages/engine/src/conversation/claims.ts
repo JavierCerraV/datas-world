@@ -68,6 +68,16 @@ export function resolveRelation(view: WorldView, citizenId: EntityId, resolve: R
   }
 }
 
+/** Son familia cercana: mismo hogar, padre o madre, o comparten padre o madre (hasta la 012). */
+export function areFamily(view: WorldView, a: EntityId, b: EntityId): boolean {
+  const x = view.citizens.get(a);
+  const y = view.citizens.get(b);
+  if (!x || !y) return false;
+  if (x.householdId !== undefined && x.householdId === y.householdId) return true;
+  if (x.motherId === b || x.fatherId === b || y.motherId === a || y.fatherId === a) return true;
+  return (x.motherId !== undefined && x.motherId === y.motherId) || (x.fatherId !== undefined && x.fatherId === y.fatherId);
+}
+
 /** R-007: el vínculo con el tercero; si aún no se tocó, la confianza de partida [M] (hasta la 012). */
 export function bondOf(view: WorldView, citizenId: EntityId, other: EntityId, family: boolean, p: ClaimParams): { tension: number; trust: number } {
   const b = view.citizens.get(citizenId)?.bonds?.find((x) => x.with === other);
