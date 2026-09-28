@@ -1,10 +1,10 @@
 ---
 id: 044
 nombre: chat-consequences
-estado: borrador
+estado: aprobada
 hito: Bloque L (ampliación, petición del usuario 2026-09-27) · completa con 012, 013 y 025 en M3–M6
 depende_de: [008, 010, 014, 019, 023, 026, 036, 037, 038, 040, 043]
-version: 0.1
+version: 0.2
 ---
 
 # 044 — Consecuencias de la charla: lo que se dice sobre otros sale de la charla
@@ -164,13 +164,16 @@ Coste de memoria: unas pocas creencias e intenciones por persona que charló (< 
 - Largo de las cadenas causales desde `CHAT_CLAIM_HEARD` a 7 y 30 días (efecto mariposa medible).
 
 ## 10. Preguntas abiertas
-- [ ] **P1.** Catálogo inicial `chat_claims`. Propuesta: `consiente_relacion_abierta`, `infiel`, `habla_mal_de_ti`, `quiere_separarse`, `te_miente_con_dinero`, `te_van_a_despedir`, `te_admira`, `te_extraña`. ¿Algo más, o menos?
-- [ ] **P2.** Celular: nuevo tipo en `object_kinds` (005). Propuesta: lo tiene toda persona de 14 años o más, con acceso según el estrato (029). ¿De acuerdo?
-- [ ] **P3.** La tensión mínima del vínculo (R-007): ¿se guarda ya en la persona hasta la 012, o se adelanta una parte de la 012?
-- [ ] **P4.** ¿La esposa debe aprender algo sobre el visitante en el encuentro (R-008.4)? Propuesta: sí, como creencia con fuente su pareja; eso abre la puerta a los rumores de la 025.
-- [ ] **P5.** ¿Nueva spec 044, como aquí, o ampliación de la 043 (v0.7)? Propuesta: la 044, porque toca el mundo mucho más allá de la charla.
+Resueltas por el usuario el 2026-09-27 (todas según la propuesta):
+- [x] **P1.** Catálogo inicial `chat_claims` con 8 afirmaciones: `consiente_relacion_abierta`, `infiel`, `habla_mal_de_ti`, `quiere_separarse`, `te_miente_con_dinero`, `te_van_a_despedir`, `te_admira`, `te_extraña`.
+- [x] **P2.** Celular: nuevo tipo en `object_kinds` (005). Lo tiene toda persona de 14 años o más, con acceso según el estrato (029).
+- [x] **P3.** La tensión mínima del vínculo (R-007) se guarda en la persona, solo para los vínculos tocados, sin adelantar la 012. Cuando llegue la 012, la absorbe.
+- [x] **P4.** En el encuentro, el tercero aprende algo sobre el visitante (R-008.4): una creencia sobre `EXT-0001` con fuente su pareja. Abre la puerta a los rumores de la 025.
+- [x] **P5.** Spec propia (044), no ampliación de la 043.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-27 | 0.1 | Borrador a petición del usuario tras probar la charla: lo dicho sobre otros deja creencias, reacción según la historia, intenciones (llamar o confrontar) y conflicto encadenado con causas (efecto mariposa) |
+| 2026-09-27 | 0.2 | Preguntas P1 a P5 resueltas por el usuario según la propuesta: 8 afirmaciones en `chat_claims`; celular desde los 14 años según el estrato; tensión mínima guardada en la persona hasta la 012; el tercero aprende sobre el visitante en el encuentro; spec propia |
+| 2026-09-28 | 0.2 | Estado → aprobada |
