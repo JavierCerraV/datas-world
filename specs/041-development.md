@@ -1,7 +1,7 @@
 ---
 id: 041
 nombre: development
-estado: aprobada
+estado: implementada
 hito: MF (bloque MF7)
 depende_de: [030, 035, 036, 037, 038, 039]
 version: 0.2
@@ -98,3 +98,4 @@ PA-015, PA-031, PA-120, PA-121.
 | 2026-09-28 | 0.2 | Decisiones del usuario (§9): densidad 50/12 por año; catálogo inicial de unos 30 episodios con fuentes colombianas; «Yo», evitación y valores aprendidos en la familia; ánimo de base, hábitos, sueño y aficiones desde la historia; registro completo de los episodios (R-007) y pestaña **Historia de vida** con familiograma extenso (R-009, CA-005, CA-006); sin adaptadores de rasgos. CA-001 sin el tope de 2 MB: el tamaño se mide |
 | 2026-09-28 | 0.2 | Estado → aprobada |
 | 2026-09-28 | 0.2 | Precisiones de la implementación (MF7): (1) R-007 y §5: los episodios se registran **todos**, agrupados en un evento `DEVELOPMENT_YEAR` por año de vida, cada uno con fecha, tipo, quién intervino, valencia, causa y lo aprendido. Un evento por episodio (`DEVELOPMENT_EPISODE`) ocupaba ≈ 103 MB con 199 personas; agrupados, ≈ 24 MB y ≈ 7 000 eventos (CLAUDE.md regla 8). El texto de cada episodio está en el catálogo. (2) Catálogo `development_episodes` de 46 episodios: incluye episodios contrarios (castigar la expresión emocional, burlarse de una confidencia, castigar la defensa, enfrentar los problemas en casa) y los que producen los hechos de la 030. Los verbales exigen 2 años. (3) Estilo de la familia [M]: calidez, dureza y hablar de emociones, compartidos por los hermanos. Sin él todos terminaban iguales, porque la fuerza operante se acerca al resultado (036 R-002). (4) Ánimo de base `0,55 + 0,3 × (balance − 0,3)`. (5) Hábitos (031) desde lo aprendido y normalizados por la media de la población, para conservar las prevalencias del perfil; esparcimiento (032) con la posición de la persona en la población (`0,5 + 0,2 × z`); sueño sin ficha: 6,95 h. (6) Decisión 8: los mundos de ejemplo no se regeneran (política de `docs/validaciones/mundos/README.md`); la prueba de la API genera un mundo al vuelo. Mediciones: `world:new` ≈ 2 s; V-12 (a) distancia media > 0,1 y (b) menor que (a); CA-003 con más castigo físico en los estratos bajos. Sin cambios en CA |
+| 2026-09-28 | 0.2 | Estado → implementada |

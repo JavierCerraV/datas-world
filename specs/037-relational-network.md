@@ -1,7 +1,7 @@
 ---
 id: 037
 nombre: relational-network
-estado: aprobada
+estado: implementada
 hito: MF (bloque MF4)
 depende_de: [035, 036]
 version: 0.2
@@ -125,3 +125,4 @@ PA-005 a PA-010 (§11.2), PA-031 a PA-035 (§11.7), PA-110, PA-111, PA-130.
 | 2026-09-26 | 0.2 | Estado → aprobada |
 | 2026-09-26 | 0.2 | Implementación del bloque MF4. Precisiones: (1) la adyacencia se recorre en orden de inserción de las aristas (determinista) y se guarda en caché por arreglo de aristas; la fuerza se lee al recorrer; (2) para el valor funcional se podan los caminos cuyo tipo no transforma (sin pérdida: un tipo así solo se compone en sí mismo); (3) Cfunc de un camino = 1 solo si todas sus aristas tienen la clave funcional del contexto; (4) la elicitación de las emociones usa como función directa la aprendida del estímulo, sin generalización ni primarios (no tiene la ontología); la selección usa la completa; (5) CA-004: 1,0 ms con 500 estímulos, 3,2 ms con 250 y 18,7 ms con 100 (red muy densa, 5 relaciones por estímulo; coste combinatorio): se cumple con redes de densidad ≤ 2 y queda abierto para las muy densas (PA-110). V-7, V-8 y V-11a verdes a la primera. Sin cambios en CA |
 | 2026-09-26 | 0.2 | Ampliación aprobada con la 038 v0.2 (R-007): `opposition ∘ part_of = opposition` en la tabla de composición (lo opuesto a un miembro de una clase es opuesto a la clase; red opuesta de un valor). CA-001 la incluye. Sin más cambios en CA |
+| 2026-09-28 | 0.2 | Estado → implementada |

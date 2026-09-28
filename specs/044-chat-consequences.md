@@ -1,7 +1,7 @@
 ---
 id: 044
 nombre: chat-consequences
-estado: aprobada
+estado: implementada
 hito: Bloque L (ampliación, petición del usuario 2026-09-27) · completa con 012, 013 y 025 en M3–M6
 depende_de: [008, 010, 014, 019, 023, 026, 036, 037, 038, 040, 043]
 version: 0.3
@@ -188,3 +188,4 @@ Resueltas por el usuario el 2026-09-27 (todas según la propuesta):
 | 2026-09-27 | 0.2 | L5.4: `citizen:report` muestra creencias, intenciones y vínculos, y la cadena de cada conflicto hasta la charla (CA-005). CA-007: el turno evalúa la afirmación sin cambiar el hash. Batería con el guion «revelación sobre la pareja» (§9). Hallazgo: en ese guion, el ejemplo del usuario, el visitante insiste antes de la revelación. Se le cree poco (credibilidad ≈ 0,3) y el impacto queda en 0,17 a 0,18, bajo el umbral de 0,2, así que nadie actúa: el impacto multiplica la credibilidad dos veces en la práctica (para creer y para actuar). Queda para decidir con el usuario si el umbral de intención se mide sin la credibilidad (la preocupación: función × cercanía), y la credibilidad solo decide entre preguntar, confrontar, llamar o rumiar. Sin cambios en CA |
 | 2026-09-27 | 0.3 | L5.5 (el usuario delega la decisión, 2026-09-27): la intención se forma si lo cree y la **preocupación** (`|función| × cercanía × (1 + VALUE_AMP × valor opuesto)`) alcanza `INTENT_THRESHOLD` = 0,3; el impacto (`credibilidad × preocupación`) sigue en la carga, el estrés y la urgencia. Antes la credibilidad contaba dos veces (para creer y para actuar), y en el guion del usuario nadie actuaba (impacto 0,17 a 0,18). La duda decide cómo actúa (preguntar), no si actúa. Medición con la batería (guion «revelación sobre la pareja», 10 ciudadanos, 4 con pareja): las 4 actúan, 3 preguntan y 1 confronta. `ClaimAssessment.concern` nuevo. Sin cambios en CA |
 | 2026-09-28 | 0.3 | MF6 (039, decisión 5 del usuario): lo creído que pega en contra entra en la mente de la persona como pensamiento con función `−preocupación`, y el PNR de la 039 lo lleva; la intención `rumiar` ya no suma 0,005 de estrés por hora. Sin cambios en CA |
+| 2026-09-28 | 0.3 | Estado → implementada |

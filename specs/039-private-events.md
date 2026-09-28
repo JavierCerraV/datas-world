@@ -1,7 +1,7 @@
 ---
 id: 039
 nombre: private-events
-estado: aprobada
+estado: implementada
 hito: MF (bloque MF6)
 depende_de: [035, 036, 037, 038]
 version: 0.2
@@ -116,3 +116,4 @@ PA-023 a PA-026 (§11.6), PA-036 a PA-039 (§11.8), PA-115 a PA-117. Los valores
 | 2026-09-28 | 0.2 | Decisiones del usuario (§9): PNR como episodio con entrada 0,5, salida 0,25, evitación o tope de 12 pasos por hora; carga con techo 1 y 16 eventos activos; catálogo de evitación; flexibilidad débil hasta MF7; el `rumiar` de la 044 pasa a PNR real; estrés y ánimo desde la carga (MF6.4) |
 | 2026-09-28 | 0.2 | Estado → aprobada |
 | 2026-09-28 | 0.2 | Precisiones de la implementación (MF6): (1) R-001: disparan los hechos del tick con λ < 0 en las reglas de la 036, por cada estímulo presente con función aversiva para esa persona (en un despido, «despido» y no «trabajo»), y las creencias de la charla (044) con `−preocupación`. (2) R-002: el paso deriva desde el foco (el pensamiento más aversivo) el estímulo de función transformada más aversiva (`factor × función × fuerza`); sin a dónde ir, se repite y se habitúa un 10 %. Quedarse con el pensamiento es exposición: un ensayo de extinción del disparador por paso. (3) R-004: la evitación es el paso a dormir o a distraerse durante el episodio. Suprime la mitad de la carga, y el alivio (normalizado por `PNR_ENTER`) refuerza la respuesta. Mientras sigue, lo pensado se desvanece sin extinguirse. En la selección, la fuente `alivio` (040). Consumir, evitar a alguien y suprimir quedan pendientes. (4) R-006, R-007: «Yo» se emite con probabilidad igual a su fuerza (0,1 hasta MF7). Conserva la mitad de la función y cierra el episodio; se refuerza con resultado 1 si hay un dominio vital apetitivo y se extingue con 0 si no. (5) Fuera de un episodio, los pensamientos se desvanecen con media vida de 3 h. Resultados: 042 V-10 en `docs/validaciones` y `lab/private.test.ts`; en 30 días de vida normal del mundo de la semilla 482917 no hay episodios (carga máxima 0,06): los hechos del mundo actual pesan poco. Sin cambios en CA |
+| 2026-09-28 | 0.2 | Estado → implementada |
