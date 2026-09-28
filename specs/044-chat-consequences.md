@@ -4,7 +4,7 @@ nombre: chat-consequences
 estado: aprobada
 hito: Bloque L (ampliación, petición del usuario 2026-09-27) · completa con 012, 013 y 025 en M3–M6
 depende_de: [008, 010, 014, 019, 023, 026, 036, 037, 038, 040, 043]
-version: 0.2
+version: 0.3
 ---
 
 # 044 — Consecuencias de la charla: lo que se dice sobre otros sale de la charla
@@ -96,12 +96,14 @@ Coste de memoria: unas pocas creencias e intenciones por persona que charló (< 
   - transformación por la red (037): p. ej. `traición` coordinada con `abandono`, si su padre se fue;
   - reglas y valores (038): si tiene activo el dominio `pareja/familia`, la afirmación se opone a su valor y suma carga.
 
-  `impacto = credibilidad × |f(estímulo)| × cercanía(tercero) × (1 + VALUE_AMP × valorOpuesto)`
+  `preocupación = |f(estímulo)| × cercanía(tercero) × (1 + VALUE_AMP × valorOpuesto)`: cuánto le importa si fuera cierto.
+
+  `impacto = credibilidad × preocupación`
 
   Dos personas con historias distintas reaccionan distinto a la misma frase (CA-002).
 - **R-004** [M] — **Reacción en la charla.** El impacto entra en la carga aversiva de la conversación (043 R-007) en ese turno. Así sube la probabilidad de `contraatacar`, `poner_limite` o `terminar`, según lo que su historia haya reforzado. La postura la sigue eligiendo la 040.
 - **R-005** [M] — **Efecto emocional mayor.** El estrés sube `STRESS_K × impacto`, con un tope propio `MAX_CLAIM_STRESS_DELTA`, mayor que el de la charla (043 R-022). Así una revelación pesa más que un mal tono. Decae con la dinámica normal de la 010.
-- **R-006** [T] idea / [M] competencia — **Intención tras la charla.** Si `impacto ≥ INTENT_THRESHOLD`, la consolidación (043 R-019.6) crea una intención hacia el tercero. El tipo lo decide la selección de la 040 entre cuatro respuestas, con sus fuentes:
+- **R-006** [T] idea / [M] competencia — **Intención tras la charla.** Si lo cree (credibilidad ≥ `BELIEF_MIN`) y la `preocupación ≥ INTENT_THRESHOLD`, la consolidación (043 R-019.6) crea una intención hacia el tercero. El tipo lo decide la selección de la 040 entre cuatro respuestas, con sus fuentes:
 
   | Respuesta | Cuándo gana |
   |---|---|
@@ -126,7 +128,7 @@ Coste de memoria: unas pocas creencias e intenciones por persona que charló (< 
 |---|---|---|---|
 | `CHAT_CLAIM_HEARD` | Consolidación, por afirmación válida | `citizenId, about, predicate, seq, sessionId` | `CONVERSATION_HELD` |
 | `CHAT_CLAIM_BELIEVED` | Credibilidad ≥ `BELIEF_MIN` | `citizenId, about, predicate, credibility, impact` | `CHAT_CLAIM_HEARD`, fuentes de R-002 y R-003 (estímulo, regla o valor) |
-| `INTENTION_FORMED` | Impacto ≥ `INTENT_THRESHOLD` | `citizenId, kind, target, urgency, expiresAt` | `CHAT_CLAIM_BELIEVED`, fuentes de la 040 |
+| `INTENTION_FORMED` | Creída y preocupación ≥ `INTENT_THRESHOLD` | `citizenId, kind, target, urgency, expiresAt` | `CHAT_CLAIM_BELIEVED`, fuentes de la 040 |
 | `PHONE_CALL_MADE` | Se ejecuta `llamar` | `from, to, reason` | `INTENTION_FORMED` |
 | `CONFRONTATION` | Llamada o coincidencia | `a, b, topic, responseA, responseB` | `PHONE_CALL_MADE` o `INTENTION_FORMED` y el lugar |
 | `BOND_STRAINED` | Cambia la tensión | `a, b, tensionBefore, tensionAfter, trustBefore, trustAfter` | `CONFRONTATION` |
@@ -155,7 +157,7 @@ Coste de memoria: unas pocas creencias e intenciones por persona que charló (< 
 | `BELIEF_MIN` | 0,3 | 0–1 | [M] |
 | `VALUE_AMP` | 0,5 | 0–2 | [M] 038 R-007 |
 | `STRESS_K`, `MAX_CLAIM_STRESS_DELTA` | 0,5 · 0,35 | 0–1 | [M] PA-139 (mayor que `MAX_MOOD_DELTA` de 043) |
-| `INTENT_THRESHOLD` | 0,2 | 0–1 | [M] PA-139; decisión del usuario (opción A, 2026-09-27): con 0,35 nadie actuaba |
+| `INTENT_THRESHOLD` | 0,3 (sobre la preocupación) | 0–1 | [M] PA-139; L5.5: sobre la preocupación y no el impacto, porque la duda frenaba dos veces y nadie actuaba |
 | `INTENT_TTL_MIN` | 2 880 (2 días) | 60–10 080 | [M] |
 | `CALL_DELAY_MAX_MIN` | 30 | 1–240 | [M] |
 | `MAX_TENSION_DELTA`, `TENSION_DECAY_DAY` | 0,3 · 0,05 | 0–1 | [M] PA-140 |
@@ -184,3 +186,4 @@ Resueltas por el usuario el 2026-09-27 (todas según la propuesta):
 | 2026-09-27 | 0.2 | Precisiones de L5.3: (1) R-006: solo forman intención las afirmaciones creídas que pegan en contra, una por tercero (la de más impacto). Las fuentes de las cuatro respuestas salen de lo reforzado en sus charlas (contraatacar o poner un límite, callar o evadir, abrirse); la urgencia empuja a llamar y la duda a preguntar. El azar sale del flujo `intent:<CIT>` de la semilla en ese minuto (R-010). (2) R-008: tres sistemas en fases sucesivas del tick (llamada → confrontación → vínculo) para que cada evento cite al anterior. La llamada ocurre cuando los dos están despiertos. El tercero elige entre negar, explicar, contraatacar o callar; negar parte con fuerza 0,6 [M]. La gravedad de cada combinación está en una tabla [M] y la tensión sube `MAX_TENSION_DELTA × gravedad × (0,5 + 0,5 × impacto)`. Bajan las dos confianzas y sube el estrés de ambos. Una negación o explicación baja la creencia de quien reclama `× (1 − 0,5 × confianza)`. (3) R-006: quien rumia suma 0,005 de estrés por hora [M]. (4) Eventos: `PHONE_CALL_MADE` lleva la urgencia; `CONFRONTATION`, la vía y el impacto; `BOND_STRAINED`, las dos confianzas. (5) Medición (semilla 482917, 25 personas con pareja, valores por defecto): todas creen la revelación, pero ninguna forma intención (impacto 0,24 a 0,29 frente al umbral 0,35), y el impacto casi no varía entre personas porque la historia generada no enseña la traición. Pendiente de calibrar con el usuario (PA-139). Sin cambios en CA |
 | 2026-09-27 | 0.2 | Decisión del usuario (opción A): `INTENT_THRESHOLD` baja de 0,35 a 0,2, porque con 0,35 nadie actuaba. Nueva medición (semilla 482917, 25 personas con pareja, un desconocido invasivo dice que la pareja acepta una relación abierta): las 25 forman una intención; 18 preguntan, 5 rumian, 1 confronta y 1 llama. En los encuentros, la pareja explica (14) o niega (6). Sin cambios en CA |
 | 2026-09-27 | 0.2 | L5.4: `citizen:report` muestra creencias, intenciones y vínculos, y la cadena de cada conflicto hasta la charla (CA-005). CA-007: el turno evalúa la afirmación sin cambiar el hash. Batería con el guion «revelación sobre la pareja» (§9). Hallazgo: en ese guion, el ejemplo del usuario, el visitante insiste antes de la revelación. Se le cree poco (credibilidad ≈ 0,3) y el impacto queda en 0,17 a 0,18, bajo el umbral de 0,2, así que nadie actúa: el impacto multiplica la credibilidad dos veces en la práctica (para creer y para actuar). Queda para decidir con el usuario si el umbral de intención se mide sin la credibilidad (la preocupación: función × cercanía), y la credibilidad solo decide entre preguntar, confrontar, llamar o rumiar. Sin cambios en CA |
+| 2026-09-27 | 0.3 | L5.5 (el usuario delega la decisión, 2026-09-27): la intención se forma si lo cree y la **preocupación** (`|función| × cercanía × (1 + VALUE_AMP × valor opuesto)`) alcanza `INTENT_THRESHOLD` = 0,3; el impacto (`credibilidad × preocupación`) sigue en la carga, el estrés y la urgencia. Antes la credibilidad contaba dos veces (para creer y para actuar), y en el guion del usuario nadie actuaba (impacto 0,17 a 0,18). La duda decide cómo actúa (preguntar), no si actúa. Medición con la batería (guion «revelación sobre la pareja», 10 ciudadanos, 4 con pareja): las 4 actúan, 3 preguntan y 1 confronta. `ClaimAssessment.concern` nuevo. Sin cambios en CA |

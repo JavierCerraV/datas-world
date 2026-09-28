@@ -85,7 +85,7 @@ export function bondOf(view: WorldView, citizenId: EntityId, other: EntityId, fa
 }
 
 const discarded = (c: HeardClaim, why: string): ClaimAssessment => ({
-  predicate: c.predicate, relation: c.about, discarded: why, credibility: 0, value: 0, impact: 0, valueSource: 'direct',
+  predicate: c.predicate, relation: c.about, discarded: why, credibility: 0, value: 0, concern: 0, impact: 0, valueSource: 'direct',
 });
 
 /**
@@ -112,9 +112,10 @@ export function assessClaim(
   const { trust } = bondOf(view, citizenId, about, FAMILY.has(rel.resolve), p);
   const credibility = clamp01(p.credBase + p.credSource * visitorValue(s) + sign * p.credTrust * (trust - 0.5));
   const opposed = value < 0 ? valueContribution(pc.net, directOf, def.stimulus) : undefined;
-  const impact = clamp01(credibility * Math.abs(value) * rel.closeness * (1 + p.valueAmp * (opposed?.value ?? 0)));
+  const concern = clamp01(Math.abs(value) * rel.closeness * (1 + p.valueAmp * (opposed?.value ?? 0)));
+  const impact = clamp01(credibility * concern);
   return {
-    predicate: def.key, relation: rel.key, about, credibility: round(credibility), value: round(value), impact: round(impact),
+    predicate: def.key, relation: rel.key, about, credibility: round(credibility), value: round(value), concern: round(concern), impact: round(impact),
     valueSource: fv.source, ...(fv.derived ? { derivedFrom: fv.derived.to } : {}), ...(opposed ? { opposedValue: opposed.root } : {}),
   };
 }

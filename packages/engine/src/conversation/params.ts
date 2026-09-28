@@ -49,7 +49,7 @@ export interface ClaimParams {
   /** R-007 [M]: confianza de partida de un vínculo aún no tocado, familiar u otro (hasta la 012; PA-140). */
   trust0Family: number;
   trust0Other: number;
-  /** R-006 (PA-139): impacto mínimo para formar una intención (`INTENT_THRESHOLD`) y su caducidad (`INTENT_TTL_MIN`). */
+  /** R-006 (PA-139): preocupación mínima de lo creído para formar una intención (`INTENT_THRESHOLD`) y su caducidad (`INTENT_TTL_MIN`). */
   intentThreshold: number;
   intentTtlMin: number;
   /** R-006 [M]: peso de la urgencia en llamar y confrontar, y de la duda (credibilidad media) en preguntar. */
@@ -78,7 +78,9 @@ export const CLAIM_DEFAULTS: ClaimParams = Object.freeze({
   maxClaimStressDelta: 0.35,
   trust0Family: 0.6,
   trust0Other: 0.5,
-  intentThreshold: 0.2, // opción A del usuario (2026-09-27): con 0,35 nadie actuaba (PA-139)
+  // Sobre la preocupación, no el impacto (L5.5, 2026-09-27): con el impacto, la duda frenaba dos veces y nadie
+  // actuaba ni con 0,2. 0,3 deja fuera lo poco grave sobre alguien lejano (un compañero, 0,4 de cercanía).
+  intentThreshold: 0.3,
   intentTtlMin: 2_880,
   urgencyWeight: 2,
   doubtWeight: 1,

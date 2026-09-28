@@ -114,6 +114,12 @@ describe('afirmaciones sobre terceros (044 R-001 a R-004)', () => {
     const neutral = cred(emptyStore());
     const hostile = cred(storeWith([['ext.EXT-0001', -0.8]]));
     expect(hostile).toBeLessThan(neutral);
+    // L5.5: la preocupación (cuánto le importa si fuera cierto) no depende de quién lo dice; el impacto sí.
+    const both = [emptyStore(), storeWith([['ext.EXT-0001', -0.8]])].map((st) => assessClaim(startConversation(st, 'EXT-0001'), pc(), view, ana, CAT, INFIEL[0]!, 0, CLAIM_DEFAULTS));
+    // (casi igual: lo aprendido del visitante se generaliza un poco a la traición por la ontología, 036 R-004)
+    expect(both[0]!.concern).toBeCloseTo(both[1]!.concern, 1);
+    expect(both[1]!.impact).toBeLessThan(both[0]!.impact);
+    expect(both[0]!.impact).toBeCloseTo(both[0]!.credibility * both[0]!.concern, 2);
     // Cambiar el estado real de Luis (lo que cree, lo que aprendió) no cambia lo que Ana cree de él.
     Object.assign(world.citizens.get(luis)!, { functions: storeWith([['verbal.traicion', 1]]), beliefs: [{ about: ana, predicate: 'infiel', source: 'EXT-0001', credibility: 1, at: 0, cause: 'EVT-000001' as EntityId }] });
     expect(cred(emptyStore())).toBe(neutral);
