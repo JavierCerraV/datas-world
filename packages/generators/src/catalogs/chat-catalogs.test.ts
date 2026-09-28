@@ -73,3 +73,46 @@ describe('catálogos de la charla (043)', () => {
     expect([...covered].sort()).toEqual([...toneKeys].sort());
   });
 });
+
+describe('catálogos de las consecuencias de la charla (044)', () => {
+  const claims = catalogs.chat_claims.entries;
+  const relations = catalogs.chat_relations.entries;
+  const stimuli = new Map(catalogs.stimulus_classes.entries.map((e) => [e.key, e]));
+
+  it('chat_claims tiene las 8 afirmaciones de P1, cada una con estímulo verbal sin valor primario, magnitud, valor de partida y relaciones válidas', () => {
+    expect(claims.map((c) => c.key)).toEqual([
+      'consiente_relacion_abierta', 'habla_mal_de_ti', 'infiel', 'quiere_separarse',
+      'te_admira', 'te_extrana', 'te_miente_con_dinero', 'te_van_a_despedir',
+    ]);
+    const relKeys = new Set(relations.map((r) => r.key));
+    for (const c of claims) {
+      const a = c.attrs ?? {};
+      const stim = stimuli.get(String(a.stimulus));
+      expect(stim?.attrs?.kind, `${c.key}: estímulo ${String(a.stimulus)}`).toBe('verbal_term');
+      expect(stim!.attrs!.primary, c.key).toBeUndefined();
+      expect(num(a.magnitude)).toBeGreaterThan(0);
+      expect(num(a.magnitude)).toBeLessThanOrEqual(1);
+      expect(Math.abs(num(a.prior))).toBeLessThanOrEqual(1);
+      const about = a.about as string[];
+      expect(about.length, c.key).toBeGreaterThan(0);
+      for (const r of about) expect(relKeys.has(r), `${c.key}: relación ${r}`).toBe(true);
+      expect((a.examples as string[]).length).toBeGreaterThanOrEqual(2);
+      expect((a.keywords as string[]).length).toBeGreaterThanOrEqual(3);
+    }
+    // Las revelaciones sobre la pareja pesan en contra; las buenas noticias, a favor (R-003).
+    const prior = (k: string) => num(claims.find((c) => c.key === k)!.attrs!.prior);
+    expect(prior('infiel')).toBeLessThan(0);
+    expect(prior('te_extrana')).toBeGreaterThan(0);
+  });
+
+  it('chat_relations resuelve cada relación desde la vista del ciudadano, con cercanía en [0,1] y la pareja como la más cercana', () => {
+    const resolves = new Set(['partner', 'mother', 'father', 'child', 'sibling', 'boss', 'coworker']);
+    for (const r of relations) {
+      expect(resolves.has(String(r.attrs!.resolve)), r.key).toBe(true);
+      expect(num(r.attrs!.closeness)).toBeGreaterThan(0);
+      expect(num(r.attrs!.closeness)).toBeLessThanOrEqual(1);
+      expect((r.attrs!.keywords as string[]).length).toBeGreaterThan(0);
+    }
+    expect(num(relations.find((r) => r.key === 'pareja')!.attrs!.closeness)).toBe(1);
+  });
+});

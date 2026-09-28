@@ -27,11 +27,14 @@ describe('chat:battery (043 R-015)', () => {
     expect(readFileSync(`${a}.md`, 'utf8')).toBe(readFileSync(`${b}.md`, 'utf8'));
     const report = JSON.parse(readFileSync(`${a}.json`, 'utf8')) as { citizens: string[]; scripts: string[]; byTone: Record<string, Record<string, number>>; turns: number };
     expect(report.citizens).toHaveLength(5);
-    expect(report.scripts).toHaveLength(14);
+    expect(report.scripts).toHaveLength(15);
     expect(report.turns).toBeGreaterThan(100);
     // §9: el tono cambia la distribución de posturas.
     const escape = (s: Record<string, number>) => ['evadir', 'poner_limite', 'contraatacar', 'callar', 'terminar'].reduce((x, k) => x + (s[k] ?? 0), 0);
     expect(escape(report.byTone.hostil!)).toBeGreaterThan(escape(report.byTone.amable!));
+    // 044 §9: el guion «revelación sobre la pareja» se oye; quien no tiene pareja lo descarta con el motivo.
+    const c = (report as unknown as { consequences: { heard: number; discarded: Record<string, number>; formed: number } }).consequences;
+    expect(c.heard + (c.discarded['no tiene pareja'] ?? 0)).toBeGreaterThan(0);
   }, 120_000);
 
   it('rechaza un proveedor desconocido', async () => {

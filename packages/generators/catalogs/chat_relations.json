@@ -1,0 +1,49 @@
+{
+  "name": "chat_relations",
+  "version": "2026.10.1",
+  "source": "Spec 044 R-001 y R-003: a quién se refiere el visitante («su esposa» → la pareja). `resolve`: cómo encuentra el motor a la persona real desde la vista del ciudadano (su hogar, su familia y su trabajo), nunca desde la verdad del mundo. `closeness` [0,1]: cercanía por defecto del tercero en la fórmula de impacto (R-003) [M], hasta que la 012 dé la cercanía del vínculo. `keywords`: palabras que la nombran, para el clasificador y las reglas léxicas de respaldo.",
+  "entries": [
+    {
+      "key": "companero",
+      "name": "Compañero de trabajo",
+      "since": "M2",
+      "attrs": { "resolve": "coworker", "closeness": 0.4, "keywords": ["compañero", "compañera", "colega", "compañeros"] }
+    },
+    {
+      "key": "hermano",
+      "name": "Hermano o hermana",
+      "since": "M2",
+      "attrs": { "resolve": "sibling", "closeness": 0.7, "keywords": ["hermano", "hermana", "hermanito", "hermanita"] }
+    },
+    {
+      "key": "hijo",
+      "name": "Hijo o hija",
+      "since": "M2",
+      "attrs": { "resolve": "child", "closeness": 0.9, "keywords": ["hijo", "hija", "hijito", "hijita", "muchacho", "muchacha", "niño", "niña"] }
+    },
+    {
+      "key": "jefe",
+      "name": "Jefe",
+      "since": "M2",
+      "attrs": { "resolve": "boss", "closeness": 0.5, "keywords": ["jefe", "jefa", "patrón", "patrona", "supervisor", "supervisora"] }
+    },
+    {
+      "key": "madre",
+      "name": "Madre",
+      "since": "M2",
+      "attrs": { "resolve": "mother", "closeness": 0.8, "keywords": ["mamá", "madre", "mami", "cucha"] }
+    },
+    {
+      "key": "padre",
+      "name": "Padre",
+      "since": "M2",
+      "attrs": { "resolve": "father", "closeness": 0.8, "keywords": ["papá", "padre", "papi", "cucho"] }
+    },
+    {
+      "key": "pareja",
+      "name": "Pareja",
+      "since": "M2",
+      "attrs": { "resolve": "partner", "closeness": 1, "keywords": ["esposa", "esposo", "mujer", "marido", "novia", "novio", "pareja", "compañera sentimental"] }
+    }
+  ]
+}

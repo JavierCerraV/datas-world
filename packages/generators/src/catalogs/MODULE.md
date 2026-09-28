@@ -2,7 +2,7 @@
 modulo: catalogs
 ruta: packages/generators/src/catalogs
 estado: en-desarrollo
-specs: [003, 004, 005, 006, 007, 008, 009, 030, 043]
+specs: [003, 004, 005, 006, 007, 008, 009, 030, 043, 044]
 actualizado: 2026-09-27
 ---
 
@@ -87,3 +87,5 @@ Las entradas de M1 de `place_kinds` llevan `proto` (el tipo del prototipo), `def
 | 2026-09-26 | mf/4-red | 037 | `stimulus_classes` 2026.09.2: `verbal.despido`, `verbal.llegar_tarde` y `verbal.no_pagar` (37 entradas) |
 | 2026-09-26 | mf/5-reglas-valores | 038 | `stimulus_classes` 2026.09.3: respuestas de la rutina `rutina.*` (tipo `response`), que especifican las reglas (42 entradas) |
 | 2026-09-27 | charla/l0-catalogos (L0.2) | 043, 036 | Catálogos nuevos de la charla: `chat_tones` (12 tonos con estímulo, magnitud, valor social de partida aprobado por el usuario, ejemplos y palabras clave), `chat_stances` (8 posturas con escape, fuerza inicial y guía) y `chat_scripts` (14 guiones: uno por tono y dos mixtos). `stimulus_classes` 2026.09.4: nueve términos verbales de la charla, sin valor primario (51 entradas). `CATALOG_NAMES` pasa a 22 |
+| 2026-09-27 | charla/l5 (L5.1) | 044, 005, 036 | Catálogos nuevos `chat_claims` (las 8 afirmaciones de la 044 P1, con estímulo, magnitud, valor de partida, relaciones admitidas, ejemplos y palabras clave) y `chat_relations` (7 relaciones con cómo resolverlas desde la vista, cercanía y palabras). `stimulus_classes` 2026.10.1: abandono, afecto, desprecio y traición, sin valor primario. `object_kinds` 2026.10.1: el teléfono es el celular de toda persona de 14 años o más, con `callAccess` por estrato (044 P2). `CATALOG_NAMES` pasa a 24. 2 pruebas |
+| 2026-09-27 | charla/l5 (L5.4) | 044 | `chat_scripts` 2026.10.2: guion `revelacion.pareja` (el ejemplo del usuario: proponer una relación abierta y decir que la pareja está de acuerdo), 15 guiones |

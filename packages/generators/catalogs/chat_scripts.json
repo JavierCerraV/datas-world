@@ -1,7 +1,7 @@
 {
   "name": "chat_scripts",
-  "version": "2026.10.1",
-  "source": "Spec 043 R-015 (bloque L0.2). Guiones de prueba para la batería `chat:battery`: al menos uno por tono y dos mixtos (escalada y lamento seguido de burla). Los textos son genéricos para que sirvan con cualquier ciudadano; cada turno lleva su tono esperado, que en la batería hace de etiqueta de prueba (R-004).",
+  "version": "2026.10.2",
+  "source": "Spec 043 R-015 (bloque L0.2). Guiones de prueba para la batería `chat:battery`: al menos uno por tono y dos mixtos (escalada y lamento seguido de burla). Los textos son genéricos para que sirvan con cualquier ciudadano; cada turno lleva su tono esperado, que en la batería hace de etiqueta de prueba (R-004). L5.4 (044 §9): «revelación sobre la pareja», el ejemplo del usuario, para medir las afirmaciones y las intenciones.",
   "entries": [
     {
       "key": "amable.saludo",
@@ -168,6 +168,19 @@
           { "text": "Dígame ya, no me venga con cuentos.", "tone": "presion" },
           { "text": "Tiene que ayudarme, no hay de otra.", "tone": "presion" },
           { "text": "Conteste, no se haga el loco.", "tone": "presion" }
+        ]
+      }
+    },
+    {
+      "key": "revelacion.pareja",
+      "name": "Revelación sobre la pareja",
+      "since": "M2",
+      "attrs": {
+        "turns": [
+          { "text": "Buenas, ¿cómo va todo?", "tone": "amable" },
+          { "text": "Oiga, ¿y usted vive con su pareja?", "tone": "invasivo" },
+          { "text": "Es que le quería proponer que saliéramos, algo abierto, sin compromiso.", "tone": "invasivo" },
+          { "text": "Tranquilo, su esposa ya me dijo que está de acuerdo con la relación abierta, ya hablé con ella.", "tone": "invasivo" }
         ]
       }
     },

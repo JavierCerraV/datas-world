@@ -53,7 +53,17 @@ La charla termina cuando pulsas **Despedirse**, cuando cierras la ventana de la 
 - tiene que irse a un compromiso;
 - se cansa de esperar tu mensaje (10 minutos sin escribir).
 
-## 4. Batería automática
+## 4. Lo que dices de otras personas (spec 044)
+
+Si en una charla **en el mundo** le dices algo sobre alguien cercano (su pareja, su familia, su jefe o sus compañeros), por ejemplo «su esposa está de acuerdo con la relación abierta»:
+- En la charla, el panel **Por qué respondió así** muestra qué oyó, de quién, cuánto se lo cree y cuánto le afecta. Si le afecta, la reacción es más fuerte.
+- Al cerrar, si se lo cree, queda como **creencia** y le sube el estrés. Si le afectó lo suficiente, decide qué hacer: **preguntar** con calma, **confrontar** al encontrarse, **llamar** por celular o **quedarse rumiando**.
+- En el mundo, la llamada o el encuentro ocurren solos. La otra persona responde según su historia (casi siempre niega, porque nunca dijo eso), la relación se tensa y la otra persona queda sabiendo que un extraño anda diciendo cosas.
+- Para ver toda la historia: `pnpm cli citizen:report CIT-000002` → sección **Creencias, intenciones y vínculos**, con la cadena de cada conflicto hasta la frase de la charla.
+
+En **sandbox** ves lo mismo en el panel, pero no cambia nada.
+
+## 5. Batería automática
 
 Para probar muchos ciudadanos a la vez con guiones fijos (uno por tono):
 ```
@@ -64,7 +74,7 @@ Por defecto usa un proveedor simulado, gratuito y siempre igual. Deja el informe
 pnpm cli chat:battery --citizens 5 --provider config
 ```
 
-## 5. Coste y ajustes
+## 6. Coste y ajustes
 
 - **Modelo:** Claude Haiku 4.5, con un presupuesto por defecto de 20 USD al mes y 2 millones de tokens al día. Al agotarse, la charla sigue con frases de plantilla.
 - **Otro modelo o presupuesto:** crea `config/llm.json`. Ejemplo:

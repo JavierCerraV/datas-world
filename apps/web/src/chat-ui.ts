@@ -1,7 +1,7 @@
 // Vista de chat del visor (spec 043 R-017): diálogo con inicio (modo y modo prueba), conversación en streaming,
 // tono y postura de cada turno con sus motivos, marcas de coherencia y panel «Lo que sabe». Solo muestra lo que
 // devuelve la API.
-import { TONES, endChat, openChat, sendTurn, sourceLabel, stanceLabel, toneLabel, topProbabilities, verdictMark, verification } from './chat.ts';
+import { TONES, claimLine, endChat, openChat, sendTurn, sourceLabel, stanceLabel, toneLabel, topProbabilities, verdictMark, verification } from './chat.ts';
 import type { DoneMsg, OpenResult, StanceMsg } from './chat.ts';
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
@@ -95,7 +95,8 @@ export function setupChat(d: ChatUiDeps): void {
         const detected = s.tone.toneLlm && s.tone.toneLlm !== s.tone.tone ? ` · el clasificador dijo ${toneLabel(s.tone.toneLlm)}` : '';
         mine.querySelector('.meta')!.textContent = `tú · tono ${toneLabel(s.tone.tone)}${s.tone.toneTag ? ' (etiqueta)' : ''}${detected}`;
         meta.textContent = `postura: ${stanceLabel(s.stance)}${s.forced ? ' (tiene que irse)' : ''}`;
-        $('#chat-why').innerHTML = `<p>${esc(stanceLabel(s.stance))}</p><ul>${s.sources.map((x) => `<li>${esc(sourceLabel(x))} <span class="mono">${x.contribution.toFixed(2)}</span></li>`).join('')}</ul><p class="muted">Probabilidades: ${esc(topProbabilities(s.probabilities))}</p>`;
+        const heard = (s.claims ?? []).map((c) => `<p class="claim">${esc(claimLine(c))}</p>`).join('');
+        $('#chat-why').innerHTML = `${heard}<p>${esc(stanceLabel(s.stance))}</p><ul>${s.sources.map((x) => `<li>${esc(sourceLabel(x))} <span class="mono">${x.contribution.toFixed(2)}</span></li>`).join('')}</ul><p class="muted">Probabilidades: ${esc(topProbabilities(s.probabilities))}</p>`;
       } else if (event === 'token') bubble.textContent += (data as { text: string }).text;
       else if (event === 'done') {
         const dn = data as DoneMsg;

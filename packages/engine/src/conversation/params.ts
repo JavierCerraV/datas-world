@@ -17,6 +17,8 @@ export interface ChatParams {
   maxMoodDelta: number;
   /** R-022: `k` del efecto emocional, `k × valencia × intensidad`. */
   moodK: number;
+  /** Consecuencias de lo dicho sobre terceros (044); si falta, `CLAIM_DEFAULTS`. */
+  claims?: ClaimParams;
 }
 
 export const CHAT_DEFAULTS: ChatParams = Object.freeze({
@@ -28,6 +30,64 @@ export const CHAT_DEFAULTS: ChatParams = Object.freeze({
   maxLearningDelta: 0.1,
   maxMoodDelta: 0.15,
   moodK: 0.3,
+});
+
+/** Parámetros de las consecuencias de la charla (spec 044 §8). Todos [M]. */
+export interface ClaimParams {
+  /** R-002 (PA-138): credibilidad de partida y pesos de la fuente (el visitante), la confianza y la contradicción. */
+  credBase: number;
+  credSource: number;
+  credTrust: number;
+  credContra: number;
+  /** §5: credibilidad mínima para que la afirmación quede como creencia (`BELIEF_MIN`). */
+  beliefMin: number;
+  /** R-003: cuánto amplifica el impacto que la afirmación se oponga a un valor (038 R-007). */
+  valueAmp: number;
+  /** R-005 (PA-139): `STRESS_K` y tope propio `MAX_CLAIM_STRESS_DELTA` (mayor que `maxMoodDelta`). */
+  stressK: number;
+  maxClaimStressDelta: number;
+  /** R-007 [M]: confianza de partida de un vínculo aún no tocado, familiar u otro (hasta la 012; PA-140). */
+  trust0Family: number;
+  trust0Other: number;
+  /** R-006 (PA-139): impacto mínimo para formar una intención (`INTENT_THRESHOLD`) y su caducidad (`INTENT_TTL_MIN`). */
+  intentThreshold: number;
+  intentTtlMin: number;
+  /** R-006 [M]: peso de la urgencia en llamar y confrontar, y de la duda (credibilidad media) en preguntar. */
+  urgencyWeight: number;
+  doubtWeight: number;
+  /** R-006 [M]: estrés por hora mientras rumia (el estrés queda alto más tiempo). */
+  ruminationPerHour: number;
+  /** R-007, R-008 (PA-140): cambio máximo de tensión por encuentro y decaimiento diario. */
+  maxTensionDelta: number;
+  tensionDecayDay: number;
+  /** R-008 [M]: fuerza de partida de negar para quien nunca dijo eso, y cuánto baja la creencia una negación creíble. */
+  denyStrength: number;
+  denialDoubt: number;
+  /** R-008.4 [M]: credibilidad de lo que el tercero oye del visitante («un extraño anda diciendo cosas»). */
+  rumorCredibility: number;
+}
+
+export const CLAIM_DEFAULTS: ClaimParams = Object.freeze({
+  credBase: 0.4,
+  credSource: 0.3,
+  credTrust: 0.4,
+  credContra: 0.6,
+  beliefMin: 0.3,
+  valueAmp: 0.5,
+  stressK: 0.5,
+  maxClaimStressDelta: 0.35,
+  trust0Family: 0.6,
+  trust0Other: 0.5,
+  intentThreshold: 0.2, // opción A del usuario (2026-09-27): con 0,35 nadie actuaba (PA-139)
+  intentTtlMin: 2_880,
+  urgencyWeight: 2,
+  doubtWeight: 1,
+  ruminationPerHour: 0.005,
+  maxTensionDelta: 0.3,
+  tensionDecayDay: 0.05,
+  denyStrength: 0.6,
+  denialDoubt: 0.5,
+  rumorCredibility: 0.8,
 });
 
 /** Prefijo de las respuestas conversacionales en el almacén de funciones (036 R-002). */

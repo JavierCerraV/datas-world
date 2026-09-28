@@ -3,7 +3,9 @@
 // tabla de esparcimiento del motor de decisiones, 017) y el motor no hace E/S.
 import {
   CHAT_DEFAULTS,
+  CLAIM_DEFAULTS,
   NEEDS_SYSTEMS,
+  consequenceSystems,
   Runner,
   chatInputHandlers,
   learningParams,
@@ -19,7 +21,7 @@ import {
   routinesSystem,
   rulesSystem,
 } from '@datas-world/engine';
-import type { Capability, ChatCatalog, LoopOptions, SystemRegistry, World } from '@datas-world/engine';
+import type { Capability, ChatCatalog, LoopOptions, RelationResolve, SystemRegistry, World } from '@datas-world/engine';
 import { loadCatalogs } from './catalogs/load.ts';
 import type { Catalogs } from './catalogs/load.ts';
 import { leisureTable } from './leisure/params.ts';
@@ -48,6 +50,8 @@ export function lifeSystems(world: World, catalogs: Catalogs = loadCatalogs()): 
       createLearningSystem(onto),
       relationsSystem,
       rulesSystem,
+      // Consecuencias de la charla (044 R-006 a R-009): llamadas, encuentros y vínculos.
+      ...consequenceSystems(chatEngineCatalog(catalogs), CLAIM_DEFAULTS),
     ]),
     loop: { validate: createActionValidator(table) },
   };
@@ -59,7 +63,22 @@ export function chatEngineCatalog(catalogs: Catalogs): ChatCatalog {
   return {
     tones: catalogs.chat_tones.entries.map((e) => ({ key: e.key, stimulus: String(e.attrs?.stimulus ?? ''), magnitude: n(e.attrs?.magnitude), prior: n(e.attrs?.prior) })),
     stances: catalogs.chat_stances.entries.map((e) => ({ key: e.key, escape: n(e.attrs?.escape), w0: n(e.attrs?.w0) })),
+    // Consecuencias de lo dicho sobre terceros (044 R-001, R-003).
+    claims: catalogs.chat_claims.entries.map((e) => ({
+      key: e.key, stimulus: String(e.attrs?.stimulus ?? ''), magnitude: n(e.attrs?.magnitude), prior: n(e.attrs?.prior),
+      about: Array.isArray(e.attrs?.about) ? (e.attrs.about as string[]) : [],
+    })),
+    relations: catalogs.chat_relations.entries.map((e) => ({
+      key: e.key, resolve: String(e.attrs?.resolve ?? '') as RelationResolve, closeness: n(e.attrs?.closeness),
+    })),
+    // El celular (044 P2): el tipo de objeto que tiene `callAccess` por estrato.
+    ...phoneOf(catalogs),
   };
+}
+
+function phoneOf(catalogs: Catalogs): Pick<ChatCatalog, 'phone'> {
+  const e = catalogs.object_kinds.entries.find((x) => x.attrs?.callAccess !== undefined);
+  return e ? { phone: { kind: e.key, callAccess: e.attrs!.callAccess as Record<string, number> } } : {};
 }
 
 /** Runner con la vida diaria, el azar de la semilla del mundo (023) y las entradas de la charla (043 R-019). */

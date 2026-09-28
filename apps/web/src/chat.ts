@@ -26,8 +26,36 @@ export interface Source {
   ref?: string;
 }
 
+/** Afirmación del visitante sobre un tercero, ya evaluada por el motor (044 R-011). */
+export interface ClaimMsg {
+  predicate: string;
+  relation: string;
+  about?: string;
+  discarded?: string;
+  credibility: number;
+  impact: number;
+}
+
+const CLAIM_LABELS: Record<string, string> = {
+  consiente_relacion_abierta: 'consiente una relación abierta', habla_mal_de_ti: 'habla mal de él', infiel: 'le es infiel',
+  quiere_separarse: 'quiere separarse', te_admira: 'lo admira', te_extrana: 'lo extraña', te_miente_con_dinero: 'le miente con el dinero',
+  te_van_a_despedir: 'lo van a despedir',
+};
+const RELATION_LABELS: Record<string, string> = {
+  companero: 'un compañero', hermano: 'su hermano o hermana', hijo: 'su hijo o hija', jefe: 'su jefe', madre: 'su mamá', padre: 'su papá', pareja: 'su pareja',
+};
+
+/** «Oyó que su pareja (CIT-000031) le es infiel · la cree 62 % · le afecta 0,48», o por qué no cuenta. */
+export function claimLine(c: ClaimMsg): string {
+  const who = RELATION_LABELS[c.relation] ?? c.relation;
+  const what = CLAIM_LABELS[c.predicate] ?? c.predicate.replace(/_/g, ' ');
+  if (c.discarded) return `Dijo que ${who} ${what}: no cuenta (${c.discarded})`;
+  return `Oyó que ${who} (${c.about}) ${what} · la cree ${Math.round(c.credibility * 100)} % · le afecta ${c.impact.toFixed(2)}`;
+}
+
 export interface StanceMsg {
   tone: { tone: string; toneTag?: string; toneLlm?: string };
+  claims?: ClaimMsg[];
   stance: string;
   sources: Source[];
   probabilities: { stance: string; p: number }[];

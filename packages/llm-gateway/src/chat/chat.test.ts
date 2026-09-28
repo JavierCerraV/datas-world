@@ -1,4 +1,4 @@
-import { LEARNING_DEFAULTS } from '@datas-world/engine';
+import { LEARNING_DEFAULTS, stateHash } from '@datas-world/engine';
 import type { WorldEvent, WorldView } from '@datas-world/engine';
 import { buildOntology, generateWorld, loadCatalogs } from '@datas-world/generators';
 import { describe, expect, it } from 'vitest';
@@ -10,7 +10,7 @@ import type { ProviderAdapter } from '../providers/types.ts';
 import { MemoryRecordStore } from '../records.ts';
 import type { GatewayConfig, ModelConfig } from '../types.ts';
 import { chatCatalogs } from './catalog.ts';
-import { lexicalTone } from './classify.ts';
+import { classifyTone, lexicalClaims, lexicalTone } from './classify.ts';
 import { expressionRequest } from './prompt.ts';
 import { ChatEndedError, ChatSession } from './session.ts';
 import { verifyReply } from './verify.ts';
@@ -171,5 +171,52 @@ describe('charla: turnos, verificación y respaldos (043)', () => {
     const input = await s.close();
     expect(input.turns.at(-1)!.stance).toBe('terminar');
     expect(input.summary).toBe('Charlaron un rato sobre su trabajo.');
+  });
+});
+
+describe('charla: afirmaciones sobre terceros (044 R-001)', () => {
+  const lex = (text: string) => lexicalClaims(cats.claims, cats.relations, text);
+
+  it('reglas léxicas: la afirmación y la relación nombrada; si solo admite una relación, esa', () => {
+    // El ejemplo del usuario: la esposa «está de acuerdo» con la relación abierta.
+    expect(lex('Su esposa ya me dijo que está de acuerdo con la relación abierta')).toEqual([{ predicate: 'consiente_relacion_abierta', about: 'pareja' }]);
+    expect(lex('Vi a su esposo con otra mujer')).toEqual([{ predicate: 'infiel', about: 'pareja' }]);
+    expect(lex('Le están poniendo los cachos')).toEqual([{ predicate: 'infiel', about: 'pareja' }]);
+    expect(lex('Su jefe anda diciendo que usted es un inútil')).toEqual([{ predicate: 'habla_mal_de_ti', about: 'jefe' }]);
+    expect(lex('Su mamá me dijo que lo extraña mucho')).toEqual([{ predicate: 'te_extrana', about: 'madre' }]);
+  });
+
+  it('reglas léxicas: sin afirmación, o sin saber de quién habla, no hay nada; «padre» no está en «compadre»', () => {
+    expect(lex('Buenas tardes, ¿cómo le va?')).toEqual([]);
+    expect(lex('Anda diciendo cosas raras')).toEqual([]); // habla_mal_de_ti admite varias relaciones y no nombra ninguna
+    expect(lex('Mi compadre anda diciendo que usted es flojo')).toEqual([]);
+  });
+
+  it('el clasificador LLM manda cuando responde; descarta relaciones que la afirmación no admite; sin respuesta, las léxicas', async () => {
+    const said = 'Su esposa está de acuerdo con la relación abierta, y su jefe le es infiel a todos';
+    const llm = '{"tone":"invasivo","claims":[{"predicate":"consiente_relacion_abierta","about":"pareja"},{"predicate":"infiel","about":"jefe"}]}';
+    const g = new Gateway({ config: cfg(), adapters: { mock: mockAdapter(byPurpose({ classify: llm })) } });
+    const a = await classifyTone(g, cats, said);
+    expect(a.visitorClaims).toEqual([{ predicate: 'consiente_relacion_abierta', about: 'pareja' }]);
+    expect(a.visitorClaimsLexical.map((c) => c.predicate)).toContain('consiente_relacion_abierta');
+    // Si el clasificador no responde algo válido, quedan las léxicas.
+    const bad = new Gateway({ config: cfg(), adapters: { mock: mockAdapter(byPurpose({ classify: 'no es JSON' })) } });
+    const b = await classifyTone(bad, cats, said);
+    expect(b.toneLlm).toBeUndefined();
+    expect(b.visitorClaims).toEqual(b.visitorClaimsLexical);
+  });
+
+  it('el turno de la charla lleva las afirmaciones detectadas; sin catálogo, la charla sigue igual', async () => {
+    const g = new Gateway({ config: cfg(), adapters: { mock: mockAdapter(byPurpose({ classify: '{"tone":"invasivo","claims":[{"predicate":"infiel","about":"pareja"}]}' })) } });
+    const before = stateHash(gen.world);
+    const t = await session(g).turn('Su esposa lo engaña');
+    expect(t.tone.visitorClaims).toEqual([{ predicate: 'infiel', about: 'pareja' }]);
+    // 044 CA-007: la sesión evalúa la afirmación (lo que muestra el panel) sin tocar el mundo.
+    expect(t.claims).toHaveLength(1);
+    expect(t.claims[0]!.discarded ?? (t.claims[0]!.credibility >= 0 && t.claims[0]!.impact >= 0)).toBeTruthy();
+    expect(stateHash(gen.world)).toBe(before);
+    const plain = chatCatalogs({ chat_tones: catalogs.chat_tones, chat_stances: catalogs.chat_stances, chat_scripts: catalogs.chat_scripts });
+    const r = await classifyTone(new Gateway({ config: cfg(), adapters: { mock: mockAdapter(byPurpose()) } }), plain, 'Su esposa lo engaña');
+    expect(r.visitorClaims).toEqual([]);
   });
 });

@@ -38,7 +38,7 @@ describe('spec 005: objetos iniciales', () => {
 });
 
 describe('005 CA-001: proporciones agregadas de 20 mundos', () => {
-  const stats = { adults: [0, 0], teens: [0, 0], bike: [0, 0], heir: [0, 0] };
+  const stats = { phone14: [0, 0], under14: [0, 0], bike: [0, 0], heir: [0, 0] };
   const cars: Record<string, [number, number]> = { '2': [0, 0], '3': [0, 0], '4': [0, 0] };
   const motos: Record<string, [number, number]> = { '2': [0, 0], '3': [0, 0], '4': [0, 0] };
   for (let s = 1; s <= 20; s++) {
@@ -51,8 +51,7 @@ describe('005 CA-001: proporciones agregadas de 20 mundos', () => {
         s[0] += has ? 1 : 0;
         s[1] += 1;
       };
-      if (a >= 18) count('adults', kinds.has('tecnologia.telefono'));
-      else if (a >= 12) count('teens', kinds.has('tecnologia.telefono'));
+      count(a >= 14 ? 'phone14' : 'under14', kinds.has('tecnologia.telefono'));
       if (a >= 10 && a <= 59) count('bike', kinds.has('transporte.bicicleta'));
       if (a >= 25) count('heir', kinds.has('recuerdo.herencia'));
     }
@@ -67,9 +66,9 @@ describe('005 CA-001: proporciones agregadas de 20 mundos', () => {
   }
   const rate = ([k, n]: number[]) => k! / n!;
 
-  it('teléfono (adultos 0,9 y de 12 a 17 0,6), bicicleta (10–59: 0,3) y herencia (25+: 0,08) a ±0,03; adolescentes a ±0,06 por ser pocos', () => {
-    expect(Math.abs(rate(stats.adults) - 0.9)).toBeLessThanOrEqual(0.03);
-    expect(Math.abs(rate(stats.teens) - 0.6)).toBeLessThanOrEqual(0.06);
+  it('celular para toda persona de 14 años o más y ninguna menor (044 P2); bicicleta (10–59: 0,3) y herencia (25+: 0,08) a ±0,03', () => {
+    expect(rate(stats.phone14)).toBe(1);
+    expect(rate(stats.under14)).toBe(0);
     expect(Math.abs(rate(stats.bike) - 0.3)).toBeLessThanOrEqual(0.03);
     expect(Math.abs(rate(stats.heir) - 0.08)).toBeLessThanOrEqual(0.03);
   });

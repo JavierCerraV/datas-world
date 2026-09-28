@@ -58,7 +58,7 @@ describe('world:advance', () => {
     cli('world:new', '--seed', '482917', '--empty', '--db', db);
     expect(cli('world:advance', '--days', '365', '--db', db).code).toBe(0);
     expect(info()).toMatchObject({ now: 365 * 1440, daysStarted: 365, snapshots: 366, writerPid: null });
-  });
+  }, 30_000); // ≈ 1 s sola; en paralelo con las simulaciones de la charla (044) supera los 5 s por defecto
 
   it('bench --check falla con --days distinto de 365', () => {
     const r = cli('bench', '--days', '1', '--check');

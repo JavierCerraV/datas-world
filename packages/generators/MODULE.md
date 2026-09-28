@@ -2,7 +2,7 @@
 modulo: generators
 ruta: packages/generators
 estado: en-desarrollo
-specs: [001, 023]
+specs: [001, 023, 044]
 actualizado: 2026-09-23
 ---
 
@@ -79,3 +79,6 @@ Porta `genWorld`, `buildPlaces`, `genPopulation`, `newAgent`, `genJobs`, `genRel
 | 2026-09-26 | mf/4-red | 037 | `lifeSystems` monta el sistema `relations` (enseñanza de la comunidad verbal); catálogo `stimulus_classes` 2026.09.2 |
 | 2026-09-26 | mf/5-reglas-valores | 038 | `generateWorld` llama a `initRules` (reglas de la rutina); `lifeSystems` monta el sistema `rules`. Catálogo `stimulus_classes` 2026.09.3 |
 | 2026-09-27 | charla/l3-mundo (L3) | 043 | `lifeRunner` registra los manejadores de la charla (`chatInputHandlers`) con los catálogos `chat_*`, la ontología y los parámetros de aprendizaje; `chatEngineCatalog`. Prueba `chat-world.test.ts`: apertura, consolidación, rechazo sin cambios y replay (043 CA-014) |
+| 2026-09-27 | charla/l5 (L5.1, L5.2) | 044, 005 | `chatEngineCatalog` incluye `chat_claims` y `chat_relations` (sin ellos el worker descartaría todas las afirmaciones). El celular desde los 14 años cambia los objetos y el hash de los mundos nuevos (044 P2). Prueba nueva en `chat-world.test.ts`: una afirmación sobre su hijo deja la creencia y el replay da el mismo estado sin LLM (044 CA-006) |
+| 2026-09-27 | charla/l5 (L5.3) | 044 | `lifeSystems` monta los sistemas de las consecuencias de la charla (`consequenceSystems`: llamadas, encuentros y vínculos); sin intenciones no hacen nada, así que no cambian el hash de los mundos. `chatEngineCatalog` incluye el celular (`phone`: el tipo con `callAccess`). Prueba en `chat-world.test.ts`: la revelación forma una intención, todo encuentro se remonta a lo que oyó (044 INV-002) y el replay de 2 días coincide |
+| 2026-09-27 | charla/l5 (L5.4) | 044 | `chat-world.test.ts` con tiempo máximo de 60 s por prueba: cada una genera y hace vivir el mundo de la semilla, y con toda la suite en paralelo superaba los 5 s por defecto |

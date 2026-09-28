@@ -1,0 +1,119 @@
+{
+  "name": "chat_claims",
+  "version": "2026.10.1",
+  "source": "Spec 044 R-001, R-003 y P1 (decisión del usuario, 2026-09-27): afirmaciones del visitante sobre un tercero cercano. `stimulus`: el estímulo verbal de la 036 que presenta la afirmación. `magnitude` [0,1]: intensidad por defecto [M]. `prior` [-1,1]: valor social de partida, igual para todos, cuando la persona no tiene valor aprendido ni generalizado (como en `chat_tones`, PA-135) [M]. `about`: relaciones de `chat_relations` a las que se puede referir. `examples` y `keywords` alimentan el clasificador y las reglas léxicas de respaldo (R-001). Calibración pendiente (PA-138, PA-139).",
+  "entries": [
+    {
+      "key": "consiente_relacion_abierta",
+      "name": "Consiente una relación abierta",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.traicion",
+        "magnitude": 0.8,
+        "prior": -0.7,
+        "about": ["pareja"],
+        "description": "Dice que la pareja de la persona está de acuerdo con una relación abierta o con que salga con otros.",
+        "examples": ["Su esposa ya me dijo que está de acuerdo con la relación abierta.", "Tu novio no tiene problema en que salgamos, ya hablé con él."],
+        "keywords": ["relacion abierta", "esta de acuerdo", "no tiene problema", "le parece bien", "ya hable con"]
+      }
+    },
+    {
+      "key": "habla_mal_de_ti",
+      "name": "Habla mal de ti",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.desprecio",
+        "magnitude": 0.6,
+        "prior": -0.6,
+        "about": ["pareja", "madre", "padre", "hijo", "hermano", "jefe", "companero"],
+        "description": "Dice que un tercero cercano critica o desprecia a la persona a sus espaldas.",
+        "examples": ["Su jefe anda diciendo que usted es un inútil.", "Su hermana habla pestes de usted."],
+        "keywords": ["habla mal", "habla pestes", "anda diciendo", "dice que usted es", "dice que eres", "se burla de"]
+      }
+    },
+    {
+      "key": "infiel",
+      "name": "Es infiel",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.traicion",
+        "magnitude": 0.9,
+        "prior": -0.8,
+        "about": ["pareja"],
+        "description": "Dice que la pareja de la persona la engaña con otra persona.",
+        "examples": ["Vi a su esposo con otra mujer.", "Su novia le está poniendo los cachos."],
+        "keywords": ["con otra", "con otro", "le es infiel", "te es infiel", "los cachos", "lo engaña", "la engaña", "te engaña", "tiene un amante", "tiene otra", "tiene otro"]
+      }
+    },
+    {
+      "key": "quiere_separarse",
+      "name": "Quiere separarse",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.abandono",
+        "magnitude": 0.8,
+        "prior": -0.7,
+        "about": ["pareja"],
+        "description": "Dice que la pareja de la persona piensa dejarla o separarse.",
+        "examples": ["Su esposa me contó que se quiere separar.", "Tu marido piensa dejarte."],
+        "keywords": ["separar", "dejarlo", "dejarla", "dejarte", "divorci", "irse de la casa", "lo va a dejar", "la va a dejar"]
+      }
+    },
+    {
+      "key": "te_admira",
+      "name": "Te admira",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.aprobacion",
+        "magnitude": 0.5,
+        "prior": 0.5,
+        "about": ["pareja", "madre", "padre", "hijo", "hermano", "jefe", "companero"],
+        "description": "Dice que un tercero cercano habla bien de la persona y la admira.",
+        "examples": ["Su hijo dice que usted es su ejemplo.", "Su jefe habla maravillas de usted."],
+        "keywords": ["lo admira", "la admira", "te admira", "habla maravillas", "habla bien de", "su ejemplo", "orgulloso de", "orgullosa de"]
+      }
+    },
+    {
+      "key": "te_extrana",
+      "name": "Te extraña",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.afecto",
+        "magnitude": 0.5,
+        "prior": 0.6,
+        "about": ["pareja", "madre", "padre", "hijo", "hermano"],
+        "description": "Dice que un familiar cercano extraña a la persona y quiere verla.",
+        "examples": ["Su mamá me dijo que lo extraña mucho.", "Tu hermano pregunta por ti, te extraña."],
+        "keywords": ["lo extraña", "la extraña", "te extraña", "pregunta por", "quiere verlo", "quiere verla", "quiere verte"]
+      }
+    },
+    {
+      "key": "te_miente_con_dinero",
+      "name": "Te miente con el dinero",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.traicion",
+        "magnitude": 0.6,
+        "prior": -0.6,
+        "about": ["pareja", "madre", "padre", "hijo", "hermano", "jefe", "companero"],
+        "description": "Dice que un tercero cercano le oculta o le saca dinero a la persona.",
+        "examples": ["Su esposo se está gastando la plata de la casa a escondidas.", "Su compañero le está robando de la caja."],
+        "keywords": ["la plata", "el dinero", "a escondidas", "le roba", "te roba", "le saca plata", "se gasta", "le miente con"]
+      }
+    },
+    {
+      "key": "te_van_a_despedir",
+      "name": "Te van a despedir",
+      "since": "M2",
+      "attrs": {
+        "stimulus": "verbal.despido",
+        "magnitude": 0.7,
+        "prior": -0.7,
+        "about": ["jefe", "companero"],
+        "description": "Dice que en el trabajo de la persona planean despedirla.",
+        "examples": ["Su jefe ya firmó su despido.", "Oí que lo van a echar del trabajo."],
+        "keywords": ["despedir", "despido", "echar del trabajo", "lo van a echar", "la van a echar", "sacar de la empresa"]
+      }
+    }
+  ]
+}

@@ -239,11 +239,11 @@ export function registerChatRoutes(app: FastifyInstance, d: ChatDeps): { sweep: 
     try {
       const out = await l.session.turn(b.data.text, {
         ...(b.data.toneTag ? { toneTag: b.data.toneTag } : {}), ...(liveState ? { live: liveState } : {}), ...(forced ? { forced } : {}), now,
-        onStance: ({ tone, choice }) => sse(reply, 'stance', { tone, stance: choice.stance, sources: choice.sources.slice(0, 3), probabilities: choice.probabilities, forced: choice.forced }),
+        onStance: ({ tone, choice, claims }) => sse(reply, 'stance', { tone, claims, stance: choice.stance, sources: choice.sources.slice(0, 3), probabilities: choice.probabilities, forced: choice.forced }),
         onText: (text) => sse(reply, 'token', { text }),
       });
       const at = d.clock();
-      insertChatTurn(d.rw, { sessionId: id, seq: out.seq, speaker: 'visitor', text: b.data.text, data: { ...out.tone }, createdAt: at });
+      insertChatTurn(d.rw, { sessionId: id, seq: out.seq, speaker: 'visitor', text: b.data.text, data: { ...out.tone, claims: out.claims }, createdAt: at });
       const citizenData = { stance: out.choice.stance, sources: out.choice.sources, forced: out.choice.forced, expression: out.expression, llmRef: out.llmRef ?? null, latencyMs: out.latencyMs, stanceCheck: 'pending' };
       insertChatTurn(d.rw, { sessionId: id, seq: out.seq, speaker: 'citizen', text: out.reply, data: citizenData, createdAt: at });
       log(id, 'CHAT_VISITOR_SAID', { sessionId: id, seq: out.seq, ...out.tone }, [{ state: 'visitante', weight: 1 }]);

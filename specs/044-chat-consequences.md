@@ -1,10 +1,10 @@
 ---
 id: 044
 nombre: chat-consequences
-estado: borrador
+estado: aprobada
 hito: Bloque L (ampliación, petición del usuario 2026-09-27) · completa con 012, 013 y 025 en M3–M6
 depende_de: [008, 010, 014, 019, 023, 026, 036, 037, 038, 040, 043]
-version: 0.1
+version: 0.2
 ---
 
 # 044 — Consecuencias de la charla: lo que se dice sobre otros sale de la charla
@@ -82,7 +82,9 @@ Coste de memoria: unas pocas creencias e intenciones por persona que charló (< 
   El motor resuelve la relación a una persona real **desde la vista del ciudadano** (su hogar, su familia y su trabajo). Si no la conoce (no tiene pareja, por ejemplo), la afirmación se descarta con el motivo. Sin LLM hay reglas léxicas de respaldo, como en los tonos.
 - **R-002** [T] idea / [M] fórmula — **Credibilidad.** Cuánto cree lo que oyó (PA-138):
 
-  `credibilidad = clamp(CRED_BASE + CRED_SOURCE × v(ext.EXT) + CRED_TRUST × (confianza − 0,5) − CRED_CONTRA × contradicción)`
+  `credibilidad = clamp(CRED_BASE + CRED_SOURCE × v(ext.EXT) ± CRED_TRUST × (confianza − 0,5) − CRED_CONTRA × contradicción)`
+
+  El signo del término de confianza es el del valor de partida de la afirmación: confiar en el tercero hace más creíble lo bueno («te extraña») y menos creíble lo malo («te es infiel»).
 
   - `v(ext.EXT)`: la función aprendida del visitante (043 R-018). Si viene siendo hostil, se le cree menos.
   - `confianza`: la del vínculo con el tercero (R-007).
@@ -153,7 +155,7 @@ Coste de memoria: unas pocas creencias e intenciones por persona que charló (< 
 | `BELIEF_MIN` | 0,3 | 0–1 | [M] |
 | `VALUE_AMP` | 0,5 | 0–2 | [M] 038 R-007 |
 | `STRESS_K`, `MAX_CLAIM_STRESS_DELTA` | 0,5 · 0,35 | 0–1 | [M] PA-139 (mayor que `MAX_MOOD_DELTA` de 043) |
-| `INTENT_THRESHOLD` | 0,35 | 0–1 | [M] PA-139 |
+| `INTENT_THRESHOLD` | 0,2 | 0–1 | [M] PA-139; decisión del usuario (opción A, 2026-09-27): con 0,35 nadie actuaba |
 | `INTENT_TTL_MIN` | 2 880 (2 días) | 60–10 080 | [M] |
 | `CALL_DELAY_MAX_MIN` | 30 | 1–240 | [M] |
 | `MAX_TENSION_DELTA`, `TENSION_DECAY_DAY` | 0,3 · 0,05 | 0–1 | [M] PA-140 |
@@ -164,13 +166,21 @@ Coste de memoria: unas pocas creencias e intenciones por persona que charló (< 
 - Largo de las cadenas causales desde `CHAT_CLAIM_HEARD` a 7 y 30 días (efecto mariposa medible).
 
 ## 10. Preguntas abiertas
-- [ ] **P1.** Catálogo inicial `chat_claims`. Propuesta: `consiente_relacion_abierta`, `infiel`, `habla_mal_de_ti`, `quiere_separarse`, `te_miente_con_dinero`, `te_van_a_despedir`, `te_admira`, `te_extraña`. ¿Algo más, o menos?
-- [ ] **P2.** Celular: nuevo tipo en `object_kinds` (005). Propuesta: lo tiene toda persona de 14 años o más, con acceso según el estrato (029). ¿De acuerdo?
-- [ ] **P3.** La tensión mínima del vínculo (R-007): ¿se guarda ya en la persona hasta la 012, o se adelanta una parte de la 012?
-- [ ] **P4.** ¿La esposa debe aprender algo sobre el visitante en el encuentro (R-008.4)? Propuesta: sí, como creencia con fuente su pareja; eso abre la puerta a los rumores de la 025.
-- [ ] **P5.** ¿Nueva spec 044, como aquí, o ampliación de la 043 (v0.7)? Propuesta: la 044, porque toca el mundo mucho más allá de la charla.
+Resueltas por el usuario el 2026-09-27 (todas según la propuesta):
+- [x] **P1.** Catálogo inicial `chat_claims` con 8 afirmaciones: `consiente_relacion_abierta`, `infiel`, `habla_mal_de_ti`, `quiere_separarse`, `te_miente_con_dinero`, `te_van_a_despedir`, `te_admira`, `te_extrana`.
+- [x] **P2.** Celular: nuevo tipo en `object_kinds` (005). Lo tiene toda persona de 14 años o más, con acceso según el estrato (029).
+- [x] **P3.** La tensión mínima del vínculo (R-007) se guarda en la persona, solo para los vínculos tocados, sin adelantar la 012. Cuando llegue la 012, la absorbe.
+- [x] **P4.** En el encuentro, el tercero aprende algo sobre el visitante (R-008.4): una creencia sobre `EXT-0001` con fuente su pareja. Abre la puerta a los rumores de la 025.
+- [x] **P5.** Spec propia (044), no ampliación de la 043.
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-27 | 0.1 | Borrador a petición del usuario tras probar la charla: lo dicho sobre otros deja creencias, reacción según la historia, intenciones (llamar o confrontar) y conflicto encadenado con causas (efecto mariposa) |
+| 2026-09-27 | 0.2 | Preguntas P1 a P5 resueltas por el usuario según la propuesta: 8 afirmaciones en `chat_claims`; celular desde los 14 años según el estrato; tensión mínima guardada en la persona hasta la 012; el tercero aprende sobre el visitante en el encuentro; spec propia |
+| 2026-09-28 | 0.2 | Estado → aprobada |
+| 2026-09-27 | 0.2 | Precisiones de L5.1: la clave `te_extraña` se escribe `te_extrana` (las claves de catálogo no admiten ñ). Las relaciones (`pareja`, `madre`, `padre`, `hijo`, `hermano`, `jefe`, `companero`) van en un catálogo propio, `chat_relations`, con cómo resolverlas desde la vista y su cercanía por defecto para R-003. El celular reutiliza el tipo `tecnologia.telefono` (005) en vez de crear otro, con `callAccess` por estrato. Estímulos verbales nuevos en la 036: `verbal.abandono`, `verbal.afecto`, `verbal.desprecio` y `verbal.traicion`. Las afirmaciones salen en la misma llamada del clasificador de tono, sin coste extra. Sin cambios en CA |
+| 2026-09-27 | 0.2 | Precisiones de L5.2: (1) R-002: el término de confianza lleva el signo del valor de partida; con signo fijo, confiar en la pareja haría más creíble que es infiel. (2) R-001: si hay varios hijos, hermanos o compañeros, se toma el primero por id hasta que la 012 dé el más cercano; el jefe es quien ocupa el puesto supervisor. (3) R-002: la contradicción con su historia queda en 0 hasta la memoria episódica (013). (4) R-005: el estrés de la revelación solo viene de lo creído; lo no creído pesa únicamente por hacer más tensa la charla (043 R-022). (5) R-007: confianza de partida 0,6 con la familia y 0,5 con los demás [M] (PA-140). Parámetros en `ChatParams.claims`. Sin cambios en CA |
+| 2026-09-27 | 0.2 | Precisiones de L5.3: (1) R-006: solo forman intención las afirmaciones creídas que pegan en contra, una por tercero (la de más impacto). Las fuentes de las cuatro respuestas salen de lo reforzado en sus charlas (contraatacar o poner un límite, callar o evadir, abrirse); la urgencia empuja a llamar y la duda a preguntar. El azar sale del flujo `intent:<CIT>` de la semilla en ese minuto (R-010). (2) R-008: tres sistemas en fases sucesivas del tick (llamada → confrontación → vínculo) para que cada evento cite al anterior. La llamada ocurre cuando los dos están despiertos. El tercero elige entre negar, explicar, contraatacar o callar; negar parte con fuerza 0,6 [M]. La gravedad de cada combinación está en una tabla [M] y la tensión sube `MAX_TENSION_DELTA × gravedad × (0,5 + 0,5 × impacto)`. Bajan las dos confianzas y sube el estrés de ambos. Una negación o explicación baja la creencia de quien reclama `× (1 − 0,5 × confianza)`. (3) R-006: quien rumia suma 0,005 de estrés por hora [M]. (4) Eventos: `PHONE_CALL_MADE` lleva la urgencia; `CONFRONTATION`, la vía y el impacto; `BOND_STRAINED`, las dos confianzas. (5) Medición (semilla 482917, 25 personas con pareja, valores por defecto): todas creen la revelación, pero ninguna forma intención (impacto 0,24 a 0,29 frente al umbral 0,35), y el impacto casi no varía entre personas porque la historia generada no enseña la traición. Pendiente de calibrar con el usuario (PA-139). Sin cambios en CA |
+| 2026-09-27 | 0.2 | Decisión del usuario (opción A): `INTENT_THRESHOLD` baja de 0,35 a 0,2, porque con 0,35 nadie actuaba. Nueva medición (semilla 482917, 25 personas con pareja, un desconocido invasivo dice que la pareja acepta una relación abierta): las 25 forman una intención; 18 preguntan, 5 rumian, 1 confronta y 1 llama. En los encuentros, la pareja explica (14) o niega (6). Sin cambios en CA |
+| 2026-09-27 | 0.2 | L5.4: `citizen:report` muestra creencias, intenciones y vínculos, y la cadena de cada conflicto hasta la charla (CA-005). CA-007: el turno evalúa la afirmación sin cambiar el hash. Batería con el guion «revelación sobre la pareja» (§9). Hallazgo: en ese guion, el ejemplo del usuario, el visitante insiste antes de la revelación. Se le cree poco (credibilidad ≈ 0,3) y el impacto queda en 0,17 a 0,18, bajo el umbral de 0,2, así que nadie actúa: el impacto multiplica la credibilidad dos veces en la práctica (para creer y para actuar). Queda para decidir con el usuario si el umbral de intención se mide sin la credibilidad (la preocupación: función × cercanía), y la credibilidad solo decide entre preguntar, confrontar, llamar o rumiar. Sin cambios en CA |
