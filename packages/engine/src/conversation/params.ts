@@ -78,7 +78,7 @@ export const CLAIM_DEFAULTS: ClaimParams = Object.freeze({
   maxClaimStressDelta: 0.35,
   trust0Family: 0.6,
   trust0Other: 0.5,
-  intentThreshold: 0.35,
+  intentThreshold: 0.2, // opción A del usuario (2026-09-27): con 0,35 nadie actuaba (PA-139)
   intentTtlMin: 2_880,
   urgencyWeight: 2,
   doubtWeight: 1,

@@ -80,7 +80,7 @@ Desde `@datas-world/engine`:
   - impacto: `credibilidad × |función| × cercanía × (1 + 0,5 × valor opuesto)`;
   - en la charla, lo que pega en contra suma su impacto a la carga del turno (R-004);
   - al consolidar, lo creído (credibilidad ≥ 0,3) queda como creencia y sube el estrés `0,5 × Σ impacto`, con tope 0,35 (R-005). Lo no creído solo pesa por hacer más tensa la charla.
-- **Intenciones (044 R-006, `intentions.ts`):** si lo creído pega en contra con impacto ≥ 0,35, se forma una intención por tercero. Las fuentes salen de su historia en las charlas: confrontar y llamar, de lo reforzado al contraatacar o poner un límite; rumiar, de callar o evadir; preguntar, de abrirse. La urgencia empuja a llamar y la duda a preguntar. El azar sale del flujo `intent:<CIT>` de la semilla del mundo en ese minuto, así que el replay no guarda nada más.
+- **Intenciones (044 R-006, `intentions.ts`):** si lo creído pega en contra con impacto ≥ 0,2 (opción A del usuario), se forma una intención por tercero. Las fuentes salen de su historia en las charlas: confrontar y llamar, de lo reforzado al contraatacar o poner un límite; rumiar, de callar o evadir; preguntar, de abrirse. La urgencia empuja a llamar y la duda a preguntar. El azar sale del flujo `intent:<CIT>` de la semilla del mundo en ese minuto, así que el replay no guarda nada más.
 - **El bucle (044 R-006 a R-008, `encounter.ts`):** tres sistemas en fases sucesivas del mismo tick, para que cada evento cite al anterior (llamada → confrontación → vínculo):
   - la llamada ocurre en cuanto los dos están despiertos y el otro no está charlando;
   - confrontar y preguntar esperan a coincidir en el mismo lugar;
@@ -116,7 +116,11 @@ Desde `@datas-world/engine`:
 
 `src/conversation/encounter.test.ts` (6 pruebas, 044): CA-004 por llamada, con la cadena de causas, los vínculos, las dudas y lo que aprende el tercero; CA-004 en persona y sin llamada a quien duerme; rumiar y caducar; el decaimiento de la tensión; la respuesta del tercero según su historia; la elección de la intención según la historia, el celular y la duda.
 
-Medición con el mundo de la semilla 482917 (25 personas con pareja, valores por defecto): todas creen la revelación (credibilidad 0,35 a 0,39) y ninguna forma una intención (impacto 0,24 a 0,29, bajo el umbral de 0,35). Pendiente de calibrar (PA-139).
+Medición con el mundo de la semilla 482917 (25 personas con pareja; un desconocido invasivo dice que la pareja acepta una relación abierta):
+- con el umbral de 0,35, todas creen la revelación (credibilidad 0,35 a 0,39) y ninguna forma una intención (impacto 0,24 a 0,29);
+- con 0,2 (opción A del usuario), las 25 actúan: 18 preguntan, 5 rumian, 1 confronta y 1 llama. En los encuentros, la pareja explica (14) o niega (6), y 5 intenciones caducan.
+
+Calibración fina pendiente (PA-139).
 
 Distribución de la última postura con los catálogos reales (300 charlas por guion, sin historia aprendida):
 
@@ -144,3 +148,4 @@ No aplica: el prototipo no tiene charla.
 | 2026-09-27 | charla/l4 (L4.3) | 043 | Resumen de plantilla en singular para un turno y con las posturas en palabras («poner limite») |
 | 2026-09-27 | charla/l5 (L5.2) | 044, 037, 038 | `claims.ts`: resolución de la relación, credibilidad, impacto según la historia (aprendida o por la red) y suma a la carga del turno. `consolidateChat` reproduce las afirmaciones de la entrada y emite `CHAT_CLAIM_HEARD` y `CHAT_CLAIM_BELIEVED`, guarda las creencias y aplica el estrés de la revelación con su tope. `CLAIM_DEFAULTS` en `ChatParams.claims`. 6 pruebas |
 | 2026-09-27 | charla/l5 (L5.3) | 044, 040 | `intentions.ts`: intenciones tras la charla elegidas con la selección de la 040 (llamar, confrontar, preguntar, rumiar), formadas al consolidar con el flujo `intent:<CIT>`. `encounter.ts`: sistemas `intentions`, `encounters` y `bonds` (llamada, confrontación, tensión y confianza, dudas, rumor y rumiación). `areFamily`. Parámetros nuevos en `CLAIM_DEFAULTS`. 6 pruebas |
+| 2026-09-27 | charla/l5 (L5.3b) | 044 | Umbral de intención 0,35 → 0,2 (opción A del usuario, PA-139): con 0,35 nadie actuaba en el mundo de la semilla 482917 |
