@@ -160,9 +160,10 @@ export function consolidateChat(
     const belief: Belief = { about, predicate: a.predicate, source: input.visitorId, credibility: a.credibility, at: now, cause: b.id };
     if (i >= 0) beliefs[i] = belief;
     else beliefs.push(belief);
-    if (a.value < 0 && a.impact >= cp.intentThreshold) {
+    // R-006 (L5.5): actúa si le importa lo bastante, aunque dude; la duda decide cómo (preguntar), no si actúa.
+    if (a.value < 0 && a.concern >= cp.intentThreshold) {
       const prev = strongest.get(about);
-      if (!prev || a.impact > prev.a.impact) strongest.set(about, { a, believedId: b.id });
+      if (!prev || a.concern > prev.a.concern) strongest.set(about, { a, believedId: b.id });
     }
   }
 

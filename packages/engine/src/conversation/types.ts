@@ -75,6 +75,9 @@ export interface ClaimAssessment {
   credibility: number;
   /** Función del estímulo para esta persona, en [−1,1] (`prior` + historia). */
   value: number;
+  /** Cuánto le importa si fuera cierto, en [0,1]: `|función| × cercanía × (1 + valueAmp × valor opuesto)` (R-006). */
+  concern: number;
+  /** `credibilidad × preocupación` (R-003). */
   impact: number;
   /** De dónde sale la función: aprendida directa o derivada por la red (037), con el estímulo de origen. */
   valueSource: 'direct' | 'derived';
