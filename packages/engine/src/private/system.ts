@@ -202,6 +202,7 @@ export function createPrivateSystem(onto: Ontology, p: PrivateParams = PRIVATE_D
             ...(r.storeChanged ? { functions: r.store } : {}),
             ...(r.netChanged ? { network: r.net } : {}),
           },
+          owned: true, // mente, almacén y red son copias propias de `mindTick`
         });
         events.push(...r.events);
       }

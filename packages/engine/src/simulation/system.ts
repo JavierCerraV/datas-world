@@ -60,7 +60,11 @@ export type Patch =
   /** Muchas celdas de una misma columna: `rows[k]` recibe `values[k]` (la forma rápida para sistemas por persona). */
   | { op: 'setMany'; type: ColumnType; column: string; rows: readonly number[]; values: readonly number[] }
   | { op: 'add'; type: ColumnType; column: string; row: number; delta: number }
-  | { op: 'entity'; id: EntityId; fields: Record<string, unknown> }
+  /**
+   * Con `owned`, el sistema cede la propiedad de `fields`: son copias propias que no vuelve a tocar, así que no se
+   * copian otra vez al aplicarlas (MF8.5: los almacenes de funciones se copiaban dos veces por tick).
+   */
+  | { op: 'entity'; id: EntityId; fields: Record<string, unknown>; owned?: true }
   /**
    * Transferencia de dinero (015 R-006): resta `amount` (entero > 0) de una cuenta y lo suma a otra, en el mismo
    * paso. Es la única forma de mover dinero, así que la suma de todos los saldos se conserva por construcción.

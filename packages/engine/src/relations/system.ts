@@ -69,7 +69,7 @@ export const relationsSystem: System = {
     }
     const patches: Patch[] = [...nets]
       .sort((a, b) => a[0] - b[0])
-      .map(([row, network]) => ({ op: 'entity', id: formatId('CIT', row) as EntityId, fields: { network } }));
+      .map(([row, network]) => ({ op: 'entity', id: formatId('CIT', row) as EntityId, fields: { network }, owned: true as const }));
     return { patches };
   },
 };

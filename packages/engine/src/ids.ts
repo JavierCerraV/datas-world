@@ -22,20 +22,46 @@ export const ID_WIDTH: Readonly<Record<EntityKind, number>> = Object.freeze({
 
 export const ENTITY_KINDS = Object.freeze(Object.keys(ID_WIDTH) as EntityKind[]);
 
-const ID_RE = /^([A-Z]{3})-(\d+)$/;
+/**
+ * Ids ya formateados por tipo y número (MF8.5): los sistemas los piden miles de veces por tick. Solo los tipos de
+ * entidades del mundo, no los eventos (ilimitados), para que la memoria quede acotada por el tamaño del mundo.
+ */
+const FORMATTED: Partial<Record<EntityKind, string[]>> = {};
+const CACHED: ReadonlySet<EntityKind> = new Set<EntityKind>(['CIT', 'HOU', 'ORG', 'PLC', 'OBJ']);
 
 export function formatId(kind: EntityKind, n: number): EntityId {
+  const hit = FORMATTED[kind]?.[n];
+  if (hit !== undefined) return hit as EntityId;
   const width = ID_WIDTH[kind];
   if (!Number.isSafeInteger(n) || n < 1 || String(n).length > width) {
     throw new RangeError(`Id fuera de rango para ${kind}: ${n} (ancho ${width})`);
   }
-  return `${kind}-${String(n).padStart(width, '0')}`;
+  const id = `${kind}-${String(n).padStart(width, '0')}`;
+  if (CACHED.has(kind)) (FORMATTED[kind] ??= [])[n] = id;
+  return id as EntityId;
 }
 
+/** Ids de entidades del mundo ya leídos (acotado como `FORMATTED`: sin eventos). */
+const PARSED = new Map<string, [EntityKind, number]>();
+
 function parse(id: string): [EntityKind, number] {
-  const m = ID_RE.exec(id);
-  if (!m || !(m[1]! in ID_WIDTH)) throw new RangeError(`Id inválido: ${id}`);
-  return [m[1] as EntityKind, Number(m[2])];
+  const hit = PARSED.get(id);
+  if (hit) return hit;
+  const out = parseId(id);
+  if (CACHED.has(out[0])) PARSED.set(id, out);
+  return out;
+}
+
+/** `TIPO-000123`: tres mayúsculas de un tipo conocido, un guion y solo dígitos (sin expresión regular: es caliente). */
+function parseId(id: string): [EntityKind, number] {
+  const kind = id.slice(0, 3);
+  let ok = id.length > 4 && id.charCodeAt(3) === 45 && kind in ID_WIDTH;
+  for (let i = 4; ok && i < id.length; i++) {
+    const c = id.charCodeAt(i);
+    ok = c >= 48 && c <= 57;
+  }
+  if (!ok) throw new RangeError(`Id inválido: ${id}`);
+  return [kind as EntityKind, Number(id.slice(4))];
 }
 
 export const idKind = (id: EntityId): EntityKind => parse(id)[0];

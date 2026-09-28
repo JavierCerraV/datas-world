@@ -37,8 +37,20 @@ const isoOf = (days: number) => {
   return `${c.year}-${String(c.month).padStart(2, '0')}-${String(c.day).padStart(2, '0')}`;
 };
 
+/** Semanas Santas ya calculadas por lista de festivos y año (MF8.5: se consultaba en cada plan del día). */
+const HOLY = new WeakMap<readonly string[], Map<number, [string, string] | undefined>>();
+
 /** Semana Santa (lunes a viernes): la del Jueves y Viernes Santo, dos festivos seguidos jueves-viernes en marzo o abril. */
 function holyWeek(holidays: readonly string[], year: number): [string, string] | undefined {
+  let byYear = HOLY.get(holidays);
+  if (!byYear) HOLY.set(holidays, (byYear = new Map()));
+  if (byYear.has(year)) return byYear.get(year);
+  const found = findHolyWeek(holidays, year);
+  byYear.set(year, found);
+  return found;
+}
+
+function findHolyWeek(holidays: readonly string[], year: number): [string, string] | undefined {
   for (const d of holidays) {
     if (!d.startsWith(`${year}-03`) && !d.startsWith(`${year}-04`)) continue;
     const [y, m, dd] = d.split('-').map(Number) as [number, number, number];
