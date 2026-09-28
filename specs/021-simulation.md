@@ -100,6 +100,12 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 - [x] ¿Qué sistemas tienen `runCoarse` desde M2? → needs, routines y economy (usuario, 2026-09-25).
 - [x] ¿Qué niveles en M2? → Solo 1 (rutina por bloques) y 2 (decisión por tick); 3 y 4 con M3–M4 y M6; 0 con la escala de M7 (usuario, 2026-09-25).
 
+
+## Adaptación al motor funcional (MF8.1, 2026-09-28)
+Según la 035 §8:
+- Qué capas corren en cada nivel: hoy todas las personas están en nivel 2 (`levelOf`), y en cada tick corren la 036 (aprendizaje), la 037 (red), la 038 (reglas), la 039 (eventos privados) y la 040 (selección).
+- En nivel 1 (cuando exista), el paso de PNR corre por hora y la selección por bloques; en nivel ≥ 4, además, `THOUGHT_DERIVED`.
+
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
@@ -113,3 +119,4 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 | 2026-09-25 | 0.3 | Bloque F de M2: parche `transfer` (`from`, `to`, `amount`) entre cuentas (`Account`: persona, hogar, organización, resto del país), aplicado en un solo paso; es la única forma de mover dinero (015 R-006). Sin cambios en CA |
 | 2026-09-25 | 0.3 | Bloque H de M2: `LoopOptions.level` fija el nivel de todas las personas. CA-001 verificado (100 personas, 30 días: ánimo y gasto neto del pueblo a < 5 % entre los niveles 1 y 2, con las decisiones por horas en el nivel 1); el gasto se mide como la caída del patrimonio de personas y hogares, porque el ingreso es el mismo en los dos niveles. CA-002 medido con `pnpm cli bench:life` (`docs/validaciones/M2-bench-vida.md`): el mapa actual solo aloja 254 personas, que viven 1 año en 228 s; la proyección para 500 es ≈ 450 s (< 600 s), pendiente de medir literalmente con un mapa más grande. Sin cambios en CA |
 | 2026-09-26 | 0.3 | Bloque MF2: `TickCtx.events` expone a cada sistema los eventos ya emitidos en el tick por las fases anteriores; el sistema `learning` (036) los consume en la fase `memory`. Sin cambios en CA |
+| 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |

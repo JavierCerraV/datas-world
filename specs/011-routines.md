@@ -81,6 +81,13 @@ Tiempo en cada actividad por situación (comparable con la ENUT del DANE: trabaj
 - [x] ¿Hábitos? → M5 (usuario, 2026-09-25).
 - [ ] ¿Jornada única escolar? Propuesta: jornada de mañana en M2; la jornada única se añade como opción del catálogo del colegio.
 
+
+## Adaptación al motor funcional (MF8.1, 2026-09-28)
+Según la 035 §8:
+- La rutina se sigue por reglas de pliance y tracking con su historia (038 R-010): seguirla es una fuente `regla` de la selección, no una obligación fija.
+- Quedarse dormido depende del descuento aprendido (`hist.discountK`, MF3.4), no de la responsabilidad.
+- Las horas de sueño salen de la ficha de salud; sin ella, 6,95 h sin rasgos (MF7.3).
+
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
@@ -91,3 +98,4 @@ Tiempo en cada actividad por situación (comparable con la ENUT del DANE: trabaj
 | 2026-09-25 | 0.2 | Bloque MF1 (ADR-007, 035 §9): la responsabilidad (quedarse dormido) y los rasgos de las horas de sueño sin ficha de salud se leen por el adaptador @deprecated de la 009 v1.0. Caducan en MF3.4 y MF7.3. Sin cambios en CA |
 | 2026-09-26 | 0.2 | Estado → implementada |
 | 2026-09-28 | — | MF7.3 (041): las horas de sueño sin ficha de salud (mundos de prueba y perfil prototipo) son 6,95 h ± 0,4, sin rasgos. Sin cambios en CA |
+| 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |

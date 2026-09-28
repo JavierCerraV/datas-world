@@ -194,3 +194,4 @@ PA-110, PA-130 y todas las de §11 del documento rector (ver `docs/investigacion
 |---|---|---|
 | 2026-09-25 | 0.1 | Borrador de la Fase A de la reorientación funcional-contextual (ADR-007). En revisión por el usuario |
 | 2026-09-25 | 0.1 | Estado → aprobada |
+| 2026-09-28 | 0.1 | MF8 (cierre): CA-001 se cumple (20 de 20 conductas con la cadena §12 completa, `citizen:explain`), igual que CA-002 (batería 042 completa, `docs/validaciones/bateria-conductual.md`) y CA-004 (arquitectura). CA-003: el motor funcional ocupa 10,4 KB por persona (≤ 20 KB), y un año con 254 personas se simula en 411 s. El mapa no aloja 500 personas, y la vida diaria es un 53 % más lenta que en MF5 por las historias densas (MF8.5, `docs/validaciones/MF8-bench-vida.md`). Sin cambios en CA |

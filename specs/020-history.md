@@ -78,8 +78,15 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 - [ ] Revisar parámetros con los resultados de la primera validación.
 - [ ] Fórmulas exactas de cada dimensión del perfil emergente (revisión de M3).
 
+
+## Adaptación al motor funcional (MF8.1, 2026-09-28)
+Según la 035 §8:
+- La explicación retrospectiva es funcional: qué funciones, relaciones, reglas y repertorios llevaron a dónde está la persona (035 §1), con `citizen:explain` y la pestaña **Vida** como primeras vistas.
+- La «resiliencia» deja de ser un rasgo: es una métrica de trayectoria del perfil emergente (cuánto se recupera el ánimo tras hechos aversivos), calculada desde la historia.
+
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-23 | 0.2 | Capítulos objetivos alineados con los autobiográficos de 013, divergencias historia/memoria, perfil emergente con base causal, informe bajo demanda (ADR-005, idea B) |
+| 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |

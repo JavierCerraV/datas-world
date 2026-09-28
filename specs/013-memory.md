@@ -140,9 +140,17 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 - [ ] ¿Separar la consolidación en una spec propia si crece? (Propuesta: sí, si esta spec supera ~250 líneas.)
 - [ ] Enganche de la capa clínica (034 R-003): origen `session` en los recuerdos y compromisos ("quedé en…") recordables. Propuesta: añadir `source: 'lived' | 'told' | 'session'` al modelo al aprobar esta spec.
 
+
+## Adaptación al motor funcional (MF8.1, 2026-09-28)
+Según la 035 §8:
+- Los episodios se guardan como registro de contingencias: estímulo, respuesta, consecuencia y contexto, con el evento que los produjo (036 R-011).
+- Los esquemas son subredes de la 037: relaciones consolidadas por uso, no categorías aparte.
+- El recuerdo de una charla (`CONVERSATION_HELD`, 043) y los años de desarrollo (`DEVELOPMENT_YEAR`, 041) son las primeras fuentes de episodios.
+
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-23 | 0.2 | Memoria en tres capas (ADR-005, idea B): esquemas, capítulos autobiográficos, consolidación nocturna, recuperación puntuada determinista, límites de RAM y CA-004 a CA-008 |
 | 2026-09-24 | 0.2 | Pregunta abierta: enganche de la capa clínica (spec 034), recuerdos con origen `session` |
+| 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |
