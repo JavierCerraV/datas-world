@@ -6,6 +6,7 @@ import {
   CLAIM_DEFAULTS,
   NEEDS_SYSTEMS,
   consequenceSystems,
+  createPrivateSystem,
   Runner,
   chatInputHandlers,
   learningParams,
@@ -50,6 +51,8 @@ export function lifeSystems(world: World, catalogs: Catalogs = loadCatalogs()): 
       createLearningSystem(onto),
       relationsSystem,
       rulesSystem,
+      // Eventos privados, PNR, evitación y «Yo» (039).
+      createPrivateSystem(onto),
       // Consecuencias de la charla (044 R-006 a R-009): llamadas, encuentros y vínculos.
       ...consequenceSystems(chatEngineCatalog(catalogs), CLAIM_DEFAULTS),
     ]),

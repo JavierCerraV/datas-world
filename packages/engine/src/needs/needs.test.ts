@@ -14,7 +14,7 @@ import { stateHash } from '../serialize.ts';
 import { TEST_PROFILE, testConfig } from '../testing.ts';
 import { addCitizen, createWorld } from '../world.ts';
 import type { World } from '../world.ts';
-import { EMOTIONS, NEEDS, initNeeds } from './columns.ts';
+import { EMOTIONS, MOOD_BASELINE, NEEDS, initNeeds } from './columns.ts';
 import { emotionPatches } from './emotions.ts';
 import { NEEDS_SYSTEMS } from './index.ts';
 
@@ -88,14 +88,14 @@ const runnerFor = (world: World, log: Map<number, Record<string, number>[]>, see
 const mean = (xs: number[]) => xs.reduce((s, x) => s + x, 0) / xs.length;
 
 describe('spec 010: necesidades, emociones y salud del día a día', () => {
-  it('initNeeds: rangos del prototipo y línea base del ánimo por estabilidad emocional', () => {
+  it('initNeeds: rangos del prototipo; la línea base del ánimo no sale del neuroticismo (MF6.4, 039 decisión 6)', () => {
     const w = worldWith([{ neuroticism: 0.2 }, { neuroticism: 0.8 }]);
     const f = w.components.f32;
     for (const row of [1, 2]) {
       expect(f['need.hunger']![row]).toBeGreaterThanOrEqual(0.65);
       expect(f['state.stress']![row]).toBeLessThanOrEqual(0.35);
+      expect(f['state.moodBaseline']![row]).toBeCloseTo(MOOD_BASELINE, 6);
     }
-    expect(f['state.moodBaseline']![1]).toBeGreaterThan(f['state.moodBaseline']![2]!);
   });
 
   it('CA-003: 30 días con la vista congelada; todo en [0,1] y sin NaN; mismo hash con la misma semilla', () => {
@@ -117,7 +117,7 @@ describe('spec 010: necesidades, emociones y salud del día a día', () => {
     expect(energy(2)).toBeLessThan(energy(1));
   });
 
-  it('CA-005: perder el empleo sube tristeza y miedo ese día (más con más activación basal, 036) y el estrés de las 4 semanas siguientes (más con neuroticismo, por el adaptador hasta MF6)', () => {
+  it('CA-005: perder el empleo sube tristeza y miedo ese día (más con más activación basal, 036) y el estrés de las 4 semanas siguientes, igual con cualquier neuroticismo (MF6.4)', () => {
     const log = new Map<number, Record<string, number>[]>();
     const w = worldWith([{ neuroticism: 0.2 }, { neuroticism: 0.8 }]);
     // 009 v1.0: la intensidad emocional depende de la activación basal (temperamento) y de la historia, no del neuroticismo.
@@ -138,7 +138,8 @@ describe('spec 010: necesidades, emociones y salud del día a día', () => {
       return mean(s.filter((x) => x.at! > cut).map((x) => x['state.stress']!)) - mean(s.filter((x) => x.at! <= cut).map((x) => x['state.stress']!));
     };
     expect(stressDelta(1)).toBeGreaterThan(0);
-    expect(stressDelta(2)).toBeGreaterThan(stressDelta(1));
+    // 039 decisión 6: el estrés sale de lo que vive (el desempleo), no del rasgo.
+    expect(stressDelta(2)).toBeCloseTo(stressDelta(1), 2);
     const firstHour = (row: number) => log.get(row)!.find((x) => x.at! > cut)!;
     expect(firstHour(1)['emo.sadness']).toBeGreaterThan(0.2);
     expect(firstHour(1)['emo.fear']).toBeGreaterThan(0.2);

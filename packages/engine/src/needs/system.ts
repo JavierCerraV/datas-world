@@ -3,11 +3,17 @@
 import { ACTIVITY, ACTIVITY_COLUMN } from '../activity.ts';
 import { MINUTES_PER_DAY } from '../calendar.ts';
 import type { NewEvent } from '../events.ts';
+import { sensitivityOf } from '../functions/sensitivity.ts';
 import { formatId } from '../ids.ts';
+import type { EntityId } from '../ids.ts';
+import { loadOf } from '../private/pnr.ts';
+import type { MindState } from '../private/types.ts';
 import type { Patch, System, SystemOutput, TickCtx, WorldView } from '../simulation/system.ts';
-import { legacyTraits } from '../temperament/legacy.ts';
 import { EMOTIONS } from './columns.ts';
 import { needsParams } from './params.ts';
+
+/** 039 decisión 6 [M]: cuánto empuja el objetivo del estrés la carga de los eventos privados (PA-116). */
+export const PRIVATE_LOAD_STRESS = 0.5;
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v));
 const WORK = new Set<number>([ACTIVITY.work, ACTIVITY.study]);
@@ -68,12 +74,11 @@ function step(view: WorldView, ctx: TickCtx): SystemOutput {
       hunger -= (work ? R.hungerWork! : R.hungerAwake!) * dt;
       hygiene -= R.hygieneAwake! * dt;
     }
-    const traits = legacyTraits(view, row); // @deprecated: sustituido por funciones y carga aversiva en MF2 y MF6
-    const extraversion = traits.extraversion;
     // 043 R-019.2: charlar con un visitante del laboratorio también es estar acompañado.
     const company = act === ACTIVITY.conversation || (loc ? (awakeAt.get(loc[row]!) ?? 0) > 1 : COMPANY.has(act));
     if (!rest && company) social += R.socialCompany! * dt;
-    else social -= (rest ? R.socialRest! : R.socialAlone! * (0.5 + extraversion)) * dt;
+    // MF6.4: la falta de compañía pesa según la saliencia social de la 036 (antes, la extraversión del adaptador).
+    else social -= (rest ? R.socialRest! : R.socialAlone! * sensitivityOf(view, row).social) * dt;
     if (FUN.has(act)) fun += R.funLeisure! * dt;
     else if (!rest) fun -= R.funAwake! * dt;
     if (act === ACTIVITY.wash) hygiene = 1;
@@ -81,9 +86,10 @@ function step(view: WorldView, ctx: TickCtx): SystemOutput {
     // El reposo de un enfermo cuenta como sueño: si no, cada día de enfermedad sumaría una noche entera de deuda.
     if (rest) set('state.sleptToday', row, i['state.sleptToday']![row]! + view.config.tickMinutes, 'i32');
 
-    // R-002: el estrés tiende a un objetivo; los estresores se modulan por neuroticismo y resiliencia.
-    const neuroticism = traits.neuroticism;
-    const resilience = traits.resilience;
+    // R-002 (MF6.4, 039 decisión 6): el estrés tiende a la carga aversiva presente: los estresores del mundo y la de
+    // sus eventos privados. Sin neuroticismo ni resiliencia: lo que vive y lo que piensa, no un rasgo.
+    const mind = view.citizens.get(formatId('CIT', row))?.mind as MindState | undefined;
+    const privateLoad = mind ? loadOf(mind) : 0;
     const occ = view.citizens.get(formatId('CIT', row))?.occupation;
     const ageYears = (view.now - i['demo.birthMinute']![row]!) / (365.25 * MINUTES_PER_DAY);
     const money = i.money?.[row] ?? 0;
@@ -94,8 +100,9 @@ function step(view: WorldView, ctx: TickCtx): SystemOutput {
     if (energy < 0.15) stressors += S.exhausted!;
     if (sickNow) stressors += S.sick!;
     if ((view.components.u8['econ.debtPressure']?.[row] ?? 0) === 1) stressors += S.debt ?? 0; // 015 R-005
-    const stab = 1 - neuroticism;
-    const target = S.base! + S.instability! * (1 - stab) + stressors * (0.5 + neuroticism) * (1.5 - resilience);
+    // El término de inestabilidad queda con el valor medio de la población (N = 0,5) y los estresores con factor 1
+    // (el de N = R = 0,5): el estrés medio del mundo no cambia (paridad), solo desaparecen las diferencias por rasgo.
+    const target = S.base! + 0.5 * S.instability! + stressors + PRIVATE_LOAD_STRESS * privateLoad;
     const newStress = clamp(stress + (clamp(target) - stress) * R.stressRate! * dt);
     if (stress < S.peak! && newStress >= S.peak!) {
       const id = formatId('CIT', row);
@@ -105,7 +112,8 @@ function step(view: WorldView, ctx: TickCtx): SystemOutput {
         participants: [{ id, role: 'persona' }],
         causes: [
           { state: 'estresores', entity: id, value: Math.round(stressors * 100) / 100, weight: 0.7 },
-          { state: 'neuroticismo', entity: id, value: Math.round(neuroticism * 100) / 100, weight: 0.3 },
+          ...(privateLoad > 0 ? [{ state: 'carga_privada', entity: id, value: Math.round(privateLoad * 100) / 100, weight: 0.3 }] : []),
+          ...(mind?.episode?.cause ? [{ event: mind.episode.cause as EntityId, weight: 0.2 }] : []),
         ],
       });
     }

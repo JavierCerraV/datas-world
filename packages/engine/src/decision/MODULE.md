@@ -2,7 +2,7 @@
 modulo: decision
 ruta: packages/engine/src/decision
 estado: en-desarrollo
-specs: [040, 036, 037, 038, 032, 010, 011, 016, 021, 035]
+specs: [040, 036, 037, 038, 039, 032, 010, 011, 016, 021, 035]
 actualizado: 2026-09-26
 ---
 
@@ -86,3 +86,4 @@ Porta `decide`: opciones de tiempo libre con puntuación y ruido y duración aco
 | 2026-09-26 | mf/3-seleccion (MF3.2–MF3.4) | 040, 036 | Pasa de la 017 a la 040: `select.ts` (softmax, temperatura desde `hist.variability`, aporte logarítmico de la fuerza), aportes por fuente en `options.ts` (`SourceContribution` sustituye a `Factor`; `Option.value` a `utility`), causas `fuente.*` con eventos de origen, `choose` devuelve los rechazos y sube la variabilidad. Sin el adaptador de temperamento. Referencia de la fuerza calibrada al volumen de ocio de la 017 |
 | 2026-09-26 | mf/4-red | 037, 040 | La fuente `aversion` usa el valor funcional (037 R-006) de la actividad y del lugar: el aprendido (con `directValue`: generalización y primarios) o el derivado por la red relacional, si es mayor; sus orígenes incluyen los eventos de las relaciones del camino |
 | 2026-09-26 | mf/5-reglas-valores | 038, 040 | La fuente `regla` de las obligaciones sale de las reglas de la persona (038 R-004; sin reglas, el número fijo de antes). Fuente nueva `valor` para el ocio que señala un valor (038 R-006). La aversión se calcula sin las raíces de valor. Elegir buscar empleo acumula el contraste de su regla (desaliento, 038 R-005). Prueba 038 CA-004 |
+| 2026-09-28 | mf/6-privados (MF6.2) | 039, 040 | Fuente nueva `alivio` (039 R-004): con un episodio de PNR abierto, dormir un rato y cada afición valen `2 × carga × fuerza de la evitación` (`evit.dormir`, `evit.distraccion`). Dormir se ofrece también sin agotamiento si hay episodio |

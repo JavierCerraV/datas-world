@@ -55,8 +55,6 @@ export interface ClaimParams {
   /** R-006 [M]: peso de la urgencia en llamar y confrontar, y de la duda (credibilidad media) en preguntar. */
   urgencyWeight: number;
   doubtWeight: number;
-  /** R-006 [M]: estrés por hora mientras rumia (el estrés queda alto más tiempo). */
-  ruminationPerHour: number;
   /** R-007, R-008 (PA-140): cambio máximo de tensión por encuentro y decaimiento diario. */
   maxTensionDelta: number;
   tensionDecayDay: number;
@@ -84,7 +82,6 @@ export const CLAIM_DEFAULTS: ClaimParams = Object.freeze({
   intentTtlMin: 2_880,
   urgencyWeight: 2,
   doubtWeight: 1,
-  ruminationPerHour: 0.005,
   maxTensionDelta: 0.3,
   tensionDecayDay: 0.05,
   denyStrength: 0.6,

@@ -76,11 +76,11 @@ Specs: 009 v1.0 (aprobada), 035 (aprobada).
 - [x] MF5.4 Criterios: 038 CA-001–CA-005; 042 V-9 y V-11b.
 
 ## Bloque MF6 — Eventos privados y flexibilidad (039; rama `mf/6-privados`)
-- [ ] MF6.1 Eventos privados como estímulos; paso de derivación; episodios de PNR con condición de parada.
-- [ ] MF6.2 Evitación experiencial como respuesta reforzada negativamente; costes demorados.
-- [ ] MF6.3 Enmarque jerárquico con "Yo" como repertorio aprendido.
-- [ ] MF6.4 El estrés y el ánimo de 010 salen de la carga aversiva y apetitiva presente (se retira del adaptador la modulación de estresores por neuroticismo y resiliencia).
-- [ ] MF6.5 Criterios: 039 CA-001–CA-003; 042 V-10.
+- [x] MF6.1 Eventos privados como estímulos; paso de derivación; episodios de PNR con condición de parada.
+- [x] MF6.2 Evitación experiencial como respuesta reforzada negativamente; costes demorados.
+- [x] MF6.3 Enmarque jerárquico con "Yo" como repertorio aprendido.
+- [x] MF6.4 El estrés y el ánimo de 010 salen de la carga aversiva y apetitiva presente (se retira del adaptador la modulación de estresores por neuroticismo y resiliencia).
+- [x] MF6.5 Criterios: 039 CA-001–CA-003; 042 V-10.
 
 ## Bloque MF7 — Desarrollo (041; rama `mf/7-desarrollo`)
 - [ ] MF7.1 Catálogo `development_episodes` y fase de desarrollo en `generateWorld` (flujo `gen:development`).

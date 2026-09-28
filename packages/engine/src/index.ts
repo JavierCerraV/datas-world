@@ -152,7 +152,7 @@ export {
   needsParams,
   needsSystem,
   sleepSystem,
-  stability,
+  MOOD_BASELINE,
 } from './needs/index.ts';
 export type { NeedsParams } from './needs/index.ts';
 
@@ -403,6 +403,28 @@ export type {
   TurnRecord,
   VisitorTurn,
 } from './conversation/index.ts';
+
+export {
+  AVOIDANCE_RESPONSES,
+  AVOIDANCE_W0,
+  PRIVATE_DEFAULTS,
+  SELF_RESPONSE,
+  activate,
+  applyStep,
+  avoidanceOf,
+  consolidate,
+  createPrivateSystem,
+  derivationStep,
+  fade,
+  focusOf,
+  loadOf,
+  mindTick,
+  responseStrength,
+  scale,
+  seedResponse,
+  stepMind,
+} from './private/index.ts';
+export type { AvoidanceResponse, EpisodeEnd, MindCtx, MindState, MindTick, PnrEpisode, PrivateEvent, PrivateParams, StepResult } from './private/index.ts';
 
 export { FORBIDDEN_TERMS, MECHANISMS, isMechanism } from './temperament/mechanisms.ts';
 export type { MechanismId } from './temperament/mechanisms.ts';

@@ -27,7 +27,7 @@ export const storeOf = (view: WorldView, row: number): FunctionStore => {
 };
 
 /** Quién aprende de un evento: las personas participantes y, si participa un hogar (`RENT_LATE`), su jefe o jefa. */
-function learners(e: DeepReadonly<{ participants: readonly { id: EntityId }[] }>, view: WorldView): number[] {
+export function learners(e: DeepReadonly<{ participants: readonly { id: EntityId }[] }>, view: WorldView): number[] {
   const rows: number[] = [];
   for (const p of e.participants) {
     if (p.id.startsWith('CIT')) rows.push(idNumber(p.id));

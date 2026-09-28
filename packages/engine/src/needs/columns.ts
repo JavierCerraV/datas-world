@@ -1,9 +1,8 @@
-// Columnas de la spec 010 y sus valores iniciales (del prototipo, `newAgent`), según la personalidad (009).
+// Columnas de la spec 010 y sus valores iniciales (del prototipo, `newAgent`). Sin rasgos desde MF6.4 (039).
 import { ACTIVITY_COLUMN } from '../activity.ts';
 import { defineColumn } from '../components.ts';
 import type { ColumnType } from '../components.ts';
 import type { Rng } from '../rng.ts';
-import { legacyTrait } from '../temperament/legacy.ts';
 import type { World } from '../world.ts';
 
 export const NEEDS = ['need.hunger', 'need.energy', 'need.hygiene', 'need.social', 'need.fun'] as const;
@@ -28,13 +27,16 @@ export function defineNeedsColumns(world: World): void {
   for (const [type, name, initial] of NEEDS_COLUMNS) if (!(name in c[type])) defineColumn(c, type, name, initial);
 }
 
-/** Estabilidad emocional (el "estabilidad" del prototipo) = 1 − neuroticismo. Vía el adaptador (@deprecated, MF6). */
-export const stability = (world: World, row: number): number => 1 - legacyTrait(world, row, 'neuroticism');
+/**
+ * Línea base del ánimo (010 R-003) [M]. Desde MF6.4 (039, decisión 6) no sale del neuroticismo: es igual para todos
+ * hasta que la historia del desarrollo (041, MF7) la forme. El ánimo de cada persona se mueve por lo que vive.
+ */
+export const MOOD_BASELINE = 0.55;
 
 /**
  * Estado inicial de las personas activas (flujo `init:needs/<fila>`): rangos de `newAgent` del prototipo,
  * convertidos a "1 = satisfecha" (hambre 0,1–0,35 → 0,65–0,9; soledad 0,1–0,45 → compañía 0,55–0,9), y la línea
- * base del ánimo según la estabilidad emocional. Es parte de la creación del mundo, no un tick.
+ * base del ánimo. Es parte de la creación del mundo, no un tick.
  */
 export function initNeeds(world: World, rng: Rng): void {
   defineNeedsColumns(world);
@@ -51,6 +53,6 @@ export function initNeeds(world: World, rng: Rng): void {
     f['need.fun']![row] = range(0.5, 0.9);
     f['state.stress']![row] = range(0.1, 0.35);
     f['state.mood']![row] = range(0.5, 0.72);
-    f['state.moodBaseline']![row] = 0.55 + 0.12 * (stability(world, row) - 0.5);
+    f['state.moodBaseline']![row] = MOOD_BASELINE;
   }
 }
