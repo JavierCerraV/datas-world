@@ -116,8 +116,11 @@ export function applyEffects(store: FunctionStore, net: RelationalNetwork, effec
       note(e.domain, vOf(e.domain) - before);
       balance += e.lambda;
     } else {
-      teach(net, { a: e.a, b: e.b, t: e.t, s: e.s, now: at });
-      note(`${e.a}~${e.b}`, e.s);
+      // 041 R-003: la comunidad verbal enseña relaciones; `@speaker` es quien interviene (su rol).
+      const a = e.a === '@speaker' ? speakerStim : e.a;
+      if (!a) continue;
+      teach(net, { a, b: e.b, t: e.t, s: e.s, now: at });
+      note(`${a}~${e.b}`, e.s);
     }
   }
   return { learned, balance };

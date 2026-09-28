@@ -151,6 +151,11 @@ Alerta si una prevalencia sale del intervalo o si hay beneficiarios sin cotizant
 - [x] ¿La herencia familiar sube el riesgo? → Sí, con un multiplicador estimado. Los antepasados (030) reciben solo hipertensión y diabetes (usuario, 2026-09-24).
 - [x] Cifras de §8 → verificadas el 2026-09-24 con fuentes oficiales o secundarias que las citan. Quedan estimados el reparto contributivo y especial, las prevalencias por edad y los efectos.
 
+
+## Adaptación al motor funcional (MF8.1, 2026-09-28)
+Según la 035 §8:
+- Los hábitos (tabaco, alcohol, actividad física) y el peso salen de lo aprendido en la historia de desarrollo (041, MF7.3), con las prevalencias del perfil. Sin impulsividad, responsabilidad ni valor escalar de la salud.
+
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
@@ -160,3 +165,4 @@ Alerta si una prevalencia sale del intervalo o si hay beneficiarios sin cotizant
 | 2026-09-25 | 0.3 | Implementación del bloque J4. Precisiones: la ficha se genera en dos fases (hábitos, peso y discapacidad antes del empleo, por R-004; condiciones, afiliación y salud física después de la historia, por el riesgo familiar y el empleo formal); las prevalencias por edad van en el perfil (`gen.health.condition.*`) y los factores de riesgo en el catálogo `health_conditions`, normalizados por su media en el mundo para no inflar la prevalencia; los antepasados solo tienen hipertensión y diabetes (decisión de §10); la policía y los docentes oficiales van al régimen especial; el perfil prototipo no tiene ficha. Medido en 20 mundos: contributivo 0,452, subsidiado 0,465, especial 0,067, sin afiliación 0,016; exceso de peso 0,541; tabaquismo 0,081; discapacidad 0,078; hipertensión 0,139; diabetes 0,047. Sin cambios en CA |
 | 2026-09-25 | 0.3 | Bloque MF1 (009 v1.0): impulsividad y responsabilidad se leen por el adaptador @deprecated (la impulsividad desde `tmp.discount0`); el valor "salud" ya no existe como escalar (los valores son redes, 038), así que deja de modular tabaco y actividad física. Los hábitos saldrán del desarrollo (041 R-008) en MF7.3. Sin cambios en CA |
 | 2026-09-28 | — | MF7.3 (041 R-008): el tabaco, el alcohol, la actividad física y el peso salen de lo aprendido en la historia de desarrollo (`habito.fumar`, `habito.beber`, `evit.consumir`, `habito.ejercicio`, el valor de la salud), normalizados por la media de la población, así que las prevalencias del perfil se conservan. Se calculan después del desarrollo (`learnedHabits`); el sueño y la discapacidad siguen antes del empleo. Sin rasgos. Sin cambios en CA |
+| 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |

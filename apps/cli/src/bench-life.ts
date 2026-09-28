@@ -45,6 +45,10 @@ export function benchLife(args: string[], io: Io): void {
   gc?.();
   const mem = process.memoryUsage();
   const kbPerPerson = (mem.heapUsed - heap0) / 1024 / living;
+  // 035 CA-003: lo que ocupa el motor funcional de cada persona (funciones, red, reglas y mente), serializado.
+  const functional = [...world.citizens.values()].filter((c) => !c.ancestor).map((c) => JSON.stringify([c.functions ?? null, c.network ?? null, c.rules ?? null, c.mind ?? null]).length / 1024);
+  const kbFunctional = functional.reduce((a, x) => a + x, 0) / Math.max(1, functional.length);
+  const kbFunctionalMax = Math.max(0, ...functional);
   const lines = [
     `# bench:life — ${living} personas × ${days} días (perfil ${v.profile}, semilla ${seed})`,
     '',
@@ -55,6 +59,7 @@ export function benchLife(args: string[], io: Io): void {
     `| Memoria del mundo al generarlo | ${((heapWorld - heap0) / MB).toFixed(1)} MB | — |`,
     `| Memoria al final (heap) | ${(mem.heapUsed / MB).toFixed(1)} MB · RSS ${(mem.rss / MB).toFixed(1)} MB | < 1 GB (CLAUDE.md regla 8) |`,
     `| Memoria por persona viva | ≈ ${kbPerPerson.toFixed(1)} KB (incluye antepasados y la parte fija) | < 40 KB (peldaño 4) |`,
+    `| Motor funcional por persona (funciones, red, reglas y mente, serializado) | media ${kbFunctional.toFixed(1)} KB · máximo ${kbFunctionalMax.toFixed(1)} KB | ≤ 20 KB (035 CA-003) ${kbFunctional <= 20 ? '✔' : '✘'} |`,
     `| Hash final | \`${stateHash(world)}\` | — |`,
     '',
     gc ? 'Medido con `node --expose-gc`.' : 'Sin `--expose-gc`: la memoria incluye basura sin recoger (cota superior).',

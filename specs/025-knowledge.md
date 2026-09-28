@@ -64,8 +64,15 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 - [ ] Revisar parámetros con los resultados de la primera validación.
 - [ ] Enganche de la capa clínica (034 R-002): la `PersonView` (lo que la persona sabe y cree) debe poder construirse para cualquier persona y momento, y es la única entrada del LLM. Propuesta: definirla aquí y reutilizarla en la 026 y la 034.
 
+
+## Adaptación al motor funcional (MF8.1, 2026-09-28)
+Según la 035 §8:
+- La comunidad verbal transmite relaciones y reglas (037 R-007, 038): lo que una persona sabe de otra es una creencia con fuente (la forma mínima ya existe en la 044).
+- Mentir emerge de contingencias y reglas (evitar un castigo, conseguir aprobación), sin un rasgo de honestidad.
+
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-24 | 0.1 | Pregunta abierta: `PersonView` como única entrada del LLM (spec 034) |
+| 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |

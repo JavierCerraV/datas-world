@@ -106,6 +106,14 @@ Distribuciones de necesidades, emociones, estrés y ánimo en la prueba de 100 p
 - [x] ¿Cuántas necesidades en M2? → 5; seguridad, autonomía y propósito en M3 (usuario, 2026-09-25).
 - [ ] Temporada de dengue: ¿depende del clima de la región (piso térmico del municipio)? Propuesta: sí, cuando el perfil del municipio tenga clima (peldaño 4).
 
+
+## Adaptación al motor funcional (MF8.1, 2026-09-28)
+Según la 035 §8:
+- Las necesidades son operaciones motivadoras de la selección (040 R-007): multiplican la eficacia de sus reforzadores, no son utilidades.
+- Las emociones por evento salen de la activación basal y de lo que el estímulo ya significa para la persona (036, `elicitationGain`), no de rasgos (MF2.5).
+- El estrés tiende a la carga aversiva presente: estresores del mundo y carga de los eventos privados (039). Sin neuroticismo, extraversión ni resiliencia (MF6.4). La soledad pesa por la saliencia social (036).
+- La línea base del ánimo sale del balance de la historia de desarrollo (041, MF7).
+
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
@@ -124,3 +132,4 @@ Distribuciones de necesidades, emociones, estrés y ánimo en la prueba de 100 p
 | 2026-09-26 | 0.2 | Bloque MF3 (040 R-010): el exceso de sueño por falta de energía ya no depende de la responsabilidad sino del descuento aprendido (`1,3 − 1/(1 + 5k)`); `OVERSLEPT` cita `descuento`. CA-001 sigue verde. Sin cambios en CA |
 | 2026-09-26 | 0.2 | Bloque MF4 (037 R-006): la ganancia de las emociones por evento usa el valor funcional del estímulo principal (aprendido o derivado por la red relacional). Sin cambios en CA |
 | 2026-09-28 | 0.2 | MF6.4 (039, decisión 6 del usuario): R-002 sin modulación por neuroticismo ni resiliencia. El objetivo del estrés es `base + 0,5 × inestabilidad + estresores + 0,5 × carga privada`: el término de inestabilidad queda con el valor medio de la población para no mover la media del mundo. La soledad sin compañía pesa según la saliencia social de la 036, y la línea base del ánimo es 0,55 para todos hasta MF7. `STRESS_PEAK` cita la carga privada. Paridad en `docs/validaciones/MF6-paridad-prototipo.md`: el estrés medio queda en rango (0,251); ánimo, empleo y enfermedades como en MF5. Sin cambios en CA |
+| 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |

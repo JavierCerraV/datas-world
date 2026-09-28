@@ -49,7 +49,14 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 ## 10. Preguntas abiertas
 - [ ] Revisar parámetros con los resultados de la primera validación.
 
+
+## Adaptación al motor funcional (MF8.1, 2026-09-28)
+Según la 035 §8:
+- Las causas de una conducta incluyen el vector de aportes por fuente (040 R-006) y la cadena de origen de cada función hasta hechos del registro o del desarrollo (035 CA-001: `citizen:explain`).
+- Una función, una relación o una regla sin evento de origen es un error (041 INV-001).
+
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
+| 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |

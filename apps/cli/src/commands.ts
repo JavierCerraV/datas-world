@@ -24,6 +24,7 @@ import { benchRelations } from './bench-relations.ts';
 import { validateParity } from './validate.ts';
 import { DEFAULT_DB, UsageError, dateOf, toInt, withDb } from './common.ts';
 import type { Io } from './common.ts';
+import { citizenExplain } from './explain.ts';
 import { citizenReport, worldHistory } from './history.ts';
 import { worldMap } from './map.ts';
 import { worldReport } from './report.ts';
@@ -42,6 +43,7 @@ export const USAGE = `Uso: pnpm cli <comando> [opciones]
   world:history [--from AAAA] [--to AAAA] [--type TIPO,…] [--citizen CIT] [--place PLC|ORG] [--limit N]
                 [--no-causes] [--db RUTA]
   citizen:report CIT-000123 [--db RUTA]
+  citizen:explain EVT-00000012345 [--db RUTA]   la cadena que explica una conducta elegida (035)
   control pause|resume|step|stop|speed <0|1|10|100|1000> [--db RUTA]
   bench [--days N] [--json] [--check]
   validate:parity [--profile prototipo|CO-2026.09] [--seeds N-M] [--days N] [--population N] [--out RUTA]
@@ -147,6 +149,7 @@ const COMMANDS: Record<string, (args: string[], io: Io) => void> = {
   'world:map': worldMap,
   'world:history': worldHistory,
   'citizen:report': citizenReport,
+  'citizen:explain': citizenExplain,
   control,
   bench: (args, io) => bench(args, io),
   'validate:parity': (args, io) => validateParity(args, io),

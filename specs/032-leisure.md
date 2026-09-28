@@ -139,6 +139,12 @@ Alerta si una actividad no la practica nadie o si todos practican lo mismo.
 - [x] Cifras de §8 → verificadas el 2026-09-24 donde hay dato oficial (ECC, ENUT, ENPH). El resto queda como estimado.
 - [ ] La ECC 2020 fue un año de pandemia. Propuesta: calibrar con 2016 (cine 0,40) hasta tener la ECC 2022 o 2024.
 
+
+## Adaptación al motor funcional (MF8.1, 2026-09-28)
+Según la 035 §8:
+- La ficha de esparcimiento sale de lo aprendido (abrirse, aplacar, dominios vitales; 041, MF7.3).
+- La frecuencia en la vida diaria es la fuerza de la respuesta `ocio.<clave>` (036), reforzada por el disfrute de cada vez.
+
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
@@ -149,3 +155,4 @@ Alerta si una actividad no la practica nadie o si todos practican lo mismo.
 | 2026-09-25 | 0.3 | Bloque E de M2: R-006 y CA-006 con el motor de decisiones (017). `LeisureInterest.lastDone` (última vez; la generación la sitúa al azar dentro de su intervalo) regula la frecuencia; `LEISURE_DONE` se emite al elegir la actividad, con el `explain` como causa; las aficiones se registran como `exercise`, `socialize` o `leisure` y las tres suben la diversión. En una semana del mundo generado, la frecuencia es ≈ 1,3 veces la de la ficha (calibración en el bloque H). Sin cambios en CA |
 | 2026-09-25 | 0.3 | Bloque MF1 (009 v1.0): los `traits` del catálogo se leen por el adaptador @deprecated y los `values` dan un valor neutro (los valores ya no son escalares), así que dejan de modular la elección de la ficha. La ficha saldrá del desarrollo (041 R-008) en MF7.3. Sin cambios en CA |
 | 2026-09-28 | — | MF7.3 (041 R-008): CA-002 se comprueba con lo aprendido en lugar de los rasgos. Abrirse se correlaciona con las actividades en compañía, y valorar el conocimiento o la creatividad con la cultura y el arte (r > 0,15). El catálogo nombra respuestas y dominios vitales (`leisure_activities` 2026.10.1); la elección usa la posición de la persona en la población |
+| 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |
