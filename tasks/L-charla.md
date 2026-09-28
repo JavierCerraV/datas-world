@@ -43,7 +43,7 @@ Specs: 043 v0.3 (aprobada). Usa las implementadas (014, 030) y las aprobadas (02
 ## Bloque L4 — Visor y batería
 - [x] L4.1 Vista de chat del visor (R-017), según el diseño aprobado.
 - [x] L4.2 `pnpm cli chat:battery` con informe (R-015); criterio CA-016.
-- [ ] L4.3 Guía de uso para el usuario (`docs/uso-charla.md`, hecha) y prueba con un proveedor real (hecha por el usuario, 2026-09-27). Falta anotar latencia (R-023) y coste por sesión: `pnpm cli chat:stats` sobre su base.
+- [x] L4.3 Guía de uso (`docs/uso-charla.md`) y prueba con Haiku 4.5 real (usuario, 2026-09-27): primer token p50 616 ms, respuesta completa p95 2634 ms (cumple R-023); unos 0,04 USD por charla, casi la mitad en el verificador; el caché no actúa porque el prompt fijo (~2000 tokens) no llega al mínimo de Haiku (4096).
 
 ## Arreglos tras la prueba del usuario (2026-09-27)
 - [x] La API se caía al recargar el mundo mientras el worker escribía (027 CA-004): la charla quedaba abierta, sin recuerdo ni cambio de estrés. `loadWorld` en una transacción de lectura; la API resiste los fallos de recarga; las charlas colgadas se cierran y se consolidan al arrancar.
