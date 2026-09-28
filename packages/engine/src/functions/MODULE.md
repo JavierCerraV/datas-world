@@ -80,3 +80,4 @@ No aplica (ADR-007 §7): la referencia es la batería 042.
 | 2026-09-26 | mf/4-red | 037, 036, 010 | `directValue` (valor neto aprendido o primario, 037 R-003). `elicitationGain` usa el valor funcional (aprendido o derivado por la red). Estímulos nuevos en `WORLD_STIMULI`: `verbal.despido`, `verbal.llegar_tarde`, `verbal.no_pagar`; `JOB_LOST` incluye `verbal.despido` |
 | 2026-09-26 | mf/5-reglas-valores | 038, 036 | 038 R-011: `verbal.aprobacion` se empareja con el disfrute en el ocio con otros (`social.*`, `baile.*`, `comunidad.*`) y con el dinero en `JOB_HIRED` |
 | 2026-09-28 | mf/6-privados (MF6.1) | 039 | `learners` se exporta: el sistema `private` dispara los pensamientos de quienes aprenden de cada hecho |
+| 2026-09-28 | mf/8-rendimiento (MF8.5) | 036, 021 | El sistema `learning` cede la propiedad de los almacenes que parchea (`owned`): son copias propias de `storeOf`, y así no se copian dos veces por tick. Sin cambios de comportamiento (mismo hash) |

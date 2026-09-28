@@ -23,15 +23,27 @@ export interface TripPlan {
   intercity: boolean;
 }
 
+/**
+ * Índice de vehículos por dueño (MF8.5): recorrer todos los objetos en cada consulta era lo más caro de la vida
+ * diaria. Se rehace en cada minuto del mundo y si cambia el número de objetos; así ve los cambios del tick anterior.
+ */
+const VEHICLES = new WeakMap<object, { now: number; size: number; byOwner: Map<string, string[]> }>();
+function vehicleIndex(view: WorldView): Map<string, string[]> {
+  const hit = VEHICLES.get(view.objects);
+  if (hit && hit.now === view.now && hit.size === view.objects.size) return hit.byOwner;
+  const byOwner = new Map<string, string[]>();
+  for (const o of view.objects.values())
+    if (o.status === 'active' && o.fate === 'owned' && o.kind.startsWith('transporte.')) byOwner.set(o.ownerId, [...(byOwner.get(o.ownerId) ?? []), o.kind]);
+  VEHICLES.set(view.objects, { now: view.now, size: view.objects.size, byOwner });
+  return byOwner;
+}
+
 /** Tipos de vehículo de la persona o de su hogar (005): bicicleta, moto, carro. */
 export function vehiclesOf(view: WorldView, row: number): Set<string> {
   const id = formatId('CIT', row);
   const household = view.citizens.get(id)?.householdId;
-  const out = new Set<string>();
-  for (const o of view.objects.values())
-    if (o.status === 'active' && o.fate === 'owned' && o.kind.startsWith('transporte.') && (o.ownerId === id || o.ownerId === household))
-      out.add(o.kind);
-  return out;
+  const index = vehicleIndex(view);
+  return new Set([...(index.get(id) ?? []), ...(household ? (index.get(household) ?? []) : [])]);
 }
 
 /** Factor de ruido uniforme en [1 − noise, 1 + noise]; sin azar (`null`), 1: la estimación para decidir cuándo salir. */

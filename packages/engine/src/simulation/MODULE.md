@@ -78,3 +78,4 @@ Porta el orden de `tick` del prototipo (necesidades → decisiones → acciones 
 | 2026-09-25 | m2/h-cierre | 021 | `LoopOptions.level`: nivel de todas las personas (R-011), para comparar el 1 con el 2 (CA-001); sin él, `levelOf` (2 en M2) |
 | 2026-09-25 | mf/2-funciones | 021, 036 | `TickCtx.events`: los eventos ya emitidos en el tick por las fases anteriores, para que la fase `memory` aprenda de ellos (sistema `learning`) |
 | 2026-09-27 | charla/l3-mundo (L3) | 043, 021 | Quien tiene `chat.until` > ahora queda fuera de las fases de decisión y de acciones (rutina, selección, desplazamientos) mientras charla; sus necesidades siguen su curso |
+| 2026-09-28 | mf/8-rendimiento (MF8.5) | 021 | Parche `entity` con `owned`: el sistema cede la propiedad de `fields` y `applyPatches` no los copia otra vez. Solo para copias propias que el sistema no vuelve a tocar (aprendizaje, red, mente). Sin cambios de comportamiento |

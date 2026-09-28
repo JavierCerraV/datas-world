@@ -1,7 +1,7 @@
 ---
 id: 040
 nombre: behavior-selection
-estado: aprobada
+estado: implementada
 hito: MF (bloque MF3)
 depende_de: [035, 036, 017, 021]
 version: 0.2
@@ -102,3 +102,4 @@ PA-015 a PA-018 (§11.4), PA-019 a PA-022 (§11.5), PA-036 a PA-039 (§11.8), PA
 | 2026-09-26 | 0.2 | Bloque MF4 (037 R-006): la fuente `aversion` usa el valor funcional (aprendido o derivado por la red relacional, el de mayor magnitud) y cita los eventos de las relaciones del camino. Sin cambios en CA |
 | 2026-09-26 | 0.2 | Bloque MF5 (038): la fuente `regla` de las obligaciones es el aporte de las reglas de la persona (sin reglas, el número fijo de antes); fuente nueva `valor` (038 R-006); la aversión se calcula sin las raíces de valor. Sin cambios en CA |
 | 2026-09-28 | 0.2 | MF6.2 (039 R-004): fuente nueva `alivio`. Con un episodio de PNR abierto, dormir un rato y cada afición valen `2 × carga × fuerza de la evitación aprendida` (`evit.dormir`, `evit.distraccion`), y dormir se ofrece aunque no haya agotamiento. Sin cambios en CA |
+| 2026-09-28 | 0.2 | Estado → implementada |

@@ -1,7 +1,7 @@
 ---
 id: 038
 nombre: rules-values
-estado: aprobada
+estado: implementada
 hito: MF (bloque MF5)
 depende_de: [035, 036, 037, 040]
 version: 0.2
@@ -114,3 +114,4 @@ PA-019 a PA-022 (§11.5), PA-112 a PA-114.
 | 2026-09-26 | 0.2 | Concreción para MF5: modelo de regla con contraste e historia, criterio de tipo, fórmula de competencia sobre la fuente `regla` de la 040, reglas iniciales de la rutina (conservan la conducta), desaliento en la búsqueda de empleo, valores como subred jerárquica con la fuente `valor` en la 040, composición oposición–jerarquía (amplía la 037 R-002), aprobación emparejada en la vida mínima, CA más precisos y CA-004/CA-005. V-9 comprobado en borrador: pliance 33 ensayos frente a 24 del moldeado; pliance fuerte 34 frente a 28 del débil; tracking 23. Augmentals motivadores y cambio de pliance por el hablante pasan a MF6 y M3 |
 | 2026-09-26 | 0.2 | Estado → aprobada |
 | 2026-09-26 | 0.2 | Implementación del bloque MF5. Precisiones: (1) en V-9, obedecer se refuerza por el experimentador en cada ensayo en el grupo de pliance y solo por el resultado en el de tracking (así se mantiene el tipo según la historia, R-003); (2) la aversión de la selección se calcula sin las raíces de valor (`dominio.*`): con la regla de la 037 R-006 (gana la función de mayor magnitud), el valor derivado tapaba la aversión directa y además se contaba dos veces; así valor y aversión se suman sin competir, como pide R-006; (3) las reglas de tracking de la rutina empiezan con una confirmación de la contingencia, para que su tipo sea tracking aunque las dijo la comunidad; (4) en el mundo solo se sigue la historia de la regla de buscar empleo (las demás no tienen consecuencia observable hasta M3); (5) en un año del mundo generado, el aporte de la regla de buscar empleo de quien sigue desempleado baja de 0,45 a 0,23 hacia el quinto mes y a 0,11 al año. Sin cambios en CA |
+| 2026-09-28 | 0.2 | Estado → implementada |

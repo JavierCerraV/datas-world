@@ -77,3 +77,4 @@ No aplica: el prototipo no tiene eventos privados. El efecto en el estrés y el 
 |---|---|---|---|
 | 2026-09-28 | mf/6-privados (MF6.1) | 039 | Documento creado desde la plantilla (sin código) |
 | 2026-09-28 | mf/6-privados (MF6.1 a MF6.3, MF6.5) | 039, 036, 037, 044 | Primera implementación: tipos (`Citizen.mind`), parámetros, lógica pura del PNR (`pnr.ts`), núcleo `stepMind` y sistema `private` (disparo, episodio, evitación, consolidación, «Yo»). Eventos `PNR_EPISODE` y `THOUGHT_DERIVED`. 7 pruebas |
+| 2026-09-28 | mf/8-rendimiento (MF8.5) | 039, 021 | El sistema cede la propiedad de la mente, el almacén y la red que parchea (`owned`): son copias propias de `mindTick`. Sin cambios de comportamiento |

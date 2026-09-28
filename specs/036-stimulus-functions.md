@@ -1,7 +1,7 @@
 ---
 id: 036
 nombre: stimulus-functions
-estado: aprobada
+estado: implementada
 hito: MF (bloque MF2)
 depende_de: [009, 035, 021, 023]
 version: 0.1
@@ -118,3 +118,4 @@ PA-001 a PA-005 (§11.1), PA-011 a PA-014 (§11.3), PA-015 a PA-018 (§11.4), PA
 | 2026-09-26 | 0.1 | Bloque MF3 (con la 040): R-009 (descuento hiperbólico con `hist.discountK` por día, inicial `0,02 × 100^tmp.discount0`, baja con `SALARY_PAID` y sube con `JOB_LOST`), R-010 (las operaciones motivadoras multiplican la magnitud del reforzador en la selección), R-011 (la consecuencia de una actividad de ocio actualiza la fuerza de esa respuesta, con sus eventos de origen) y R-012 (`hist.variability`, inicial `tmp.variability0`, sube con el rechazo de la opción elegida y con el refuerzo de la variación). `LEISURE_DONE` enseña con λ = 0,2 + 0,4 × afinidad. Sin cambios en CA |
 | 2026-09-26 | 0.1 | Bloque MF4 (037): `directValue` da la función directa de un estímulo (valor neto aprendido o, sin él, el primario ±1, R-007). `JOB_LOST` incluye `verbal.despido` entre sus estímulos. Sin cambios en CA |
 | 2026-09-26 | 0.1 | Bloque MF5 (038 R-011): `verbal.aprobacion` entre los estímulos de `LEISURE_DONE` con otros y de `JOB_HIRED` (emparejada con el disfrute y con el dinero). Sin cambios en CA |
+| 2026-09-28 | 0.1 | Estado → implementada |

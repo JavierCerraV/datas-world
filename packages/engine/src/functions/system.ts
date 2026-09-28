@@ -67,7 +67,8 @@ export function createLearningSystem(onto: Ontology): System {
     const patches: Patch[] = [];
     for (const [row, store] of [...stores].sort((a, b) => a[0] - b[0])) {
       prune(store, P);
-      patches.push({ op: 'entity', id: formatId('CIT', row) as EntityId, fields: { functions: store } });
+      // El almacén es una copia propia (`storeOf`) que el sistema no vuelve a tocar: cede su propiedad.
+      patches.push({ op: 'entity', id: formatId('CIT', row) as EntityId, fields: { functions: store }, owned: true });
       const h = hists.get(row)!;
       const f = view.components.f32;
       if (f['hist.discountK'] && h.k !== f['hist.discountK'][row]) patches.push({ op: 'set', type: 'f32', column: 'hist.discountK', row, value: h.k });

@@ -64,7 +64,7 @@ export function applyPatches(world: World, patches: readonly Patch[], source: st
       const entity = list ? (world[list] as Map<string, object>).get(p.id) : undefined;
       if (!entity) throw new Error(`${source}: parche sobre una entidad inexistente (${p.id})`);
       if ('id' in p.fields || 'status' in p.fields) throw new Error(`${source}: un parche no cambia id ni status (${p.id})`);
-      Object.assign(entity, structuredClone(p.fields));
+      Object.assign(entity, p.owned ? p.fields : structuredClone(p.fields));
       continue;
     }
     const col = c[p.type][p.column];

@@ -1,7 +1,7 @@
 ---
 id: 043
 nombre: citizen-chat
-estado: aprobada
+estado: implementada
 hito: Bloque L (versión mínima adelantada, decisión del usuario 2026-09-27) · completa en M6
 depende_de: [010, 013, 020, 022, 023, 024, 025, 026, 030, 036, 037, 038, 039, 040]
 version: 0.6
@@ -384,3 +384,4 @@ Por sesión, por ciudadano y por guion (informe de la batería y panel de la vis
 | 2026-09-27 | 0.6 | Tras la prueba del usuario (la charla quedaba abierta al despedirse, sin recuerdo ni cambio de estrés): R-019.6 añade el cierre de las charlas que quedan abiertas sin sesión viva (motivo `interrupted`, consolidadas con los turnos guardados). R-017 añade la pestaña **Charlas** de la ficha para revisar las charlas guardadas (decisión del usuario). La causa del fallo era de persistencia (027 CA-004: la carga del mundo no usaba una transacción de lectura). Sin cambios en CA |
 | 2026-09-27 | 0.6 | Tras la segunda prueba del usuario (seguía saliendo «Ya hay una charla en el mundo abierta»: el diálogo se cerraba con Esc o recargando sin despedirse y la charla seguía viva en la API): abrir otra charla `in_world` cierra la anterior con motivo `replaced` y la consolida; cerrar el diálogo por cualquier vía es despedirse (R-019.6). Sin cambios en CA |
 | 2026-09-27 | 0.6 | Medición con Haiku 4.5 real (L4.3, `pnpm cli chat:stats` sobre 12 charlas y 78 respuestas del usuario): primer token p50 616 ms y p95 869 ms; respuesta completa p50 2032 ms y p95 2634 ms; cumple R-023. Coste 0,36 USD en total, unos 0,04 USD por charla; el verificador es casi la mitad (0,16 USD). El caché de prompts no actúa (0 tokens): la parte fija del prompt ronda los 2000 tokens y Haiku 4.5 solo cachea desde 4096. Con este coste no hace falta forzarlo; si la vista crece (025), empezará a actuar sola. Sin cambios en CA |
+| 2026-09-28 | 0.6 | Estado → implementada |

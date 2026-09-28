@@ -1,7 +1,7 @@
 ---
 id: 042
 nombre: behavior-validation
-estado: aprobada
+estado: implementada
 hito: MF (se completa por bloques MF2–MF7)
 depende_de: [035, 036, 037, 038, 039, 040, 041]
 version: 0.1
@@ -68,3 +68,4 @@ PA-122 (rangos cuantitativos), PA-123 (qué escenarios faltan para cubrir el doc
 | 2026-09-26 | 0.1 | Bloque MF5: V-9 (`lab/rules.ts`: 20 sujetos por grupo; pliance tarda más en ajustarse que el moldeado y más con pliance fuerte; el tracking se ajusta como el moldeado) y V-11b (el pensamiento aparece al tercer rechazo, aversivo por oposición jerárquica; sin la red de valor, no). Sin cambios en CA |
 | 2026-09-28 | 0.1 | Bloque MF6: V-10 implementado en `packages/engine/src/lab/private.ts` con el núcleo de la 039 (`stepMind`): 10 disparos, uno por día, en tres condiciones. Con evitación, 4 episodios de 95 a 180 min y el disparador se conserva (≈ −0,47); quedándose con el pensamiento, un episodio de 520 min, extinción (−0,05) y recuperación espontánea después; con «Yo» reforzado y un valor, episodios de 5 a 15 min. La red se vuelve más compleja (0,8 → 1,4) y menos derivada (1 → 0,57). Sin cambios en CA |
 | 2026-09-28 | 0.1 | Bloque MF7: V-12 implementado en `packages/generators/src/development/development.test.ts` con el desarrollo real (041). (a) La misma persona con el mismo temperamento y 20 pares de historias distintas: distancia media entre repertorios > 0,1. (b) Temperamentos opuestos (sensibilidad aversiva 0,1 y 0,9) con la misma historia: distancia menor que en (a). Sin cambios en CA |
+| 2026-09-28 | 0.1 | Estado → implementada |
