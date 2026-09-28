@@ -92,7 +92,7 @@ export { deserializeWorld, serializeWorld, stateHash } from './serialize.ts';
 export type { WorldSnapshot } from './serialize.ts';
 
 export { applyExternalInput, tick } from './tick.ts';
-export type { ExternalInput, InputResult, ScheduledHandler } from './tick.ts';
+export type { ExternalInput, InputHandler, InputResult, ScheduledHandler } from './tick.ts';
 
 export { PHASES } from './simulation/system.ts';
 export type {
@@ -129,7 +129,7 @@ export type { ObjectTransfer } from './objects.ts';
 export { checkProfile, profileEntry, profileNumber, profileValue } from './profile.ts';
 export type { CountryProfile, ProfileEntry, ProfileScope, ProfileStatus, ProfileValue } from './profile.ts';
 
-export { Runner } from './runner.ts';
+export { REAL_TIME, Runner } from './runner.ts';
 export type { Speed } from './runner.ts';
 
 export { ACTIVITY, ACTIVITY_COLUMN } from './activity.ts';
@@ -324,6 +324,51 @@ export {
   valueContribution,
 } from './rules/index.ts';
 export type { NewRule, Rule, RuleKind } from './rules/index.ts';
+
+export {
+  CHAT_DEFAULTS,
+  CHAT_UNTIL,
+  FLEXIBLE_FROM,
+  chatInputHandlers,
+  defineChatColumns,
+  STANCE_PREFIX,
+  chatAvailability,
+  citizenAnswered,
+  consolidateChat,
+  motivation,
+  openingEvent,
+  selectStance,
+  stanceOptions,
+  stanceResponse,
+  stanceStrength,
+  startConversation,
+  summarize,
+  toneValue,
+  visitorSaid,
+  visitorStimulus,
+  visitorValue,
+} from './conversation/index.ts';
+export type {
+  Availability,
+  ChatCatalog,
+  ChatContribution,
+  ChatOpenInput,
+  ChatParams,
+  ChatSessionInput,
+  ChatSource,
+  ChatSummary,
+  Consolidation,
+  ConversationState,
+  LearnerCtx,
+  LiveState,
+  PersonCtx,
+  StanceChoice,
+  StanceDef,
+  StanceOption,
+  ToneDef,
+  TurnRecord,
+  VisitorTurn,
+} from './conversation/index.ts';
 
 export { FORBIDDEN_TERMS, MECHANISMS, isMechanism } from './temperament/mechanisms.ts';
 export type { MechanismId } from './temperament/mechanisms.ts';

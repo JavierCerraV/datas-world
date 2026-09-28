@@ -1,0 +1,18 @@
+{
+  "name": "@datas-world/llm-gateway",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Pasarela LLM (spec 026) y capa de charla con ciudadanos (spec 043)",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
+    "@datas-world/engine": "workspace:*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@datas-world/generators": "workspace:*"
+  }
+}

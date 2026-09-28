@@ -17,6 +17,8 @@ import {
 } from '@datas-world/persistence';
 import type { ControlCommandName } from '@datas-world/persistence';
 import { bench } from './bench.ts';
+import { chatBattery } from './battery.ts';
+import { chatStatsCommand } from './chat-stats.ts';
 import { benchLife } from './bench-life.ts';
 import { benchRelations } from './bench-relations.ts';
 import { validateParity } from './validate.ts';
@@ -44,7 +46,9 @@ export const USAGE = `Uso: pnpm cli <comando> [opciones]
   bench [--days N] [--json] [--check]
   validate:parity [--profile prototipo|CO-2026.09] [--seeds N-M] [--days N] [--population N] [--out RUTA]
   bench:life [--population 500] [--days 365] [--profile CO-2026.09] [--out RUTA]
-  bench:relations [--out RUTA]`;
+  bench:relations [--out RUTA]
+  chat:battery [--citizens N|CIT-…,…] [--scripts all|clave,…] [--provider mock|config] [--out RUTA] [--db RUTA]
+  chat:stats [--json] [--db RUTA]`;
 
 function worldAdvance(args: string[], io: Io): void {
   const { values: v } = parseArgs({
@@ -148,9 +152,29 @@ const COMMANDS: Record<string, (args: string[], io: Io) => void> = {
   'validate:parity': (args, io) => validateParity(args, io),
   'bench:life': (args, io) => benchLife(args, io),
   'bench:relations': (args, io) => benchRelations(args, io),
+  'chat:stats': chatStatsCommand,
 };
 
-/** Ejecuta un comando y devuelve el código de salida. */
+/** Comandos asíncronos (usan la pasarela LLM, 026). */
+const ASYNC_COMMANDS: Record<string, (args: string[], io: Io) => Promise<void>> = {
+  'chat:battery': (args, io) => chatBattery(args, io),
+};
+
+/** Como `run`, pero también atiende los comandos asíncronos (el punto de entrada usa este). */
+export async function runAsync(argv: readonly string[], io: Io): Promise<number> {
+  const [name, ...args] = argv;
+  const cmd = ASYNC_COMMANDS[name ?? ''];
+  if (!cmd) return run(argv, io);
+  try {
+    await cmd(args, io);
+    return 0;
+  } catch (err) {
+    io.err(`${name}: ${(err as Error).message}`);
+    return err instanceof UsageError || (err as { code?: string }).code?.startsWith('ERR_PARSE_ARGS') ? 2 : 1;
+  }
+}
+
+/** Ejecuta un comando síncrono y devuelve el código de salida. */
 export function run(argv: readonly string[], io: Io): number {
   const [name, ...args] = argv;
   const cmd = COMMANDS[name ?? ''];

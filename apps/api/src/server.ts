@@ -1,10 +1,15 @@
 // Servidor HTTP de la API (spec 022): lectura del mundo, SSE en vivo y controles autenticados. Solo lee la base,
 // salvo `control_commands` (R-001), que atiende el worker.
 import { Buffer } from 'node:buffer';
-import { statSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import type { EntityId, WorldEvent } from '@datas-world/engine';
-import { CONTROL_COMMANDS, closeDb, enqueueCommand, openWorldDb, queryEvents } from '@datas-world/persistence';
-import type { ControlCommandName } from '@datas-world/persistence';
+import { buildOntology, loadCatalogs } from '@datas-world/generators';
+import { DEFAULT_CONFIG, Gateway, anthropicAdapter, chatCatalogs, mockAdapter, openaiCompatibleAdapter, parseConfig } from '@datas-world/llm-gateway';
+import type { LlmRecord, ProviderAdapter, RecordStore } from '@datas-world/llm-gateway';
+import { CONTROL_COMMANDS, SqliteRecordStore, closeDb, enqueueCommand, openWorldDb, queryEvents } from '@datas-world/persistence';
+import type { ControlCommandName, Db } from '@datas-world/persistence';
+import { registerChatRoutes } from './chat.ts';
 import Fastify from 'fastify';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
@@ -17,6 +22,35 @@ export interface ApiOptions {
   auth?: { user: string; password: string };
   /** Hora real para `control_commands.created_at` (se inyecta: la lógica no lee el reloj). */
   clock?: () => string;
+  /** Charla con ciudadanos (043): pasarela (por defecto, la de `config/llm.json` o la de fábrica) y espera al worker. */
+  chat?: { gateway?: Gateway; waitMs?: number; nowMs?: () => number };
+}
+
+/** Pasarela de fábrica (026 R-006): `config/llm.json` si existe; el cliente de Anthropic se crea al primer uso. */
+function defaultGateway(rw: Db): Gateway {
+  const path = join(process.cwd(), 'config', 'llm.json');
+  const config = existsSync(path) ? parseConfig(JSON.parse(readFileSync(path, 'utf8'))) : DEFAULT_CONFIG;
+  let anthropic: ProviderAdapter | undefined;
+  return new Gateway({
+    config,
+    adapters: {
+      anthropic: { call: (c) => (anthropic ??= anthropicAdapter()).call(c) },
+      openai_compatible: openaiCompatibleAdapter(),
+      mock: mockAdapter(),
+    },
+    records: sqliteRecords(rw),
+  });
+}
+
+/** `llm_records` de la base como almacén de la pasarela (026 R-003); el propósito se guarda tal cual. */
+function sqliteRecords(rw: Db): RecordStore {
+  const s = new SqliteRecordStore(rw);
+  return {
+    get: (key) => s.get(key) as LlmRecord | undefined,
+    put: (r) => s.put(r),
+    markAffectsWorld: (key) => s.markAffectsWorld(key),
+    prune: (before) => s.prune(before),
+  };
 }
 
 const eventsQuery = z.object({ since: z.string().regex(/^EVT-\d+$/).optional(), limit: z.coerce.number().int().min(1).max(200).default(100) });
@@ -46,10 +80,15 @@ export interface Api {
   reader: WorldReader;
   /** Una vuelta del sondeo (R-006): recarga si cambió el minuto y avisa a los clientes SSE. */
   poll: () => void;
+  /** 043 R-019.5: cierra las charlas inactivas o cuyo tiempo disponible terminó. */
+  sweep: () => Promise<void>;
   close: () => Promise<void>;
 }
 
 export function buildApi(opts: ApiOptions): Api {
+  // Conexión de escritura para los datos del laboratorio (043 R-001) y las órdenes; abre antes que el lector para
+  // aplicar las migraciones pendientes.
+  const rw = openWorldDb(opts.db);
   const reader = new WorldReader(opts.db);
   const app = Fastify({ logger: false });
   const clients = new Set<{ reply: FastifyReply; last?: string }>();
@@ -124,8 +163,27 @@ export function buildApi(opts: ApiOptions): Api {
     }
   });
 
+  const catalogs = loadCatalogs();
+  const chat = registerChatRoutes(app, {
+    rw,
+    reader,
+    gateway: opts.chat?.gateway ?? defaultGateway(rw),
+    catalogs: chatCatalogs(catalogs),
+    onto: buildOntology(catalogs),
+    authorized: (h) => (opts.auth ? authorized(h, opts.auth) : null),
+    clock: opts.clock ?? (() => new Date().toISOString()),
+    nowMs: opts.chat?.nowMs ?? (() => Date.now()),
+    ...(opts.chat?.waitMs !== undefined ? { waitMs: opts.chat.waitMs } : {}),
+  });
+
   const poll = () => {
-    if (!reader.refresh()) return;
+    // Un fallo al recargar (base ocupada, estado a medio escribir) no puede tumbar la API: se reintenta al segundo.
+    try {
+      if (!reader.refresh()) return;
+    } catch (e) {
+      app.log.warn(`recarga del mundo fallida: ${(e as Error).message}`);
+      return;
+    }
     const w = reader.world;
     for (const c of clients) {
       sse(c.reply, 'tick', { now: w.now, date: dateOf(w, w.now), status: w.status });
@@ -137,10 +195,12 @@ export function buildApi(opts: ApiOptions): Api {
     app,
     reader,
     poll,
+    sweep: chat.sweep,
     close: async () => {
       for (const c of clients) c.reply.raw.end();
       await app.close();
       reader.close();
+      closeDb(rw);
     },
   };
 }

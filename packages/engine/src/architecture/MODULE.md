@@ -32,12 +32,12 @@ Desde `@datas-world/engine`:
 ## 4. Diseño interno y decisiones
 - **Reglas:**
   - `lectura-temperamento`: un literal `'tmp.…'` o `'pers.…'` fuera de los permitidos;
-  - `seleccion-importa-temperamento`: `decision/` o `selection/` importan `temperament/` (salvo el adaptador);
+  - `seleccion-importa-temperamento`: `decision/`, `selection/` o `conversation/` importan `temperament/` (salvo el adaptador);
   - `adaptador-no-autorizado`;
   - `adaptador-caducado`: se cerró la tarea del bloque que retira ese uso, o se cerró MF7.4 y el adaptador sigue existiendo.
 - **Pruebas excluidas:** los archivos `*.test.ts` no cuentan, porque montan columnas para sus escenarios.
 - **Dónde vive cada parte:** el escaneo del disco va en `generators`, porque el guardarraíl de determinismo prohíbe `node:fs` en todo `packages/engine`, incluidas las pruebas. La 009 decía `packages/engine/src/architecture.test.ts`: la precisión consta en su historial.
-- **ESLint:** además, `eslint.config.js` restringe las importaciones de `temperament/*` (salvo el adaptador) en `decision/` y `selection/`.
+- **ESLint:** además, `eslint.config.js` restringe las importaciones de `temperament/*` (salvo el adaptador) en `decision/`, `selection/` y `conversation/`.
 
 ## 5. Invariantes y guardarraíles
 `pnpm check` falla con cualquier violación (escaneo del repositorio y ESLint).
@@ -63,3 +63,4 @@ No aplica.
 | 2026-09-25 | mf/1-temperamento (MF1.5) | 009 v1.0, 035 | `rules.ts` (política y comprobación), `fixtures.ts` y 4 pruebas (CA-B) |
 | 2026-09-25 | mf/2-funciones (MF2.5) | 035, 009 | `POLICY`: `functions/` es lector registrado de `tmp.*`; `needs/emotions.ts` deja de importar el adaptador |
 | 2026-09-26 | mf/3-seleccion (MF3.4) | 040, 009 | `POLICY.legacyImporters` ya no incluye `decision/options.ts`, `decision/system.ts` ni `routines/system.ts`. La prueba usa `needs/system.ts` como importador vigente y comprueba que `decision/system.ts` queda no autorizado (040 CA-004) |
+| 2026-09-27 | charla/l1-motor (L1) | 043, 009 | `POLICY.selectionModules` incluye `conversation/`: la postura de la charla es selección de conducta (043 INV-003). También en `eslint.config.js` |

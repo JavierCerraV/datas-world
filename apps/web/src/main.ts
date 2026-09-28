@@ -1,6 +1,8 @@
 // Visor mínimo (spec 024): mapa, personas, día y noche, inspector, registro de eventos y controles. Solo lee de la
 // API (022); no tiene lógica de simulación (INV-002).
 import { api, control, stream } from './api.ts';
+import { showChatHistory } from './chat-history.ts';
+import { setupChat } from './chat-ui.ts';
 import { eventEs, inspectorTabs } from './format.ts';
 import type { Section } from './format.ts';
 import { TS, interpolate, nightAlpha, spread, timeOf } from './logic.ts';
@@ -10,7 +12,7 @@ import type { CitizenDetail, CitizenPosition, WorldView } from './types.ts';
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
 const canvas = $<HTMLCanvasElement>('#map');
 const g = canvas.getContext('2d')!;
-const SPEEDS = [0, 1, 10, 100, 1000];
+const SPEEDS = [0, 1 / 60, 1, 10, 100, 1000]; // 1/60 = tiempo real (002 R-003)
 
 let world: WorldView;
 let mapLayer: HTMLCanvasElement;
@@ -83,13 +85,21 @@ function renderSections(sections: Section[]): string {
 }
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
-let tab: 'estado' | 'historia' | 'funcional' = 'estado';
+let tab: 'estado' | 'historia' | 'funcional' | 'charlas' = 'estado';
 let detail: CitizenDetail | null = null;
+let chatsShownFor: string | null = null;
 function renderInspector(): void {
   if (!detail) return;
   const t = inspectorTabs(detail);
   $('#insp-name').textContent = detail.name;
   for (const b of document.querySelectorAll<HTMLButtonElement>('.tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === tab));
+  // Las charlas no cambian con cada tick: se cargan al entrar en la pestaña o al cambiar de persona.
+  if (tab === 'charlas') {
+    if (chatsShownFor !== detail.id) void showChatHistory($('#insp-body'), detail.id, () => credentials, askAuth);
+    chatsShownFor = detail.id;
+    return;
+  }
+  chatsShownFor = null;
   $('#insp-body').innerHTML =
     tab === 'estado'
       ? renderSections(t.estado)
@@ -134,18 +144,24 @@ function addLog(line: string): void {
   while (ul.children.length > 60) ul.lastChild!.remove();
 }
 
+/** Pide usuario y contraseña de los controles (y de la charla); devuelve false si se cancela. */
+function askAuth(): boolean {
+  const user = prompt('Usuario de los controles');
+  const pass = user ? prompt('Contraseña') : null;
+  if (!user || !pass) return false;
+  credentials = btoa(`${user}:${pass}`);
+  try {
+    sessionStorage.setItem('dw-auth', credentials);
+  } catch {
+    /* sin almacenamiento: se pedirá otra vez */
+  }
+  return true;
+}
+
 async function send(cmd: 'pause' | 'resume' | 'speed' | 'step', arg?: number): Promise<void> {
   let code = await control(cmd, arg, credentials);
   if (code === 401) {
-    const user = prompt('Usuario de los controles');
-    const pass = user ? prompt('Contraseña') : null;
-    if (!user || !pass) return;
-    credentials = btoa(`${user}:${pass}`);
-    try {
-      sessionStorage.setItem('dw-auth', credentials);
-    } catch {
-      /* sin almacenamiento: se pedirá otra vez */
-    }
+    if (!askAuth()) return;
     code = await control(cmd, arg, credentials);
   }
   $('#msg').textContent = code === 200 ? 'Orden enviada' : code === 503 ? 'Controles desactivados (define DATAS_WORLD_USER y DATAS_WORLD_PASSWORD)' : `No se pudo (${code})`;
@@ -220,7 +236,8 @@ canvas.addEventListener('wheel', (e) => {
 });
 window.addEventListener('resize', resize);
 window.addEventListener('keydown', (e) => {
-  if ((e.target as HTMLElement).tagName === 'INPUT') return;
+  // Los atajos no actúan al escribir ni con la charla abierta (043 R-017).
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName) || $<HTMLDialogElement>('#chat').open) return;
   const step = 24 / scale;
   if (e.key === ' ') {
     e.preventDefault();
@@ -243,8 +260,11 @@ $('#insp-close').addEventListener('click', closeInspector);
 for (const b of document.querySelectorAll<HTMLButtonElement>('.tabs button'))
   b.addEventListener('click', () => {
     tab = b.dataset.tab as typeof tab;
+    chatsShownFor = null; // pulsar la pestaña vuelve a cargar las charlas
     renderInspector();
   });
+
+setupChat({ citizen: () => (detail ? { id: detail.id, name: detail.name } : null), auth: () => credentials, askAuth });
 
 start().catch((err: unknown) => {
   $('#msg').textContent = `No se pudo conectar con la API: ${String(err)}. ¿Está corriendo \`pnpm dev\`?`;

@@ -4,7 +4,7 @@ nombre: citizen-chat
 estado: aprobada
 hito: Bloque L (versión mínima adelantada, decisión del usuario 2026-09-27) · completa en M6
 depende_de: [010, 013, 020, 022, 023, 024, 025, 026, 030, 036, 037, 038, 039, 040]
-version: 0.5
+version: 0.6
 ---
 
 # 043 — Charla con ciudadanos
@@ -167,12 +167,13 @@ interface ChatScript { key: string; label: string; turns: { text: string; tone: 
   3. si se agota ese tiempo, o con el proveedor `mock`, las reglas léxicas del catálogo (`examples` y palabras clave).
 
   Se guardan las tres cuando existen, para medir el acuerdo entre ellas (§9).
-- **R-005** [T] idea / [M] correspondencia y valores de partida — **El tono es un estímulo.** Cada tono presenta su estímulo verbal (tabla de §3) con su magnitud. Su función para esta persona se toma, por orden (precisión aprobada por el usuario, 2026-09-27):
-  1. **La aprendida:** el valor neto aprendido en su historia (036 `directValue`).
-  2. **La generalizada:** si no la tiene, la generalización desde estímulos parecidos con valor aprendido (036 R-004). Por ejemplo, quien aprendió que la crítica del jefe es aversiva encuentra más aversivo un insulto.
-  3. **La de partida:** si tampoco hay generalización, el valor social `prior` del tono en `chat_tones`, igual para todos: lo que la comunidad enseña a cualquiera [M] (PA-135).
+- **R-005** [T] idea / [M] correspondencia y valor de partida — **El tono es un estímulo.** Cada tono presenta su estímulo verbal (tabla de §3) con su magnitud. Su función para esta persona es (decisión del usuario, 2026-09-27, opción A):
 
-  Así, dos personas reaccionan distinto a la misma frase según su historia, no según un rasgo. Hasta la historia sintética (MF7) las diferencias serán moderadas: salen de lo vivido en el trabajo y con el dinero, y de lo aprendido en las propias charlas `in_world` (R-021). Los estímulos nuevos se añaden al catálogo de la 036.
+  `función = clamp(prior + netValue, −1, 1)`
+  - `prior`: el valor social de partida del tono en `chat_tones`, igual para todos. Es lo que la comunidad enseña a cualquiera [M] (PA-135). Siempre está.
+  - `netValue`: lo aprendido en su historia, incluida la generalización desde estímulos parecidos (036 `netValue`, R-004).
+
+  La historia modula la base. Por ejemplo, quien aprendió que la crítica del jefe es aversiva encuentra más aversivo un insulto; quien tiene la aprobación muy reforzada, más apetitiva la amabilidad. Dos personas reaccionan distinto a la misma frase según su historia, no según un rasgo. La suma evita que la generalización entre términos verbales, que en la ontología actual casi no distinguen valencia (PA-131), anule la base: la aprobación aprendida no vuelve agradable un insulto. Hasta la historia sintética (MF7) las diferencias serán moderadas. Los estímulos nuevos se añaden al catálogo de la 036.
 - **R-006** [E] — **El visitante adquiere función.** Tras cada turno, el valor del visitante se actualiza por emparejamiento con la función del estímulo presentado (condicionamiento respondiente, 036 R-001; referencia a verificar), con la tasa de la 036. Empieza en la función aprendida del visitante `EXT-0001` si ya hubo charlas `in_world`, o en 0.
 - **R-007** [E] fenómeno / [M] forma — **Escape y carga aversiva.** La carga crece con la magnitud aversiva de cada turno y decae un `LOAD_DECAY` por turno. Las posturas con `escape > 0` reciben un aporte de reforzamiento negativo proporcional a `escape × carga` (036 R-002; 039 R-004; referencia a verificar).
 - **R-008** [T] fuentes / [M] magnitudes — **Postura.** Cada turno del ciudadano es un punto de decisión (040 R-001) con las 8 posturas como candidatas. Los aportes de cada candidata son:
@@ -216,6 +217,8 @@ interface ChatScript { key: string; label: string; turns: { text: string; tone: 
   - el modo prueba, con su selector de tono;
   - el modo de la sesión (`in_world` o `sandbox`).
 
+  La ficha tiene además una pestaña **Charlas** (decisión del usuario, 2026-09-27) con las charlas guardadas de la persona, la más reciente primero: fecha, modo, cómo terminó y, al desplegarla, la transcripción con el tono de cada mensaje del visitante y la postura de cada respuesta. Sirve para revisarlas después.
+
   La web no decide nada.
 - **R-018** [M] — **El visitante en el mundo.** El visitante es una entidad externa `EXT-0001` (no es un `CIT`, no vive ni se mueve en el mundo). Para cada ciudadano es un estímulo con función aprendida: la 036 guarda esa función como la de cualquier estímulo. Si varias personas usan el laboratorio, cada una puede tener su propio `EXT-`.
 - **R-019** [M] — **Charla casual; el mundo sigue su curso** (decisión del usuario, 2026-09-27). Una charla `in_world` es una conversación casual, como encontrarse con alguien: no tiene duración acordada. Las sesiones con duración y condiciones pactadas son de la capa clínica (034).
@@ -234,6 +237,8 @@ interface ChatScript { key: string; label: string; turns: { text: string; tone: 
   6. **Consolidación.** Al cerrar, la API registra la entrada externa `chat_session` con los turnos, los tonos, las posturas y las referencias a los textos. El worker la aplica con la función pura `consolidateChat(state, input, rng)`, que emite los eventos y los parches de R-020 a R-022 y devuelve a la persona a su día.
 
   El replay del mundo re-inyecta `chat_open` y `chat_session` en su `(at, seq)` y obtiene el mismo resultado sin llamar al LLM. Solo puede haber una charla `in_world` abierta a la vez.
+
+  Una charla que quedó abierta sin sesión viva (la API se cerró o se cayó durante la charla) se cierra al arrancar la API con el motivo `interrupted` y, si era `in_world`, se consolida con los turnos guardados: la persona la recuerda igual. Como hay un solo visitante, abrir otra charla `in_world` cierra la anterior con el motivo `replaced` y la consolida (salvo que esté a mitad de un turno: entonces 409). Cerrar el diálogo del visor por cualquier vía equivale a despedirse.
 - **R-020** [M] — **Recuerdo.** La consolidación emite `CONVERSATION_HELD`, con:
   - la persona y el visitante como participantes;
   - un resumen (plantilla con los tonos y posturas dominantes, o resumen del LLM ya registrado);
@@ -373,3 +378,9 @@ Por sesión, por ciudadano y por guion (informe de la batería y panel de la vis
 | 2026-09-27 | 0.3 | Estado → aprobada |
 | 2026-09-27 | 0.4 | Corrección del usuario: la charla es casual, no una sesión. Sin duración acordada: acepta según su situación (dormido: no; en una obligación: un momento; libre: hasta su próximo compromiso) y termina por despedida, postura, compromiso o inactividad (R-019). La duración pactada pasa a la 034. CA-015, CA-019 y CA-020 reescritos; `BUSY_WINDOW_MIN` e `IDLE_END_MIN` sustituyen a `CHAT_DURATIONS` y `MIN_SESSION_MIN` |
 | 2026-09-27 | 0.5 | Precisión aprobada por el usuario (R-005): la función de un tono sale de lo aprendido, si no de la generalización (036 R-004) y si no del valor social de partida `prior` de `chat_tones` [M]. Tabla de `prior` en §8. Modelo de la expresión: Haiku 4.5 (026). Sin cambios en CA |
+| 2026-09-27 | 0.6 | Decisión del usuario (opción A) al empezar L1: la función de un tono es `prior + netValue` (base social modulada por la historia), no una cadena de respaldos. Motivo: `netValue` ya incluye la generalización y, entre términos verbales, la ontología actual generaliza casi por completo (aprobación → insulto 0,92), de modo que la base no se habría usado nunca. Sin cambios en CA |
+| 2026-09-27 | 0.6 | Precisión de la implementación del bloque L2 (R-010, R-012): la expresión devuelve texto en streaming, no JSON, para que el chat sea fluido; las afirmaciones las extrae el verificador después (R-012), no la expresión. El clasificador y el verificador usan salidas estructuradas validadas con Zod (026 R-010). La vista incluye los nacimientos y muertes de la familia cercana, que la persona sabe por parentesco (R-003). Sin cambios en CA |
+| 2026-09-27 | 0.6 | Precisiones de la implementación del bloque L3: las entradas `chat_open` y `chat_session` viajan como órdenes de `control_commands` con su payload JSON, y el worker las aplica con manejadores registrados en el Runner (validar sin cambiar nada y luego aplicar); quien charla tiene la columna `chat.until` y la actividad `conversation`, y el bucle lo deja fuera de las fases de decisión y de acciones mientras dura (sus necesidades siguen y charlar cuenta como compañía); el tiempo real es la velocidad 1/60x (002 R-003); si la persona está dormida, la apertura responde `declined` con el motivo; `sweep` cierra por inactividad y, en el mundo, por compromiso aunque el visitante no escriba. Sin cambios en CA |
+| 2026-09-27 | 0.6 | Tras la prueba del usuario (la charla quedaba abierta al despedirse, sin recuerdo ni cambio de estrés): R-019.6 añade el cierre de las charlas que quedan abiertas sin sesión viva (motivo `interrupted`, consolidadas con los turnos guardados). R-017 añade la pestaña **Charlas** de la ficha para revisar las charlas guardadas (decisión del usuario). La causa del fallo era de persistencia (027 CA-004: la carga del mundo no usaba una transacción de lectura). Sin cambios en CA |
+| 2026-09-27 | 0.6 | Tras la segunda prueba del usuario (seguía saliendo «Ya hay una charla en el mundo abierta»: el diálogo se cerraba con Esc o recargando sin despedirse y la charla seguía viva en la API): abrir otra charla `in_world` cierra la anterior con motivo `replaced` y la consolida; cerrar el diálogo por cualquier vía es despedirse (R-019.6). Sin cambios en CA |
+| 2026-09-27 | 0.6 | Medición con Haiku 4.5 real (L4.3, `pnpm cli chat:stats` sobre 12 charlas y 78 respuestas del usuario): primer token p50 616 ms y p95 869 ms; respuesta completa p50 2032 ms y p95 2634 ms; cumple R-023. Coste 0,36 USD en total, unos 0,04 USD por charla; el verificador es casi la mitad (0,16 USD). El caché de prompts no actúa (0 tokens): la parte fija del prompt ronda los 2000 tokens y Haiku 4.5 solo cachea desde 4096. Con este coste no hace falta forzarlo; si la vista crece (025), empezará a actuar sola. Sin cambios en CA |

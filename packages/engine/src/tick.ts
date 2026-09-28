@@ -4,7 +4,7 @@ import { MINUTES_PER_DAY, formatDate, toCalendar } from './calendar.ts';
 import type { WorldMinute } from './calendar.ts';
 import { canEnable, withCapability } from './capabilities.ts';
 import { EVENT_TYPES, makeEvent } from './events.ts';
-import type { WorldEvent } from './events.ts';
+import type { CauseRef, NewEvent, WorldEvent } from './events.ts';
 import type { Rng } from './rng.ts';
 import { popDue } from './scheduler.ts';
 import { runSystems } from './simulation/loop.ts';
@@ -61,15 +61,44 @@ export interface ExternalInput {
 
 export type InputResult = { ok: true; events: WorldEvent[] } | { ok: false; reason: string };
 
-const SPEEDS: readonly number[] = [0, 1, 10, 100, 1000];
+/**
+ * Entrada externa de un tipo que el núcleo no conoce (p. ej. la charla, 043 R-019). En dos fases: `check` valida
+ * sin cambiar nada; si acepta, devuelve `apply`, que recibe la causa (el `EXTERNAL_INPUT_APPLIED`) y `emit` para
+ * crear sus eventos en orden. Así una entrada rechazada no gasta ids ni cambia el mundo.
+ */
+export type InputHandler = (
+  world: World,
+  input: ExternalInput,
+) => { ok: false; reason: string } | { ok: true; apply: (cause: CauseRef[], emit: (e: NewEvent) => WorldEvent) => void };
+
+/** 002 R-003: velocidades; `1/60` es el tiempo real (1 min de mundo por minuto real; 043 R-019.3). */
+const SPEEDS: readonly number[] = [0, 1 / 60, 1, 10, 100, 1000];
 
 /**
  * Valida y aplica una entrada externa en el minuto actual. Si se rechaza, el mundo no cambia.
  * Si se aplica, emite EXTERNAL_INPUT_APPLIED y, según el tipo, el evento específico con esa causa.
  */
-export function applyExternalInput(world: World, input: ExternalInput): InputResult {
+export function applyExternalInput(world: World, input: ExternalInput, inputs: Readonly<Record<string, InputHandler>> = {}): InputResult {
   if (input.at !== world.now)
     return { ok: false, reason: `la entrada es del minuto ${input.at} y el mundo está en ${world.now}` };
+  const custom = inputs[input.kind];
+  if (custom) {
+    const checked = custom(world, input);
+    if (!checked.ok) return checked;
+    const applied = makeEvent(world.counters, world.now, {
+      type: 'EXTERNAL_INPUT_APPLIED',
+      payload: { kind: input.kind, seq: input.seq },
+      causes: [{ state: 'external_input', value: input.seq, weight: 1 }],
+      origin: 'external',
+    });
+    const events = [applied];
+    checked.apply([{ event: applied.id, weight: 1 }], (e) => {
+      const made = makeEvent(world.counters, world.now, { origin: 'external', ...e });
+      events.push(made);
+      return made;
+    });
+    return { ok: true, events };
+  }
   const p = (typeof input.payload === 'object' && input.payload !== null ? input.payload : {}) as Record<
     string,
     unknown

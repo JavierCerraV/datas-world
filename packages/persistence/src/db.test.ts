@@ -19,12 +19,16 @@ describe('migraciones (R-006) y pragmas (R-003)', () => {
       db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all() as { name: string }[]
     ).map((t) => t.name);
     expect(tables).toEqual([
+      'chat_log',
+      'chat_sessions',
+      'chat_turns',
       'components',
       'control_commands',
       'entities',
       'event_participants',
       'events',
       'external_inputs',
+      'llm_records',
       'memory_archive',
       'meta',
       'snapshots',
@@ -44,13 +48,17 @@ describe('migraciones (R-006) y pragmas (R-003)', () => {
   it('reabrir no vuelve a migrar ni hace copia', () => {
     closeDb(openWorldDb(tmp.file('w.db')));
     const db = openWorldDb(tmp.file('w.db'));
-    expect(schemaVersion(db)).toBe(1);
+    expect(schemaVersion(db)).toBe(listMigrations().length);
     expect(existsSync(tmp.file('w.db.v1.backup'))).toBe(false);
     closeDb(db);
   });
 
   it('antes de migrar una base con datos hace una copia .backup con su contenido', () => {
-    const db1 = openWorldDb(tmp.file('w.db'));
+    // Una base en la versión 1 (solo la migración inicial) que se migra a una 2 de prueba.
+    const v1 = join(tmp.dir, 'migs-v1');
+    mkdirSync(v1);
+    copyFileSync(join(MIGRATIONS_DIR, '001-inicial.sql'), join(v1, '001-inicial.sql'));
+    const db1 = openWorldDb(tmp.file('w.db'), { migrationsDir: v1 });
     db1.prepare("INSERT INTO meta (key, value) VALUES ('world_id', 'WLD-0001')").run();
     closeDb(db1);
 

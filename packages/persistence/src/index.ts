@@ -22,3 +22,19 @@ export { WorldSession } from './session.ts';
 export type { FlushBatch } from './repository.ts';
 export { eventsById, queryEvents, rowsToEvents } from './queries.ts';
 export type { EventQuery, EventRow } from './queries.ts';
+
+export {
+  SqliteRecordStore,
+  appendChatLog,
+  chatLog,
+  chatSessionsOf,
+  chatTurns,
+  getChatSession,
+  insertChatSession,
+  insertChatTurn,
+  nextChatSessionId,
+  openChatSessions,
+  openInWorldSession,
+  updateChatSession,
+} from './chat.ts';
+export type { ChatSessionRow, ChatTurnRow, StoredLlmRecord } from './chat.ts';

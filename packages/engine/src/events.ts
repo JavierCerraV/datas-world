@@ -33,8 +33,9 @@ interface EventTypeDef<P> {
 }
 
 const isObj = (p: unknown): p is Record<string, unknown> => typeof p === 'object' && p !== null && !Array.isArray(p);
-const SPEEDS = [0, 1, 10, 100, 1000];
+const SPEEDS = [0, 1 / 60, 1, 10, 100, 1000];
 const speedOk = (v: unknown) => typeof v === 'number' && SPEEDS.includes(v);
+const speedText = (v: number) => (v === 1 / 60 ? 'tiempo real' : `${v}x`);
 const needObj = (p: unknown, fields: Record<string, (v: unknown) => boolean>): string | null => {
   if (!isObj(p)) return 'se espera un objeto';
   for (const [k, ok] of Object.entries(fields)) if (!ok(p[k])) return `campo "${k}" inválido`;
@@ -70,7 +71,7 @@ export const EVENT_TYPES = Object.freeze({
     baseImportance: 0.05,
     spontaneous: false,
     check: (p) => needObj(p, { from: speedOk, to: speedOk }),
-    text: (e) => `La velocidad cambia de ${e.payload.from}x a ${e.payload.to}x.`,
+    text: (e) => `La velocidad cambia de ${speedText(e.payload.from)} a ${speedText(e.payload.to)}.`,
   }),
   WORLD_PAUSED: def<{ reason: string }>({
     baseImportance: 0.05,
@@ -278,6 +279,43 @@ export const EVENT_TYPES = Object.freeze({
     spontaneous: false,
     check: (p) => needObj(p, { citizenId: str, activity: str, name: str }),
     text: (e) => `${e.payload.citizenId} empieza a ${e.payload.name.toLowerCase()}.`,
+  }),
+  // Charla con ciudadanos en el mundo (spec 043 R-019 a R-021).
+  CONVERSATION_STARTED: def<{ citizenId: string; visitorId: string; sessionId: string; availableUntil: number; busy: boolean }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, visitorId: str, sessionId: str, availableUntil: int, busy: (v) => typeof v === 'boolean' }),
+    text: (e) => `${e.payload.citizenId} se pone a charlar con ${e.payload.visitorId}${e.payload.busy ? ' un momento' : ''}.`,
+  }),
+  CONVERSATION_DECLINED: def<{ citizenId: string; visitorId: string; reason: string }>({
+    baseImportance: 0.1,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, visitorId: str, reason: str }),
+    text: (e) => `${e.payload.citizenId} no puede charlar con ${e.payload.visitorId} (${e.payload.reason}).`,
+  }),
+  CONVERSATION_HELD: def<{
+    citizenId: string; visitorId: string; sessionId: string; turns: number; dominantTones: string[];
+    dominantStances: string[]; summary: string; valence: number; intensity: number;
+  }>({
+    baseImportance: 0.4,
+    spontaneous: false,
+    check: (p) =>
+      needObj(p, {
+        citizenId: str, visitorId: str, sessionId: str, turns: (v) => int(v) && (v as number) >= 0,
+        dominantTones: (v) => Array.isArray(v) && v.every(str), dominantStances: (v) => Array.isArray(v) && v.every(str),
+        summary: str, valence: (v) => typeof v === 'number' && v >= -1 && v <= 1, intensity: (v) => typeof v === 'number' && v >= 0 && v <= 1,
+      }),
+    text: (e) => `${e.payload.citizenId} charló con ${e.payload.visitorId}: ${e.payload.summary}`,
+  }),
+  LEARNED_FROM_CONVERSATION: def<{ citizenId: string; sessionId: string; deltas: { key: string; before: number; after: number }[] }>({
+    baseImportance: 0.2,
+    spontaneous: false,
+    check: (p) =>
+      needObj(p, {
+        citizenId: str, sessionId: str,
+        deltas: (v) => Array.isArray(v) && v.every((d) => isObj(d) && str(d.key) && Number.isFinite(d.before) && Number.isFinite(d.after)),
+      }),
+    text: (e) => `${e.payload.citizenId} aprende de la charla ${e.payload.sessionId} (${e.payload.deltas.length} cambios).`,
   }),
   // Historia generada (spec 030), de 1900 al presente.
   TOWN_FOUNDED: def<{ placeId: string; name: string; year: number }>({

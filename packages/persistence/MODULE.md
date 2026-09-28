@@ -2,7 +2,7 @@
 modulo: persistence
 ruta: packages/persistence
 estado: en-desarrollo
-specs: [027, 015]
+specs: [027, 015, 043, 026]
 actualizado: 2026-09-24
 ---
 
@@ -35,6 +35,7 @@ Desde `@datas-world/persistence` (`src/index.ts`):
 | `encodeSnapshot`, `decodeSnapshot`, `columnToLE`, `columnFromLE` | `src/codec.ts` | Formato binario de instantáneas y columnas |
 | `FLUSH_TICKS`, `SNAPSHOT_EVERY_DAYS` | `src/params.ts` | Parámetros de la §8 que usa el M0 |
 | `queryEvents(db, { from?, to?, types?, participant?, place?, limit? })`, `eventsById(db, ids)`, `rowsToEvents`, tipos `EventQuery`/`EventRow` | `src/queries.ts` | Consultas de solo lectura del registro, en orden (`at`, `seq`). `participant` usa `event_participants`; `place` busca en `place_id` y en `placeId`/`orgId` del payload (`json_extract`). Las usa la CLI (`world:history`, `citizen:report`, 030 R-008) |
+| `nextChatSessionId`, `insertChatSession`, `updateChatSession`, `getChatSession`, `chatSessionsOf`, `openInWorldSession`, `openChatSessions`, `insertChatTurn`, `chatTurns`, `appendChatLog`, `chatLog`, `SqliteRecordStore` | `src/chat.ts` | Datos del laboratorio de charla (043 R-001), fuera del estado del mundo. `openChatSessions` da las charlas abiertas; la API las cierra al arrancar |
 
 ## 4. Diseño interno y decisiones
 - **better-sqlite3 13** (ADR-001), síncrono. Trae binarios precompilados (`gypfile: false`), así que en `pnpm-workspace.yaml` su script de instalación queda deshabilitado (`allowBuilds: better-sqlite3: false`): no hace falta compilador de C++. El RSS del módulo nativo son unos pocos MB.
@@ -47,7 +48,7 @@ Desde `@datas-world/persistence` (`src/index.ts`):
 - **Columnas en binario little-endian** (R-008), también dentro de la instantánea. En máquinas LE la escritura es una vista sin copia.
 - **Instantánea** (R-004): `MSS1` + u32 LE + cabecera JSON (el `WorldSnapshot` sin las filas) + columnas en binario, todo comprimido con zstd; la tabla guarda el hash. `INSERT OR REPLACE` por minuto. La retención llega en M4.
 - **Mapa** (spec 003, M1): se guarda una sola vez en `meta.geo` (JSON con los 2 560 tiles) la primera vez que aparece, porque no cambia (003 INV-002). Viaja también en la cabecera de la instantánea. Los lugares de M1 (con `rect`, `door`, `stratum`…) se guardan en `entities` como cualquier entidad.
-- **Carga verificada.** `loadWorld` rechaza capacidades desconocidas (R-009) y comprueba que el hash del mundo reconstruido coincide con `meta.state_hash`: detecta estados alterados o incoherentes.
+- **Carga verificada.** `loadWorld` rechaza capacidades desconocidas (R-009) y comprueba que el hash del mundo reconstruido coincide con `meta.state_hash`: detecta estados alterados o incoherentes. Lee todo dentro de **una transacción de lectura**: con el worker escribiendo, cada SELECT suelto vería un flush distinto (WAL) y la carga mezclaría dos estados. Eso tumbaba la API durante la charla (hash distinto del guardado).
 - **Puntos de control** (R-012). `flush({ …, checkpoint: true })` y `saveSnapshot` guardan `state_hash`, `state_hash_at` y `state_dirty = 0`; un flush normal solo pone `state_dirty = 1`. `WorldSession.flush(true)` se usa al final de `advanceTicks`; el worker lo usa al pausar o cambiar de control, y al cerrar hace instantánea. Si al cargar `state_dirty = 1` (cierre en seco), el mundo se carga sin verificar y `repo.recovered` es `true`. Una base sin `state_hash_at` (anterior a R-012) se verifica siempre. Avanzar 30 días con la población de M1: de 12 s a 2,4 s, con el mismo hash.
 - **Sentencias preparadas una vez**, en el constructor del repositorio, y la transacción de flush también. Prepararlas en cada flush dejaba miles de sentencias nativas esperando al recolector: 365 días (8 760 flush) llegaban a 483 MB de RSS y 2,3 s. Preparadas una vez, se quedan en 66 MB y 0,75 s.
 - **Un solo escritor** (R-001): el worker y `world:advance` toman `meta.writer_pid` en una transacción `IMMEDIATE`. Si el dueño ya no existe (murió en seco), se recupera. Encolar una orden de control es una escritura mínima que no toma el cerrojo: SQLite la serializa con `busy_timeout`.
@@ -69,7 +70,8 @@ Vitest, desde la raíz: `pnpm test`. Cada prueba usa una carpeta temporal propia
   - INV-001: un lote con `seq` repetido se rechaza y no deja nada a medias;
   - R-009, estado alterado detectado por hash, dos mundos en una base;
   - CA-004: un lector con una transacción abierta ve su instantánea mientras el escritor hace 20 flush, sin `SQLITE_BUSY`.
-- `src/crash.test.ts` (1 prueba, CA-003): un proceso hijo (`src/crash-child.fixture.ts`) avanza 30 días con flush cada `FLUSH_TICKS` ticks. El padre lo mata en seco (`SIGKILL`) después de un flush del día 10. Al reabrir: estado de un flush, ningún evento confirmado perdido, eventos iguales al prefijo de una ejecución de referencia. Seguir hasta el día 30 da el mismo hash y los mismos eventos.
+- `src/crash.test.ts` (1 prueba, CA-003): un proceso hijo (`src/crash-child.fixture.ts`) avanza 30 días con flush cada `FLUSH_TICKS` ticks. El padre lo mata en seco (`SIGKILL`) después de un flush del día 10. Al reabrir: estado de un flush, ningún evento confirmado perdido, eventos iguales al prefijo de una ejecución de referencia. Seguir hasta el día 30 da el mismo hash y los mismos eventos. Con el argumento `checkpoint`, el hijo hace cada flush como punto de control.
+- `src/concurrent-read.test.ts` (1 prueba, CA-004 con la carga completa): mientras el hijo hace flush con punto de control, un lector carga el mundo una y otra vez sin ningún error de hash.
 
 - `src/queries.test.ts` (1 prueba): filtros por fecha, tipo, participante y lugar, orden cronológico, límite y búsqueda por id.
 - `src/control.test.ts` (3 pruebas): órdenes en orden de id; cerrojo rechazado con un dueño vivo, liberado y recuperado de un proceso muerto.
@@ -100,3 +102,5 @@ No aplica (el prototipo no persiste).
 | 2026-09-24 | m1/hash-puntos-control | 027 | R-012, aprobada por el usuario: `FlushBatch.checkpoint`, `saveSnapshot` como punto de control, `repo.recovered` y `WorldSession.flush(checkpoint)`, con punto de control al final de `advanceTicks`. 30 días con población: de 12 s a 2,4 s, mismo hash. 1 prueba nueva; la de estado alterado usa un punto de control |
 | 2026-09-25 | m2/f-economia | 027, 015 | El repositorio guarda y carga las cuentas del sistema (`World.accounts`, 015) en la clave `accounts` de `meta`, en cada guardado; los mundos sin economía no la tienen |
 | 2026-09-26 | visor/minimo (V1) | 022 | `EventQuery`: `afterId` (eventos registrados después de un id, para el SSE) y `latest` (los `limit` más recientes, en orden de inserción) |
+| 2026-09-27 | charla/l3-mundo (L3) | 043, 026 | Migración 002: `chat_sessions`, `chat_turns`, `chat_log` (append-only) y `llm_records`, fuera del estado del mundo; funciones del chat y `SqliteRecordStore`. Órdenes `chat_open` y `chat_session`. `db.test.ts` pasa a la versión 2 del esquema; 2 pruebas nuevas |
+| 2026-09-27 | claude/wonderful-carson-4c4i3k (arreglo de la charla) | 027, 043 | `loadWorld` lee en una transacción de lectura: con el worker escribiendo, la API cargaba un estado mezclado de dos flush y se caía con «El estado cargado no coincide con el guardado», dejando la charla colgada. `openChatSessions`. El proceso hijo de prueba admite `checkpoint`. 1 prueba nueva (`concurrent-read.test.ts`), que fallaba antes del arreglo |

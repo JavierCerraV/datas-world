@@ -67,4 +67,4 @@ process.on('SIGTERM', stop);
 run('worker', ['apps/worker/src/main.ts', '--db', v.db, '--speed', v.speed]);
 run('api', ['apps/api/src/main.ts', '--db', v.db]);
 run('web', ['apps/web/node_modules/vite/bin/vite.js', '--config', 'apps/web/vite.config.ts']);
-console.log('\nAbre http://127.0.0.1:5173 en el navegador. Ctrl+C para detener.\n');
+console.log(`\nAbre http://127.0.0.1:${process.env.DATAS_WORLD_WEB_PORT ?? 5180} en el navegador. Ctrl+C para detener.\n`);

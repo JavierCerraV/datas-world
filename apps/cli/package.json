@@ -4,6 +4,13 @@
   "private": true,
   "type": "module",
   "description": "Herramientas de línea de comandos",
-  "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@datas-world/engine": "workspace:*", "@datas-world/generators": "workspace:*", "@datas-world/persistence": "workspace:*" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@datas-world/engine": "workspace:*",
+    "@datas-world/generators": "workspace:*",
+    "@datas-world/llm-gateway": "workspace:*",
+    "@datas-world/persistence": "workspace:*"
+  }
 }
