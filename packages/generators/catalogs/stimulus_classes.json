@@ -1,7 +1,7 @@
 {
   "name": "stimulus_classes",
-  "version": "2026.09.4",
-  "source": "Spec 036 R-004 (ADR-007): ontología compartida de estímulos. [M] Rasgos estimados para la generalización, seis dimensiones en [0, 1]: social, cuerpo, dinero, trabajo, ocio y hogar (dims). Clases explícitas: los términos verbales, roles y estados del cuerpo que usan las reglas del motor (WORLD_STIMULI). Las entradas `familia.lugar.<categoría>` y `familia.actividad.<categoría>` dan los rasgos de las clases `lugar.<clave>` y `actividad.<clave>` que se derivan de place_kinds y leisure_activities. Primarios (R-007): dolor −1 y disfrute +1. MF4 (037 R-007): despido, llegar tarde y no pagar, que enseña la comunidad verbal. MF5 (038 R-010): las respuestas de la rutina (`rutina.*`) que especifican las reglas. Calibración pendiente (PA-131). L0.2 (043 R-005): nueve términos verbales de la charla (burla, confidencia, culpa, insulto, lamento, neutro, presión, pregunta y pregunta invasiva), sin valor primario: su función se aprende o sale del valor de partida de `chat_tones`.",
+  "version": "2026.10.1",
+  "source": "Spec 036 R-004 (ADR-007): ontología compartida de estímulos. [M] Rasgos estimados para la generalización, seis dimensiones en [0, 1]: social, cuerpo, dinero, trabajo, ocio y hogar (dims). Clases explícitas: los términos verbales, roles y estados del cuerpo que usan las reglas del motor (WORLD_STIMULI). Las entradas `familia.lugar.<categoría>` y `familia.actividad.<categoría>` dan los rasgos de las clases `lugar.<clave>` y `actividad.<clave>` que se derivan de place_kinds y leisure_activities. Primarios (R-007): dolor −1 y disfrute +1. MF4 (037 R-007): despido, llegar tarde y no pagar, que enseña la comunidad verbal. MF5 (038 R-010): las respuestas de la rutina (`rutina.*`) que especifican las reglas. Calibración pendiente (PA-131). L0.2 (043 R-005): nueve términos verbales de la charla (burla, confidencia, culpa, insulto, lamento, neutro, presión, pregunta y pregunta invasiva), sin valor primario: su función se aprende o sale del valor de partida de `chat_tones`. L5.1 (044 R-003): abandono, afecto, desprecio y traición, que presentan las afirmaciones de `chat_claims`, también sin valor primario.",
   "entries": [
     {
       "key": "cuerpo.disfrute",
@@ -279,6 +279,24 @@
       }
     },
     {
+      "key": "verbal.abandono",
+      "name": "Abandono (lo van a dejar)",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0, 0, 0, 0, 0.8]
+      }
+    },
+    {
+      "key": "verbal.afecto",
+      "name": "Afecto (lo extrañan)",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0.2, 0, 0, 0, 0.5]
+      }
+    },
+    {
       "key": "verbal.amenaza",
       "name": "Amenaza",
       "since": "M2",
@@ -339,6 +357,15 @@
       "attrs": {
         "kind": "verbal_term",
         "features": [0.5, 0, 0.6, 1, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.desprecio",
+      "name": "Desprecio (hablan mal de él)",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0, 0, 0, 0, 0.2]
       }
     },
     {
@@ -447,6 +474,15 @@
       "attrs": {
         "kind": "verbal_term",
         "features": [0.3, 0, 0.5, 1, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.traicion",
+      "name": "Traición (engaño de alguien cercano)",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0.2, 0.2, 0, 0, 0.8]
       }
     },
     {

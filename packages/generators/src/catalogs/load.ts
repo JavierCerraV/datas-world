@@ -12,6 +12,8 @@ export const CATALOGS_DIR = join(import.meta.dirname, '..', '..', 'catalogs');
 export const CATALOG_NAMES = [
   'appearance',
   'birthplaces',
+  'chat_claims',
+  'chat_relations',
   'chat_scripts',
   'chat_stances',
   'chat_tones',

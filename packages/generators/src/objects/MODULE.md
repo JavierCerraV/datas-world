@@ -2,8 +2,8 @@
 modulo: objects
 ruta: packages/generators/src/objects
 estado: en-desarrollo
-specs: [005, 029]
-actualizado: 2026-09-24
+specs: [005, 029, 044]
+actualizado: 2026-09-27
 ---
 
 # Módulo: objects
@@ -63,3 +63,4 @@ Porta `genObjects` (probabilidades, precios, "el anillo de su abuela"). El carro
 | 2026-09-24 | m1/g-empleo-objetos | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/g-empleo-objetos (G2) | 005 | `generateObjects` con reglas del catálogo, carro por estrato y eventos de origen. 5 pruebas: 005 CA-001, CA-002, CA-003 |
 | 2026-09-25 | m2/d-movilidad | 005, 016 | Moto del hogar (`transporte.moto`, catálogo 2026.09.3) con `gen.objects.motoP` por estrato (0,4 · 0,35 · 0,25, por confirmar); los vehículos del hogar se generan por tipo con su `pKey`. La prueba del carro ya no cuenta cualquier objeto del hogar como carro. 1 prueba nueva |
+| 2026-09-27 | charla/l5 (L5.1) | 005, 044 | El celular (`tecnologia.telefono`) lo recibe toda persona de 14 años o más (044 P2, `object_kinds` 2026.10.1); la prueba de 005 CA-001 comprueba que todos los de 14 o más lo tienen y ningún menor. Sin cambios de código: la regla sale del catálogo |

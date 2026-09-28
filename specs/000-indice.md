@@ -51,7 +51,7 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [041](041-development.md) | Desarrollo: historia de aprendizaje sintética (0 años → presente) | MF (bloque MF7) | 030, 035, 036, 037, 038, 039 | borrador | — |
 | [042](042-behavior-validation.md) | Batería de validación conductual | MF (se completa por bloques MF2–MF7) | 035, 036, 037, 038, 039, 040, 041 | aprobada | `packages/engine/src/functions`, `packages/engine/src/lab` |
 | [043](043-citizen-chat.md) | Charla con ciudadanos | Bloque L (versión mínima adelantada, decisión del usuario 2026-09-27) · completa en M6 | 010, 013, 020, 022, 023, 024, 025, 026, 030, 036, 037, 038, 039, 040 | aprobada | `apps/api`, `apps/cli`, `apps/web`, `packages/engine`, `packages/engine/src/conversation`, `packages/generators/src/catalogs`, `packages/llm-gateway`, `packages/persistence` |
-| [044](044-chat-consequences.md) | Consecuencias de la charla: lo que se dice sobre otros sale de la charla |  |  |  | — |
+| [044](044-chat-consequences.md) | Consecuencias de la charla: lo que se dice sobre otros sale de la charla | Bloque L (ampliación, petición del usuario 2026-09-27) · completa con 012, 013 y 025 en M3–M6 | 008, 010, 014, 019, 023, 026, 036, 037, 038, 040, 043 | aprobada | `packages/generators/src/catalogs`, `packages/generators/src/objects`, `packages/llm-gateway` |
 <!-- INDICE:FIN -->
 
 ## Orden sugerido de revisión

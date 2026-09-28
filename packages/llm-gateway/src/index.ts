@@ -16,9 +16,9 @@ export type {
 } from './types.ts';
 
 export { chatCatalogs } from './chat/catalog.ts';
-export type { ChatCatalogs, StanceInfo, ToneInfo } from './chat/catalog.ts';
-export { classifyTone, lexicalTone } from './chat/classify.ts';
-export type { ToneResult } from './chat/classify.ts';
+export type { ChatCatalogs, ClaimInfo, RelationInfo, StanceInfo, ToneInfo } from './chat/catalog.ts';
+export { classifyTone, lexicalClaims, lexicalTone } from './chat/classify.ts';
+export type { ClassifyCatalogs, ToneResult, VisitorClaim } from './chat/classify.ts';
 export { TRANSCRIPT_TURNS, expressionRequest, instructions, renderView, stancePart } from './chat/prompt.ts';
 export type { TranscriptTurn } from './chat/prompt.ts';
 export { ChatEndedError, ChatSession, TEMPLATES } from './chat/session.ts';

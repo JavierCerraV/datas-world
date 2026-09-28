@@ -39,7 +39,7 @@ Coste en memoria: ≈ 250 B por objeto; con 1 a 4 objetos por persona, ≈ 1 KB 
 
 ## 4. Reglas
 - **R-001 (M1)** — Objetos iniciales con `rng.fork('gen:objects').fork(citizenId)`, como `genObjects` del prototipo:
-  - teléfono: adultos con p = 0,9 y de 12 a 17 años con p = 0,6; 650 000;
+  - teléfono (celular): desde L5.1 (044 P2), toda persona de 14 años o más; 650 000. La posibilidad de llamar en un momento dado depende del estrato (`callAccess` del catálogo). Antes: adultos con p = 0,9 y de 12 a 17 años con p = 0,6, como el prototipo;
   - bicicleta: de 10 a 59 años con p = 0,3; 480 000;
   - herencia (`heirloom`, "el anillo de su abuela"): 25 años o más con p = 0,08; 300 000; valor emocional 0,95.
 - **R-002 (M1)** — Objetos del hogar: carro con probabilidad `CAR_P[estrato]` y dueño el hogar. Su valor emocional nace en 0 para cada miembro.
@@ -64,7 +64,7 @@ Coste en memoria: ≈ 250 B por objeto; con 1 a 4 objetos por persona, ≈ 1 KB 
 - **INV-002** — `ownerId` existe y es un `CIT` o un `HOU`.
 
 ## 7. Criterios de aceptación
-- **CA-001 (M1)** — *Dado* 20 mundos de 200 personas, *entonces* las proporciones agregadas de teléfono (adultos), bicicleta y herencia están a ±0,03 de R-001, y la de teléfono de 12 a 17 años a ±0,06 (hay pocos adolescentes); el carro del hogar por estrato está a ±0,08 de `CAR_P`.
+- **CA-001 (M1)** — *Dado* 20 mundos de 200 personas, *entonces* toda persona de 14 años o más tiene celular y ninguna menor de 14; las proporciones agregadas de bicicleta y herencia están a ±0,03 de R-001; el carro del hogar por estrato está a ±0,08 de `CAR_P`.
 - **CA-002 (M1)** — *Dado* un objeto inicial, *entonces* su `historyEventIds` empieza con un evento de origen con `at < 0`.
 - **CA-003 (M1)** — *Dado* un carro de hogar, *entonces* su `ownerId` es el `HOU` y todos los miembros pueden verlo como suyo.
 - **CA-004 (M2)** — *Dado* un reloj regalado por la madre, *entonces* `sentimental[hijo] ≥ 0,6` y su historia incluye `OBJECT_GIFTED`.
@@ -95,3 +95,4 @@ Objetos por persona y hogar, por tipo y estrato; valor emocional medio. Alerta s
 | 2026-09-24 | 0.4 | Implementación del bloque G, con la revisión de CA aprobada por el usuario (agregado de 20 mundos). Precisiones: las reglas por edad y el rango de estado (`condition`) de cada tipo están en el catálogo `object_kinds` (2026.09.2); una compra ocurre en los últimos 5 años (desde los 10 de edad) y una herencia en algún momento de la vida adulta; el carro lo registra la cabeza del hogar |
 | 2026-09-25 | 0.4 | Bloque D de M2 (016 R-002): la moto del hogar (`transporte.moto`, $7 500 000, estimado) entra en `object_kinds` 2026.09.3, con probabilidad por estrato `gen.objects.motoP` del perfil (0,4 · 0,35 · 0,25, por confirmar con la ECV). Los vehículos del hogar indican su tabla con `pKey`. Sin cambios en CA |
 | 2026-09-25 | 0.4 | Bloque G de M2: R-005 con `transferObject` (regalo y venta) y `loseObject` (pérdida o destrucción: `status: inactive` y `fate`, nunca se borra, CA-005). Valor emocional del regalo [M] (hasta R-006 en M3): 0,7 si lo da el padre o la madre, 0,6 otro miembro del hogar, 0,4 otra persona; nunca baja. Los regalos y las ventas en la vida diaria (quién regala qué y cuándo) llegan con las relaciones (012, M3); en M2 son operaciones del motor con evento. Sin cambios en CA |
+| 2026-09-27 | 0.4 | Decisión del usuario en la 044 (P2): el teléfono pasa a ser el celular de toda persona de 14 años o más (`object_kinds` 2026.10.1), con `callAccess` por estrato para la llamada de la 044 R-006 (estimado, por confirmar con la ENTIC de MinTIC y DANE). Se reutiliza el tipo `tecnologia.telefono` en vez de crear uno nuevo. Se aparta del prototipo a propósito; la paridad no mide los teléfonos. CA-001 ajustado a la regla nueva |

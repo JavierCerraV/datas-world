@@ -165,7 +165,7 @@ Coste de memoria: unas pocas creencias e intenciones por persona que charló (< 
 
 ## 10. Preguntas abiertas
 Resueltas por el usuario el 2026-09-27 (todas según la propuesta):
-- [x] **P1.** Catálogo inicial `chat_claims` con 8 afirmaciones: `consiente_relacion_abierta`, `infiel`, `habla_mal_de_ti`, `quiere_separarse`, `te_miente_con_dinero`, `te_van_a_despedir`, `te_admira`, `te_extraña`.
+- [x] **P1.** Catálogo inicial `chat_claims` con 8 afirmaciones: `consiente_relacion_abierta`, `infiel`, `habla_mal_de_ti`, `quiere_separarse`, `te_miente_con_dinero`, `te_van_a_despedir`, `te_admira`, `te_extrana`.
 - [x] **P2.** Celular: nuevo tipo en `object_kinds` (005). Lo tiene toda persona de 14 años o más, con acceso según el estrato (029).
 - [x] **P3.** La tensión mínima del vínculo (R-007) se guarda en la persona, solo para los vínculos tocados, sin adelantar la 012. Cuando llegue la 012, la absorbe.
 - [x] **P4.** En el encuentro, el tercero aprende algo sobre el visitante (R-008.4): una creencia sobre `EXT-0001` con fuente su pareja. Abre la puerta a los rumores de la 025.
@@ -177,3 +177,4 @@ Resueltas por el usuario el 2026-09-27 (todas según la propuesta):
 | 2026-09-27 | 0.1 | Borrador a petición del usuario tras probar la charla: lo dicho sobre otros deja creencias, reacción según la historia, intenciones (llamar o confrontar) y conflicto encadenado con causas (efecto mariposa) |
 | 2026-09-27 | 0.2 | Preguntas P1 a P5 resueltas por el usuario según la propuesta: 8 afirmaciones en `chat_claims`; celular desde los 14 años según el estrato; tensión mínima guardada en la persona hasta la 012; el tercero aprende sobre el visitante en el encuentro; spec propia |
 | 2026-09-28 | 0.2 | Estado → aprobada |
+| 2026-09-27 | 0.2 | Precisiones de L5.1: la clave `te_extraña` se escribe `te_extrana` (las claves de catálogo no admiten ñ). Las relaciones (`pareja`, `madre`, `padre`, `hijo`, `hermano`, `jefe`, `companero`) van en un catálogo propio, `chat_relations`, con cómo resolverlas desde la vista y su cercanía por defecto para R-003. El celular reutiliza el tipo `tecnologia.telefono` (005) en vez de crear otro, con `callAccess` por estrato. Estímulos verbales nuevos en la 036: `verbal.abandono`, `verbal.afecto`, `verbal.desprecio` y `verbal.traicion`. Las afirmaciones salen en la misma llamada del clasificador de tono, sin coste extra. Sin cambios en CA |

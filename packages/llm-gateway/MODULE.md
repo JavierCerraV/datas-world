@@ -2,7 +2,7 @@
 modulo: llm-gateway
 ruta: packages/llm-gateway
 estado: en-desarrollo
-specs: [026, 043]
+specs: [026, 043, 044]
 actualizado: 2026-09-27
 ---
 
@@ -22,6 +22,7 @@ El LLM expresa; no decide la postura ni cambia el mundo (ADR-003). No hace E/S d
 |---|---|---|
 | 026 | CA-003 a CA-011. R-001, R-003 (con almacén en memoria), R-004, R-006 a R-013 | CA-001 y CA-002 (el mundo con `mock` y el replay sin red se prueban con el worker, L3); R-002 y R-005 (decisiones de nivel 4, M6); el almacén SQLite de `llm_records` (L3) |
 | 043 | CA-002, CA-003, CA-009 a CA-012, CA-018. R-002 a R-004, R-010 a R-014, R-023 (streaming, caché y verificación asíncrona) | CA-001, CA-014, CA-015, CA-017 (L3); CA-016 (L4); la medición real de latencia y coste (L4.3) |
+| 044 | R-001: extracción de las afirmaciones sobre terceros en el clasificador, con respaldo léxico (L5.1) | Resolución a una persona real, credibilidad e impacto (L5.2, motor); CA-001 a CA-008 |
 
 ## 3. API pública
 Desde `@datas-world/llm-gateway`:
@@ -37,7 +38,8 @@ Desde `@datas-world/llm-gateway`:
 | `chatCatalogs(catalogs)` | Tonos, posturas y guiones de los catálogos `chat_*`, en la forma de la pasarela y del motor |
 | `buildPersonView(input)`, tipos `PersonView`, `ViewFact` | Vista mínima de la persona (043 §3) |
 | `expressionRequest`, `instructions`, `renderView`, `stancePart` | Prompt de la expresión: instrucciones y vista cacheables; postura y estado vivo aparte |
-| `classifyTone`, `lexicalTone` | Tono del turno: etiqueta, clasificador LLM o reglas léxicas |
+| `classifyTone`, `lexicalTone` | Tono del turno: etiqueta, clasificador LLM o reglas léxicas. En la misma llamada, las afirmaciones sobre terceros (`visitorClaims`, 044 R-001) |
+| `lexicalClaims` | Respaldo léxico de las afirmaciones: palabra clave de `chat_claims` y relación de `chat_relations` nombrada como palabra completa (la primera del mensaje) o la única que admite |
 | `verifyReply` | Afirmaciones marcadas contra la vista y adherencia a la postura |
 | `ChatSession` (`turn`, `close`, `input`), `TEMPLATES`, `ChatEndedError` | Sesión de charla: tono, postura, `onStance`, texto en streaming, verificación en segundo plano y entrada `chat_session` al cerrar |
 
@@ -79,3 +81,4 @@ No aplica: el prototipo no usa LLM.
 | 2026-09-23 | kit de arranque | — | Documento creado (sin código) |
 | 2026-09-27 | charla/l2-pasarela (L2) | 026, 043 | Primera implementación: configuración por propósito, `Gateway` (registro, presupuesto, tiempo máximo, reparación, coste y métricas), adaptadores Anthropic (SDK oficial), compatible con OpenAI y `mock`; capa de charla (vista, prompt, clasificador, verificador y `ChatSession`). 18 pruebas |
 | 2026-09-27 | claude/wonderful-carson-4c4i3k (arreglo de la charla) | 043 | `ChatSession.input()`: la entrada de consolidación sin resumen, para cerrar aunque falle la llamada `summarize` |
+| 2026-09-27 | charla/l5 (L5.1) | 044, 043 | El clasificador de tono devuelve también las afirmaciones del visitante sobre terceros cercanos (`visitorClaims`: `predicate` de `chat_claims`, `about` de `chat_relations`) en la misma llamada, sin otra llamada al LLM; descarta relaciones que la afirmación no admite. Respaldo léxico `lexicalClaims` (palabra completa: «padre» no está en «compadre»). `chatCatalogs` lee `chat_claims` y `chat_relations` si llegan; si no, la charla sigue igual. La API ya las guarda en el turno del visitante. 4 pruebas |

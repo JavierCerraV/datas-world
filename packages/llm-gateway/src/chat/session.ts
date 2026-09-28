@@ -110,7 +110,7 @@ export class ChatSession {
     const { gateway: gw, catalogs } = this.#o;
     const now = t.now ?? this.#o.now;
     const t0 = performance.now();
-    const tone = await classifyTone(gw, catalogs.tones, text, t.toneTag);
+    const tone = await classifyTone(gw, catalogs, text, t.toneTag);
     const toneDef = catalogs.engine.tones.find((x) => x.key === tone.tone);
     if (!toneDef) throw new Error(`Tono desconocido: ${tone.tone}`);
     visitorSaid(this.state, this.#pc, catalogs.engine, toneDef, now, this.params);
