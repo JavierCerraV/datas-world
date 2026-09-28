@@ -49,7 +49,8 @@ describe('041: desarrollo en la generación del mundo', () => {
         expect(f.src.length, `${id} ${f.s}`).toBeGreaterThan(0);
         const origin = f.src.map((s) => byId.get(s as EntityId)).find((e) => e && e.payload.citizenId === id);
         expect(origin, `${id} ${f.s}`).toBeDefined();
-        expect(origin!.payload.episodes.some((ep) => ep[6].some(([key]) => key === f.s)), `${id} ${f.s}`).toBe(true);
+        // La función de una persona (`cit.<id>`, 012 R-007) la forman los episodios en que intervino (`speakerId`).
+        expect(origin!.payload.episodes.some((ep) => ep[6].some(([key]) => key === f.s) || f.s === `cit.${ep[3]}`), `${id} ${f.s}`).toBe(true);
       }
     }
   });

@@ -1,0 +1,19 @@
+# M3 — Vida social (sobre el motor funcional)
+
+Hito del roadmap: relaciones asimétricas, memoria, causalidad, historia y conocimiento, escritas sobre el motor funcional (035 §8). Prueba del hito: 100 ciudadanos × 1 año; batería 042 en verde; informes de vida con explicación funcional; rumores con verdad ≠ creencia.
+
+Specs: 012 (aprobada, v0.2), 013, 019, 020 y 025 (borradores). Una rama por bloque: `m3/<bloque>`.
+
+## Bloque R — Relaciones (012; rama `m3/relaciones`)
+- [x] R1 Módulo `packages/engine/src/relationships/` (MODULE.md, tipos, parámetros). `Citizen.bonds` amplía el `Bond` de la 044 (familiaridad, etiquetas, encuentros). Capacidad `relationships` en los mundos con vida diaria.
+- [x] R2 Encuentros en lugares compartidos con las posturas de la charla (043) sin LLM: la persona como estímulo `cit.<CIT>`, aprendizaje de cada lado, acercarse como respuesta aprendida (R-001 a R-003).
+- [x] R3 Etiquetas con histéresis, discusiones, parejas y rupturas con sus eventos (R-004 a R-006); olvido y tope (R-008).
+- [x] R4 Punto de partida desde el desarrollo (041): la función de cada pariente y la familiaridad por convivencia (R-007).
+- [x] R5 Criterios CA-001 a CA-005; métricas frente al prototipo; apego como métrica (P4).
+- [x] R6 Visor: los vínculos en la ficha (quién, etiqueta, familiaridad, afecto de cada lado).
+
+## Bloques siguientes (specs en borrador: resolver sus preguntas y aprobarlas antes)
+- [ ] M 013 Memoria episódica como registro de contingencias.
+- [ ] C 019 Causalidad con el vector de aportes y la cadena de origen.
+- [ ] H 020 Historia retrospectiva funcional y la resiliencia como métrica de trayectoria.
+- [ ] K 025 Conocimiento, creencias y rumores (reescritura).

@@ -52,6 +52,7 @@ export type {
   BaseEntity,
   Belief,
   Bond,
+  BondLabel,
   CatalogRef,
   Citizen,
   Debt,
@@ -425,6 +426,29 @@ export {
   stepMind,
 } from './private/index.ts';
 export type { AvoidanceResponse, EpisodeEnd, MindCtx, MindState, MindTick, PnrEpisode, PrivateEvent, PrivateParams, StepResult } from './private/index.ts';
+// Relaciones (spec 012 v0.2): encuentros, vínculos, etiquetas, discusiones, parejas, rupturas y olvido.
+export {
+  APPROACH,
+  CLASH,
+  RELATIONSHIP_DEFAULTS,
+  TONE_OF_STANCE,
+  affectionFor,
+  approachOf,
+  attachmentOf,
+  bondWith,
+  createBondDailySystem,
+  createBondLedgerSystem,
+  createSocialEncounterSystem,
+  exchange,
+  forgettable,
+  hasPartner,
+  personStimulus,
+  relabel,
+  relationshipSystems,
+  sameOrg,
+  touch,
+} from './relationships/index.ts';
+export type { Attachment, EncounterDeps, Exchange, RelationshipParams, Side } from './relationships/index.ts';
 
 export { FORBIDDEN_TERMS, MECHANISMS, isMechanism } from './temperament/mechanisms.ts';
 export type { MechanismId } from './temperament/mechanisms.ts';

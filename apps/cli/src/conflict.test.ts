@@ -29,9 +29,15 @@ describe('citizen:report con las consecuencias de la charla (044 CA-005)', () =>
       r.submit('chat_open', { citizenId: id, visitorId: 'EXT-0001', sessionId: 'CHS-000001' });
       const turns = [{ tone: 'invasivo', stance: 'evadir' }, { tone: 'invasivo', stance: 'poner_limite', claims: [{ predicate: 'consiente_relacion_abierta', about: 'pareja' }] }];
       r.submit('chat_session', { sessionId: 'CHS-000001', citizenId: id, visitorId: 'EXT-0001', turns });
-      for (let i = 0; i < DAY / 5 && !gen.world.citizens.get(id)!.bonds?.length; i++) r.advanceTicks(1);
-      if (gen.world.citizens.get(id)!.bonds?.length) {
-        found = { world: gen.world, events: [...gen.events, ...r.drainEvents()], id };
+      // Los vínculos existen desde la generación (012 R-007): se espera al encuentro de la 044 (`BOND_STRAINED`).
+      const events: WorldEvent[] = [...gen.events, ...r.drainEvents()];
+      const strained = () => events.some((e) => e.type === 'BOND_STRAINED' && (e.payload as { a: string }).a === id);
+      for (let i = 0; i < DAY / 5 && !strained(); i++) {
+        r.advanceTicks(1);
+        events.push(...r.drainEvents());
+      }
+      if (strained()) {
+        found = { world: gen.world, events, id };
         break;
       }
     }

@@ -70,6 +70,44 @@ export function behaviorChain(world: World, get: (id: string) => WorldEvent | un
   return steps;
 }
 
+/** Eventos de relación (012 §5) que se explican por la historia del par. */
+export const RELATIONSHIP_EVENTS: ReadonlySet<string> = new Set(['ARGUMENT', 'BREAKUP', 'FRIENDSHIP_FORMED', 'RELATIONSHIP_STARTED', 'ENCOUNTER']);
+
+/**
+ * 012 CA-005, R-009: la cadena de un evento de relación. El vínculo de cada lado (el afecto sale del almacén de cada
+ * uno, INV-003) y la historia del par hacia atrás por las causas: los roces, discusiones y encuentros que llevaron ahí.
+ */
+export function relationshipChain(world: World, get: (id: string) => WorldEvent | undefined, e: WorldEvent): ChainStep[] {
+  const { a, b } = e.payload as { a: EntityId; b: EntityId };
+  const side = (x: EntityId, y: EntityId) => {
+    const bond = world.citizens.get(x)?.bonds?.find((z) => z.with === y);
+    const fn = world.citizens.get(x)?.functions?.f.find((f) => f.s === `cit.${y}`)?.v ?? 0;
+    return bond
+      ? `${withNames(world, x)} → ${withNames(world, y)}: afecto ${r2(fn)}, trato ${r2(bond.familiarity ?? 0)}, tensión ${r2(bond.tension)}, confianza ${r2(bond.trust)}, ${bond.encounters ?? 0} encuentros${bond.labels?.length ? ` (${bond.labels.join(', ')})` : ''}`
+      : `${withNames(world, x)} → ${withNames(world, y)}: sin vínculo hoy`;
+  };
+  // Historia del par: las causas del evento y las de sus causas, hasta 12 eventos, del más reciente al más antiguo.
+  const seen = new Set<string>([e.id]);
+  const queue = e.causes.flatMap((c) => ('event' in c ? [c.event as string] : []));
+  const past: WorldEvent[] = [];
+  while (queue.length && past.length < 12) {
+    const id = queue.shift()!;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    const o = get(id);
+    if (!o) continue;
+    past.push(o);
+    queue.push(...o.causes.flatMap((c) => ('event' in c ? [c.event as string] : [])));
+  }
+  past.sort((x, y) => y.at - x.at);
+  return [
+    { step: 'Qué pasa', lines: [`${dayOf(e.at, world.config.epoch)} ${withNames(world, eventText(e))}`] },
+    { step: 'Qué lo explica ahora', lines: e.causes.flatMap((c) => ('state' in c ? [`${c.state}${c.value !== undefined ? ` ${r2(c.value)}` : ''}`] : [])) },
+    { step: 'El vínculo de cada lado', lines: [side(a, b), side(b, a)] },
+    { step: 'Historia del par', lines: past.map((o) => `${dayOf(o.at, world.config.epoch)} ${withNames(world, eventText(o))}`) },
+  ];
+}
+
 /** Una cadena está completa si ningún paso está vacío (035 CA-001). */
 export const isComplete = (steps: readonly ChainStep[]): boolean => steps.every((s) => s.lines.length > 0);
 
@@ -81,9 +119,10 @@ export function citizenExplain(args: string[], io: Io): void {
     const world = new WorldRepository(db).loadWorld();
     const [e] = eventsById(db, [id as EntityId]);
     if (!e) throw new UsageError(`No existe ${id}`);
-    if (!isChosenBehavior(e)) throw new UsageError(`${id} no es una conducta elegida (sin fuentes de control)`);
+    const relational = RELATIONSHIP_EVENTS.has(e.type);
+    if (!relational && !isChosenBehavior(e)) throw new UsageError(`${id} no es una conducta elegida (sin fuentes de control) ni un evento de relación`);
     const get = (x: string) => eventsById(db, [x as EntityId])[0];
-    for (const s of behaviorChain(world, get, e)) {
+    for (const s of relational ? relationshipChain(world, get, e) : behaviorChain(world, get, e)) {
       io.out(s.step);
       for (const l of s.lines.length ? s.lines : ['(vacío)']) io.out(`  ${l}`);
     }
