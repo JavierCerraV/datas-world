@@ -78,3 +78,4 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 | 2026-09-26 | 0.2 | Versión mínima adelantada (bloque V, decisión del usuario): endpoints concretos de mundo, personas, ficha, eventos y SSE; posición interpolada (R-005); recarga por sondeo (R-006); credenciales por variables de entorno; CA-004. Árbol causal, informe de vida, exportación y métricas quedan para M4 |
 | 2026-09-26 | 0.2 | Estado → aprobada |
 | 2026-09-26 | 0.2 | Implementación del bloque V1 (`apps/api`). Precisiones: la posición de una vivienda sin puerta propia es la de su edificio, o el centro de su área; sin `Last-Event-ID`, el SSE empieza por el último evento guardado; la velocidad vigente sale del último `SPEED_CHANGED`; la API solo escucha en 127.0.0.1. CA-001 a CA-004 verdes. Sin cambios en CA |
+| 2026-09-28 | — | 041 R-009: ruta de solo lectura `GET /api/citizens/:id/life` (episodios del desarrollo y familiograma). Sin cambios en CA |

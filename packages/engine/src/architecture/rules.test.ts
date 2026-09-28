@@ -15,17 +15,15 @@ describe('009 R-006: guardarraíl anticircularidad', () => {
 
   it('el adaptador solo lo importan los autorizados y caduca con la tarea de su bloque', () => {
     const user = { path: 'packages/engine/src/routines/columns.ts', text: "import { legacyTrait } from '../temperament/legacy.ts';" };
-    // Retirado en MF6.4 (039): las necesidades ya no pueden importar el adaptador.
-    const needs = { path: 'packages/engine/src/needs/system.ts', text: "import { legacyTrait } from '../temperament/legacy.ts';" };
-    expect(checkArchitecture([needs], new Set()).map((x) => x.rule)).toEqual(['adaptador-no-autorizado']);
-    const stranger = { path: 'packages/engine/src/economy/system.ts', text: "import { legacyTrait } from '../temperament/legacy.ts';" };
-    // Retirado en MF3.4 (040): la selección ya no puede importar el adaptador (040 CA-004).
-    const retired = { path: 'packages/engine/src/decision/system.ts', text: "import { legacyTrait } from '../temperament/legacy.ts';" };
     const legacy = { path: 'packages/engine/src/temperament/legacy.ts', text: '' };
-    expect(checkArchitecture([user, legacy], new Set())).toEqual([]);
-    expect(checkArchitecture([stranger], new Set()).map((x) => x.rule)).toEqual(['adaptador-no-autorizado']);
-    expect(checkArchitecture([retired], new Set()).map((x) => x.rule)).toEqual(['adaptador-no-autorizado']);
-    expect(checkArchitecture([user], new Set(['MF7.3'])).map((x) => x.rule)).toEqual(['adaptador-caducado']);
+    // El mecanismo, con una política que aún autoriza un importador (como en los bloques MF1 a MF6).
+    const withImporter = { ...POLICY, legacyImporters: { 'packages/engine/src/routines/columns.ts': 'MF7.3' } };
+    expect(checkArchitecture([user, legacy], new Set(), withImporter)).toEqual([]);
+    expect(checkArchitecture([user], new Set(['MF7.3']), withImporter).map((x) => x.rule)).toEqual(['adaptador-caducado']);
+    // Desde MF7.4 (041) nadie está autorizado: ni las necesidades (MF6.4), ni la selección (MF3.4), ni nadie más.
+    for (const path of ['packages/engine/src/needs/system.ts', 'packages/engine/src/decision/system.ts', 'packages/engine/src/economy/system.ts', user.path])
+      expect(checkArchitecture([{ path, text: user.text }], new Set()).map((x) => x.rule), path).toEqual(['adaptador-no-autorizado']);
+    // Y si el archivo del adaptador reaparece después de su caducidad, falla.
     expect(checkArchitecture([legacy], new Set([POLICY.legacyExpiry])).map((x) => x.rule)).toEqual(['adaptador-caducado']);
   });
 

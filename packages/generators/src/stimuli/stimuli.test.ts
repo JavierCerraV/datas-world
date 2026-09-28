@@ -33,11 +33,13 @@ describe('ontología de estímulos (036 R-004)', () => {
 
 describe('aprendizaje en la vida diaria (036 R-001, MF2.5)', () => {
   it('las consecuencias de 14 días dejan funciones con su evento de origen, sin pasar de los topes', () => {
-    const { world } = generateWorld({ seed: 482917, profileId: DEFAULT_PROFILE, population: 60, catalogs });
+    const gen = generateWorld({ seed: 482917, profileId: DEFAULT_PROFILE, population: 60, catalogs });
+    const { world } = gen;
     const runner = lifeRunner(world, catalogs);
     runner.advanceDays(14);
     const events: WorldEvent[] = runner.drainEvents();
-    const ids = new Set(events.map((e) => e.id));
+    // El origen es un hecho de estos 14 días o un año de su historia de desarrollo (041 INV-001).
+    const ids = new Set([...events, ...gen.events.filter((e) => e.type === 'DEVELOPMENT_YEAR')].map((e) => e.id));
     const learned = [...world.citizens.values()].filter((c) => c.functions && c.functions.f.length > 0);
     expect(learned.length).toBeGreaterThan(10);
     for (const c of learned) {

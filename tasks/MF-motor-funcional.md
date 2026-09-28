@@ -83,11 +83,12 @@ Specs: 009 v1.0 (aprobada), 035 (aprobada).
 - [x] MF6.5 Criterios: 039 CA-001–CA-003; 042 V-10.
 
 ## Bloque MF7 — Desarrollo (041; rama `mf/7-desarrollo`)
-- [ ] MF7.1 Catálogo `development_episodes` y fase de desarrollo en `generateWorld` (flujo `gen:development`).
-- [ ] MF7.2 Comunidad verbal familiar y escolar; primeros reforzadores generalizados, reglas y redes de valor; `backstory` con causas.
-- [ ] MF7.3 Hábitos de salud (031) y ficha de esparcimiento (032) desde los repertorios del desarrollo.
-- [ ] MF7.4 **Eliminar los adaptadores `@deprecated`.** La comprobación de caducidad pasa a exigir su ausencia.
-- [ ] MF7.5 Criterios: 041 CA-001–CA-004; 042 V-12; 009 CA-F.
+- [x] MF7.1 Catálogo `development_episodes` y fase de desarrollo en `generateWorld` (flujo `gen:development`).
+- [x] MF7.2 Comunidad verbal familiar y escolar; primeros reforzadores generalizados, reglas y redes de valor; `backstory` con causas.
+- [x] MF7.3 Hábitos de salud (031) y ficha de esparcimiento (032) desde los repertorios del desarrollo.
+- [x] MF7.4 **Eliminar los adaptadores `@deprecated`.** La comprobación de caducidad pasa a exigir su ausencia.
+- [x] MF7.5 Criterios: 041 CA-001–CA-004; 042 V-12; 009 CA-F.
+- [x] MF7.6 Pestaña **Historia de vida** en la ficha del visor, con los episodios por etapa y el familiograma extenso; ruta `GET /api/citizens/:id/life` (041 R-009, CA-005, CA-006; decisión del usuario, 2026-09-28).
 
 ## Bloque MF8 — Integración y cierre (rama `mf/8-cierre`)
 - [ ] MF8.1 Adaptaciones de specs: 010, 011, 013, 014, 019, 020 (resiliencia como métrica de trayectoria), 021 (niveles), 025 (mentir sin honestidad), 031 y 032, con sus filas de historial.

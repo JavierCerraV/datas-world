@@ -38,13 +38,8 @@ export const POLICY: ArchitecturePolicy = Object.freeze({
   ],
   selectionModules: ['packages/engine/src/decision/', 'packages/engine/src/selection/', 'packages/engine/src/conversation/'],
   legacyFiles: ['packages/engine/src/temperament/legacy.ts', 'packages/generators/src/personality/legacy.ts'],
-  legacyImporters: {
-    // MF6.4 (039): las necesidades ya no leen rasgos (estrés desde la carga, soledad por la saliencia social).
-    'packages/engine/src/routines/columns.ts': 'MF7.3',
-    'packages/engine/src/index.ts': 'MF7.4',
-    'packages/generators/src/health/habits.ts': 'MF7.3',
-    'packages/generators/src/leisure/select.ts': 'MF7.3',
-  },
+  // MF7.4 (041): el adaptador ya no existe. Nadie puede importarlo, y si reaparece, la prueba falla (caducado).
+  legacyImporters: {},
   legacyExpiry: 'MF7.4',
 });
 

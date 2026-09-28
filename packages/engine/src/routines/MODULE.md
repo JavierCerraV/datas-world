@@ -2,7 +2,7 @@
 modulo: routines
 ruta: packages/engine/src/routines
 estado: en-desarrollo
-specs: [011, 010, 006, 021, 029, 035, 040]
+specs: [011, 010, 006, 021, 029, 035, 040, 041]
 actualizado: 2026-09-25
 ---
 
@@ -72,3 +72,4 @@ Porta `setRoutine` (horarios), `wakeFor` e `inSleep` (tipo de día, madrugar) y 
 | 2026-09-25 | m2/d-movilidad | 011, 016 | Columna `routine.oversleptEvt`: `OVERSLEPT` se emite con `recordAs` para que `ARRIVED_LATE` (movilidad) lo cite como causa |
 | 2026-09-25 | mf/1-temperamento (MF1.4) | 035, 009 v1.0 | Responsabilidad (quedarse dormido y su causa) e impulsividad, extraversión y responsabilidad (horas de sueño sin ficha de salud) se leen por el adaptador @deprecated. Caducan en MF3.4 y MF7.3 |
 | 2026-09-26 | mf/3-seleccion (MF3.4) | 040 | Quedarse dormido sin el adaptador: el exceso de sueño por falta de energía se multiplica por `oversleepFactor(hist.discountK)` = 1,3 − 1/(1 + 5k) (0,39 con k = 0,02; 0,8 con la mediana 0,2; 1,21 con k = 2), en lugar de 1,3 − responsabilidad. `OVERSLEPT` cita `descuento`. Prueba 040 CA-006 |
+| 2026-09-28 | mf/7-desarrollo (MF7.3) | 041, 011 | Horas de sueño sin ficha de salud (mundos de prueba y perfil prototipo): 6,95 h ± 0,4, la media que daban los rasgos del prototipo con valores medios, sin leer rasgos. Ya no importa el adaptador |

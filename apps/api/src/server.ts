@@ -7,12 +7,13 @@ import type { EntityId, WorldEvent } from '@datas-world/engine';
 import { buildOntology, loadCatalogs } from '@datas-world/generators';
 import { DEFAULT_CONFIG, Gateway, anthropicAdapter, chatCatalogs, mockAdapter, openaiCompatibleAdapter, parseConfig } from '@datas-world/llm-gateway';
 import type { LlmRecord, ProviderAdapter, RecordStore } from '@datas-world/llm-gateway';
-import { CONTROL_COMMANDS, SqliteRecordStore, closeDb, enqueueCommand, openWorldDb, queryEvents } from '@datas-world/persistence';
+import { CONTROL_COMMANDS, SqliteRecordStore, closeDb, enqueueCommand, eventsById, openWorldDb, queryEvents } from '@datas-world/persistence';
 import type { ControlCommandName, Db } from '@datas-world/persistence';
 import { registerChatRoutes } from './chat.ts';
 import Fastify from 'fastify';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
+import { lifeView } from './life.ts';
 import { WorldReader } from './reader.ts';
 import { citizenDetail, dateOf, eventView, positions, worldView } from './views.ts';
 
@@ -115,6 +116,20 @@ export function buildApi(opts: ApiOptions): Api {
     const detail = citizenDetail(reader.world, p.data.id as EntityId, events);
     if (!detail) return reply.code(404).send({ error: 'no existe' });
     return detail;
+  });
+
+  // 041 R-009: historia de vida (episodios del desarrollo por etapa) y familiograma extenso.
+  const lifeCatalogs = loadCatalogs();
+  app.get('/api/citizens/:id/life', async (req, reply) => {
+    const p = citizenParams.safeParse(req.params);
+    if (!p.success) return reply.code(400).send({ error: 'id inválido' });
+    const id = p.data.id as EntityId;
+    const years = queryEvents(reader.db, { participant: id, types: ['DEVELOPMENT_YEAR'], limit: 1000 });
+    const causeIds = [...new Set(years.flatMap((e) => (e.payload as { episodes: [number, string, string, string, number, string][] }).episodes.map((ep) => ep[5]).filter(Boolean)))];
+    const causes = new Map(eventsById(reader.db, causeIds as EntityId[]).map((e) => [e.id as string, e]));
+    const life = lifeView(reader.world, id, years, causes, lifeCatalogs);
+    if (!life) return reply.code(404).send({ error: 'no existe' });
+    return life;
   });
 
   app.get('/api/events', async (req, reply) => {

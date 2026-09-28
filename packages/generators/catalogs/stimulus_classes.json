@@ -1,7 +1,7 @@
 {
   "name": "stimulus_classes",
-  "version": "2026.10.1",
-  "source": "Spec 036 R-004 (ADR-007): ontología compartida de estímulos. [M] Rasgos estimados para la generalización, seis dimensiones en [0, 1]: social, cuerpo, dinero, trabajo, ocio y hogar (dims). Clases explícitas: los términos verbales, roles y estados del cuerpo que usan las reglas del motor (WORLD_STIMULI). Las entradas `familia.lugar.<categoría>` y `familia.actividad.<categoría>` dan los rasgos de las clases `lugar.<clave>` y `actividad.<clave>` que se derivan de place_kinds y leisure_activities. Primarios (R-007): dolor −1 y disfrute +1. MF4 (037 R-007): despido, llegar tarde y no pagar, que enseña la comunidad verbal. MF5 (038 R-010): las respuestas de la rutina (`rutina.*`) que especifican las reglas. Calibración pendiente (PA-131). L0.2 (043 R-005): nueve términos verbales de la charla (burla, confidencia, culpa, insulto, lamento, neutro, presión, pregunta y pregunta invasiva), sin valor primario: su función se aprende o sale del valor de partida de `chat_tones`. L5.1 (044 R-003): abandono, afecto, desprecio y traición, que presentan las afirmaciones de `chat_claims`, también sin valor primario.",
+  "version": "2026.10.2",
+  "source": "Spec 036 R-004 (ADR-007): ontología compartida de estímulos. [M] Rasgos estimados para la generalización, seis dimensiones en [0, 1]: social, cuerpo, dinero, trabajo, ocio y hogar (dims). Clases explícitas: los términos verbales, roles y estados del cuerpo que usan las reglas del motor (WORLD_STIMULI). Las entradas `familia.lugar.<categoría>` y `familia.actividad.<categoría>` dan los rasgos de las clases `lugar.<clave>` y `actividad.<clave>` que se derivan de place_kinds y leisure_activities. Primarios (R-007): dolor −1 y disfrute +1. MF4 (037 R-007): despido, llegar tarde y no pagar, que enseña la comunidad verbal. MF5 (038 R-010): las respuestas de la rutina (`rutina.*`) que especifican las reglas. Calibración pendiente (PA-131). L0.2 (043 R-005): nueve términos verbales de la charla (burla, confidencia, culpa, insulto, lamento, neutro, presión, pregunta y pregunta invasiva), sin valor primario: su función se aprende o sale del valor de partida de `chat_tones`. L5.1 (044 R-003): abandono, afecto, desprecio y traición, que presentan las afirmaciones de `chat_claims`, también sin valor primario. MF7 (041): roles de la comunidad verbal del desarrollo (cuidador, docente, hermano, madre, padre, par, pareja) y «nombrar lo que se siente» (`verbal.emocion`), sin valor primario: su función sale de los episodios.",
   "entries": [
     {
       "key": "cuerpo.disfrute",
@@ -225,12 +225,75 @@
       }
     },
     {
+      "key": "rol.cuidador",
+      "name": "Cuidador o cuidadora (abuelos, otros)",
+      "since": "M2",
+      "attrs": {
+        "kind": "person_role",
+        "features": [1, 0.3, 0, 0, 0, 1]
+      }
+    },
+    {
+      "key": "rol.docente",
+      "name": "Docente",
+      "since": "M2",
+      "attrs": {
+        "kind": "person_role",
+        "features": [1, 0, 0, 0.6, 0, 0]
+      }
+    },
+    {
+      "key": "rol.hermano",
+      "name": "Hermano o hermana",
+      "since": "M2",
+      "attrs": {
+        "kind": "person_role",
+        "features": [1, 0.1, 0, 0, 0.5, 0.8]
+      }
+    },
+    {
       "key": "rol.jefe",
       "name": "Jefe o jefa",
       "since": "M2",
       "attrs": {
         "kind": "person_role",
         "features": [1, 0, 0.3, 1, 0, 0]
+      }
+    },
+    {
+      "key": "rol.madre",
+      "name": "Madre",
+      "since": "M2",
+      "attrs": {
+        "kind": "person_role",
+        "features": [1, 0.4, 0, 0, 0, 1]
+      }
+    },
+    {
+      "key": "rol.padre",
+      "name": "Padre",
+      "since": "M2",
+      "attrs": {
+        "kind": "person_role",
+        "features": [1, 0.3, 0.2, 0.2, 0, 1]
+      }
+    },
+    {
+      "key": "rol.par",
+      "name": "Par (amigo, compañero)",
+      "since": "M2",
+      "attrs": {
+        "kind": "person_role",
+        "features": [1, 0, 0, 0, 0.8, 0]
+      }
+    },
+    {
+      "key": "rol.pareja",
+      "name": "Pareja",
+      "since": "M2",
+      "attrs": {
+        "kind": "person_role",
+        "features": [1, 0.5, 0.2, 0, 0.3, 0.9]
       }
     },
     {
@@ -384,6 +447,15 @@
       "attrs": {
         "kind": "verbal_term",
         "features": [0, 0, 1, 0, 0, 0]
+      }
+    },
+    {
+      "key": "verbal.emocion",
+      "name": "Nombrar lo que se siente",
+      "since": "M2",
+      "attrs": {
+        "kind": "verbal_term",
+        "features": [1, 0.3, 0, 0, 0, 0.3]
       }
     },
     {

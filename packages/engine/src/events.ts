@@ -10,6 +10,12 @@ export type CauseRef =
 
 export type EventOrigin = 'engine' | 'external' | 'llm';
 
+/**
+ * Un episodio de desarrollo dentro de `DEVELOPMENT_YEAR` (041 R-007), en forma compacta:
+ * `[minuto, clave del catálogo, rol de quien intervino, su id o '', valencia, causa (evento de la 030) o '', lo aprendido]`.
+ */
+export type DevelopmentEpisode = [at: number, kind: string, speaker: string, speakerId: string, valence: number, cause: string, learned: [string, number][]];
+
 export interface WorldEvent<P = unknown> {
   readonly id: EntityId;
   readonly type: EventType;
@@ -316,6 +322,19 @@ export const EVENT_TYPES = Object.freeze({
         deltas: (v) => Array.isArray(v) && v.every((d) => isObj(d) && str(d.key) && Number.isFinite(d.before) && Number.isFinite(d.after)),
       }),
     text: (e) => `${e.payload.citizenId} aprende de la charla ${e.payload.sessionId} (${e.payload.deltas.length} cambios).`,
+  }),
+  // Desarrollo (spec 041 R-007, §5): los episodios de aprendizaje de un año de vida, cada uno con quién intervino y lo
+  // que aprendió. Un evento por año (no por episodio) para caber en el presupuesto de disco (CLAUDE.md regla 8); el
+  // texto de cada episodio está en el catálogo `development_episodes`, por su clave.
+  DEVELOPMENT_YEAR: def<{ citizenId: string; age: number; stage: string; episodes: DevelopmentEpisode[] }>({
+    baseImportance: 0.1,
+    spontaneous: false,
+    check: (p) =>
+      needObj(p, {
+        citizenId: str, age: (v) => int(v) && (v as number) >= 0, stage: str,
+        episodes: (v) => Array.isArray(v) && v.every((x) => Array.isArray(x) && x.length === 7 && int(x[0]) && str(x[1]) && str(x[2]) && Array.isArray(x[6])),
+      }),
+    text: (e) => `${e.payload.citizenId} vivió ${e.payload.episodes.length} episodios de aprendizaje a los ${e.payload.age} años (${e.payload.stage}).`,
   }),
   // Eventos privados (spec 039 §5): el episodio de PNR, no un estado; el pensamiento derivado solo en nivel ≥ 4.
   PNR_EPISODE: def<{ citizenId: string; trigger: string; steps: number; minutes: number; ended: string; peak: number }>({

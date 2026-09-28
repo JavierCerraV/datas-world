@@ -2,7 +2,7 @@
 modulo: health
 ruta: packages/generators/src/health
 estado: en-desarrollo
-specs: [031, 029, 030, 006, 035]
+specs: [031, 029, 030, 006, 035, 041]
 actualizado: 2026-09-25
 ---
 
@@ -81,3 +81,4 @@ No aplica: el perfil `prototipo` no tiene ficha de salud y su `health.physical` 
 | 2026-09-25 | m1/j-salud (J4) | 031, 029, 030, 006 | Primera implementación: `params.ts`, `habits.ts` (fase 1), `conditions.ts` y `insurance.ts` (fase 2). 8 pruebas |
 | 2026-09-25 | m2/b-necesidades | 031, 010 | `computePhysical` también escribe `health.energyFactor` = 1 + 2 × carga de las condiciones (la mitad si está controlada), que la 010 usa para acelerar la caída de energía (031 R-007) |
 | 2026-09-25 | mf/1-temperamento (MF1.4) | 031, 035 | Impulsividad y responsabilidad se leen por el adaptador @deprecated de los generadores (la impulsividad sale de `tmp.discount0`); el valor "salud" ya no existe como escalar (038) y el adaptador lo da neutro, así que no modula tabaco ni actividad física. Caduca en MF7.3 (hábitos desde el desarrollo, 041 R-008) |
+| 2026-09-28 | mf/7-desarrollo (MF7.3) | 031, 041 | Sin adaptador. La fase 1 se divide: `generateHabits` (sueño y discapacidad, antes del empleo) y `learnedHabits` (tabaco, alcohol, actividad física y peso, después del desarrollo, flujo `gen:health/habitos/<id>`). La prevalencia sigue siendo la del perfil; quién tiene el hábito lo reparte la historia: la fuerza aprendida de cada persona (`habito.fumar`, `habito.beber` y `evit.consumir`, `habito.ejercicio`) dividida por la media de la población. Valorar la salud (`dominio.salud` > 0,3) baja el tabaco y sube la actividad |

@@ -2,7 +2,7 @@
 modulo: web
 ruta: apps/web
 estado: en-desarrollo
-specs: [024, 022, 043, 044]
+specs: [024, 022, 043, 044, 041]
 actualizado: 2026-09-27
 ---
 
@@ -67,3 +67,4 @@ Mapa, colores, figuras y día y noche portados del prototipo (`prototipo/index.h
 | 2026-09-27 | claude/wonderful-carson-4c4i3k (charla sustituida) | 043 | Cerrar el diálogo por cualquier vía (✕, Esc) o salir de la página termina la charla (`endChat` con `keepalive`). El botón Enviar se reactiva al abrir otra charla (quedaba desactivado tras una despedida). Motivo `replaced` en la pestaña Charlas |
 | 2026-09-27 | claude/wonderful-carson-4c4i3k (puerto) | 024 | El visor usa el puerto 5180 (`DATAS_WORLD_WEB_PORT`) con `strictPort`: el 5173 lo ocupaba otro proyecto con Vite y el navegador abría ese. `scripts/dev.mjs` y las guías de uso muestran el puerto nuevo |
 | 2026-09-27 | charla/l5 (L5.2) | 044 | El panel «Por qué respondió así» muestra primero lo que oyó sobre un tercero: de quién, qué, cuánto se lo cree y cuánto le afecta, o por qué no cuenta (`claimLine`, 044 R-011). 1 prueba |
+| 2026-09-28 | mf/7-desarrollo (MF7.6) | 041, 024 | Pestaña **Vida** en la ficha (`life.ts`, decisión del usuario): familiograma extenso en SVG (cuadrado hombre, círculo mujer, borde doble la persona, cruz si murió, borde punteado si vive fuera del mundo; relación verde cercana, roja en zigzag conflictiva, gris punteada distante) y la historia de vida por etapas, desplegables, con quién intervino, lo aprendido y la causa. Se carga al entrar en la pestaña. 2 pruebas |

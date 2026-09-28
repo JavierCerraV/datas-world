@@ -5,8 +5,20 @@ import type { EntityId, Rng, World } from '@datas-world/engine';
 import type { Catalog } from '../catalogs/schema.ts';
 import { limitsWork } from '../health/habits.ts';
 import { stepAt } from '../health/params.ts';
-import { legacyColumn } from '../personality/legacy.ts';
 import type { ActivityAttrs, LeisureParams } from './params.ts';
+
+/**
+ * 041 R-008: lo aprendido que nombra el catálogo (`traits` y `values`), en [0,1]: la función de un dominio vital
+ * (`dominio.*`, 038) como `0,5 + 0,5 × función`, o la fuerza de una respuesta (036). Sin historia, 0,5 (neutro).
+ */
+export function learnedColumn(world: World, id: EntityId, key: string): number {
+  const store = world.citizens.get(id)?.functions;
+  if (key.startsWith('dominio.')) {
+    const v = store?.f.find((f) => f.s === key)?.v ?? 0;
+    return Math.max(0, Math.min(1, 0.5 + 0.5 * v));
+  }
+  return store?.r.find((x) => x.r === key && x.c === '')?.w ?? 0.5;
+}
 
 export interface Offer {
   /** Tipos de lugar que existen en el municipio (con mapa) y en la ciudad de referencia. */
@@ -62,9 +74,22 @@ export function selectActivities(
     const h = world.households.get(world.citizens.get(id)!.householdId!)!;
     return world.places.get(world.places.get(h.dwellingId)!.districtId!)!.stratum!;
   };
-  // @deprecated (035 §9): los rasgos y valores que nombra el catálogo, vía el adaptador, hasta MF7.3 (041 R-008).
-  const trait = (col: string, id: EntityId) => legacyColumn(world, idNumber(id), col);
   const persons = livingIds.filter((id) => age(id) >= 3);
+  // 041 R-008 (MF7.3): lo aprendido que nombra el catálogo, como posición de la persona en la población
+  // (`0,5 + 0,2 × z` [M], cerca de la escala de los rasgos con que se estimaron los pesos del catálogo): importa si
+  // se abre más o valora más el conocimiento que los demás.
+  const scales = new Map<string, { mean: number; sd: number }>();
+  const trait = (col: string, id: EntityId) => {
+    let s = scales.get(col);
+    if (!s) {
+      const xs = persons.map((p) => learnedColumn(world, p, col));
+      const mean = xs.reduce((a, x) => a + x, 0) / Math.max(1, xs.length);
+      const sd = Math.sqrt(xs.reduce((a, x) => a + (x - mean) ** 2, 0) / Math.max(1, xs.length));
+      scales.set(col, (s = { mean, sd }));
+    }
+    const z = s.sd > 1e-9 ? (learnedColumn(world, id, col) - s.mean) / s.sd : 0;
+    return Math.max(0, Math.min(1, 0.5 + 0.2 * z));
+  };
   const chosen = new Map<EntityId, Choice[]>(persons.map((id) => [id, []]));
   const candidates = new Map<EntityId, Choice[]>(persons.map((id) => [id, []]));
 

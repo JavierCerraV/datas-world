@@ -6,7 +6,7 @@ import { ageOf, buildWorld, catalogs } from '../testing.ts';
 import { expectedSpend, leisureBudget } from './generate.ts';
 import { leisureParams } from './params.ts';
 import type { ActivityAttrs } from './params.ts';
-import { offerOf, reachOf } from './select.ts';
+import { learnedColumn, offerOf, reachOf } from './select.ts';
 
 const profile = loadProfile(DEFAULT_PROFILE);
 const P = leisureParams(profile, '2026-01-01')!;
@@ -74,15 +74,15 @@ describe('spec 032: agregado de 20 mundos', () => {
     worlds.push(world);
     for (const id of pop.citizenIds) {
       const L = world.citizens.get(id)!.leisure ?? [];
-      const row = idNumber(id);
       if (ageOf(world, id) >= 12) {
         n12++;
         for (const x of L) practice.set(x.key, (practice.get(x.key) ?? 0) + 1);
       }
       if (ageOf(world, id) >= 18)
         rows.push({
-          ext: world.components.f32['pers.extraversion']![row]!,
-          open: world.components.f32['pers.openness']![row]!,
+          // 041 R-008 (MF7.3): lo aprendido en la historia ocupa el lugar de los rasgos (abrirse, valorar el conocimiento).
+          ext: learnedColumn(world, id, 'conv.abrirse'),
+          open: Math.max(learnedColumn(world, id, 'dominio.conocimiento'), learnedColumn(world, id, 'dominio.creatividad')),
           social: L.filter((x) => attrs.get(x.key)!.group === 'con_otros').length,
           culture: L.filter((x) => x.key.startsWith('cultura.') || x.key.startsWith('arte.')).length,
         });
@@ -108,7 +108,7 @@ describe('spec 032: agregado de 20 mundos', () => {
   };
   const mean = (xs: number[]) => xs.reduce((s, x) => s + x, 0) / xs.length;
 
-  it('CA-002: la extraversión se correlaciona con las actividades en compañía y la apertura con las culturales y artísticas (r > 0,15)', () => {
+  it('CA-002 (041 R-008): lo aprendido al abrirse se correlaciona con las actividades en compañía y valorar el conocimiento o la creatividad con las culturales y artísticas (r > 0,15)', () => {
     expect(corr(rows.map((r) => r.ext), rows.map((r) => r.social))).toBeGreaterThan(0.15);
     expect(corr(rows.map((r) => r.open), rows.map((r) => r.culture))).toBeGreaterThan(0.15);
   });
