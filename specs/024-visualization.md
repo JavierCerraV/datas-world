@@ -75,3 +75,4 @@ Fps del render (visible en el visor).
 | 2026-09-26 | 0.2 | Estado → aprobada |
 | 2026-09-26 | 0.2 | Implementación del bloque V2 (`apps/web`). Precisiones: varias personas en la misma puerta se reparten en un círculo pequeño para verse; el registro omite `DAY_STARTED` y `TRIP_TAKEN`; las credenciales de los controles se piden al primer 401 y quedan en `sessionStorage`; `pnpm dev` crea el mundo si no existe y detiene el worker con la orden `stop` (cierre limpio también en Windows). CA-002 y CA-004 verdes; CA-001 y CA-003 pendientes de la revisión del usuario. Sin cambios en CA |
 | 2026-09-27 | 0.2 | CA-001 y CA-003 aceptados en la revisión del usuario («el visor es funcional para esta etapa») |
+| 2026-09-28 | — | 041 R-009 (decisión del usuario): pestaña **Vida** en la ficha, con el familiograma extenso y la historia de vida por etapas. Sin cambios en CA |

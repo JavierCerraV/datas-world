@@ -2,7 +2,7 @@
 modulo: api
 ruta: apps/api
 estado: en-desarrollo
-specs: [022, 043, 026, 044]
+specs: [022, 043, 026, 044, 041]
 actualizado: 2026-09-26
 ---
 
@@ -64,3 +64,4 @@ Expone lo que el inspector del prototipo muestra (menos relaciones, memoria y cr
 | 2026-09-27 | claude/wonderful-carson-4c4i3k (arreglo de la charla) | 043 | Un fallo al recargar el mundo ya no tumba la API (`poll` y `sweep` lo registran y reintentan). El cierre siempre termina la charla aunque falle el resumen (`ChatSession.input()`). Al arrancar, las charlas que quedaron abiertas se cierran con motivo `interrupted` y, en el mundo, se consolidan con sus turnos guardados (R-019.6). El 409 dice qué charla está abierta (`openSessionId`), y la velocidad anterior se guarda en `CHAT_SESSION_STARTED` para restaurarla. 1 prueba nueva |
 | 2026-09-27 | claude/wonderful-carson-4c4i3k (charla sustituida) | 043 | Abrir otra charla en el mundo ya no responde 409: cierra la anterior (viva o huérfana) con motivo `replaced`, la consolida y hereda su velocidad previa para restaurarla al final. Solo hay 409 si la anterior está a mitad de un turno. CA-015 lo prueba |
 | 2026-09-27 | charla/l5 (L5.2) | 044 | El evento SSE `stance` lleva las afirmaciones evaluadas (`claims`: de quién, credibilidad, impacto o motivo del descarte) y se guardan en el turno del visitante. Las validadas viajan en la entrada `chat_session` para el worker (044 R-010) |
+| 2026-09-28 | mf/7-desarrollo (MF7.6) | 041, 022 | Ruta nueva `GET /api/citizens/:id/life` (`life.ts`): los episodios del desarrollo por etapa (fecha, edad, quién intervino, texto del catálogo, lo aprendido en palabras y el hecho que lo causó) y el familiograma extenso (bisabuelos a hijos, con generación, años, si vive fuera del mundo y calidad de la relación por los episodios en que intervino). `nameOf` se exporta. `life.test.ts` (3 pruebas, 041 CA-005 y CA-006) sobre un mundo generado al vuelo: con el registro completo, un mundo de ejemplo pesaría ≈ 25 MB |

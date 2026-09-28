@@ -2,7 +2,7 @@
 modulo: engine
 ruta: packages/engine
 estado: en-desarrollo
-specs: [001, 002, 003, 004, 005, 006, 007, 008, 009, 014, 023, 029, 030, 035, 039, 043, 044]
+specs: [001, 002, 003, 004, 005, 006, 007, 008, 009, 014, 023, 029, 030, 035, 039, 041, 043, 044]
 actualizado: 2026-09-24
 ---
 
@@ -159,3 +159,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-27 | charla/l5 (L5.2) | 044 | Eventos nuevos `CHAT_CLAIM_HEARD` y `CHAT_CLAIM_BELIEVED`. `Citizen.beliefs` (creencia mínima: sobre quién, qué, fuente, credibilidad, minuto y evento causa) y `Citizen.bonds` (tensión y confianza de los vínculos tocados, 044 P3: en la persona hasta la 012). `index.ts` exporta la API de las afirmaciones del módulo `conversation` y los tipos `Belief` y `Bond` |
 | 2026-09-27 | charla/l5 (L5.3) | 044 | Eventos nuevos `INTENTION_FORMED`, `INTENTION_EXPIRED`, `PHONE_CALL_MADE` (con la urgencia), `CONFRONTATION` (con la vía, las dos respuestas y el impacto) y `BOND_STRAINED` (tensión y las dos confianzas). `Citizen.intentions` (tipo `Intention`). `Belief.about` admite al visitante (`EXT-…`), para lo que aprende el tercero (044 P4). `index.ts` exporta los sistemas de las consecuencias y la API de las intenciones |
 | 2026-09-28 | mf/6-privados (MF6) | 039 | Módulo nuevo `src/private/` (capa 5: eventos privados, PNR, evitación y «Yo»). `Citizen.mind`. Eventos nuevos `PNR_EPISODE` y `THOUGHT_DERIVED`. `index.ts` exporta su API y `MOOD_BASELINE` en lugar de `stability` (MF6.4) |
+| 2026-09-28 | mf/7-desarrollo (MF7) | 041 | Evento nuevo `DEVELOPMENT_YEAR` (un año de vida con todos sus episodios; tipo `DevelopmentEpisode`). Se elimina el adaptador de rasgos (`temperament/legacy.ts`) y su exportación (MF7.4). Las horas de sueño sin ficha de salud ya no leen rasgos (MF7.3) |

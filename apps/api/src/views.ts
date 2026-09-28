@@ -107,7 +107,7 @@ export function eventView(world: World, e: WorldEvent) {
   };
 }
 
-function nameOf(world: World, id: string): string | null {
+export function nameOf(world: World, id: string): string | null {
   if (id.startsWith('CIT')) {
     const c = world.citizens.get(id as EntityId);
     return c?.name ? `${c.name.given} ${c.name.family.join(' ')}` : null;

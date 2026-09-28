@@ -21,7 +21,7 @@ export { createScheduler, popDue, schedule, sortedItems } from './scheduler.ts';
 export type { ScheduledItem, Scheduler } from './scheduler.ts';
 
 export { EVENT_TYPES, eventText, makeEvent } from './events.ts';
-export type { CauseRef, EventOrigin, EventType, NewEvent, WorldEvent } from './events.ts';
+export type { CauseRef, DevelopmentEpisode, EventOrigin, EventType, NewEvent, WorldEvent } from './events.ts';
 
 export {
   CAPABILITIES,
@@ -428,8 +428,5 @@ export type { AvoidanceResponse, EpisodeEnd, MindCtx, MindState, MindTick, PnrEp
 
 export { FORBIDDEN_TERMS, MECHANISMS, isMechanism } from './temperament/mechanisms.ts';
 export type { MechanismId } from './temperament/mechanisms.ts';
-/** @deprecated Adaptador temporal de la migración al motor funcional (035 §9); se elimina en MF7. */
-export { legacyTrait, legacyTraits } from './temperament/legacy.ts';
-export type { LegacyTraits } from './temperament/legacy.ts';
 export { POLICY, checkArchitecture, doneTasks } from './architecture/rules.ts';
 export type { ArchitecturePolicy, SourceFile, Violation } from './architecture/rules.ts';

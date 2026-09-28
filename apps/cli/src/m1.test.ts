@@ -108,7 +108,8 @@ describe('world:history (030 R-008)', () => {
     expect(lines.length).toBeGreaterThan(20);
     for (const l of lines) expect(Number(l.slice(0, 4))).toBeGreaterThanOrEqual(1948);
     for (const l of lines) expect(Number(l.slice(0, 4))).toBeLessThanOrEqual(1958);
-    const rural = lines.filter((l) => /llega a .* desde (el campo|un pueblo de Boyacá)/.test(l));
+    // El texto del propio evento (antes de «←»): un año de desarrollo cita la migración entre sus causas (041).
+    const rural = lines.filter((l) => /llega a .* desde (el campo|un pueblo de Boyacá)/.test(l.split('←')[0]!));
     expect(rural.length).toBeGreaterThan(0);
     for (const l of rural) expect(l).toMatch(/← .*La Violencia/);
   });

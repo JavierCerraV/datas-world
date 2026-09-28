@@ -2,7 +2,7 @@
 modulo: generators
 ruta: packages/generators
 estado: en-desarrollo
-specs: [001, 023, 044]
+specs: [001, 023, 041, 044]
 actualizado: 2026-09-23
 ---
 
@@ -83,3 +83,4 @@ Porta `genWorld`, `buildPlaces`, `genPopulation`, `newAgent`, `genJobs`, `genRel
 | 2026-09-27 | charla/l5 (L5.3) | 044 | `lifeSystems` monta los sistemas de las consecuencias de la charla (`consequenceSystems`: llamadas, encuentros y vínculos); sin intenciones no hacen nada, así que no cambian el hash de los mundos. `chatEngineCatalog` incluye el celular (`phone`: el tipo con `callAccess`). Prueba en `chat-world.test.ts`: la revelación forma una intención, todo encuentro se remonta a lo que oyó (044 INV-002) y el replay de 2 días coincide |
 | 2026-09-27 | charla/l5 (L5.4) | 044 | `chat-world.test.ts` con tiempo máximo de 60 s por prueba: cada una genera y hace vivir el mundo de la semilla, y con toda la suite en paralelo superaba los 5 s por defecto |
 | 2026-09-28 | mf/6-privados (MF6) | 039 | `lifeSystems` monta el sistema `private` (eventos privados, PNR, evitación y «Yo»). Sin nada activo no hace nada |
+| 2026-09-28 | mf/7-desarrollo (MF7) | 041, 031 | `generateWorld` añade la fase de desarrollo (`generateDevelopment`, módulo `development`) después de la historia de la 030, salvo en los mundos estáticos, y después `learnedHabits` (tabaco, alcohol, actividad física y peso desde lo aprendido). Cambia el hash de los mundos nuevos. `vitest.config.ts`: tiempo máximo de 180 s por prueba y 120 s por preparación, porque generar un mundo incluye su historia |

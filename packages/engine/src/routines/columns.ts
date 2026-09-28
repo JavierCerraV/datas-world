@@ -3,7 +3,6 @@ import { defineColumn } from '../components.ts';
 import { formatId } from '../ids.ts';
 import type { Rng } from '../rng.ts';
 import type { WorldView } from '../simulation/system.ts';
-import { legacyTraits } from '../temperament/legacy.ts';
 import type { World } from '../world.ts';
 
 /**
@@ -53,18 +52,9 @@ export function initRoutines(world: World, rng: Rng): void {
     const wakeW = shift ? shift.start - 85 : student ? 335 : clamp(420 + Math.round(r.normal(0, 30)), 330, 540);
     const wakeE = wakeW + r.int(60, 110);
     const fromProfile = c.u8['health.sleepHours']?.[row] ?? 0;
-    const legacy = legacyTraits(world, row);
-    const sleepH =
-      age < 12
-        ? 10
-        : fromProfile > 0
-          ? fromProfile
-          : clamp(
-              // Prototipo, solo sin ficha de salud (mundos de prueba). @deprecated: sale del desarrollo en MF7.
-              7.5 + r.normal(0, 0.4) - legacy.impulsivity * 1.2 - legacy.extraversion * 0.5 + legacy.conscientiousness * 0.6,
-              5.5,
-              9,
-            );
+    // Sin ficha de salud (mundos de prueba y perfil prototipo): la media que daban los rasgos del prototipo con
+    // valores medios (6,95 h), sin rasgos (MF7.3, 041 R-008).
+    const sleepH = age < 12 ? 10 : fromProfile > 0 ? fromProfile : clamp(6.95 + r.normal(0, 0.4), 5.5, 9);
     i['routine.wakeW']![row] = wakeW;
     i['routine.wakeE']![row] = wakeE;
     const bed = (((wakeW - Math.round(sleepH * 60)) % 1440) + 1440) % 1440;

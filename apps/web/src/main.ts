@@ -2,6 +2,7 @@
 // API (022); no tiene lógica de simulación (INV-002).
 import { api, control, stream } from './api.ts';
 import { showChatHistory } from './chat-history.ts';
+import { showLife } from './life.ts';
 import { setupChat } from './chat-ui.ts';
 import { eventEs, inspectorTabs } from './format.ts';
 import type { Section } from './format.ts';
@@ -85,9 +86,10 @@ function renderSections(sections: Section[]): string {
 }
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
-let tab: 'estado' | 'historia' | 'funcional' | 'charlas' = 'estado';
+let tab: 'estado' | 'historia' | 'funcional' | 'vida' | 'charlas' = 'estado';
 let detail: CitizenDetail | null = null;
 let chatsShownFor: string | null = null;
+let lifeShownFor: string | null = null;
 function renderInspector(): void {
   if (!detail) return;
   const t = inspectorTabs(detail);
@@ -100,6 +102,13 @@ function renderInspector(): void {
     return;
   }
   chatsShownFor = null;
+  // La historia de vida (041 R-009) tampoco cambia con los ticks: se carga una vez por persona.
+  if (tab === 'vida') {
+    if (lifeShownFor !== detail.id) void showLife($('#insp-body'), detail.id);
+    lifeShownFor = detail.id;
+    return;
+  }
+  lifeShownFor = null;
   $('#insp-body').innerHTML =
     tab === 'estado'
       ? renderSections(t.estado)

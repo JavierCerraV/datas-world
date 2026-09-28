@@ -32,7 +32,6 @@ Desde `@datas-world/generators`:
 | `generateTemperament(world, citizenId, temperament, rng)` | Parámetros `tmp.*` (R-002) desde los descriptores ya guardados, con el flujo `gen:temperament`, por persona y por parámetro |
 | `checkTemperamentCatalog(temperament, traits)` | 009 INV-003 y CA-A: `modula` no vacío y registrado, ningún término de conducta o clínico, mapeo solo desde descriptores. Lanza con todos los problemas |
 | tipo `TemperamentAttrs` | Atributos de una entrada de `temperament_params` |
-| `legacy.ts`: `legacyColumn`, `legacyTraitsOf`, `legacyValue` (**@deprecated**, uso interno) | Rasgos y valores de la v0.3 para hábitos (031) y ficha de esparcimiento (032) hasta MF7.3 |
 
 ## 4. Diseño interno y decisiones
 - **Catálogos** (ADR-006):
@@ -50,10 +49,7 @@ Desde `@datas-world/generators`:
   - valores `val.*`;
   - afrontamiento (`pers.coping`, `copingFor`, `COPING`);
   - `topValues`.
-- **Adaptador de generadores** (`legacy.ts`, @deprecated):
-  - traduce los nombres de columna que usan los catálogos de 031 y 032;
-  - rasgos vía el adaptador del motor (la impulsividad sale de `tmp.discount0`);
-  - los valores `val.*` devuelven 0,5 (neutro). Así el valor "salud" ya no modula los hábitos y los `values` de `leisure_activities` ya no modulan la ficha.
+- **Sin adaptador desde MF7.4 (041):** los hábitos (031) y la ficha de esparcimiento (032) salen de lo aprendido en la historia de desarrollo, no de los descriptores.
 - **Correlación configurada (CA-C):** con 5 descriptores, el paso de extremos atenúa cualquier correlación configurada ≈ 30 % (ρ = −0,4 se mide −0,27 con 2 000 personas). El mecanismo se comprueba sin extremos: [−0,5, −0,3].
 - **Coste:** 13 columnas, 52 B por persona (la v0.3 usaba 23 columnas, 89 B).
 
@@ -79,7 +75,7 @@ Los descriptores siguen portando `newAgent`: normal(0,5, 0,17) recortada y 22 % 
 
 ## 8. Pendientes y deuda
 - [ ] Tabla de expertos: parámetros, mapeo y correlaciones (PA-101, PA-102).
-- [ ] Retirar `legacy.ts` en MF7.3 (hábitos y ficha desde el desarrollo, 041 R-008).
+- [x] Retirar `legacy.ts` (MF7.3 y MF7.4: hábitos y ficha desde el desarrollo, 041 R-008).
 - [ ] `TRAIT_SHIFT` y cambio lento (R-005, M3+).
 
 ## 9. Bitácora de cambios
@@ -88,3 +84,4 @@ Los descriptores siguen portando `newAgent`: normal(0,5, 0,17) recortada y 22 % 
 | 2026-09-24 | m1/e-personalidad | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/e-personalidad (E1) | 009 | Catálogos `personality_traits` y `personal_values`; `definePersonalityColumns`, `generatePersonality` (normal recortada, correlaciones, rasgo extremo), `copingFor`, `topValues`. 7 pruebas: 009 CA-001, CA-002, CA-003 |
 | 2026-09-25 | mf/1-temperamento (MF1.2–MF1.4) | 009 v1.0, 035 | Reorientación a temperamento (ADR-007): catálogos `personality_traits` (Big Five), `temperament_params` (nuevo) y `life_domains` (sustituye a `personal_values`); `generateTemperament` y `checkTemperamentCatalog`; se eliminan afrontamiento, extras, valores y `topValues`; adaptador `legacy.ts` (@deprecated). Cambia el hash de los mundos nuevos (009 INV-002). 8 pruebas: CA-A, CA-C, CA-D, CA-G |
+| 2026-09-28 | mf/7-desarrollo (MF7.4) | 041, 009 | Se elimina el adaptador `legacy.ts`: nadie lo usa (hábitos y ficha salen de la historia) |

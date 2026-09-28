@@ -2,7 +2,7 @@
 modulo: catalogs
 ruta: packages/generators/src/catalogs
 estado: en-desarrollo
-specs: [003, 004, 005, 006, 007, 008, 009, 030, 043, 044]
+specs: [003, 004, 005, 006, 007, 008, 009, 030, 041, 043, 044]
 actualizado: 2026-09-27
 ---
 
@@ -89,3 +89,4 @@ Las entradas de M1 de `place_kinds` llevan `proto` (el tipo del prototipo), `def
 | 2026-09-27 | charla/l0-catalogos (L0.2) | 043, 036 | Catálogos nuevos de la charla: `chat_tones` (12 tonos con estímulo, magnitud, valor social de partida aprobado por el usuario, ejemplos y palabras clave), `chat_stances` (8 posturas con escape, fuerza inicial y guía) y `chat_scripts` (14 guiones: uno por tono y dos mixtos). `stimulus_classes` 2026.09.4: nueve términos verbales de la charla, sin valor primario (51 entradas). `CATALOG_NAMES` pasa a 22 |
 | 2026-09-27 | charla/l5 (L5.1) | 044, 005, 036 | Catálogos nuevos `chat_claims` (las 8 afirmaciones de la 044 P1, con estímulo, magnitud, valor de partida, relaciones admitidas, ejemplos y palabras clave) y `chat_relations` (7 relaciones con cómo resolverlas desde la vista, cercanía y palabras). `stimulus_classes` 2026.10.1: abandono, afecto, desprecio y traición, sin valor primario. `object_kinds` 2026.10.1: el teléfono es el celular de toda persona de 14 años o más, con `callAccess` por estrato (044 P2). `CATALOG_NAMES` pasa a 24. 2 pruebas |
 | 2026-09-27 | charla/l5 (L5.4) | 044 | `chat_scripts` 2026.10.2: guion `revelacion.pareja` (el ejemplo del usuario: proponer una relación abierta y decir que la pareja está de acuerdo), 15 guiones |
+| 2026-09-28 | mf/7-desarrollo (MF7.1, MF7.3) | 041, 032, 036 | Catálogo nuevo `development_episodes` 2026.10.4 (46 episodios por etapa, con efectos, modificadores, condiciones y disparadores de la 030; tasas estimadas, fuentes por verificar). `stimulus_classes` 2026.10.2: roles de la comunidad verbal (`rol.cuidador`, `rol.docente`, `rol.hermano`, `rol.madre`, `rol.padre`, `rol.par`, `rol.pareja`) y `verbal.emocion`. `leisure_activities` 2026.10.1: `traits` y `values` nombran lo aprendido (respuestas y dominios vitales) en lugar de rasgos. `CATALOG_NAMES` pasa a 25 |

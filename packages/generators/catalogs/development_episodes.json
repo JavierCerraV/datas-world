@@ -1,0 +1,465 @@
+{
+  "name": "development_episodes",
+  "version": "2026.10.4",
+  "source": "Spec 041 R-001 a R-009 (bloque MF7; decisiones del usuario del 2026-09-28). Episodios de aprendizaje de la vida anterior al presente del mundo, por etapa: infancia (0–5 años), escolar (6–11), adolescencia (12–17) y adulto (18+). `weight`: peso relativo dentro de su etapa [M] (PA-120). `speaker`: quién interviene (rol de la comunidad verbal; `@speaker` en un efecto es su estímulo `rol.*`). `valence`: +1 si el episodio acerca a esa persona, −1 si la vuelve conflictiva (familiograma, R-009). `effects`: `pair` (respondiente, 036 R-001), `operant` (respuesta y resultado, 036 R-002), `value` (el estímulo como parte de un dominio vital, 038 R-006), `teach` (relación, 037 R-007). `mods`: multiplicadores del peso según el hogar y la historia de 030. `requires`: condiciones para que ocurra. `trigger`: el hecho de la 030 que lo produce en su momento (sin sorteo). Todas las tasas son estimadas; fuentes por verificar: ENDS 2015 (Profamilia y MinSalud) para la crianza con castigo, ENSM 2015 (MinSalud) para la salud mental y el consumo en adolescentes, Encuesta Nacional de Consumo de Sustancias Psicoactivas en Población Escolar 2016 (ODC) para el tabaco y el alcohol escolar.",
+  "entries": [
+    {
+      "key": "adolescencia.confidencia_burlada",
+      "name": "Se burlan de lo que contó",
+      "since": "M2",
+      "attrs": {"stage": "adolescencia", "weight": 1.5, "speaker": "par", "valence": 0, "text": "Contó algo personal y se burlaron de eso.", "effects": [{"op": "operant", "response": "conv.abrirse", "outcome": 0.1}, {"op": "pair", "stim": "verbal.confidencia", "lambda": -0.4, "us": "verbal.burla", "social": true}], "status": "estimado"}
+    },
+    {
+      "key": "adolescencia.confidente",
+      "name": "Tiene con quién hablar",
+      "since": "M2",
+      "attrs": {
+        "stage": "adolescencia", "weight": 4, "speaker": "par", "valence": 1,
+        "text": "Le contó a alguien de confianza lo que le pasaba y se sintió escuchado.",
+        "effects": [{ "op": "operant", "response": "conv.abrirse", "outcome": 0.8 }, { "op": "pair", "stim": "verbal.confidencia", "lambda": 0.5, "us": "cuerpo.disfrute", "social": true }],
+        "mods": [{ "if": "familia_unida", "x": 1.4 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adolescencia.conflicto_padres",
+      "name": "Discusión con su madre o su padre",
+      "since": "M2",
+      "attrs": {
+        "stage": "adolescencia", "weight": 2, "speaker": "progenitor", "valence": -1,
+        "text": "Discutió fuerte con su madre o su padre y terminó gritando.",
+        "effects": [{ "op": "pair", "stim": "@speaker", "lambda": -0.3, "us": "verbal.critica", "social": true }, { "op": "operant", "response": "conv.contraatacar", "outcome": 0.6 }],
+        "mods": [{ "if": "padres_separados", "x": 1.5 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adolescencia.deporte",
+      "name": "Hace deporte con otros",
+      "since": "M2",
+      "attrs": {
+        "stage": "adolescencia", "weight": 3, "speaker": "par", "valence": 1,
+        "text": "Entrenó con su equipo y lo disfrutó.",
+        "effects": [{ "op": "operant", "response": "habito.ejercicio", "outcome": 0.8 }, { "op": "value", "stim": "cuerpo.disfrute", "domain": "dominio.salud", "s": 0.5, "lambda": 0.4 }],
+        "mods": [{ "if": "estrato_bajo", "x": 0.8 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adolescencia.lectura",
+      "name": "Lee por gusto",
+      "since": "M2",
+      "attrs": {"stage": "adolescencia", "weight": 2, "speaker": "ninguno", "valence": 0, "text": "Se aficionó a leer y a aprender por su cuenta.", "effects": [{"op": "value", "stim": "verbal.pregunta", "domain": "dominio.conocimiento", "s": 0.6, "lambda": 0.5}], "mods": [{"if": "estudios_superiores", "x": 1.8}], "status": "estimado"}
+    },
+    {
+      "key": "adolescencia.meta_estudio",
+      "name": "Se propone estudiar",
+      "since": "M2",
+      "attrs": {
+        "stage": "adolescencia", "weight": 3, "speaker": "docente", "valence": 1,
+        "text": "Un docente le animó a seguir estudiando y se lo propuso.",
+        "effects": [{ "op": "value", "stim": "rutina.study", "domain": "dominio.conocimiento", "s": 0.6, "lambda": 0.4 }, { "op": "operant", "response": "rutina.study", "outcome": 0.7 }],
+        "mods": [{ "if": "estudios_superiores", "x": 2 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adolescencia.obedecer_sin_premio",
+      "name": "Obedece y nadie lo nota",
+      "since": "M2",
+      "attrs": {"stage": "adolescencia", "weight": 2, "speaker": "progenitor", "valence": 0, "text": "Hizo lo que le pidieron y nadie lo notó.", "effects": [{"op": "operant", "response": "conv.aplacar", "outcome": 0.15}], "status": "estimado"}
+    },
+    {
+      "key": "adolescencia.pares_beben",
+      "name": "Bebe con sus amigos",
+      "since": "M2",
+      "attrs": {
+        "stage": "adolescencia", "weight": 3, "speaker": "par", "valence": 0,
+        "text": "Tomó alcohol con sus amigos para pasarla bien y olvidarse de los problemas.",
+        "effects": [{ "op": "operant", "response": "evit.consumir", "outcome": 0.6 }, { "op": "operant", "response": "habito.beber", "outcome": 0.7 }],
+        "requires": ["edad_14"],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adolescencia.pares_fuman",
+      "name": "Fuma con sus amigos",
+      "since": "M2",
+      "attrs": {
+        "stage": "adolescencia", "weight": 1.5, "speaker": "par", "valence": 0,
+        "text": "Probó el cigarrillo con sus amigos.",
+        "effects": [{ "op": "operant", "response": "habito.fumar", "outcome": 0.8 }],
+        "requires": ["edad_14"],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adolescencia.primera_pareja",
+      "name": "Primera pareja",
+      "since": "M2",
+      "attrs": {
+        "stage": "adolescencia", "weight": 2, "speaker": "par", "valence": 1,
+        "text": "Tuvo su primera relación de pareja.",
+        "effects": [{ "op": "pair", "stim": "rol.pareja", "lambda": 0.5, "us": "cuerpo.disfrute", "social": true }],
+        "requires": ["edad_14"],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adolescencia.ruptura",
+      "name": "Una ruptura",
+      "since": "M2",
+      "attrs": {
+        "stage": "adolescencia", "weight": 1, "speaker": "par", "valence": 0,
+        "text": "Su pareja le dejó y lo pasó mal varias semanas.",
+        "effects": [{ "op": "pair", "stim": "verbal.abandono", "lambda": -0.5, "us": "cuerpo.dolor" }, { "op": "pair", "stim": "rol.pareja", "lambda": -0.2, "social": true }],
+        "requires": ["edad_14"],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adulto.ahorro",
+      "name": "Ahorra para lo que viene",
+      "since": "M2",
+      "attrs": {"stage": "adulto", "weight": 2, "speaker": "ninguno", "valence": 0, "text": "Logró ahorrar un poco y se sintió más tranquilo.", "effects": [{"op": "value", "stim": "verbal.dinero", "domain": "dominio.seguridad", "s": 0.5, "lambda": 0.4}], "mods": [{"if": "estrato_bajo", "x": 0.7}], "status": "estimado", "requires": ["empleado"]}
+    },
+    {
+      "key": "adulto.amigos",
+      "name": "Sale con sus amigos",
+      "since": "M2",
+      "attrs": {"stage": "adulto", "weight": 3, "speaker": "par", "valence": 0, "text": "Salió con sus amigos y la pasó bien.", "effects": [{"op": "pair", "stim": "rol.par", "lambda": 0.4, "us": "cuerpo.disfrute", "social": true}, {"op": "value", "stim": "rol.par", "domain": "dominio.pertenencia", "s": 0.5, "lambda": 0.3}], "status": "estimado"}
+    },
+    {
+      "key": "adulto.apoyo_pareja",
+      "name": "Apoyo de su pareja",
+      "since": "M2",
+      "attrs": {
+        "stage": "adulto", "weight": 3, "speaker": "pareja", "valence": 1,
+        "text": "Su pareja le apoyó en un momento difícil.",
+        "effects": [{ "op": "pair", "stim": "rol.pareja", "lambda": 0.5, "us": "cuerpo.disfrute", "social": true }, { "op": "value", "stim": "rol.pareja", "domain": "dominio.familia", "s": 0.6, "lambda": 0.4 }],
+        "requires": ["con_pareja"],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adulto.busqueda_empleo",
+      "name": "Busca trabajo sin conseguirlo",
+      "since": "M2",
+      "attrs": {"stage": "adulto", "weight": 1.5, "speaker": "ninguno", "valence": 0, "text": "Buscó trabajo durante semanas y no lo consiguió.", "effects": [{"op": "pair", "stim": "verbal.trabajo", "lambda": -0.2, "us": "verbal.critica"}, {"op": "operant", "response": "rutina.job_search", "outcome": 0.3}], "mods": [{"if": "estrato_bajo", "x": 1.5}], "status": "estimado"}
+    },
+    {
+      "key": "adulto.critica_jefe",
+      "name": "Una crítica en el trabajo",
+      "since": "M2",
+      "attrs": {
+        "stage": "adulto", "weight": 2, "speaker": "jefe", "valence": 0,
+        "text": "Su jefe le criticó delante de otros.",
+        "effects": [{ "op": "pair", "stim": "rol.jefe", "lambda": -0.4, "us": "verbal.critica", "social": true }, { "op": "operant", "response": "conv.callar", "outcome": 0.5 }],
+        "requires": ["empleado"],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adulto.cuidado_hijos",
+      "name": "Cuidar a sus hijos",
+      "since": "M2",
+      "attrs": {
+        "stage": "adulto", "weight": 3, "speaker": "ninguno", "valence": 0,
+        "text": "Cuidó a sus hijos y lo sintió como lo más importante.",
+        "effects": [{ "op": "value", "stim": "rutina.care", "domain": "dominio.familia", "s": 0.7, "lambda": 0.5 }, { "op": "operant", "response": "rutina.care", "outcome": 0.7 }],
+        "requires": ["con_hijos"],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adulto.discusion_pareja",
+      "name": "Una discusión de pareja",
+      "since": "M2",
+      "attrs": {
+        "stage": "adulto", "weight": 2, "speaker": "pareja", "valence": -1,
+        "text": "Discutió con su pareja por dinero o por la casa.",
+        "effects": [{ "op": "pair", "stim": "rol.pareja", "lambda": -0.3, "us": "verbal.critica", "social": true }, { "op": "operant", "response": "conv.poner_limite", "outcome": 0.6 }],
+        "requires": ["con_pareja"],
+        "mods": [{ "if": "estrato_bajo", "x": 1.2 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adulto.logro_trabajo",
+      "name": "Un logro en el trabajo",
+      "since": "M2",
+      "attrs": {
+        "stage": "adulto", "weight": 4, "speaker": "jefe", "valence": 0,
+        "text": "Le reconocieron un buen trabajo.",
+        "effects": [{ "op": "pair", "stim": "verbal.trabajo", "lambda": 0.4, "us": "verbal.aprobacion" }, { "op": "value", "stim": "verbal.trabajo", "domain": "dominio.exito", "s": 0.5, "lambda": 0.4 }],
+        "requires": ["empleado"],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "adulto.voluntariado",
+      "name": "Ayuda en su comunidad",
+      "since": "M2",
+      "attrs": {
+        "stage": "adulto", "weight": 1, "speaker": "ninguno", "valence": 0,
+        "text": "Ayudó en una actividad de su barrio o de su iglesia.",
+        "effects": [{ "op": "value", "stim": "verbal.aprobacion", "domain": "dominio.altruismo", "s": 0.5, "lambda": 0.4 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "colegio.critica_docente",
+      "name": "Una crítica del docente",
+      "since": "M2",
+      "attrs": {
+        "stage": "escolar", "weight": 3, "speaker": "docente", "valence": 0,
+        "text": "Un docente le regañó delante del curso.",
+        "effects": [{ "op": "pair", "stim": "verbal.critica", "lambda": -0.4, "us": "cuerpo.dolor", "social": true }, { "op": "pair", "stim": "rol.docente", "lambda": -0.2, "social": true }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "colegio.defensa_castigada",
+      "name": "Le castigan por defenderse",
+      "since": "M2",
+      "attrs": {"stage": "escolar", "weight": 1.5, "speaker": "docente", "valence": 0, "text": "Respondió a una burla y le castigaron a él o ella.", "effects": [{"op": "operant", "response": "conv.contraatacar", "outcome": 0.1}, {"op": "pair", "stim": "rol.docente", "lambda": -0.2, "social": true}], "status": "estimado"}
+    },
+    {
+      "key": "colegio.elogio_tarea",
+      "name": "Elogio por una tarea",
+      "since": "M2",
+      "attrs": {
+        "stage": "escolar", "weight": 6, "speaker": "docente", "valence": 0,
+        "text": "Le felicitaron por una tarea bien hecha.",
+        "effects": [{ "op": "pair", "stim": "verbal.aprobacion", "lambda": 0.4, "us": "cuerpo.disfrute", "social": true }, { "op": "operant", "response": "rutina.study", "outcome": 0.6 }],
+        "mods": [{ "if": "estudios_superiores", "x": 1.3 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "crianza.castigo_fisico",
+      "name": "Castigo físico",
+      "since": "M2",
+      "attrs": {"stage": "infancia", "weight": 3, "speaker": "progenitor", "valence": -1, "text": "Le pegaron como castigo.", "effects": [{"op": "pair", "stim": "@speaker", "lambda": -0.5, "us": "cuerpo.dolor", "social": true}, {"op": "pair", "stim": "verbal.critica", "lambda": -0.5, "us": "cuerpo.dolor"}, {"op": "operant", "response": "conv.callar", "outcome": 0.6}], "mods": [{"if": "estrato_bajo", "x": 1.4}, {"if": "padres_separados", "x": 1.2}], "status": "estimado", "fuente": "ENDS 2015 (Profamilia y MinSalud), prácticas de crianza; por verificar", "requires": ["edad_2"]}
+    },
+    {
+      "key": "crianza.consuelo",
+      "name": "Consuelo",
+      "since": "M2",
+      "attrs": {
+        "stage": "infancia", "weight": 10, "speaker": "cuidador_principal", "valence": 1,
+        "text": "Le consolaron cuando lloraba.",
+        "effects": [{ "op": "pair", "stim": "@speaker", "lambda": 0.5, "us": "cuerpo.disfrute", "social": true }],
+        "mods": [{ "if": "familia_unida", "x": 1.5 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "crianza.elogio",
+      "name": "Elogio",
+      "since": "M2",
+      "attrs": {"stage": "infancia", "weight": 8, "speaker": "cuidador_principal", "valence": 1, "text": "Le dijeron lo bien que lo había hecho.", "effects": [{"op": "pair", "stim": "verbal.aprobacion", "lambda": 0.5, "us": "cuerpo.disfrute", "social": true}, {"op": "pair", "stim": "@speaker", "lambda": 0.2, "social": true}], "status": "estimado", "requires": ["edad_2"]}
+    },
+    {
+      "key": "crianza.expresion_castigada",
+      "name": "Le castigan expresar lo que siente",
+      "since": "M2",
+      "attrs": {"stage": "infancia", "weight": 2, "speaker": "progenitor", "valence": -1, "text": "Le dijeron que llorar era de débiles y que se callara.", "effects": [{"op": "operant", "response": "conv.abrirse", "outcome": 0.15}, {"op": "operant", "response": "yo.enmarque", "outcome": 0}, {"op": "pair", "stim": "verbal.emocion", "lambda": -0.4, "us": "verbal.critica", "social": true}], "mods": [{"if": "familia_unida", "x": 0.4}], "status": "estimado", "requires": ["edad_2"]}
+    },
+    {
+      "key": "crianza.gritos",
+      "name": "Gritos",
+      "since": "M2",
+      "attrs": {"stage": "infancia", "weight": 4, "speaker": "progenitor", "valence": -1, "text": "Le gritaron y le dijeron que era un problema.", "effects": [{"op": "pair", "stim": "verbal.critica", "lambda": -0.4, "us": "cuerpo.dolor"}, {"op": "pair", "stim": "@speaker", "lambda": -0.3, "social": true}, {"op": "operant", "response": "conv.callar", "outcome": 0.5}], "mods": [{"if": "padres_separados", "x": 1.3}], "status": "estimado", "requires": ["edad_2"]}
+    },
+    {
+      "key": "crianza.juego",
+      "name": "Juego en familia",
+      "since": "M2",
+      "attrs": {
+        "stage": "infancia", "weight": 8, "speaker": "cuidador_principal", "valence": 1,
+        "text": "Jugó con su familia y se rió mucho.",
+        "effects": [{ "op": "pair", "stim": "@speaker", "lambda": 0.4, "us": "cuerpo.disfrute", "social": true }, { "op": "operant", "response": "conv.abrirse", "outcome": 0.7 }],
+        "mods": [{ "if": "familia_unida", "x": 1.4 }, { "if": "campo", "x": 1.2 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "crianza.negligencia",
+      "name": "Nadie le atiende",
+      "since": "M2",
+      "attrs": {
+        "stage": "infancia", "weight": 1.5, "speaker": "progenitor", "valence": -1,
+        "text": "Lloró y nadie vino.",
+        "effects": [{ "op": "pair", "stim": "verbal.abandono", "lambda": -0.5, "us": "cuerpo.dolor" }, { "op": "pair", "stim": "@speaker", "lambda": -0.2, "social": true }],
+        "mods": [{ "if": "familia_unida", "x": 0.3 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "crianza.nombrar_emocion",
+      "name": "Le enseñan a nombrar lo que siente",
+      "since": "M2",
+      "attrs": {"stage": "infancia", "weight": 0.8, "speaker": "cuidador_principal", "valence": 1, "text": "Le ayudaron a ponerle nombre a lo que sentía («estás triste porque…»).", "effects": [{"op": "operant", "response": "yo.enmarque", "outcome": 1}, {"op": "pair", "stim": "verbal.emocion", "lambda": 0.4, "us": "cuerpo.disfrute", "social": true}], "mods": [{"if": "familia_unida", "x": 2}], "status": "estimado", "requires": ["edad_2"]}
+    },
+    {
+      "key": "crianza.regla_obediencia",
+      "name": "Una regla de obediencia",
+      "since": "M2",
+      "attrs": {"stage": "infancia", "weight": 5, "speaker": "progenitor", "valence": 0, "text": "Le enseñaron que hay que obedecer a los mayores y le premiaron por hacerlo.", "effects": [{"op": "pair", "stim": "verbal.aprobacion", "lambda": 0.3, "social": true}, {"op": "operant", "response": "conv.aplacar", "outcome": 0.6}], "status": "estimado", "requires": ["edad_2"]}
+    },
+    {
+      "key": "escolar.arte",
+      "name": "Arte o música",
+      "since": "M2",
+      "attrs": {"stage": "escolar", "weight": 2, "speaker": "docente", "valence": 0, "text": "Dibujó, pintó o tocó música y le encantó.", "effects": [{"op": "value", "stim": "cuerpo.disfrute", "domain": "dominio.creatividad", "s": 0.6, "lambda": 0.5}], "mods": [{"if": "estrato_bajo", "x": 0.7}], "status": "estimado"}
+    },
+    {
+      "key": "familia.conflicto_padres",
+      "name": "Sus padres pelean",
+      "since": "M2",
+      "attrs": {
+        "stage": "escolar", "weight": 2, "speaker": "progenitor", "valence": -1,
+        "text": "Vio a sus padres pelear y se escondió a jugar para no oírlos.",
+        "effects": [{ "op": "pair", "stim": "verbal.amenaza", "lambda": -0.4, "us": "cuerpo.dolor" }, { "op": "operant", "response": "evit.distraccion", "outcome": 0.6 }],
+        "mods": [{ "if": "padres_separados", "x": 3 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "familia.enfrentar_problemas",
+      "name": "En casa enfrentan los problemas",
+      "since": "M2",
+      "attrs": {"stage": "escolar", "weight": 2, "speaker": "cuidador_principal", "valence": 1, "text": "En su casa hablaron del problema y lo resolvieron juntos.", "effects": [{"op": "operant", "response": "evit.distraccion", "outcome": 0.1}, {"op": "operant", "response": "evit.suprimir", "outcome": 0.1}, {"op": "operant", "response": "conv.abrirse", "outcome": 0.8}], "mods": [{"if": "familia_unida", "x": 1.5}], "status": "estimado"}
+    },
+    {
+      "key": "familia.modelo_alcohol",
+      "name": "Ve beber para olvidar",
+      "since": "M2",
+      "attrs": {
+        "stage": "escolar", "weight": 1, "speaker": "progenitor", "valence": -1,
+        "text": "Vio a un adulto de su casa beber para olvidarse de los problemas.",
+        "effects": [{ "op": "operant", "response": "evit.consumir", "outcome": 0.5 }],
+        "status": "estimado", "fuente": "ENSM 2015 (MinSalud), consumo de alcohol en el hogar; por verificar"
+      }
+    },
+    {
+      "key": "familia.modelo_distraccion",
+      "name": "En casa no se habla de lo malo",
+      "since": "M2",
+      "attrs": {
+        "stage": "escolar", "weight": 2, "speaker": "progenitor", "valence": 0,
+        "text": "Cuando algo iba mal, en su casa ponían la televisión y cambiaban de tema.",
+        "effects": [{ "op": "operant", "response": "evit.distraccion", "outcome": 0.6 }, { "op": "operant", "response": "evit.suprimir", "outcome": 0.5 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "familia.tareas_hogar",
+      "name": "Ayuda en la casa",
+      "since": "M2",
+      "attrs": {
+        "stage": "escolar", "weight": 4, "speaker": "cuidador_principal", "valence": 1,
+        "text": "Ayudó con los oficios de la casa y le agradecieron.",
+        "effects": [{ "op": "operant", "response": "rutina.chores", "outcome": 0.7 }, { "op": "value", "stim": "rutina.chores", "domain": "dominio.familia", "s": 0.4, "lambda": 0.3 }],
+        "mods": [{ "if": "hermano_mayor", "x": 1.5 }, { "if": "campo", "x": 1.3 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "historia.duelo",
+      "name": "Muere alguien cercano",
+      "since": "M2",
+      "attrs": {
+        "stage": "cualquiera", "weight": 0, "speaker": "fallecido", "valence": 0,
+        "text": "Murió alguien de su familia y lo lloró mucho.",
+        "effects": [{ "op": "pair", "stim": "verbal.abandono", "lambda": -0.7, "us": "cuerpo.dolor" }, { "op": "operant", "response": "evit.dormir", "outcome": 0.5 }],
+        "trigger": ["CITIZEN_DIED", "CHILDHOOD_EVENT:infancia.perdida_padre"],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "historia.estudios",
+      "name": "Termina sus estudios",
+      "since": "M2",
+      "attrs": {
+        "stage": "cualquiera", "weight": 0, "speaker": "ninguno", "valence": 0,
+        "text": "Terminó sus estudios y se sintió orgulloso.",
+        "effects": [{ "op": "value", "stim": "rutina.study", "domain": "dominio.conocimiento", "s": 0.5, "lambda": 0.5 }, { "op": "pair", "stim": "verbal.aprobacion", "lambda": 0.4, "social": true }],
+        "trigger": "STUDIES_COMPLETED",
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "historia.migracion",
+      "name": "Deja su tierra",
+      "since": "M2",
+      "attrs": {
+        "stage": "cualquiera", "weight": 0, "speaker": "ninguno", "valence": 0,
+        "text": "Se fue a vivir lejos de donde nació y extrañó a los suyos.",
+        "effects": [{ "op": "pair", "stim": "verbal.abandono", "lambda": -0.3, "us": "cuerpo.dolor" }, { "op": "value", "stim": "verbal.trabajo", "domain": "dominio.seguridad", "s": 0.4, "lambda": 0.3 }],
+        "trigger": "MIGRATED",
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "historia.mudanzas",
+      "name": "Otra mudanza",
+      "since": "M2",
+      "attrs": {
+        "stage": "cualquiera", "weight": 0, "speaker": "ninguno", "valence": 0,
+        "text": "Se mudó otra vez y tuvo que dejar a sus amigos.",
+        "effects": [{ "op": "pair", "stim": "verbal.vivienda", "lambda": -0.3 }, { "op": "pair", "stim": "rol.par", "lambda": -0.2, "social": true }],
+        "trigger": "CHILDHOOD_EVENT:infancia.mudanzas",
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "historia.separacion_padres",
+      "name": "Sus padres se separan",
+      "since": "M2",
+      "attrs": {
+        "stage": "cualquiera", "weight": 0, "speaker": "padre", "valence": -1,
+        "text": "Sus padres se separaron y dejó de ver a su padre a diario.",
+        "effects": [{ "op": "pair", "stim": "verbal.abandono", "lambda": -0.7, "us": "cuerpo.dolor" }, { "op": "pair", "stim": "rol.padre", "lambda": -0.3, "social": true }, { "op": "teach", "a": "verbal.abandono", "b": "verbal.traicion", "t": "coordination", "s": 0.5 }],
+        "trigger": "CHILDHOOD_EVENT:infancia.padres_separados",
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "pares.amistad",
+      "name": "Un buen amigo",
+      "since": "M2",
+      "attrs": {
+        "stage": "escolar", "weight": 6, "speaker": "par", "valence": 0,
+        "text": "Hizo un buen amigo en el colegio.",
+        "effects": [{ "op": "pair", "stim": "rol.par", "lambda": 0.5, "us": "cuerpo.disfrute", "social": true }, { "op": "operant", "response": "conv.abrirse", "outcome": 0.6 }, { "op": "value", "stim": "rol.par", "domain": "dominio.pertenencia", "s": 0.5, "lambda": 0.3 }],
+        "mods": [{ "if": "mudanzas", "x": 0.6 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "pares.burla_defensa",
+      "name": "Se burlan y responde",
+      "since": "M2",
+      "attrs": {
+        "stage": "escolar", "weight": 3, "speaker": "par", "valence": 0,
+        "text": "Se burlaron de él o ella y respondió con fuerza; lo dejaron en paz.",
+        "effects": [{ "op": "pair", "stim": "verbal.burla", "lambda": -0.5, "us": "cuerpo.dolor", "social": true }, { "op": "operant", "response": "conv.contraatacar", "outcome": 0.7 }],
+        "status": "estimado"
+      }
+    },
+    {
+      "key": "pares.burla_silencio",
+      "name": "Se burlan y se calla",
+      "since": "M2",
+      "attrs": {
+        "stage": "escolar", "weight": 3, "speaker": "par", "valence": 0,
+        "text": "Se burlaron de él o ella; se quedó callado y se fue a jugar solo.",
+        "effects": [{ "op": "pair", "stim": "verbal.burla", "lambda": -0.6, "us": "cuerpo.dolor", "social": true }, { "op": "operant", "response": "conv.callar", "outcome": 0.6 }, { "op": "operant", "response": "evit.distraccion", "outcome": 0.5 }],
+        "mods": [{ "if": "mudanzas", "x": 1.4 }],
+        "status": "estimado"
+      }
+    }
+  ]
+}

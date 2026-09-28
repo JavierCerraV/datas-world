@@ -18,6 +18,7 @@ export const CATALOG_NAMES = [
   'chat_stances',
   'chat_tones',
   'childhood_events',
+  'development_episodes',
   'education_levels',
   'family_names',
   'given_names',
