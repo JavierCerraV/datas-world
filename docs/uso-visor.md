@@ -16,7 +16,7 @@ Guía para abrir el visor mínimo de Data's World (bloque V). El visor solo mira
    pnpm dev
    ```
    La primera vez crea un mundo nuevo en `data/world.db` (tarda unos segundos). Las siguientes veces continúa el mismo mundo donde lo dejaste.
-4. Abre **http://127.0.0.1:5173** en el navegador.
+4. Abre **http://127.0.0.1:5180** en el navegador.
 
 Para detener, pulsa **Ctrl+C** en la terminal. El mundo se guarda al cerrar.
 

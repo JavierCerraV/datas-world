@@ -18,7 +18,7 @@ El ciudadano habla con Claude Haiku 4.5. Sin clave, la charla funciona igual, pe
    ```
    pnpm dev
    ```
-4. Abre **http://127.0.0.1:5173**.
+4. Abre **http://127.0.0.1:5180**.
 
 ## 2. Abrir una charla
 
