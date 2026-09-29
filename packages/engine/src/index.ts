@@ -449,6 +449,29 @@ export {
   touch,
 } from './relationships/index.ts';
 export type { Attachment, EncounterDeps, Exchange, RelationshipParams, Side } from './relationships/index.ts';
+// Memoria autobiográfica (spec 013 v0.3).
+export {
+  CHAT_RECALL,
+  MEMORY_DEFAULTS,
+  MEMORY_KINDS,
+  addMemory,
+  consolidateMemory,
+  createMemorySystem,
+  distortion,
+  emptyMemory,
+  encodeEvent,
+  episodeValue,
+  memoryDecayDay,
+  openChapter,
+  peopleOf,
+  recall,
+  rehearse,
+  remembererOf,
+  retention,
+  trimMemory,
+  updateChapters,
+} from './memory/index.ts';
+export type { Chapter, FnOf, Memory, MemoryKind, MemoryParams, MemoryStore, RecallContext, SchemaChange } from './memory/index.ts';
 
 export { FORBIDDEN_TERMS, MECHANISMS, isMechanism } from './temperament/mechanisms.ts';
 export type { MechanismId } from './temperament/mechanisms.ts';

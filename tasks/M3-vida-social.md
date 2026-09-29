@@ -12,8 +12,15 @@ Specs: 012 (aprobada, v0.2), 013, 019, 020 y 025 (borradores). Una rama por bloq
 - [x] R5 Criterios CA-001 a CA-005; métricas frente al prototipo; apego como métrica (P4).
 - [x] R6 Visor: los vínculos en la ficha (quién, etiqueta, familiaridad, afecto de cada lado).
 
+## Bloque M — Memoria (013 v0.3, aprobada; rama `m3/memoria`)
+- [x] M1 Módulo `packages/engine/src/memory/`: episodios con saliencia desde las funciones de la persona, olvido en ley de potencia, tope (R-001 a R-005).
+- [x] M2 Recuperación con sesgo del ánimo, reconstrucción y repaso por la rumiación (039) y los encuentros (012) (R-006 a R-008).
+- [x] M3 Memoria de partida desde el desarrollo (041) y la historia (030), con capítulos del pasado (R-002, R-010).
+- [x] M4 La charla recibe lo que la persona recuerda y deja recuerdos (P5).
+- [x] M5 Consolidación en la red (R-009) y capítulos en la vida diaria; CA-001 a CA-009.
+- [x] M6 Visor: capítulos y recuerdos en la pestaña **Vida**.
+
 ## Bloques siguientes (specs en borrador: resolver sus preguntas y aprobarlas antes)
-- [ ] M 013 Memoria episódica como registro de contingencias.
 - [ ] C 019 Causalidad con el vector de aportes y la cadena de origen.
 - [ ] H 020 Historia retrospectiva funcional y la resiliencia como métrica de trayectoria.
 - [ ] K 025 Conocimiento, creencias y rumores (reescritura).

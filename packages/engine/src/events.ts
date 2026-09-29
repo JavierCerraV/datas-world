@@ -367,6 +367,31 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { a: str, b: str }),
     text: (e) => `${e.payload.a} ya casi no se acuerda de ${e.payload.b}.`,
   }),
+  // Memoria (spec 013 §5): lo que se generaliza en la red y los capítulos de la vida. No hay evento por recuerdo.
+  SCHEMA_FORMED: def<{ citizenId: string; a: string; b: string; strength: number }>({
+    baseImportance: 0.2,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, a: str, b: str, strength: (v) => typeof v === 'number' && v >= 0 && v <= 1 }),
+    text: (e) => `${e.payload.citizenId} aprende por experiencia que ${e.payload.a} lleva a ${e.payload.b}.`,
+  }),
+  SCHEMA_REVISED: def<{ citizenId: string; a: string; b: string; before: number; after: number }>({
+    baseImportance: 0.1,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, a: str, b: str, before: (v) => typeof v === 'number', after: (v) => typeof v === 'number' && v >= 0 && v <= 1 }),
+    text: (e) => `${e.payload.citizenId} ${e.payload.after > e.payload.before ? 'confirma' : 'duda de'} que ${e.payload.a} lleva a ${e.payload.b}.`,
+  }),
+  CHAPTER_OPENED: def<{ citizenId: string; theme: string; tone: number }>({
+    baseImportance: 0.5,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, theme: str, tone: (v) => typeof v === 'number' && v >= -1 && v <= 1 }),
+    text: (e) => `${e.payload.citizenId} empieza una etapa de su vida: ${e.payload.theme.replace(/_/g, ' ')}.`,
+  }),
+  CHAPTER_CLOSED: def<{ citizenId: string; theme: string; tone: number }>({
+    baseImportance: 0.3,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, theme: str, tone: (v) => typeof v === 'number' && v >= -1 && v <= 1 }),
+    text: (e) => `${e.payload.citizenId} cierra una etapa de su vida: ${e.payload.theme.replace(/_/g, ' ')}.`,
+  }),
   // Desarrollo (spec 041 R-007, §5): los episodios de aprendizaje de un año de vida, cada uno con quién intervino y lo
   // que aprendió. Un evento por año (no por episodio) para caber en el presupuesto de disco (CLAUDE.md regla 8); el
   // texto de cada episodio está en el catálogo `development_episodes`, por su clave.

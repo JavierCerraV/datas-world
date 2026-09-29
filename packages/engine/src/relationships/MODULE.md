@@ -63,3 +63,4 @@ Relaciones asimétricas entre ciudadanos (spec 012 v0.2): encuentros en lugares 
 |---|---|---|---|
 | 2026-09-28 | m3/relaciones (R1) | 012 | Documento creado desde la plantilla (sin código) |
 | 2026-09-28 | m3/relaciones (R1–R5) | 012 | Módulo implementado: encuentros con las posturas de la charla, vínculos, etiquetas, discusiones, parejas, rupturas, olvido, registro de causas y apego como métrica; parámetros calibrados con 100 personas × 1 año |
+| 2026-09-29 | m3/memoria (M5) | 012, 013 | R-001 con la 013 CA-005: con quién se encuentra se pondera también por el valor que tiene la otra persona para quien inicia (directo o derivado de la red, 037), `× max(0,1; 1 + valor)`. Lo que la experiencia generalizó sigue apartando aunque los episodios se olviden. En 100 personas × 1 año las discusiones bajan de 79 a 44 (la gente evita a quien le desagrada) y las amistades quedan igual (286) |

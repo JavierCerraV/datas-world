@@ -30,11 +30,61 @@ export interface EpisodeView {
   learned: { label: string; delta: number }[];
   cause: string | null;
 }
+export interface MemoryView {
+  id: string;
+  date: string;
+  age: number;
+  source: 'lived' | 'told' | 'session';
+  text: string;
+  valence: number;
+  valence0: number;
+  intensity: number;
+  rehearsals: number;
+  chapter: string | null;
+}
+export interface ChapterView {
+  id: string;
+  theme: string;
+  from: string;
+  to: string | null;
+  fromAge: number;
+  tone: number;
+  openedBy: string | null;
+}
 export interface LifeView {
   id: string;
   name: string;
   genogram: { nodes: GenoNode[]; partners: [string, string][] };
   stages: { stage: string; episodes: EpisodeView[] }[];
+  /** 013; opcionales para respuestas anteriores. */
+  chapters?: ChapterView[];
+  memories?: MemoryView[];
+}
+
+const THEME: Record<string, string> = {
+  infancia: 'Infancia', adolescencia: 'Adolescencia', juventud: 'Juventud', vida_adulta: 'Vida adulta', trabajo: 'Trabajo', desempleo: 'Desempleo',
+  jubilacion: 'Jubilación', pareja: 'En pareja', ruptura: 'Después de una ruptura', crianza: 'Criando hijos', duelo: 'Duelo', migracion: 'Migración',
+};
+const tone = (v: number) => (v <= -0.3 ? 'muy difícil' : v < -0.1 ? 'difícil' : v >= 0.3 ? 'muy buena' : v > 0.1 ? 'buena' : 'mezclada');
+/** 013 R-007: si lo recuerda distinto de como lo vivió, se dice. */
+const drift = (m: MemoryView) => (m.valence - m.valence0 <= -0.1 ? ' · <em>lo recuerda peor de lo que lo vivió</em>' : m.valence - m.valence0 >= 0.1 ? ' · <em>lo recuerda mejor de lo que lo vivió</em>' : '');
+
+/** 013: los capítulos de su vida y lo que recuerda, del más antiguo al más reciente. */
+export function renderMemory(v: LifeView): string {
+  const chapters = v.chapters ?? [];
+  const memories = v.memories ?? [];
+  if (!chapters.length && !memories.length) return '';
+  const byChapter = new Map<string | null, MemoryView[]>();
+  for (const m of memories) byChapter.set(m.chapter, [...(byChapter.get(m.chapter) ?? []), m]);
+  const item = (m: MemoryView) =>
+    `<li class="${m.valence > 0.1 ? 'pos' : m.valence < -0.1 ? 'neg' : ''}"><span class="mono">${esc(m.date)}</span> · ${m.age} años${m.source === 'told' ? ' · se lo contaron' : ''}<br>${esc(m.text)}<small>intensidad ${Math.round(m.intensity * 100)} %${m.rehearsals ? ` · recordado ${m.rehearsals} ${m.rehearsals === 1 ? 'vez' : 'veces'}` : ''}${drift(m)}</small></li>`;
+  const blocks = chapters.map((c) => {
+    const mine = byChapter.get(c.id) ?? [];
+    return `<details class="life-stage"><summary>${esc(THEME[c.theme] ?? c.theme)} · desde los ${c.fromAge} años${c.to ? '' : ' (ahora)'} · etapa ${tone(c.tone)} · ${mine.length} recuerdos</summary>${c.openedBy ? `<p class="muted">Empezó con: ${esc(c.openedBy)}</p>` : ''}<ol class="life">${mine.map(item).join('')}</ol></details>`;
+  });
+  const loose = byChapter.get(null) ?? [];
+  if (loose.length) blocks.push(`<details class="life-stage"><summary>Otros recuerdos · ${loose.length}</summary><ol class="life">${loose.map(item).join('')}</ol></details>`);
+  return `<h3>Lo que recuerda, por etapas de su vida</h3>${blocks.join('')}`;
 }
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
@@ -133,7 +183,7 @@ export function renderLife(v: LifeView): string {
       .map((e) => `<li class="${e.valence > 0 ? 'pos' : e.valence < 0 ? 'neg' : ''}"><span class="mono">${esc(e.date)}</span> · ${e.age} años${e.speaker ? ` · ${esc(e.speaker)}${e.speakerName ? ` (${esc(e.speakerName)})` : ''}` : ''}<br>${esc(e.text)}<small>aprendió: ${learnedText(e.learned)}${e.cause ? `<br>por: ${esc(e.cause)}` : ''}</small></li>`)
       .join('')}</ol></details>`)
     .join('');
-  return `<h3>Familiograma</h3><div class="genogram-wrap">${genogramSvg(v.genogram)}</div>${LEGEND}<h3>Historia de vida</h3>${total ? stages : '<p>Este mundo no tiene historia de desarrollo (se creó antes de la spec 041).</p>'}`;
+  return `<h3>Familiograma</h3><div class="genogram-wrap">${genogramSvg(v.genogram)}</div>${LEGEND}${renderMemory(v)}<h3>Historia de vida (lo que vivió)</h3>${total ? stages : '<p>Este mundo no tiene historia de desarrollo (se creó antes de la spec 041).</p>'}`;
 }
 
 /** Carga y muestra la historia de vida de una persona. */

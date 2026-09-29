@@ -54,7 +54,7 @@ interface Bond {
 Coste: hasta `MAX_BONDS` = 40 vínculos por persona × ≈ 80 B, más una función por vínculo en el almacén (036). ≈ 5 KB por persona como máximo.
 
 ## 4. Reglas
-- **R-001** [M] — **Encuentros.** En cada lugar con varias personas despiertas (016, `loc.place`), cada par puede tener un encuentro con probabilidad por tick `P_ENCOUNTER × (0,3 + familiaridad) × acercarse`. «Acercarse» es la fuerza aprendida de la respuesta `social.acercarse` en ese contexto (036 R-002). Tope de encuentros por persona y hora (`MAX_ENCOUNTERS_HOUR`). Azar: `sys:relationships/<lugar>`.
+- **R-001** [M] — **Encuentros.** En cada lugar con varias personas despiertas (016, `loc.place`), cada par puede tener un encuentro con probabilidad por tick `P_ENCOUNTER × (0,3 + familiaridad) × acercarse`. «Acercarse» es la fuerza aprendida de la respuesta `social.acercarse` en ese contexto (036 R-002). Tope de encuentros por persona y hora (`MAX_ENCOUNTERS_HOUR`). Azar: `sys:relationships/<lugar>`. Implementación: cada persona inicia con probabilidad `P_ENCOUNTER × acercarse` y elige con quién con peso `(0,3 + familiaridad) × max(0,1; 1 + valor de la otra persona)`, donde el valor es el directo o el derivado de su red (037); así lo que la experiencia generalizó (013 R-009) sigue acercando o apartando aunque los episodios se olviden.
 - **R-002** [T] idea / [M] forma — **El intercambio.** En un encuentro, cada uno elige una postura con la selección de la 040 y el catálogo `chat_stances` (043 R-008), sin LLM. El «tono» con que llega el otro es su postura:
   - abrirse, aplacar o responder breve se reciben como aprobación o neutralidad;
   - contraatacar, poner un límite o callar, como crítica, conflicto o frialdad;
@@ -143,3 +143,4 @@ Resueltas (§9 bis). La calibración sigue abierta: PA-142 a PA-145.
 | 2026-09-28 | 0.2 | Decisiones del usuario (§9 bis): P1 a P5 aprobadas; en P3, la opción a (sin orientación sexual por ahora) |
 | 2026-09-28 | 0.2 | Estado → aprobada |
 | 2026-09-28 | 0.3 | Lo que reveló la implementación (bloque R de M3, 100 personas × 1 año): el choque necesita un estímulo aversivo (R-002) y quien inicia no empareja al otro con su propio saludo; la tensión se repara en encuentros amables (R-003, `REPAIR`); la amistad no se aplica a la familia (R-004); `ENCOUNTER` registra solo los roces; parámetros medidos (§8) y CA-001 en la escala medida del afecto. Resultados en `docs/validaciones/M3-relaciones.md` |
+| 2026-09-29 | 0.3 | Con la 013 (CA-005): R-001 pondera con quién se encuentra por el valor de la otra persona, directo o derivado de la red. En 100 personas × 1 año, las discusiones bajan de 79 a 44 y las amistades quedan igual. Sin cambios en CA |

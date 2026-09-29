@@ -10,6 +10,7 @@ import type { WorldEvent } from './events.ts';
 import { allocateId, emptyCounters, idKind, idNumber } from './ids.ts';
 import type { Counters, EntityId, WorldId } from './ids.ts';
 import type { MindState } from './private/types.ts';
+import type { MemoryStore } from './memory/types.ts';
 import type { FunctionStore } from './functions/types.ts';
 import type { RelationalNetwork } from './relations/types.ts';
 import type { Rule } from './rules/rules.ts';
@@ -113,6 +114,8 @@ export interface Citizen extends BaseEntity {
   intentions?: Intention[];
   /** Eventos privados activos y episodio de PNR en curso (039); vacío si no piensa en nada aversivo. */
   mind?: MindState;
+  /** Memoria autobiográfica (013): episodios y capítulos, como los recuerda la persona. */
+  memory?: MemoryStore;
 }
 
 /** Intención tras la charla (044 §3). */

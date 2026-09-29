@@ -2,8 +2,8 @@
 modulo: llm-gateway
 ruta: packages/llm-gateway
 estado: en-desarrollo
-specs: [026, 043, 044]
-actualizado: 2026-09-27
+specs: [026, 043, 044, 013]
+actualizado: 2026-09-29
 ---
 
 # Módulo: llm-gateway
@@ -51,6 +51,7 @@ Desde `@datas-world/llm-gateway`:
 - **Registro (R-003).** La clave es el sha256 del proveedor, el modelo, el propósito, los parámetros, los mensajes y el esquema. La misma charla reproducida reutiliza las respuestas sin red (043 CA-009).
 - **Presupuesto (R-004).** Contadores de tokens por día y de coste por mes, con el reloj real (la pasarela no es el motor). El coste se cuenta en millonésimas de dólar: la lectura de caché cuesta el 10 % y la escritura el 125 %.
 - **Vista (043 R-003).** Incluye solo los eventos en los que la persona participa, más los nacimientos y muertes de su familia cercana. El ocio de la semana va resumido. El estado vivo no entra en la parte cacheable.
+- **Recuerdos (013 P5 a).** Si la persona tiene memoria, lo reciente no es la lista de hechos: son sus `CHAT_RECALL` recuerdos más relevantes (`recall`, con el sesgo del ánimo), cada uno como hecho con id `MEM-…`, su texto (el del evento, el del episodio de desarrollo del catálogo o lo que le contaron) y cómo lo recuerda hoy («lo recuerda como algo muy doloroso»…). Los hechos de su historia de origen siguen. `chatCatalogs` lee `development_episodes` si llega (`memories`).
 - **Dependencias nuevas:**
   - `@anthropic-ai/sdk`: la vía obligada para llamar a Claude (026, ADR-003);
   - `zod`: ya estaba en el monorepo;
@@ -84,3 +85,4 @@ No aplica: el prototipo no usa LLM.
 | 2026-09-27 | charla/l5 (L5.1) | 044, 043 | El clasificador de tono devuelve también las afirmaciones del visitante sobre terceros cercanos (`visitorClaims`: `predicate` de `chat_claims`, `about` de `chat_relations`) en la misma llamada, sin otra llamada al LLM; descarta relaciones que la afirmación no admite. Respaldo léxico `lexicalClaims` (palabra completa: «padre» no está en «compadre»). `chatCatalogs` lee `chat_claims` y `chat_relations` si llegan; si no, la charla sigue igual. La API ya las guarda en el turno del visitante. 4 pruebas |
 | 2026-09-27 | charla/l5 (L5.2) | 044 | `ChatSession.turn` evalúa las afirmaciones con el motor (`claimsHeard`) antes de elegir la postura, las devuelve en `TurnOutcome.claims` y en `onStance`, y guarda las validadas en los turnos de la entrada `chat_session` (R-010). `chatCatalogs().engine` incluye afirmaciones y relaciones |
 | 2026-09-27 | charla/l5 (L5.4) | 044 | Prueba de 044 CA-007: el turno evalúa la afirmación (lo que muestra el panel) sin cambiar el hash del mundo |
+| 2026-09-29 | m3/memoria (M4) | 013 | La vista de la charla lleva lo que la persona recuerda en lugar de los eventos recientes (013 P5 a), con la valencia reconstruida en palabras; `ViewInput.memoryText` y `ChatCatalogs.memories` para contar los recuerdos de infancia. 1 prueba |

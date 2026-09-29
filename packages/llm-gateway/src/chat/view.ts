@@ -1,8 +1,8 @@
 // Vista mínima de la persona (spec 043 §3, R-002, R-003): lo único que recibe el LLM. Solo contiene hechos propios,
 // eventos en los que participa y los nacimientos y muertes de su familia cercana (los sabe por parentesco). Nunca
 // hechos de otros que no presenció. Se sustituye por la `PersonView` de la 025 cuando exista.
-import { ACTIVITY, ACTIVITY_COLUMN, ageInYears, formatId, toCalendar } from '@datas-world/engine';
-import type { EntityId, WorldEvent, WorldView } from '@datas-world/engine';
+import { ACTIVITY, ACTIVITY_COLUMN, CHAT_RECALL, MEMORY_DEFAULTS, ageInYears, formatId, recall, toCalendar } from '@datas-world/engine';
+import type { EntityId, Memory, WorldEvent, WorldView } from '@datas-world/engine';
 import { renderFact } from './facts.ts';
 
 export interface ViewFact {
@@ -43,6 +43,30 @@ export interface ViewInput {
   events: readonly WorldEvent[];
   /** Eventos recientes de la simulación que entran (043 §8, `N_RECENT_EVENTS`). */
   nRecent?: number;
+  /** Texto de un episodio de desarrollo por su clave (041), para los recuerdos de infancia (013). */
+  memoryText?: (kind: string) => string | undefined;
+}
+
+/** Cómo lo recuerda, en palabras (la valencia actual, reconstruida, 013 R-007). */
+const feeling = (v: number) =>
+  v <= -0.5 ? 'lo recuerda como algo muy doloroso' : v < -0.15 ? 'lo recuerda como algo malo' : v >= 0.5 ? 'lo recuerda con mucho cariño' : v > 0.15 ? 'lo recuerda como algo bueno' : 'le da más o menos igual';
+
+/** El recuerdo en una frase: el hecho del registro si lo tiene, o el texto del episodio de su desarrollo. */
+function memoryText(
+  view: WorldView, me: string, m: Memory, byId: ReadonlyMap<string, WorldEvent>, family: readonly FamilyMember[], dev?: (kind: string) => string | undefined,
+): string | undefined {
+  const e = m.event ? byId.get(m.event) : undefined;
+  if (e && e.type !== 'DEVELOPMENT_YEAR' && m.source !== 'told') return renderFact(view, me, e, family);
+  if (m.source === 'told') {
+    const about = m.stims.find((s) => s.startsWith('cit.'))?.slice(4);
+    const who = about ? view.citizens.get(about as EntityId)?.name?.given ?? about : 'alguien';
+    return `${who}: ${m.kind.replace(/_/g, ' ')}`;
+  }
+  const text = dev?.(m.kind);
+  if (!text) return undefined;
+  const person = m.stims.find((s) => s.startsWith('cit.'))?.slice(4);
+  const name = person ? view.citizens.get(person as EntityId)?.name?.given : undefined;
+  return name ? `${text.replace(/\.$/, '')} (con ${name}).` : text;
 }
 
 const ACTIVITY_LABEL: Record<string, string> = {
@@ -108,13 +132,24 @@ export function buildPersonView(input: ViewInput): PersonView {
     (KIN_EVENTS.has(e.type) && kin.has(String((e.payload as { citizenId?: string }).citizenId))));
   const born = mine.find((e) => e.type === 'CITIZEN_BORN' && (e.payload as { citizenId: string }).citizenId === id);
   const origin = mine.filter((e) => e.at < 0 && e.type !== 'LEISURE_DONE');
-  const recent = mine.filter((e) => e.at >= 0 && e.type !== 'LEISURE_DONE').slice(-(input.nRecent ?? 40));
+  // 013 P5 (a): con memoria, lo reciente no es la lista de hechos sino lo que la persona recuerda, como lo recuerda.
+  const remembers = !!me.memory;
+  const recent = remembers ? [] : mine.filter((e) => e.at >= 0 && e.type !== 'LEISURE_DONE').slice(-(input.nRecent ?? 40));
+  const dateOf = (at: number) => {
+    const c = toCalendar(at, epoch);
+    return `${c.year}-${String(c.month).padStart(2, '0')}-${String(c.day).padStart(2, '0')}`;
+  };
   const facts: ViewFact[] = [...origin, ...recent]
     .sort((a, b) => a.at - b.at || (a.id < b.id ? -1 : 1))
-    .map((e) => {
-      const c = toCalendar(e.at, epoch);
-      return { id: e.id, date: `${c.year}-${String(c.month).padStart(2, '0')}-${String(c.day).padStart(2, '0')}`, age: ageAt(e.at), text: renderFact(view, id, e, family) };
-    });
+    .map((e) => ({ id: e.id, date: dateOf(e.at), age: ageAt(e.at), text: renderFact(view, id, e, family) }));
+  if (remembers) {
+    const byId = new Map(input.events.map((e) => [e.id as string, e]));
+    const recalled = recall(me.memory, { mood: f['state.mood']?.[row] ?? 0.5, now }, CHAT_RECALL, MEMORY_DEFAULTS);
+    for (const m of [...recalled].sort((a, b) => a.at - b.at)) {
+      const text = memoryText(view, id, m, byId, family, input.memoryText);
+      if (text) facts.push({ id: m.id, date: dateOf(m.at), age: ageAt(m.at), text: `${m.source === 'told' ? 'Le contaron' : 'Recuerda'}: ${text} (${feeling(m.valence)})` });
+    }
+  }
   // El ocio de la última semana, resumido en un hecho.
   const week = mine.filter((e) => e.type === 'LEISURE_DONE' && e.at >= now - 7 * 1440);
   if (week.length > 0) {

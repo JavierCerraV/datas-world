@@ -3,7 +3,11 @@
 // azar) y se escribe acotado, con el recuerdo y el efecto emocional. El replay obtiene exactamente lo mismo.
 import type { NewEvent, WorldEvent } from '../events.ts';
 import { storeOf } from '../functions/system.ts';
-import { prune } from '../functions/learn.ts';
+import { directValue, prune } from '../functions/learn.ts';
+import { addMemory, recall, rehearse, trim as trimMemory } from '../memory/episodes.ts';
+import { CHAT_RECALL, MEMORY_DEFAULTS, emptyMemory } from '../memory/types.ts';
+import type { MemoryStore } from '../memory/types.ts';
+import { personStimulus } from '../relationships/params.ts';
 import type { FunctionStore } from '../functions/types.ts';
 import { idNumber } from '../ids.ts';
 import type { EntityId } from '../ids.ts';
@@ -178,12 +182,38 @@ export function consolidateChat(
   const intentions = formIntentions(view, input.citizenId, store, [...strongest.values()], cat, cp, now, participants, emit);
   events.push(...intentions.events);
 
+  // 013 R-002, R-008 (P5): lo que recordó durante la charla cuenta como repaso, y quedan el recuerdo de la charla
+  // (vivido) y el de lo que le contaron y creyó (contado).
+  let memory: MemoryStore | undefined;
+  if (view.capabilities.includes('memory')) {
+    memory = JSON.parse(JSON.stringify(person?.memory ?? emptyMemory())) as MemoryStore;
+    const fn = (x: string) => directValue(store, lc.onto, x, '', now, lc.P);
+    for (const m of recall(memory, { mood, now }, CHAT_RECALL, MEMORY_DEFAULTS)) rehearse(memory.episodes.find((x) => x.id === m.id)!, fn, MEMORY_DEFAULTS);
+    if (summary.intensity * Math.abs(summary.valence) >= MEMORY_DEFAULTS.encodeMin)
+      addMemory(memory, {
+        event: held.id, at: now, source: 'lived', kind: 'CONVERSATION_HELD', stims: [s.visitorStim], lambda: round(summary.valence),
+        valence: round(summary.valence), valence0: round(summary.valence), intensity: round(clamp01(summary.intensity)), rehearsals: 0,
+      });
+    for (const e of events.filter((x) => x.type === 'CHAT_CLAIM_BELIEVED')) {
+      const x = e.payload as { about: string; predicate: string; credibility: number; impact: number };
+      const a = heard.find((h) => h.a.about === x.about && h.a.predicate === x.predicate)?.a;
+      const claim = cat.claims?.find((c) => c.key === x.predicate);
+      if (!a || x.impact * x.credibility < MEMORY_DEFAULTS.encodeMin) continue;
+      addMemory(memory, {
+        event: e.id, at: now, source: 'told', kind: x.predicate, stims: [personStimulus(x.about), ...(claim ? [claim.stimulus] : [])],
+        lambda: round(a.value), valence: round(a.value), valence0: round(a.value), intensity: round(clamp01(x.impact * x.credibility)), rehearsals: 0,
+      });
+    }
+    trimMemory(memory, now, MEMORY_DEFAULTS);
+  }
+
   const patches: Patch[] = [
     {
       op: 'entity', id: input.citizenId,
       fields: {
         functions: store, ...(heard.length > 0 ? { beliefs } : {}), ...(intentions.events.length > 0 ? { intentions: intentions.list } : {}),
         ...(JSON.stringify(mind) !== JSON.stringify(person?.mind ?? { active: [] }) ? { mind } : {}),
+        ...(memory ? { memory } : {}),
       },
     },
     { op: 'set', type: 'f32', column: 'state.mood', row, value: clamp01(mood + delta) },

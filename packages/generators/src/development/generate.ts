@@ -26,7 +26,7 @@ interface FamilyStyle { warmth: number; harshness: number; emotionTalk: number }
 const lognormal = (r: Rng) => Math.exp(r.normal(0, 0.5));
 const styleOf = (r: Rng): FamilyStyle => ({ warmth: lognormal(r), harshness: lognormal(r), emotionTalk: lognormal(r) * lognormal(r) });
 
-const ROLE_STIM: Readonly<Record<string, string>> = {
+export const ROLE_STIM: Readonly<Record<string, string>> = {
   madre: 'rol.madre', padre: 'rol.padre', cuidador: 'rol.cuidador', hermano: 'rol.hermano', docente: 'rol.docente', par: 'rol.par', pareja: 'rol.pareja', jefe: 'rol.jefe',
 };
 

@@ -53,4 +53,24 @@ describe('pestaña «Vida» del visor (041)', () => {
     expect(html).toContain('por: Hecho de infancia');
     expect(renderLife({ ...view, stages: [] })).toContain('no tiene historia de desarrollo');
   });
+
+  it('013: los capítulos con su tono y lo que recuerda, marcando cuando lo recuerda distinto de como lo vivió', () => {
+    const html = renderLife({
+      ...view,
+      chapters: [
+        { id: 'CHP-1', theme: 'infancia', from: '1980-01-01', to: '1992-01-01', fromAge: 0, tone: 0.4, openedBy: null },
+        { id: 'CHP-2', theme: 'desempleo', from: '2027-02-01', to: null, fromAge: 47, tone: -0.5, openedBy: 'Ana perdió su empleo.' },
+      ],
+      memories: [
+        { id: 'MEM-1', date: '1986-03-01', age: 6, source: 'lived', text: 'Le leían en casa.', valence: 0.5, valence0: 0.5, intensity: 0.3, rehearsals: 2, chapter: 'CHP-1' },
+        { id: 'MEM-2', date: '2027-02-01', age: 47, source: 'lived', text: 'Perdió su empleo.', valence: -0.7, valence0: -0.5, intensity: 0.8, rehearsals: 3, chapter: 'CHP-2' },
+      ],
+    });
+    expect(html).toContain('Infancia · desde los 0 años · etapa muy buena · 1 recuerdos');
+    expect(html).toContain('Desempleo · desde los 47 años (ahora) · etapa muy difícil');
+    expect(html).toContain('Empezó con: Ana perdió su empleo.');
+    expect(html).toContain('lo recuerda peor de lo que lo vivió');
+    expect(html).toContain('recordado 3 veces');
+    expect(renderLife(view)).not.toContain('Lo que recuerda');
+  });
 });
