@@ -21,6 +21,8 @@ export { WorldRepository } from './repository.ts';
 export { WorldSession } from './session.ts';
 export type { FlushBatch } from './repository.ts';
 export { eventsById, queryEvents, rowsToEvents } from './queries.ts';
+export { saveTrajectory, trajectoryOf, trajectoryRows } from './trajectory.ts';
+export type { DayPoint } from './trajectory.ts';
 export type { EventQuery, EventRow } from './queries.ts';
 
 export {

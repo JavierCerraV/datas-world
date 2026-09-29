@@ -76,6 +76,16 @@ describe('world:advance', () => {
     expect(info().hash).toBe(info(other).hash);
   });
 
+  it('020: citizen:life con la trayectoria que dejan las instantáneas diarias', () => {
+    cli('world:new', '--seed', '482917', '--population', '30', '--db', db);
+    cli('world:advance', '--days', '3', '--db', db);
+    const r = cli('citizen:life', 'CIT-000001', '--db', db);
+    expect(r.code, r.err.join('\n')).toBe(0);
+    for (const s of ['Informe de vida de', 'Etapas: lo que pasó · cómo lo recuerda', 'Lo que cambió su vida', 'Perfil que sale de su historia']) expect(r.out.some((l) => l.startsWith(s)), s).toBe(true);
+    expect(r.out.some((l) => /^Trayectoria: 4 días/.test(l))).toBe(true);
+    expect(cli('citizen:life', 'nada', '--db', db).code).toBe(2);
+  }, 120_000);
+
   it('no avanza si otro proceso vivo escribe en el mundo (R-001)', () => {
     cli('world:new', '--seed', '482917', '--empty', '--db', db);
     const h = openWorldDb(db);

@@ -1,7 +1,7 @@
 ---
 id: 020
 nombre: history
-estado: borrador
+estado: aprobada
 hito: M3
 depende_de: [013, 014, 019, 027, 035]
 version: 0.3
@@ -116,7 +116,10 @@ No define tipos propios.
 ## 9. Métricas
 Capítulos objetivos por persona y año; proporción con divergencia; distribución de cada dimensión del perfil; tamaño de la trayectoria.
 
-## 10. Preguntas abiertas (para el usuario)
+## 9 bis. Decisiones del usuario (2026-09-29)
+Aprobadas las cinco propuestas de §10 (P1 a P5) tal como están.
+
+## 10. Preguntas abiertas (resueltas en §9 bis)
 - **P1 — Trayectoria diaria.** Guardar, junto a la instantánea diaria, ánimo, estrés, dinero y deuda de sueño de cada persona (≈ 5 MB por año con 250 personas, fuera del estado del mundo). Permite medir la resiliencia, detectar qué hechos cambiaron su vida y dibujar la gráfica. Sin ella, la resiliencia no se puede calcular. *Propuesta:* sí.
 - **P2 — Puntos de inflexión por consecuencias.** Los hechos que más consecuencias tuvieron en su vida (grafo causal y cambio de ánimo y dinero), cada uno con su «¿por qué?». *Propuesta:* sí.
 - **P3 — Perfil emergente de seis dimensiones** con las fórmulas de R-006, cada una con sus hechos de base, y la resiliencia indefinida si no hubo golpes. *Propuesta:* sí; son [M] y se calibran después.
@@ -135,3 +138,6 @@ Según la 035 §8:
 | 2026-09-23 | 0.2 | Capítulos objetivos alineados con los autobiográficos de 013, divergencias historia/memoria, perfil emergente con base causal, informe bajo demanda (ADR-005, idea B) |
 | 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |
 | 2026-09-29 | 0.3 | Reescritura sobre lo construido en M3 (bloque H): trayectoria diaria junto a la instantánea (R-001), puntos de inflexión por consecuencias en el grafo causal (019), capítulos objetivos desde el pasado alineados con los de la 013, fórmulas del perfil emergente con la resiliencia como trayectoria, informe en CLI, API y pestaña Vida. CA-006 nuevo. Preguntas P1 a P5 para el usuario |
+| 2026-09-29 | 0.3 | Decisiones del usuario (§9 bis): P1 a P5 aprobadas |
+| 2026-09-29 | 0.3 | Estado → aprobada |
+| 2026-09-29 | 0.3 | Implementación (bloque H de M3). Calibración de R-005 en 100 personas × 1 año: con 0,4 salían 3,3 divergencias de tono por persona, porque la memoria es en conjunto más amable que lo vivido; el tono se compara en el patrón de cada persona (cada tono menos la media de su lado), el sesgo general se dice una vez y una etapa recordada al revés (ambos tonos > 0,3) se marca siempre; umbral 0,5. Las etapas por edad citan el nacimiento (CA-002). El rumbo económico usa `tanh` (saturaba). Tono objetivo de los episodios de desarrollo: valencia × 0,6. Hallazgo: la estabilidad laboral sale casi siempre alta porque la historia generada (030) apenas registra cambios de empleo. Resultados en `docs/validaciones/M3-historia.md`. Sin cambios en CA |

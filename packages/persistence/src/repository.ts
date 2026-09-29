@@ -23,6 +23,7 @@ import type {
 import { columnFromLE, columnToLE, decodeSnapshot, encodeSnapshot } from './codec.ts';
 import type { Db } from './db.ts';
 import { rowsToEvents } from './queries.ts';
+import { saveTrajectory } from './trajectory.ts';
 import type { EventRow } from './queries.ts';
 
 export interface FlushBatch {
@@ -289,9 +290,13 @@ export class WorldRepository {
    */
   saveSnapshot(world: World): string {
     const hash = stateHash(world);
-    this.db
-      .prepare('INSERT OR REPLACE INTO snapshots (at, hash, data) VALUES (?, ?, ?)')
-      .run(world.now, hash, encodeSnapshot(world));
+    this.db.transaction(() => {
+      this.db
+        .prepare('INSERT OR REPLACE INTO snapshots (at, hash, data) VALUES (?, ?, ?)')
+        .run(world.now, hash, encodeSnapshot(world));
+      // 020 R-001: la trayectoria del día, con la instantánea (fuera del estado del mundo).
+      saveTrajectory(this.db, world);
+    })();
     this.#markVerified(world, hash);
     return hash;
   }
