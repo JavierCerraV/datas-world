@@ -1,7 +1,7 @@
 // Capítulos objetivos y divergencias con los recordados (spec 020 R-004, R-005).
 import type { DevelopmentEpisode, WorldEvent } from '../events.ts';
 import type { EntityId } from '../ids.ts';
-import { MEMORY_KINDS } from '../memory/kinds.ts';
+import { themeOf } from '../memory/kinds.ts';
 import type { Chapter } from '../memory/types.ts';
 import type { DeepReadonly, WorldView } from '../simulation/system.ts';
 import { DAY, YEAR, clamp1, lambdaOf, pointAt, r3 } from './types.ts';
@@ -42,7 +42,7 @@ export function objectiveChapters(input: ReportInput): LifeChapter[] {
   const lived: typeof past = [];
   const seen = new Set<string>();
   for (const e of events) {
-    const theme = MEMORY_KINDS[e.type]?.theme;
+    const theme = themeOf(e, birth);
     if (!theme || !concerns(view, e, id)) continue;
     if (e.at < 0) {
       if (ONCE.has(theme) && seen.has(theme)) continue;
@@ -129,8 +129,9 @@ export function divergences(objective: readonly LifeChapter[], remembered: reado
   objective.forEach((c, i) => {
     const best = pairs[i];
     const name = THEME[c.theme] ?? c.theme;
-    if (!best) {
-      out.push({ chapter: i, kind: 'missing', note: `No cuenta ${name} como una etapa de su vida.` });
+    // Si lo que recuerda en ese tramo es otra etapa (sigue en el desempleo cuando ya trabaja), no cuenta esta.
+    if (!best || best.theme !== c.theme) {
+      out.push({ chapter: i, kind: 'missing', ...(best ? { remembered: best.id } : {}), note: `No cuenta ${name} como una etapa de su vida${best ? `: en su relato sigue ${THEME[best.theme] ?? best.theme}` : ''}.` });
       return;
     }
     const o = c.tone - meanO;
@@ -146,7 +147,7 @@ export function divergences(objective: readonly LifeChapter[], remembered: reado
           : `Comparada con el resto de su vida, recuerda ${name} ${r < o ? 'peor' : 'mejor'} de lo que fue.`,
       });
     if (Math.abs(c.from - best.from) > BOUNDARY_DAYS * DAY)
-      out.push({ chapter: i, kind: 'boundary', remembered: best.id, note: `Sitúa el comienzo de ${name} ${Math.round(Math.abs(c.from - best.from) / DAY)} días ${best.from < c.from ? 'antes' : 'después'} de cuando fue.` });
+      out.push({ chapter: i, kind: 'boundary', remembered: best.id, note: `Sitúa el comienzo ${`de ${name}`.replace(/^de el /, 'del ')} ${Math.round(Math.abs(c.from - best.from) / DAY)} días ${best.from < c.from ? 'antes' : 'después'} de cuando fue.` });
   });
   return out;
 }

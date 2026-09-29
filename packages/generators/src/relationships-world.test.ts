@@ -1,5 +1,5 @@
 // Relaciones en un mundo que vive (spec 012, bloque R de M3): 100 personas × 1 año con la semilla del proyecto.
-import { affectionFor, beliefTruth, lifeReport, walk, why } from '@datas-world/engine';
+import { affectionFor, beliefTruth, lifeReport, turningCandidates, walk, why } from '@datas-world/engine';
 import type { DayPoint, ProfileKey, WorldEvent } from '@datas-world/engine';
 import { describe, expect, it } from 'vitest';
 import { loadCatalogs } from './catalogs/load.ts';
@@ -98,11 +98,14 @@ describe('M3 (012, 013, 019 y 020): 100 personas × 1 año', { timeout: 900_000 
     // 020: el informe de cada persona.
     const resilience: number[] = [];
     let divs = 0;
+    let withThree = 0;
     for (const c of people) {
       const mine = all.filter((e) => e.participants.some((p) => p.id === c.id) || e.type === 'CITIZEN_DIED');
-      const rep = lifeReport({ view: world, id: c.id, events: mine, get: (x) => byId.get(x), trajectory: trajectory.get(c.id)!, now: world.now });
-      const facts = mine.filter((e) => e.at >= 0 && !['LEISURE_DONE', 'DAY_STARTED', 'TRIP_TAKEN', 'SALARY_PAID', 'RENT_PAID'].includes(e.type));
-      expect(rep.turningPoints.length).toBeGreaterThanOrEqual(Math.min(3, facts.length)); // CA-001
+      const input = { view: world, id: c.id, events: mine, get: (x: string) => byId.get(x), trajectory: trajectory.get(c.id)!, now: world.now };
+      const rep = lifeReport(input);
+      // CA-001: ≥ 3 puntos de inflexión, o todos los hechos de su vida que pueden serlo si tiene menos.
+      expect(rep.turningPoints.length).toBeGreaterThanOrEqual(Math.min(3, turningCandidates(input).length));
+      if (rep.turningPoints.length >= 3) withThree++;
       for (const t of rep.turningPoints) expect(byId.has(t.event) && t.why.ref === t.event).toBe(true);
       // CA-002: cada etapa cita un hecho real (el que la abrió o los de su tramo).
       for (const ch of rep.chapters) expect([ch.openedBy, ...ch.events].filter(Boolean).every((x) => byId.has(x!)) && (ch.openedBy !== undefined || ch.events.length > 0), `${c.id} ${ch.theme}`).toBe(true);
@@ -116,6 +119,8 @@ describe('M3 (012, 013, 019 y 020): 100 personas × 1 año', { timeout: 900_000 
     expect(Math.sqrt(resilience.reduce((a, b) => a + (b - mean) ** 2, 0) / resilience.length)).toBeGreaterThan(0.05);
     expect([...trajectory.values()].reduce((s, t) => s + t.length, 0) * 20).toBeLessThan(10 * 1024 * 1024);
     expect(divs / people.length).toBeLessThan(3);
+    // Y la mayoría llega a tres en un año (los niños pequeños tienen pocos hechos propios).
+    expect(withThree / people.length).toBeGreaterThanOrEqual(0.7);
     // 025 CA-002: una creencia falsa compartida por ≥ 3 personas y al menos una corrección.
     const topics = knowledgeCatalog(loadCatalogs());
     const eventsAbout = new Map<string, WorldEvent[]>();

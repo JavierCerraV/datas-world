@@ -59,3 +59,4 @@ El prototipo guarda recuerdos como texto con intensidad; se porta la idea (recue
 |---|---|---|---|
 | 2026-09-29 | m3/memoria (M1) | 013 | Documento creado desde la plantilla (sin código) |
 | 2026-09-29 | m3/memoria (M1–M5) | 013 | Módulo implementado: episodios con saliencia desde las funciones, olvido en ley de potencia, recuperación con sesgo del ánimo, reconstrucción, repaso por la rumiación y los encuentros, consolidación en la red y capítulos. 10 pruebas |
+| 2026-09-29 | m3/cierre | 013 | `MemoryKind.themeMinAge` y `themeOf`: terminar estudios abre la vida adulta solo desde los 16 años (en la revisión de cierre, terminar la primaria a los 11 la abría). Lo usan el sistema de memoria, la memoria de partida y los capítulos objetivos (020) |

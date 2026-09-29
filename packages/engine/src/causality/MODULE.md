@@ -52,3 +52,4 @@ El prototipo no guarda causas; sin equivalente.
 |---|---|---|---|
 | 2026-09-29 | m3/causalidad (C1) | 019 | Documento creado desde la plantilla (sin código) |
 | 2026-09-29 | m3/causalidad (C1–C4) | 019 | Módulo implementado: orígenes de los estados, `why` con fuentes hasta su origen, y R-002 en `makeEvent`. 6 pruebas |
+| 2026-09-29 | m3/cierre | 019 | `sleepCauses` no cita nada sin deuda de sueño (la revisión de cierre encontró «deuda de sueño de 0 h» como causa de una enfermedad). Textos de `why` neutros en género («lo que la otra persona significa») |

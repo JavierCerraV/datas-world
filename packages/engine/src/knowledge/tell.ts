@@ -96,7 +96,8 @@ export function tellInEncounter(view: WorldView, teller: TellSide, listener: Tel
     || (x.about < y.about ? -1 : x.about > y.about ? 1 : x.predicate < y.predicate ? -1 : 1))[0]!;
   // R-004: a veces se cuenta una versión peor.
   const base = topicOf(cat, b.predicate)!;
-  const distorted = base.escalatesTo && rng.next() < p.distort ? topicOf(cat, base.escalatesTo) : undefined;
+  // Nadie cuenta de sí mismo una versión peor de lo que le pasó (revisión de cierre de M3).
+  const distorted = base.escalatesTo && b.about !== teller.id && rng.next() < p.distort ? topicOf(cat, base.escalatesTo) : undefined;
   const t = distorted ?? base;
   markTold(b, listener.id, p);
   reinforce(teller, listener.stance, now, p);

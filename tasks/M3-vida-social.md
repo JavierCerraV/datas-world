@@ -36,3 +36,11 @@ Specs: 012 (aprobada, v0.2), 013, 019, 020 y 025 (borradores). Una rama por bloq
   - [x] K2 Contar en los encuentros (012): corrección, relato, ocultar lo propio, deformación y aprendizaje de contar.
   - [x] K3 Sistema de conocimiento (presenciar, oír, corregir, consecuencias); lo que cree de otros en la charla, la API y el visor.
   - [x] K4 CA-001 a CA-005.
+
+## Cierre del hito (rama `m3/cierre`)
+- [x] 100 ciudadanos × 1 año con los criterios de las cinco specs (una sola prueba).
+- [x] Paridad con el prototipo (`M3-paridad-prototipo.md`): sin cambios respecto al motor funcional; la deuda de empleo y enfermedad sigue abierta.
+- [x] Batería 042 en verde.
+- [x] Revisión de 5 informes de vida al azar y corrección de lo encontrado (`M3-cierre.md`).
+- [x] Memoria y velocidad (`M3-bench-vida.md`).
+- [ ] Specs 012, 013, 019, 020 y 025 → `implementada` (con la aprobación del usuario).

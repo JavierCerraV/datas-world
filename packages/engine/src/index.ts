@@ -456,7 +456,7 @@ export type { OriginKey, StateOrigins, WhyNode, WhyOptions } from './causality/i
 export { KNOWLEDGE_DEFAULTS, SEEN, TELL, beliefTruth, closeness, createKnowledgeSystem, hear, learnBelief, tellInEncounter, topicOf, topicsOf } from './knowledge/index.ts';
 export type { Hearing, KnowledgeCatalog, KnowledgeDeps, KnowledgeParams, Listener, TellDeps, TellSide, TopicDef } from './knowledge/index.ts';
 // Informe de vida (spec 020 v0.3).
-export { TURNING_POINTS, concerns, divergences, emergentProfile, lifeReport, objectiveChapters, turningPoints } from './lifereport/index.ts';
+export { TURNING_POINTS, concerns, divergences, emergentProfile, lifeReport, objectiveChapters, turningCandidates, turningPoints } from './lifereport/index.ts';
 export type { DayPoint, Divergence, EmergentProfile, LifeChapter, LifeReport, ProfileKey, ReportInput, TurningPoint } from './lifereport/index.ts';
 // Memoria autobiográfica (spec 013 v0.3).
 export {
@@ -473,6 +473,7 @@ export {
   memoryDecayDay,
   openChapter,
   peopleOf,
+  themeOf,
   recall,
   rehearse,
   remembererOf,

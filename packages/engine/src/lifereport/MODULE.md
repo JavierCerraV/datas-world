@@ -55,3 +55,12 @@ Sin equivalente en el prototipo.
 |---|---|---|---|
 | 2026-09-29 | m3/historia (H1) | 020 | Documento creado desde la plantilla (sin código) |
 | 2026-09-29 | m3/historia (H2–H4) | 020 | Módulo implementado: capítulos objetivos, divergencias calibradas (patrón de cada persona y sesgo general aparte), puntos de inflexión por consecuencias y cambio, perfil emergente con base. 5 pruebas |
+| 2026-09-29 | m3/cierre | 020 | Revisión de 5 informes al azar (cierre de M3):
+- los puntos de inflexión son solo hechos que le tocan a la persona y desde que nació (salían muertes de antes de nacer);
+- los relatos (`RUMOR_TOLD`, deformaciones, correcciones) no cuentan como consecuencias;
+- recuperarse de una enfermedad no es punto de inflexión;
+- su «¿por qué?» se corta en 15 nodos;
+- si la etapa recordada de ese tramo es otra, la divergencia es `missing` («en su relato sigue el desempleo»), no `boundary`;
+- «del» en vez de «de el»;
+- el tema del hecho usa `themeOf` (edad mínima);
+- `turningCandidates` expone los hechos que pueden ser punto de inflexión (la prueba de CA-001 los usa, y comprueba además que al menos el 70 % de las personas llega a tres en un año). |

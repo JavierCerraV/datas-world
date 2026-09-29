@@ -5,7 +5,7 @@
 import { learningParams } from '../functions/system.ts';
 import { directValue } from '../functions/learn.ts';
 import type { FunctionStore, Ontology } from '../functions/types.ts';
-import { formatId } from '../ids.ts';
+import { formatId, idNumber } from '../ids.ts';
 import type { EntityId } from '../ids.ts';
 import type { RelationalNetwork } from '../relations/types.ts';
 import { personStimulus } from '../relationships/params.ts';
@@ -13,7 +13,7 @@ import type { Patch, System, SystemEvent, SystemOutput, TickCtx, WorldView } fro
 import { consolidate, openChapter, updateChapters } from './consolidate.ts';
 import { decayDay, encodeEvent, rehearse, remembererOf, trim } from './episodes.ts';
 import type { FnOf } from './episodes.ts';
-import { MEMORY_KINDS } from './kinds.ts';
+import { MEMORY_KINDS, themeOf } from './kinds.ts';
 import { MEMORY_DEFAULTS, emptyMemory } from './types.ts';
 import type { MemoryParams, MemoryStore } from './types.ts';
 
@@ -52,8 +52,9 @@ export function createMemorySystem(onto: Ontology, p: MemoryParams = MEMORY_DEFA
           if (!active.has(id)) continue;
           const store = storeOf(id);
           const m = encodeEvent(store, e, id, view, fnOf(id), p);
-          if (!m || !kind.theme || m.intensity < p.chapterOpen) continue;
-          const { closed, opened } = openChapter(store, kind.theme, now, m.valence, e.id, m);
+          const theme = themeOf(e, view.components.i32['demo.birthMinute']?.[idNumber(id)] ?? 0);
+          if (!m || !theme || m.intensity < p.chapterOpen) continue;
+          const { closed, opened } = openChapter(store, theme, now, m.valence, e.id, m);
           if (closed) events.push({ type: 'CHAPTER_CLOSED', payload: { citizenId: id, theme: closed.theme, tone: closed.tone }, causes: [{ event: e.id, weight: 1 }], participants: who(id) });
           events.push({ type: 'CHAPTER_OPENED', payload: { citizenId: id, theme: opened.theme, tone: opened.tone }, causes: [{ event: e.id, weight: 1 }], participants: who(id) });
         }
