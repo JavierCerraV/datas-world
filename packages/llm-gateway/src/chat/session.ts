@@ -93,7 +93,7 @@ export class ChatSession {
   constructor(o: ChatSessionOptions) {
     this.#o = o;
     const row = Number(o.citizenId.slice(4));
-    this.view = buildPersonView({ view: o.view, citizenId: o.citizenId, now: o.now, events: o.events });
+    this.view = buildPersonView({ view: o.view, citizenId: o.citizenId, now: o.now, events: o.events, memoryText: (k) => o.catalogs.memories?.[k] });
     this.state = startConversation(storeOf(o.view, row), o.visitorId);
     const person = o.view.citizens.get(formatId('CIT', row) as EntityId);
     this.#pc = {

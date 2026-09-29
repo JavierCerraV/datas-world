@@ -57,6 +57,15 @@ describe('charla: vista de la persona (043 R-002, R-003)', () => {
     expect(pv.family.filter((m) => m.relation === 'hijo' || m.relation === 'hija')).toHaveLength(2);
   });
 
+  it('013 P5 (a): la vista lleva lo que recuerda (con cómo lo recuerda), incluida su infancia contada con el catálogo', () => {
+    const withText = buildPersonView({ view, citizenId: SANTIAGO, now: 9355, events, memoryText: (k) => cats.memories[k] });
+    const memories = withText.facts.filter((f) => f.id.startsWith('MEM-'));
+    expect(memories.length).toBeGreaterThan(0);
+    expect(memories.length).toBeLessThanOrEqual(12);
+    expect(memories.every((f) => /^(Recuerda|Le contaron): .+ \((lo recuerda|le da)/.test(f.text))).toBe(true);
+    expect(memories.some((f) => f.age !== null && f.age < 18)).toBe(true);
+  });
+
   it('CA-002: un evento ajeno (el despido de un vecino) no entra en la vista ni en el prompt; uno propio sí', () => {
     const kin = new Set([SANTIAGO, ...pv.family.map((m) => m.id)]);
     const alien = events.find((e) => e.type === 'JOB_LOST' && !e.participants.some((p) => kin.has(p.id)));

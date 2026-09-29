@@ -36,6 +36,7 @@ import { generateHabits, learnedHabits } from './health/habits.ts';
 import { generateInsurance } from './health/insurance.ts';
 import { healthParams } from './health/params.ts';
 import { generateDevelopment } from './development/generate.ts';
+import { seedMemories } from './memories/generate.ts';
 import { generateHistory } from './history/generate.ts';
 import { buildOntology } from './stimuli/ontology.ts';
 import { generateLeisure } from './leisure/generate.ts';
@@ -134,6 +135,8 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
   // 041: la historia de aprendizaje de cada persona, de 0 años al presente, con la 030 ya generada. Salvo en los
   // mundos estáticos (M1), que no tienen motor funcional.
   const dev = opts.static ? { events: [] } : generateDevelopment(world, pop.citizenIds, [...prior, ...hist.events], catalogs, buildOntology(catalogs), rng);
+  // 013: los recuerdos y capítulos con que cada persona llega al día 0, desde su desarrollo y su historia.
+  const mem = opts.static ? { events: [] } : seedMemories(world, pop.citizenIds, [...prior, ...hist.events, ...dev.events], catalogs, buildOntology(catalogs));
   // 031 fase 1b (041 R-008): tabaco, alcohol, actividad física y peso desde lo aprendido.
   if (health) learnedHabits(world, pop.citizenIds, health, rng);
   // Segunda fase: condiciones (con el antecedente de padres y antepasados), afiliación y salud física.
@@ -158,7 +161,7 @@ export function generateWorld(opts: WorldOptions): GeneratedWorld {
   initRules(world);
   // 015: tenencia, arriendo, ahorro del hogar, caja de las organizaciones y resto del país (con el empleo ya hecho).
   generateEconomy(world, pop.householdIds, orgIds, rng);
-  const events = [...created, ...prior, ...hist.events, ...dev.events, ...healthEvents].sort((a, b) => idNumber(a.id) - idNumber(b.id));
+  const events = [...created, ...prior, ...hist.events, ...dev.events, ...mem.events, ...healthEvents].sort((a, b) => idNumber(a.id) - idNumber(b.id));
   sortBackstories(world, events);
   return {
     world,

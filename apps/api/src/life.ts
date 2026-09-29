@@ -38,11 +38,39 @@ export interface EpisodeView {
   cause: string | null;
 }
 
+/** Un recuerdo (013), como lo recuerda hoy la persona y cómo lo vivió. */
+export interface MemoryView {
+  id: string;
+  date: string;
+  age: number;
+  source: 'lived' | 'told' | 'session';
+  text: string;
+  valence: number;
+  valence0: number;
+  intensity: number;
+  rehearsals: number;
+  chapter: string | null;
+}
+
+/** Un capítulo de su vida (013 R-010). */
+export interface ChapterView {
+  id: string;
+  theme: string;
+  from: string;
+  to: string | null;
+  fromAge: number;
+  tone: number;
+  openedBy: string | null;
+}
+
 export interface LifeView {
   id: string;
   name: string;
   genogram: { nodes: GenoNode[]; partners: [string, string][] };
   stages: { stage: string; episodes: EpisodeView[] }[];
+  /** 013: capítulos y recuerdos (vacíos en mundos anteriores a la 013). */
+  chapters: ChapterView[];
+  memories: MemoryView[];
 }
 
 const STAGE_ORDER = ['infancia', 'escolar', 'adolescencia', 'adulto'];
@@ -157,5 +185,36 @@ export function lifeView(world: World, id: EntityId, years: readonly WorldEvent[
     id, name: `${me.name.given} ${me.name.family.join(' ')}`,
     genogram: { nodes, partners: [...partners.values()] },
     stages: STAGE_ORDER.filter((s) => stages.has(s)).map((s) => ({ stage: s, episodes: stages.get(s)! })),
+    ...memoriesOf(world, id, causes, defs),
   };
 }
+
+/** 013: los capítulos y los recuerdos de la persona, en orden de fecha, con su texto. */
+function memoriesOf(world: World, id: EntityId, events: ReadonlyMap<string, WorldEvent>, defs: ReadonlyMap<string, { title: string; text: string }>): Pick<LifeView, 'chapters' | 'memories'> {
+  const mem = world.citizens.get(id)?.memory;
+  if (!mem) return { chapters: [], memories: [] };
+  const birth = col(world, 'demo.birthMinute', id);
+  const ageAt = (at: number) => Math.max(0, Math.floor((at - birth) / (365.25 * 1440)));
+  const person = (m: { stims: string[] }) => m.stims.find((s) => s.startsWith('cit.'))?.slice(4);
+  const text = (m: (typeof mem.episodes)[number]): string => {
+    const e = m.event ? events.get(m.event) : undefined;
+    if (m.source === 'told') return `Le contaron que ${nameOf(world, person(m) ?? '') ?? 'alguien'}: ${m.kind.replace(/_/g, ' ')}`;
+    if (e && e.type !== 'DEVELOPMENT_YEAR') return withNames(world, eventText(e));
+    const who = person(m);
+    const base = defs.get(m.kind)?.text ?? m.kind.replace(/_/g, ' ');
+    return who ? `${base.replace(/\.$/, '')} (${nameOf(world, who) ?? who}).` : base;
+  };
+  return {
+    chapters: [...mem.chapters].sort((a, b) => a.from - b.from).map((c) => ({
+      id: c.id, theme: c.theme, from: dateOf(world, c.from).slice(0, 10), to: c.to !== undefined ? dateOf(world, c.to).slice(0, 10) : null,
+      fromAge: ageAt(c.from), tone: c.tone, openedBy: c.openedBy && events.get(c.openedBy) ? withNames(world, eventText(events.get(c.openedBy)!)) : null,
+    })),
+    memories: [...mem.episodes].sort((a, b) => a.at - b.at).map((m) => ({
+      id: m.id, date: dateOf(world, m.at).slice(0, 10), age: ageAt(m.at), source: m.source, text: text(m), valence: m.valence, valence0: m.valence0,
+      intensity: m.intensity, rehearsals: m.rehearsals, chapter: m.chapter ?? null,
+    })),
+  };
+}
+
+/** Los ids de personas del texto de un evento, cambiados por sus nombres. */
+const withNames = (world: World, s: string) => s.replace(/CIT-\d+/g, (x) => nameOf(world, x) ?? x);

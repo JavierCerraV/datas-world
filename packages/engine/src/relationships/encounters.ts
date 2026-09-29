@@ -23,7 +23,9 @@ import type { DeepReadonly, Patch, System, SystemEvent, SystemOutput, TickCtx, W
 import type { Bond } from '../world.ts';
 import { affectionFor, bondCauses, bondWith, hasPartner, relabel, sameOrg, setLabel, touch } from './bonds.ts';
 import { exchange } from './exchange.ts';
-import { APPROACH, CLASH } from './params.ts';
+import { APPROACH, CLASH, personStimulus } from './params.ts';
+import { directValue } from '../functions/learn.ts';
+import { functionalValue } from '../relations/derive.ts';
 import type { RelationshipParams } from './params.ts';
 
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
@@ -92,6 +94,12 @@ export function createSocialEncounterSystem(d: EncounterDeps): System {
         for (const b of list) if ((b.lastEncounter ?? -1) >= hourStart) n++;
         used.set(row, n);
         return n;
+      };
+      // Valor de un estímulo para una persona (037 R-003): el directo o el derivado de su red, el de mayor magnitud.
+      const valueOf = (row: number, stim: string) => {
+        const c = view.citizens.get(formatId('CIT', row) as EntityId);
+        const own = (stores.get(row) ?? c?.functions) as FunctionStore | undefined;
+        return functionalValue(c?.network as RelationalNetwork | undefined, (s) => directValue(own, d.onto, s, '', now, P), stim).value;
       };
       const live = (row: number) => ({ energy: view.components.f32['need.energy']?.[row] ?? 1, stress: view.components.f32['state.stress']?.[row] ?? 0 });
       const adult = (row: number) => (now - (view.components.i32['demo.birthMinute']?.[row] ?? 0)) / YEAR >= 18;
@@ -180,7 +188,12 @@ export function createSocialEncounterSystem(d: EncounterDeps): System {
           const others = rows.filter((o) => o !== row && usedBy(o) < p.maxEncountersHour);
           if (others.length === 0) continue;
           const me = bondsFor(row);
-          const w = others.map((o) => 0.3 + (me.find((b) => b.with === formatId('CIT', o))?.familiarity ?? 0));
+          // R-001 con la 013 R-009: la función del otro (directa o derivada de lo que la experiencia enseñó en la
+          // red) acerca o aparta, aunque los episodios que la formaron ya se olvidaran.
+          const w = others.map((o) => {
+            const oid = formatId('CIT', o) as EntityId;
+            return (0.3 + (me.find((b) => b.with === oid)?.familiarity ?? 0)) * Math.max(0.1, 1 + valueOf(row, personStimulus(oid)));
+          });
           const total = w.reduce((s, x) => s + x, 0);
           const other = others[pickIndex(w.map((x) => x / total), r.next())]!;
           meet(row, other, place, r.fork(`${row}/${other}`));

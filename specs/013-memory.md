@@ -1,7 +1,7 @@
 ---
 id: 013
 nombre: memory
-estado: borrador
+estado: aprobada
 hito: M3
 depende_de: [012, 014, 019, 021, 023, 027, 036, 037, 039, 041, 043]
 version: 0.3
@@ -83,7 +83,7 @@ Coste: `MAX_EPISODES` = 60 episodios × ≈ 100 B + 12 capítulos × ≈ 80 B �
 - **R-003** [M] — **Sin evento por recuerdo.** Codificar no emite evento (sería uno por hecho). El episodio guarda su evento de origen, y la cadena causal (019) llega a él por ahí.
 
 ### 4.2 Olvido y tope
-- **R-004** [E] fenómeno / [M] forma — **Decaimiento.** La intensidad decae con vida media `HALF_LIFE_DAYS × (1 + |valencia|)`: lo intenso y lo muy negativo o positivo dura más. Un episodio con intensidad < `FORGET` se olvida.
+- **R-004** [E] fenómeno / [M] forma — **Decaimiento.** La intensidad decae en ley de potencia, `(1 + días/TAU)^(−β')` con `β' = BETA / ((1 + |valencia|)(1 + repasos))`: rápido al principio y cada vez más despacio (ley de Jost; Wixted, a verificar, PA-146), y lo intenso, lo muy cargado y lo repasado dura más. Un episodio con intensidad < `FORGET` se olvida. (Una vida media fija de 30 días, como decía la versión aprobada, no dejaba llegar a la adultez ningún recuerdo de la infancia.)
 - **R-005** [M] — **Tope.** Como mucho `MAX_EPISODES` episodios por persona; al superarlo se olvida el de menor `intensidad × recencia` que no sea ancla de un capítulo. Olvidar lo saca de la persona (cuenta en `forgotten`); el hecho sigue en el registro (CLAUDE.md regla 6: la historia no se borra, la memoria sí).
 
 ### 4.3 Recuperación y reconstrucción
@@ -135,10 +135,11 @@ No hay evento por recuerdo formado u olvidado (R-003, R-005).
 | Parámetro | Valor | Estado |
 |---|---|---|
 | `ENCODE_MIN` | 0,15 | [M], PA-146 |
-| `HALF_LIFE_DAYS` | 30 (× (1 + \|valencia\|)) | [M], PA-146 |
+| `TAU`, `BETA` | 7 días · 0,5 | [M], PA-146 |
+| Habituación (mismo tipo con lo mismo en `NOVELTY_DAYS`) | × 0,3 en 7 días | [M] |
 | `FORGET` | 0,05 | [M] |
 | `MAX_EPISODES`, `MAX_CHAPTERS` | 60 · 12 | [M], P4 |
-| `DEV_PER_YEAR` | 2 episodios por año desde los 4 años | [M], PA-147 |
+| `DEV_PER_YEAR` | 2 episodios por año desde los 4 años; de cada tipo, los 2 más intensos (lo repetido se recuerda como uno) | [M], PA-147 |
 | `MOOD_BIAS` | 1 | [M], PA-148 |
 | `REHEARSAL_GAIN`, `RECONSTRUCT` | 0,2 · 0,1 | [M], PA-148 |
 | `SCHEMA_MIN`, `SCHEMA_GAIN` | 3 · 0,15 | [M] |
@@ -151,7 +152,10 @@ No hay evento por recuerdo formado u olvidado (R-003, R-005).
 - Alertas de degeneración: nadie recuerda nada, todo se recuerda, valencias saturadas, capítulos que no se cierran.
 - Visor: sección **Recuerdos** y capítulos en la pestaña **Vida** (lo que recuerda frente a lo que pasó).
 
-## 10. Preguntas abiertas (para el usuario)
+## 9 bis. Decisiones del usuario (2026-09-28)
+Aprobadas las cinco propuestas de §10 (P1 a P5) tal como están. La calibración sigue abierta: PA-146 a PA-148.
+
+## 10. Preguntas abiertas (resueltas en §9 bis)
 - **P1 — Episodio y distorsión.** El episodio es un registro de contingencias cuya saliencia sale de las funciones de la persona (R-001), y al recordarlo se reconstruye hacia la función actual de sus estímulos (R-007). *Propuesta:* sí.
 - **P2 — Esquemas como relaciones de la red.** Los esquemas de la v0.2 pasan a ser relaciones de la 037 aprendidas por experiencia (R-009), y la consolidación entra en M3 (no en M5), porque el motor ya lo permite. *Propuesta:* sí.
 - **P3 — Capítulos y pasado.** Capítulos en la 013 (no en la 020), y los adultos del día 0 llegan con capítulos del pasado y recuerdos de su infancia desde la historia y el desarrollo (R-002, R-010), visibles en la pestaña **Vida**. *Propuesta:* sí.
@@ -172,3 +176,6 @@ Según la 035 §8:
 | 2026-09-24 | 0.2 | Pregunta abierta: enganche de la capa clínica (spec 034), recuerdos con origen `session` |
 | 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |
 | 2026-09-28 | 0.3 | Reescritura sobre el motor funcional (bloque M de M3): episodio como registro de contingencias con saliencia desde las funciones de la persona; reconstrucción hacia la función actual al recordar; esquemas como relaciones de la 037; capítulos con el pasado desde la historia y el desarrollo; repaso por la rumiación (039); topes según el presupuesto de memoria. `source` para la capa clínica (034). Preguntas P1 a P5 para el usuario |
+| 2026-09-28 | 0.3 | Decisiones del usuario (§9 bis): P1 a P5 aprobadas |
+| 2026-09-29 | 0.3 | Estado → aprobada |
+| 2026-09-29 | 0.3 | Lo que reveló la implementación (bloque M de M3): R-004 en ley de potencia (con vida media fija no sobrevivía la infancia); habituación en la saliencia (R-001); en la memoria de partida, lo repetido se funde (2 por tipo; sin esto el 95 % de los recuerdos de un adulto eran positivos y repetidos) y la amnesia infantil vale también para los hechos de la historia; los capítulos de partida quedan en el registro como `CHAPTER_OPENED`, así que salir de la persona por el tope no los pierde. La elección de con quién encontrarse (012 R-001) usa el valor de la otra persona, directo o derivado (CA-005). Resultados en `docs/validaciones/M3-memoria.md`. Sin cambios en CA |

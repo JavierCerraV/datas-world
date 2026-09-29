@@ -125,7 +125,13 @@ export function buildApi(opts: ApiOptions): Api {
     if (!p.success) return reply.code(400).send({ error: 'id inválido' });
     const id = p.data.id as EntityId;
     const years = queryEvents(reader.db, { participant: id, types: ['DEVELOPMENT_YEAR'], limit: 1000 });
-    const causeIds = [...new Set(years.flatMap((e) => (e.payload as { episodes: [number, string, string, string, number, string][] }).episodes.map((ep) => ep[5]).filter(Boolean)))];
+    // 013: también los hechos de sus recuerdos y los que abrieron sus capítulos.
+    const memory = reader.world.citizens.get(id)?.memory;
+    const causeIds = [...new Set([
+      ...years.flatMap((e) => (e.payload as { episodes: [number, string, string, string, number, string][] }).episodes.map((ep) => ep[5]).filter(Boolean)),
+      ...(memory?.episodes ?? []).flatMap((m) => (m.event && m.kind === m.kind.toUpperCase() ? [m.event] : [])),
+      ...(memory?.chapters ?? []).flatMap((c) => (c.openedBy ? [c.openedBy] : [])),
+    ])];
     const causes = new Map(eventsById(reader.db, causeIds as EntityId[]).map((e) => [e.id as string, e]));
     const life = lifeView(reader.world, id, years, causes, lifeCatalogs);
     if (!life) return reply.code(404).send({ error: 'no existe' });

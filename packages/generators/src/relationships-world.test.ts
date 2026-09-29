@@ -26,8 +26,8 @@ describe('012 R-007: punto de partida desde el desarrollo', () => {
   });
 });
 
-describe('012: 100 personas × 1 año', { timeout: 900_000 }, () => {
-  it('CA-001 asimetría, CA-002 vínculos por persona, eventos presentes y sin degeneración', () => {
+describe('M3 (012 y 013): 100 personas × 1 año', { timeout: 900_000 }, () => {
+  it('012 CA-001 asimetría, CA-002 vínculos por persona, sin degeneración; 013 memoria acotada y viva', () => {
     const { world } = generateWorld({ seed: 482917, population: 100 });
     const r = lifeRunner(world);
     r.resume('prueba');
@@ -62,5 +62,16 @@ describe('012: 100 personas × 1 año', { timeout: 900_000 }, () => {
       expect((c.bonds ?? []).length).toBeLessThanOrEqual(40);
       for (const b of c.bonds ?? []) for (const x of [b.familiarity ?? 0, b.tension, b.trust]) expect(x >= 0 && x <= 1).toBe(true);
     }
+    // 013 CA-007 y §9 con el mismo año: memoria acotada, lo vivido se recuerda, se generaliza y se reconstruye.
+    const kb = people.reduce((s, c) => s + JSON.stringify(c.memory ?? {}).length, 0) / people.length / 1024;
+    expect(kb).toBeLessThan(8);
+    for (const c of people) {
+      expect(c.memory!.episodes.length).toBeLessThanOrEqual(60);
+      expect(c.memory!.chapters.filter((x) => x.to === undefined).length).toBe(1);
+    }
+    const lived = people.flatMap((c) => c.memory!.episodes.filter((m) => m.at >= 0));
+    expect(lived.length / people.length).toBeGreaterThan(2);
+    expect(count(events, 'SCHEMA_FORMED')).toBeGreaterThan(0);
+    expect(lived.some((m) => Math.abs(m.valence - m.valence0) > 0.01)).toBe(true);
   });
 });
