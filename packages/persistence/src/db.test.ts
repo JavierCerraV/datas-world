@@ -32,6 +32,7 @@ describe('migraciones (R-006) y pragmas (R-003)', () => {
       'memory_archive',
       'meta',
       'snapshots',
+      'trajectory', // 020 R-001
     ]);
     closeDb(db);
   });

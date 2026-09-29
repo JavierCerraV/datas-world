@@ -26,5 +26,9 @@ Specs: 012 (aprobada, v0.2), 013, 019, 020 y 025 (borradores). Una rama por bloq
   - [x] C2 Origen de los estados (R-005): sistema `origins` y citas en necesidades, enfermedad, rutina y economía.
   - [x] C3 `why` (R-004, R-006) en la CLI (`event:why`), la API y el visor («¿por qué?» en la Historia).
   - [x] C4 CA-001 a CA-005; medición del registro en 1 año.
-- [ ] H 020 Historia retrospectiva funcional y la resiliencia como métrica de trayectoria.
+- [x] H 020 Historia retrospectiva funcional y la resiliencia como métrica de trayectoria (rama `m3/historia`):
+  - [x] H1 Trayectoria diaria con la instantánea (persistencia, migración 003).
+  - [x] H2 Capítulos objetivos y divergencias con los recordados (013).
+  - [x] H3 Puntos de inflexión con su «¿por qué?», perfil emergente; CLI `citizen:life`, API y sección Informe del visor.
+  - [x] H4 CA-001 a CA-006 con 100 personas × 1 año.
 - [ ] K 025 Conocimiento, creencias y rumores (reescritura).

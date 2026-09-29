@@ -2,6 +2,7 @@
 // de aprendizaje por etapas. Solo lee `/api/citizens/:id/life` (022). El familiograma usa la simbología habitual:
 // cuadrado hombre, círculo mujer, borde doble la persona, cruz si murió, borde punteado si vive fuera del mundo, y
 // la relación con la persona en verde (cercana), rojo en zigzag (conflictiva) o gris punteado (distante).
+import { showReport } from './report.ts';
 
 export type Quality = 'cercana' | 'conflictiva' | 'distante' | 'sin_datos';
 export interface GenoNode {
@@ -194,5 +195,7 @@ export async function showLife(el: HTMLElement, id: string): Promise<void> {
     el.innerHTML = '<p>No se pudo cargar su historia.</p>';
     return;
   }
-  el.innerHTML = renderLife((await r.json()) as LifeView);
+  // 020: el informe va arriba, en su propio contenedor; se carga aparte para no retrasar la historia.
+  el.innerHTML = `<div class="life-report"><p>Cargando el informe…</p></div>${renderLife((await r.json()) as LifeView)}`;
+  await showReport(el.querySelector<HTMLElement>('.life-report')!, id);
 }

@@ -16,6 +16,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { columnToLE } from './codec.ts';
 import { closeDb, openReadonly, openWorldDb } from './db.ts';
 import { WorldRepository } from './repository.ts';
+import { trajectoryOf, trajectoryRows } from './trajectory.ts';
 import { tempDir, testConfig } from './testing.ts';
 
 let tmp = tempDir();
@@ -141,6 +142,22 @@ describe('027 CA-006: componentes idénticos byte a byte', () => {
     const back = repo.loadSnapshot()!;
     expect(stateHash(back)).toBe(hash);
     expect(columnBytes(back)).toEqual(columnBytes(world));
+    closeDb(db);
+  });
+
+  it('020 R-001, INV-003: la instantánea deja la trayectoria del día de cada persona, fuera del estado', () => {
+    const world = withComponents();
+    const db = openWorldDb(tmp.file('w.db'));
+    const repo = new WorldRepository(db);
+    const hash = repo.saveSnapshot(world);
+    const people = [...world.citizens.values()].filter((c) => c.status === 'active' && !c.ancestor);
+    expect(trajectoryRows(db)).toBe(people.length);
+    const first = people[0]!;
+    expect(trajectoryOf(db, first.id)).toEqual([expect.objectContaining({ day: Math.floor(world.now / 1440) })]);
+    repo.saveSnapshot(world); // idempotente
+    expect(trajectoryRows(db)).toBe(people.length);
+    db.prepare('DELETE FROM trajectory').run();
+    expect(stateHash(repo.loadSnapshot()!)).toBe(hash);
     closeDb(db);
   });
 });

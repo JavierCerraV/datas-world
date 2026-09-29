@@ -79,6 +79,21 @@ describe('022: API de solo lectura', () => {
     expect((await api.app.inject({ url: '/api/events?limit=5000' })).statusCode).toBe(400);
   });
 
+  it('020 R-007: /api/citizens/:id/report da el informe con etapas, puntos de inflexión y perfil; 404 si no existe', async () => {
+    const h = openReadonly(db);
+    const id = positions(new WorldRepository(h).loadWorld())[0]!.id;
+    closeDb(h);
+    const r = (await api.app.inject({ url: `/api/citizens/${id}/report` })).json() as {
+      chapters: { theme: string; date: string }[]; turningPoints: { fact: { text: string } }[]; profile: { values: Record<string, number | null> }; trajectory: unknown[];
+    };
+    expect(r.chapters.length).toBeGreaterThan(0);
+    expect(r.chapters[0]!.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(r.turningPoints.every((t) => t.fact.text.length > 0)).toBe(true);
+    expect(Object.keys(r.profile.values).sort()).toEqual(['economicTrajectory', 'jobStability', 'relationshipStability', 'resilience', 'socialNetwork', 'stressorExposure']);
+    expect(Array.isArray(r.trajectory)).toBe(true); // el mundo de M2 es anterior a la trayectoria: vacía
+    expect((await api.app.inject({ url: '/api/citizens/CIT-999999/report' })).statusCode).toBe(404);
+  });
+
   it('019 R-007: /api/events/:id/why devuelve el árbol de causas con fechas; id inválido 400, inexistente 404', async () => {
     const r = openReadonly(db);
     const withEvent = r.prepare(`SELECT id FROM events WHERE causes LIKE '%"event"%' ORDER BY seq DESC LIMIT 1`).get() as { id: string };

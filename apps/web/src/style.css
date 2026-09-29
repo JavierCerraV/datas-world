@@ -187,6 +187,41 @@ ul.why {
 .why-source {
   font-style: italic;
 }
+/* Informe de vida (020 R-007): trayectoria y tablas. */
+.traj {
+  width: 100%;
+  max-width: 480px;
+}
+.traj-bg {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 0.5;
+}
+.traj-mood,
+.traj-stress {
+  fill: none;
+  stroke-width: 1.5;
+}
+.traj-mood {
+  stroke: #3a9d5d;
+}
+.traj-stress {
+  stroke: #c0392b;
+}
+table.report {
+  border-collapse: collapse;
+  font-size: 13px;
+  width: 100%;
+}
+table.report td {
+  padding: 3px 6px;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(127, 127, 127, 0.2);
+}
+table.report small {
+  display: block;
+  color: var(--muted);
+}
 /* Pestaña «Vida» (041 R-009): familiograma y episodios del desarrollo. */
 .genogram-wrap {
   overflow-x: auto;

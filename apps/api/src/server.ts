@@ -3,12 +3,12 @@
 import { Buffer } from 'node:buffer';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { why } from '@datas-world/engine';
+import { eventText, lifeReport, why } from '@datas-world/engine';
 import type { EntityId, WhyNode, WorldEvent } from '@datas-world/engine';
 import { buildOntology, loadCatalogs } from '@datas-world/generators';
 import { DEFAULT_CONFIG, Gateway, anthropicAdapter, chatCatalogs, mockAdapter, openaiCompatibleAdapter, parseConfig } from '@datas-world/llm-gateway';
 import type { LlmRecord, ProviderAdapter, RecordStore } from '@datas-world/llm-gateway';
-import { CONTROL_COMMANDS, SqliteRecordStore, closeDb, enqueueCommand, eventsById, openWorldDb, queryEvents } from '@datas-world/persistence';
+import { CONTROL_COMMANDS, SqliteRecordStore, closeDb, enqueueCommand, eventsById, openWorldDb, queryEvents, trajectoryOf } from '@datas-world/persistence';
 import type { ControlCommandName, Db } from '@datas-world/persistence';
 import { registerChatRoutes } from './chat.ts';
 import Fastify from 'fastify';
@@ -146,6 +146,35 @@ export function buildApi(opts: ApiOptions): Api {
       ? queryEvents(reader.db, { afterId: q.data.since as EntityId, limit: q.data.limit })
       : queryEvents(reader.db, { latest: true, limit: q.data.limit });
     return events.map((e) => eventView(reader.world, e));
+  });
+
+  // 020 R-007: el informe de vida, bajo demanda (no cambia el mundo).
+  app.get('/api/citizens/:id/report', async (req, reply) => {
+    const p = citizenParams.safeParse(req.params);
+    if (!p.success) return reply.code(400).send({ error: 'id inválido' });
+    const id = p.data.id as EntityId;
+    const w = reader.world;
+    if (!w.citizens.get(id) || w.citizens.get(id)!.ancestor) return reply.code(404).send({ error: 'no existe' });
+    const mine = queryEvents(reader.db, { participant: id, limit: 1_000_000 });
+    const deaths = queryEvents(reader.db, { types: ['CITIZEN_DIED'], limit: 1_000_000 });
+    const events = [...new Map([...mine, ...deaths].map((e) => [e.id as string, e])).values()].sort((a, b) => (a.id < b.id ? -1 : 1));
+    const byId = new Map(events.map((e) => [e.id as string, e]));
+    const names = (s: string) => s.replace(/CIT-\d+/g, (x) => nameOf(w, x) ?? x);
+    const report = lifeReport({
+      view: w, id, events, trajectory: trajectoryOf(reader.db, id), now: w.now, names,
+      get: (x) => byId.get(x) ?? eventsById(reader.db, [x as EntityId])[0],
+    });
+    // Textos y fechas para el visor: el de cada hecho citado.
+    const text = (x: string) => {
+      const e = byId.get(x);
+      return e ? { id: x, date: dateOf(w, e.at).slice(0, 10), text: names(eventText(e)) } : { id: x, date: '', text: x };
+    };
+    return {
+      ...report,
+      chapters: report.chapters.map((c) => ({ ...c, date: dateOf(w, c.from).slice(0, 10), opened: c.openedBy ? text(c.openedBy) : null })),
+      remembered: report.remembered.map((c) => ({ ...c, date: dateOf(w, c.from).slice(0, 10) })),
+      turningPoints: report.turningPoints.map((t) => ({ ...t, fact: text(t.event) })),
+    };
   });
 
   // 019 R-004, R-007: el árbol de causas de un evento, con fechas y nombres.

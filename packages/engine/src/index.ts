@@ -452,6 +452,9 @@ export type { Attachment, EncounterDeps, Exchange, RelationshipParams, Side } fr
 // Causalidad hasta el origen (spec 019 v0.2).
 export { ORIGIN_RULES, STRESS_KEYS, WHY_DEFAULTS, createOriginsSystem, originCause, sleepCauses, walk, why, whyLines } from './causality/index.ts';
 export type { OriginKey, StateOrigins, WhyNode, WhyOptions } from './causality/index.ts';
+// Informe de vida (spec 020 v0.3).
+export { TURNING_POINTS, concerns, divergences, emergentProfile, lifeReport, objectiveChapters, turningPoints } from './lifereport/index.ts';
+export type { DayPoint, Divergence, EmergentProfile, LifeChapter, LifeReport, ProfileKey, ReportInput, TurningPoint } from './lifereport/index.ts';
 // Memoria autobiográfica (spec 013 v0.3).
 export {
   CHAT_RECALL,

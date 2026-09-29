@@ -2,8 +2,8 @@
 modulo: persistence
 ruta: packages/persistence
 estado: en-desarrollo
-specs: [027, 015, 043, 026]
-actualizado: 2026-09-24
+specs: [027, 015, 043, 026, 020]
+actualizado: 2026-09-29
 ---
 
 # Módulo: persistence
@@ -104,3 +104,4 @@ No aplica (el prototipo no persiste).
 | 2026-09-26 | visor/minimo (V1) | 022 | `EventQuery`: `afterId` (eventos registrados después de un id, para el SSE) y `latest` (los `limit` más recientes, en orden de inserción) |
 | 2026-09-27 | charla/l3-mundo (L3) | 043, 026 | Migración 002: `chat_sessions`, `chat_turns`, `chat_log` (append-only) y `llm_records`, fuera del estado del mundo; funciones del chat y `SqliteRecordStore`. Órdenes `chat_open` y `chat_session`. `db.test.ts` pasa a la versión 2 del esquema; 2 pruebas nuevas |
 | 2026-09-27 | claude/wonderful-carson-4c4i3k (arreglo de la charla) | 027, 043 | `loadWorld` lee en una transacción de lectura: con el worker escribiendo, la API cargaba un estado mezclado de dos flush y se caía con «El estado cargado no coincide con el guardado», dejando la charla colgada. `openChatSessions`. El proceso hijo de prueba admite `checkpoint`. 1 prueba nueva (`concurrent-read.test.ts`), que fallaba antes del arreglo |
+| 2026-09-29 | m3/historia (H1) | 020 | Migración 003: tabla `trajectory` (persona, día, ánimo, estrés, dinero y deuda de sueño; `WITHOUT ROWID`), fuera del estado del mundo (020 INV-003). `saveSnapshot` la escribe en la misma transacción que la instantánea diaria (020 R-001). `trajectoryOf` (vacía en una base anterior a la migración) y `trajectoryRows`. `db.test.ts` pasa a la versión 3; 1 prueba nueva |

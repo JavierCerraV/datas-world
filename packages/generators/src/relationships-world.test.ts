@@ -1,6 +1,6 @@
 // Relaciones en un mundo que vive (spec 012, bloque R de M3): 100 personas × 1 año con la semilla del proyecto.
-import { affectionFor, walk, why } from '@datas-world/engine';
-import type { WorldEvent } from '@datas-world/engine';
+import { affectionFor, lifeReport, walk, why } from '@datas-world/engine';
+import type { DayPoint, ProfileKey, WorldEvent } from '@datas-world/engine';
 import { describe, expect, it } from 'vitest';
 import { KIN_FAMILIARITY } from './development/bonds.ts';
 import { generateWorld } from './generate.ts';
@@ -26,15 +26,27 @@ describe('012 R-007: punto de partida desde el desarrollo', () => {
   });
 });
 
-describe('M3 (012, 013 y 019): 100 personas × 1 año', { timeout: 900_000 }, () => {
-  it('012 CA-001 asimetría, CA-002 vínculos por persona, sin degeneración; 013 memoria acotada y viva; 019 registro causal', () => {
+describe('M3 (012, 013, 019 y 020): 100 personas × 1 año', { timeout: 900_000 }, () => {
+  it('012 CA-001 asimetría, CA-002 vínculos por persona, sin degeneración; 013 memoria acotada y viva; 019 registro causal; 020 informe', () => {
     const { world, events: born } = generateWorld({ seed: 482917, population: 100 });
     const r = lifeRunner(world);
     r.resume('prueba');
     const events: WorldEvent[] = [];
-    for (let m = 0; m < 12; m++) {
-      r.advanceDays(m === 11 ? 365 - 11 * 30 : 30);
+    // 020 R-001: la trayectoria diaria, como la guarda la persistencia con la instantánea de cada día.
+    const trajectory = new Map<string, DayPoint[]>();
+    const sample = () => {
+      for (const c of world.citizens.values()) {
+        if (c.status !== 'active' || c.ancestor) continue;
+        const row = Number(c.id.slice(4));
+        const p = { day: Math.floor(world.now / 1440), mood: world.components.f32['state.mood']![row]!, stress: world.components.f32['state.stress']![row]!, money: world.components.i32.money![row]!, sleepDebt: world.components.i32['state.sleepDebt']![row]! };
+        trajectory.set(c.id, [...(trajectory.get(c.id) ?? []), p]);
+      }
+    };
+    sample();
+    for (let d = 0; d < 365; d++) {
+      r.advanceDays(1);
       events.push(...r.drainEvents());
+      sample();
     }
     const people = [...world.citizens.values()].filter((c) => c.status === 'active' && !c.ancestor);
     // CA-002: entre 3 y 15 vínculos con familiaridad > 0,3 de media.
@@ -82,5 +94,26 @@ describe('M3 (012, 013 y 019): 100 personas × 1 año', { timeout: 900_000 }, ()
     const citing = events.filter((e) => e.causes.some((c) => 'state' in c));
     const reached = citing.filter((e) => [...walk(why((x) => byId.get(x), e.id, { depth: 3, minWeight: 0, view: world })!)].some(({ n, d }) => d > 0 && n.kind === 'event'));
     expect(reached.length / citing.length).toBeGreaterThanOrEqual(0.6);
+    // 020: el informe de cada persona.
+    const resilience: number[] = [];
+    let divs = 0;
+    for (const c of people) {
+      const mine = all.filter((e) => e.participants.some((p) => p.id === c.id) || e.type === 'CITIZEN_DIED');
+      const rep = lifeReport({ view: world, id: c.id, events: mine, get: (x) => byId.get(x), trajectory: trajectory.get(c.id)!, now: world.now });
+      const facts = mine.filter((e) => e.at >= 0 && !['LEISURE_DONE', 'DAY_STARTED', 'TRIP_TAKEN', 'SALARY_PAID', 'RENT_PAID'].includes(e.type));
+      expect(rep.turningPoints.length).toBeGreaterThanOrEqual(Math.min(3, facts.length)); // CA-001
+      for (const t of rep.turningPoints) expect(byId.has(t.event) && t.why.ref === t.event).toBe(true);
+      // CA-002: cada etapa cita un hecho real (el que la abrió o los de su tramo).
+      for (const ch of rep.chapters) expect([ch.openedBy, ...ch.events].filter(Boolean).every((x) => byId.has(x!)) && (ch.openedBy !== undefined || ch.events.length > 0), `${c.id} ${ch.theme}`).toBe(true);
+      // CA-005: todo valor definido del perfil tiene sus hechos de base.
+      for (const [k, v] of Object.entries(rep.profile.values)) if (v !== null) expect(rep.profile.basis[k as ProfileKey].every((x) => byId.has(x)) && rep.profile.basis[k as ProfileKey].length > 0, k).toBe(true);
+      if (rep.profile.values.resilience !== null) resilience.push(rep.profile.values.resilience);
+      divs += rep.divergences.length;
+    }
+    // CA-006: la resiliencia varía entre personas; la trayectoria de 100 personas × 1 año ocupa < 10 MB (≈ 20 B por fila).
+    const mean = resilience.reduce((a, b) => a + b, 0) / resilience.length;
+    expect(Math.sqrt(resilience.reduce((a, b) => a + (b - mean) ** 2, 0) / resilience.length)).toBeGreaterThan(0.05);
+    expect([...trajectory.values()].reduce((s, t) => s + t.length, 0) * 20).toBeLessThan(10 * 1024 * 1024);
+    expect(divs / people.length).toBeLessThan(3);
   });
 });
