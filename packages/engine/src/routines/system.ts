@@ -2,6 +2,7 @@
 // Mientras no exista el motor de decisiones (017, bloque E), la persona sigue su rutina.
 import { ACTIVITY, ACTIVITY_COLUMN } from '../activity.ts';
 import { formatId } from '../ids.ts';
+import { sleepCauses } from '../causality/origins.ts';
 import { needsParams } from '../needs/params.ts';
 import type { Patch, System, SystemEvent, SystemOutput, TickCtx, WorldView } from '../simulation/system.ts';
 import type { Rng } from '../rng.ts';
@@ -72,7 +73,8 @@ function step(view: WorldView, ctx: TickCtx, rng: Rng): SystemOutput {
         participants: [{ id, role: 'persona' }],
         recordAs: { column: 'routine.oversleptEvt', row }, // la llegada tarde lo citará como causa (016 R-004)
         causes: [
-          { state: 'deuda_de_sueno', entity: id, value: i['state.sleepDebt']![row]!, weight: 0.5 },
+          // 019 R-005: la deuda de sueño con lo que le quitó el sueño (o su horario).
+          ...sleepCauses(view, row, ctx.now, i['state.sleepDebt']![row]!, 0.5),
           { state: 'energia', entity: id, value: Math.round(f['need.energy']![row]! * 100) / 100, weight: 0.3 },
           { state: 'descuento', entity: id, value: Math.round(discountKOf(view, row) * 100) / 100, weight: 0.2 },
         ],

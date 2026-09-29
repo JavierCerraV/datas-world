@@ -79,6 +79,18 @@ describe('022: API de solo lectura', () => {
     expect((await api.app.inject({ url: '/api/events?limit=5000' })).statusCode).toBe(400);
   });
 
+  it('019 R-007: /api/events/:id/why devuelve el árbol de causas con fechas; id inválido 400, inexistente 404', async () => {
+    const r = openReadonly(db);
+    const withEvent = r.prepare(`SELECT id FROM events WHERE causes LIKE '%"event"%' ORDER BY seq DESC LIMIT 1`).get() as { id: string };
+    closeDb(r);
+    const tree = (await api.app.inject({ url: `/api/events/${withEvent.id}/why?depth=2` })).json() as { ref: string; date: string; children: { kind: string }[] };
+    expect(tree.ref).toBe(withEvent.id);
+    expect(tree.date).toMatch(/^\d{4}-\d{2}-\d{2}/);
+    expect(tree.children.some((c) => c.kind === 'event')).toBe(true);
+    expect((await api.app.inject({ url: '/api/events/nada/why' })).statusCode).toBe(400);
+    expect((await api.app.inject({ url: '/api/events/EVT-99999999999/why' })).statusCode).toBe(404);
+  });
+
   it('CA-003: /api/control sin credenciales da 401; con ellas, la orden queda en control_commands', async () => {
     expect((await api.app.inject({ method: 'POST', url: '/api/control', payload: { cmd: 'pause' } })).statusCode).toBe(401);
     expect((await api.app.inject({ method: 'POST', url: '/api/control', headers: { authorization: basic('ana', 'otra') }, payload: { cmd: 'pause' } })).statusCode).toBe(401);

@@ -15,6 +15,7 @@ import {
   createDecisionSystem,
   createLearningSystem,
   createMemorySystem,
+  createOriginsSystem,
   createRegistry,
   createRng,
   relationshipSystems,
@@ -62,6 +63,8 @@ export function lifeSystems(world: World, catalogs: Catalogs = loadCatalogs()): 
       ...relationshipSystems({ cat: chatEngineCatalog(catalogs), onto, chat: CHAT_DEFAULTS, claim: CLAIM_DEFAULTS, p: RELATIONSHIP_DEFAULTS }),
       // Memoria autobiográfica (013): codificación, repaso, olvido, consolidación en la red y capítulos.
       createMemorySystem(onto),
+      // Origen de los estados (019 R-005): el último hecho detrás del estrés, el sueño, el dinero, la salud…
+      createOriginsSystem(),
     ]),
     loop: { validate: createActionValidator(table) },
   };

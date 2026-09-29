@@ -3,6 +3,7 @@
 import { api, control, stream } from './api.ts';
 import { showChatHistory } from './chat-history.ts';
 import { showLife } from './life.ts';
+import { bindWhy, whyToggle } from './why.ts';
 import { setupChat } from './chat-ui.ts';
 import { eventEs, inspectorTabs } from './format.ts';
 import type { Section } from './format.ts';
@@ -115,7 +116,7 @@ function renderInspector(): void {
       : tab === 'funcional'
         ? renderSections(t.funcional)
         : t.historia.length
-          ? `<ol class="hist">${t.historia.map((h) => `<li>${esc(h.line)}${h.causes.length ? `<small>por: ${h.causes.map(esc).join(' · ')}</small>` : ''}</li>`).join('')}</ol>`
+          ? `<ol class="hist">${t.historia.map((h) => `<li>${esc(h.line)}${h.causes.length ? `<small>por: ${h.causes.map(esc).join(' · ')}</small>` : ''}${whyToggle(h.id)}</li>`).join('')}</ol>`
           : '<p>Sin hechos recientes.</p>';
 }
 
@@ -266,6 +267,7 @@ $('#btn-faster').addEventListener('click', () => setSpeed(1));
 $('#btn-zin').addEventListener('click', () => setScale(scale + 1));
 $('#btn-zout').addEventListener('click', () => setScale(scale - 1));
 $('#insp-close').addEventListener('click', closeInspector);
+bindWhy($('#insp-body')); // 019: «¿por qué?» de cada evento de la historia
 for (const b of document.querySelectorAll<HTMLButtonElement>('.tabs button'))
   b.addEventListener('click', () => {
     tab = b.dataset.tab as typeof tab;

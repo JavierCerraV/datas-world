@@ -2,7 +2,7 @@
 import type { WorldMinute } from './calendar.ts';
 import type { Capability } from './capabilities.ts';
 import { CAPABILITIES } from './capabilities.ts';
-import { allocateId } from './ids.ts';
+import { allocateId, idNumber } from './ids.ts';
 import type { Counters, EntityId } from './ids.ts';
 
 export type CauseRef =
@@ -580,6 +580,9 @@ export function makeEvent(counters: Counters, at: WorldMinute, input: NewEvent):
   for (const c of input.causes) {
     if (!Number.isFinite(c.weight) || c.weight < 0 || c.weight > 1)
       throw new RangeError(`${input.type}: peso de causa inválido`);
+    // 019 R-002: una causa de evento es un evento anterior; los ids crecen con cada evento creado.
+    if ('event' in c && idNumber(c.event) > counters.EVT)
+      throw new RangeError(`${input.type}: la causa ${c.event} no es anterior al evento (019 R-002)`);
   }
   const importance = input.importance ?? d.baseImportance;
   if (!(importance >= 0 && importance <= 1)) throw new RangeError(`${input.type}: importancia fuera de [0,1]`);

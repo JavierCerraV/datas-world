@@ -139,7 +139,7 @@ export interface Section {
 }
 
 /** 024 R-003: las tres pestañas del inspector a partir de la ficha de la API. */
-export function inspectorTabs(d: CitizenDetail): { estado: Section[]; historia: { line: string; causes: string[] }[]; funcional: Section[] } {
+export function inspectorTabs(d: CitizenDetail): { estado: Section[]; historia: { id: string; line: string; causes: string[] }[]; funcional: Section[] } {
   const occ = d.occupation;
   const occText = !occ
     ? 'sin datos'
@@ -178,7 +178,7 @@ export function inspectorTabs(d: CitizenDetail): { estado: Section[]; historia: 
       })),
     },
   ];
-  const historia = [...d.events].reverse().map((e) => ({ line: eventEs(e), causes: e.causes.slice(0, 4).map(causeEs) }));
+  const historia = [...d.events].reverse().map((e) => ({ id: e.id, line: eventEs(e), causes: e.causes.slice(0, 4).map(causeEs) }));
   const funcional: Section[] = [
     {
       title: 'Lo que ha aprendido (funciones)',

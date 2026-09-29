@@ -62,6 +62,8 @@ function couple() {
 }
 
 const intend = (world: World, who: EntityId, it: Omit<Intention, 'expiresAt' | 'cause'> & { expiresAt?: number }) => {
+  // La intención cita un evento de la charla anterior (019 R-002: tiene que existir antes que lo que causa).
+  world.counters.EVT = Math.max(world.counters.EVT, 100);
   world.citizens.get(who)!.intentions = [{ expiresAt: world.now + P.intentTtlMin, cause: 'EVT-000099' as EntityId, ...it }];
 };
 const tick = (world: World) => runSystems(world, createRng(world.config.seed).fork(world.now), createRegistry(consequenceSystems(CAT, P)));

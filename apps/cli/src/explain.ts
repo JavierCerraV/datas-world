@@ -1,7 +1,7 @@
 // `citizen:explain EVT-…` (spec 035 CA-001): la cadena del documento rector §12 para una conducta elegida, de la
 // conducta hasta los hechos del registro o del desarrollo que la explican. Solo lee el estado y el registro.
 import { parseArgs } from 'node:util';
-import { EVENT_LEARNING, derive, eventText, leisureResponse } from '@datas-world/engine';
+import { EVENT_LEARNING, derive, eventText, leisureResponse, why, whyLines } from '@datas-world/engine';
 import type { DevelopmentEpisode, EntityId, FunctionStore, RelationalNetwork, World, WorldEvent } from '@datas-world/engine';
 import { WorldRepository, eventsById, openReadonly } from '@datas-world/persistence';
 import { DEFAULT_DB, UsageError, dayOf, withDb, withNames } from './common.ts';
@@ -126,5 +126,19 @@ export function citizenExplain(args: string[], io: Io): void {
       io.out(s.step);
       for (const l of s.lines.length ? s.lines : ['(vacío)']) io.out(`  ${l}`);
     }
+  });
+}
+
+/** `event:why EVT-… [--depth 4]` (spec 019 R-004, R-007): el árbol de causas de cualquier evento, hasta su origen. */
+export function eventWhy(args: string[], io: Io): void {
+  const { values: v, positionals } = parseArgs({ args, allowPositionals: true, options: { db: { type: 'string', default: DEFAULT_DB }, depth: { type: 'string', default: '4' } } });
+  const id = positionals[0];
+  const depth = Number(v.depth);
+  if (!id || !/^EVT-\d+$/.test(id) || !Number.isInteger(depth) || depth < 1) throw new UsageError('Uso: event:why EVT-00000012345 [--depth 4]');
+  withDb(openReadonly(v.db), (db) => {
+    const world = new WorldRepository(db).loadWorld();
+    const tree = why((x) => eventsById(db, [x as EntityId])[0], id, { depth, names: (s) => withNames(world, s), view: world });
+    if (!tree) throw new UsageError(`No existe ${id}`);
+    for (const l of whyLines(tree, (at) => dayOf(at, world.config.epoch))) io.out(l);
   });
 }
