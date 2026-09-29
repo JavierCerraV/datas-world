@@ -109,6 +109,6 @@ describe('019 R-005: origen de los estados', () => {
     expect(originCause(view, 1, ['sueno'], 10 * DAY, 0.5)).toEqual([]); // fuera de su ventana (3 días)
     expect(originCause(view, 1, ['conflicto', 'sueno'], 2 * DAY, 0.3)).toEqual([{ event: 'EVT-00000000006', weight: 0.3 }]); // el más reciente
     expect(sleepCauses(viewOf(), 1, DAY, 120, 0.5).map((c) => ('state' in c ? c.state : c.event))).toEqual(['deuda_de_sueno', 'horario_de_sueno']);
-    expect(sleepCauses(viewOf(), 1, DAY, 0, 0.5)).toHaveLength(1);
+    expect(sleepCauses(viewOf(), 1, DAY, 0, 0.5)).toEqual([]); // sin deuda, nada que citar
   });
 });

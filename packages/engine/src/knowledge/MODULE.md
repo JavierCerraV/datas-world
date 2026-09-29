@@ -64,3 +64,4 @@ El prototipo tiene rumores sin fuente ni verdad separada (55 por mundo y año); 
 |---|---|---|---|
 | 2026-09-29 | m3/creencias (K1) | 025 | Documento creado desde la plantilla (sin código) |
 | 2026-09-29 | m3/creencias (K1–K4) | 025 | Módulo implementado: temas, presenciar, contar en los encuentros como conducta aprendida, deformación, ocultar, corrección, consecuencias (afecto, pensamiento, intención) y verdad solo para el análisis. 7 pruebas |
+| 2026-09-29 | m3/cierre | 025 | Nadie deforma lo que cuenta de sí mismo (en la revisión de cierre, alguien contaba de sí «es agresivo») |

@@ -101,9 +101,8 @@ export function originCause(view: WorldView, row: number, keys: readonly OriginK
  */
 export function sleepCauses(view: WorldView, row: number, now: number, debt: number, weight: number): CauseRef[] {
   const id = formatId('CIT', row) as EntityId;
-  const origin = debt > 0 ? originCause(view, row, ['sueno'], now, weight) : [];
-  return [
-    { state: 'deuda_de_sueno', entity: id, value: debt, weight },
-    ...(origin.length ? origin : debt > 0 ? [{ state: 'horario_de_sueno', entity: id, weight }] : []),
-  ];
+  // Sin deuda de sueño no hay nada que citar (la revisión de cierre de M3 encontró «deuda de sueño de 0 h»).
+  if (debt <= 0) return [];
+  const origin = originCause(view, row, ['sueno'], now, weight);
+  return [{ state: 'deuda_de_sueno', entity: id, value: debt, weight }, ...(origin.length ? origin : [{ state: 'horario_de_sueno', entity: id, weight }])];
 }

@@ -19,6 +19,8 @@ export interface MemoryKind {
   onlyA?: true;
   /** Tema del capítulo que puede abrir (R-010). */
   theme?: string;
+  /** Edad mínima para que el hecho abra su capítulo (terminar la primaria no abre la vida adulta). */
+  themeMinAge?: number;
 }
 
 const P = <T>(e: Ev) => e.payload as T;
@@ -59,7 +61,7 @@ export const MEMORY_KINDS: Readonly<Record<string, MemoryKind>> = Object.freeze(
   BREAKUP: { lambda: -0.8, us: 'verbal.critica', theme: 'ruptura' },
   CONFRONTATION: { lambda: -0.6, us: 'verbal.critica' },
   // Historia (030): la usan la generación y, cuando existan en la vida diaria, los hechos del ciclo de vida.
-  STUDIES_COMPLETED: { lambda: 0.5, us: 'verbal.aprobacion', stims: () => ['dominio.conocimiento'], theme: 'vida_adulta' },
+  STUDIES_COMPLETED: { lambda: 0.5, us: 'verbal.aprobacion', stims: () => ['dominio.conocimiento'], theme: 'vida_adulta', themeMinAge: 16 },
   MIGRATED: { lambda: -0.3, theme: 'migracion' },
   UNION_FORMED: { lambda: 0.7, us: 'verbal.aprobacion', theme: 'pareja' },
   CITIZEN_BORN: { lambda: 0.8, theme: 'crianza', who: (e) => e.participants.filter((p) => p.role !== 'nacido').map((p) => p.id) },
@@ -75,6 +77,13 @@ export const MEMORY_KINDS: Readonly<Record<string, MemoryKind>> = Object.freeze(
     },
   },
 });
+
+/** El capítulo que abre un hecho para alguien nacido en `birth` (R-010), si lo abre a esa edad. */
+export function themeOf(e: Ev, birth: number): string | undefined {
+  const k = MEMORY_KINDS[e.type];
+  if (!k?.theme) return undefined;
+  return k.themeMinAge !== undefined && e.at - birth < k.themeMinAge * 365.25 * 1440 ? undefined : k.theme;
+}
 
 /** Las personas presentes en un hecho para quien lo recuerda: la otra del par (`a`/`b`), el fallecido o el nacido. */
 export function peopleOf(e: Ev, me: EntityId): string[] {

@@ -31,7 +31,7 @@ const r2 = (x: number) => Math.round(x * 100) / 100;
 const SOURCE: Readonly<Record<string, string>> = {
   reforzador: 'lo que conseguía en ese momento', fuerza: 'la fuerza de la costumbre', demorado: 'lo que conseguiría después', regla: 'una regla aprendida',
   valor: 'un valor', aversion: 'lo que le desagrada', coste: 'lo que le costaba', alivio: 'el alivio de no pensar', postura: 'su forma de responder',
-  funcion: 'lo que esa persona o cosa significa para ella', red: 'una relación aprendida',
+  funcion: 'lo que esa persona o cosa significa', red: 'una relación aprendida',
 };
 /** Texto de los estados más citados [M]; el resto, su clave en palabras. */
 const STATE: Readonly<Record<string, (v?: number) => string>> = {
@@ -46,7 +46,7 @@ const STATE: Readonly<Record<string, (v?: number) => string>> = {
   saldo_insuficiente: () => 'no tenía dinero suficiente',
   deficit: () => 'le faltaba dinero para sus gastos',
   tension: (v) => `había tensión entre ellos (${r2(v ?? 0)})`,
-  funcion: (v) => `lo que esa persona significa para ella (${r2(v ?? 0)})`,
+  funcion: (v) => `lo que la otra persona significa (${r2(v ?? 0)})`,
   mismo_lugar: () => 'coincidieron en el mismo lugar',
   sin_contacto: (v) => `llevaban ${v ?? 0} días sin verse`,
   duracion_viaje: (v) => `el trayecto duró ${v ?? 0} min`,

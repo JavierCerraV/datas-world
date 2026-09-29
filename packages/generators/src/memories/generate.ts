@@ -3,7 +3,7 @@
 // funciones de hoy y ya olvidados en parte según su antigüedad (ley de potencia de la 013 R-004).
 import {
   MEMORY_DEFAULTS, MEMORY_KINDS, addMemory, directValue, emptyMemory, encodeEvent, episodeValue, learningParams, makeEvent, openChapter,
-  personStimulus, retention, trimMemory, updateChapters,
+  personStimulus, retention, themeOf, trimMemory, updateChapters,
 } from '@datas-world/engine';
 import type { DevelopmentEpisode, EntityId, MemoryParams, MemoryStore, Memory, Ontology, World, WorldEvent, WorldView } from '@datas-world/engine';
 import type { Catalogs } from '../catalogs/load.ts';
@@ -113,7 +113,7 @@ export function seedMemories(world: World, citizenIds: readonly EntityId[], prio
     ];
     const once = new Set<string>();
     for (const e of mine) {
-      const theme = MEMORY_KINDS[e.type]?.theme;
+      const theme = themeOf(e, birth);
       if (!theme || ((theme === 'trabajo' || theme === 'crianza') && once.has(theme))) continue;
       once.add(theme);
       marks.push({ at: e.at, theme, cause: e });

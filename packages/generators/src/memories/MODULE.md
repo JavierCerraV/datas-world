@@ -47,3 +47,4 @@ Sin equivalente en el prototipo.
 |---|---|---|---|
 | 2026-09-29 | m3/memoria (M3) | 013 | Documento creado desde la plantilla (sin código) |
 | 2026-09-29 | m3/memoria (M3) | 013 | `seedMemories`: recuerdos de partida desde el desarrollo y la historia, olvido hasta hoy, fusión de lo repetido y capítulos del pasado con sus `CHAPTER_OPENED` |
+| 2026-09-29 | m3/cierre | 013 | Los capítulos del pasado usan `themeOf`: terminar la primaria ya no abre la vida adulta |

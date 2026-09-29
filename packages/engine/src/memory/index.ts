@@ -2,7 +2,7 @@
 // y capítulos.
 export { CHAT_RECALL, MEMORY_DEFAULTS, emptyMemory } from './types.ts';
 export type { Chapter, Memory, MemoryParams, MemoryStore } from './types.ts';
-export { MEMORY_KINDS, peopleOf } from './kinds.ts';
+export { MEMORY_KINDS, peopleOf, themeOf } from './kinds.ts';
 export type { MemoryKind } from './kinds.ts';
 export { addMemory, decayDay as memoryDecayDay, distortion, encodeEvent, episodeValue, recall, rehearse, remembererOf, retention, trim as trimMemory } from './episodes.ts';
 export type { FnOf, RecallContext } from './episodes.ts';
