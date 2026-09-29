@@ -1,7 +1,7 @@
 ---
 id: 020
 nombre: history
-estado: aprobada
+estado: implementada
 hito: M3
 depende_de: [013, 014, 019, 027, 035]
 version: 0.3
@@ -141,3 +141,4 @@ Según la 035 §8:
 | 2026-09-29 | 0.3 | Decisiones del usuario (§9 bis): P1 a P5 aprobadas |
 | 2026-09-29 | 0.3 | Estado → aprobada |
 | 2026-09-29 | 0.3 | Implementación (bloque H de M3). Calibración de R-005 en 100 personas × 1 año: con 0,4 salían 3,3 divergencias de tono por persona, porque la memoria es en conjunto más amable que lo vivido; el tono se compara en el patrón de cada persona (cada tono menos la media de su lado), el sesgo general se dice una vez y una etapa recordada al revés (ambos tonos > 0,3) se marca siempre; umbral 0,5. Las etapas por edad citan el nacimiento (CA-002). El rumbo económico usa `tanh` (saturaba). Tono objetivo de los episodios de desarrollo: valencia × 0,6. Hallazgo: la estabilidad laboral sale casi siempre alta porque la historia generada (030) apenas registra cambios de empleo. Resultados en `docs/validaciones/M3-historia.md`. Sin cambios en CA |
+| 2026-09-29 | 0.3 | Estado → implementada |

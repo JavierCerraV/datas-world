@@ -43,4 +43,4 @@ Specs: 012 (aprobada, v0.2), 013, 019, 020 y 025 (borradores). Una rama por bloq
 - [x] Batería 042 en verde.
 - [x] Revisión de 5 informes de vida al azar y corrección de lo encontrado (`M3-cierre.md`).
 - [x] Memoria y velocidad (`M3-bench-vida.md`).
-- [ ] Specs 012, 013, 019, 020 y 025 → `implementada` (con la aprobación del usuario).
+- [x] Specs 012, 013, 019, 020 y 025 → `implementada` (aprobado por el usuario, 2026-09-29).

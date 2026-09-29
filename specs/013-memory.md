@@ -1,7 +1,7 @@
 ---
 id: 013
 nombre: memory
-estado: aprobada
+estado: implementada
 hito: M3
 depende_de: [012, 014, 019, 021, 023, 027, 036, 037, 039, 041, 043]
 version: 0.3
@@ -179,3 +179,4 @@ Según la 035 §8:
 | 2026-09-28 | 0.3 | Decisiones del usuario (§9 bis): P1 a P5 aprobadas |
 | 2026-09-29 | 0.3 | Estado → aprobada |
 | 2026-09-29 | 0.3 | Lo que reveló la implementación (bloque M de M3): R-004 en ley de potencia (con vida media fija no sobrevivía la infancia); habituación en la saliencia (R-001); en la memoria de partida, lo repetido se funde (2 por tipo; sin esto el 95 % de los recuerdos de un adulto eran positivos y repetidos) y la amnesia infantil vale también para los hechos de la historia; los capítulos de partida quedan en el registro como `CHAPTER_OPENED`, así que salir de la persona por el tope no los pierde. La elección de con quién encontrarse (012 R-001) usa el valor de la otra persona, directo o derivado (CA-005). Resultados en `docs/validaciones/M3-memoria.md`. Sin cambios en CA |
+| 2026-09-29 | 0.3 | Estado → implementada |

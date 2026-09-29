@@ -1,7 +1,7 @@
 ---
 id: 025
 nombre: knowledge
-estado: aprobada
+estado: implementada
 hito: M3
 depende_de: [012, 013, 014, 019, 036, 037, 043, 044]
 version: 0.2
@@ -144,3 +144,4 @@ Según la 035 §8:
 - el catálogo `rumor_topics` tiene 16 temas con grupo, estado y nivel.
 
 Resultados en 100 personas × 1 año: 2 632 relatos, 32 deformaciones, 18 correcciones, una creencia falsa compartida por 7 personas, credibilidad media 1 → 0,55 → 0,40 → 0,32 por boca; ver `docs/validaciones/M3-creencias.md`. Sin cambios en CA |
+| 2026-09-29 | 0.2 | Estado → implementada |

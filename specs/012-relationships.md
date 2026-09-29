@@ -1,7 +1,7 @@
 ---
 id: 012
 nombre: relationships
-estado: aprobada
+estado: implementada
 hito: M3
 depende_de: [007, 008, 014, 016, 021, 023, 036, 037, 038, 040, 041, 043, 044]
 version: 0.3
@@ -144,3 +144,4 @@ Resueltas (§9 bis). La calibración sigue abierta: PA-142 a PA-145.
 | 2026-09-28 | 0.2 | Estado → aprobada |
 | 2026-09-28 | 0.3 | Lo que reveló la implementación (bloque R de M3, 100 personas × 1 año): el choque necesita un estímulo aversivo (R-002) y quien inicia no empareja al otro con su propio saludo; la tensión se repara en encuentros amables (R-003, `REPAIR`); la amistad no se aplica a la familia (R-004); `ENCOUNTER` registra solo los roces; parámetros medidos (§8) y CA-001 en la escala medida del afecto. Resultados en `docs/validaciones/M3-relaciones.md` |
 | 2026-09-29 | 0.3 | Con la 013 (CA-005): R-001 pondera con quién se encuentra por el valor de la otra persona, directo o derivado de la red. En 100 personas × 1 año, las discusiones bajan de 79 a 44 y las amistades quedan igual. Sin cambios en CA |
+| 2026-09-29 | 0.3 | Estado → implementada |
