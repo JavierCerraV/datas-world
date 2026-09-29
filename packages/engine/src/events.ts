@@ -367,6 +367,31 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { a: str, b: str }),
     text: (e) => `${e.payload.a} ya casi no se acuerda de ${e.payload.b}.`,
   }),
+  // Conocimiento (spec 025 §5): lo que se cuenta de otros, cómo se deforma y cómo se corrige.
+  RUMOR_TOLD: def<{ from: string; to: string; about: string; predicate: string; credibility: number; hops: number; value: number; concern: number; distortedFrom?: string }>({
+    baseImportance: 0.2,
+    spontaneous: false,
+    check: (p) => needObj(p, {
+      from: str, to: str, about: str, predicate: str, credibility: (v) => typeof v === 'number' && v >= 0 && v <= 1, hops: int,
+      value: (v) => typeof v === 'number' && v >= -1 && v <= 1, concern: (v) => typeof v === 'number' && v >= 0 && v <= 1,
+    }),
+    text: (e) => `${e.payload.from} le cuenta a ${e.payload.to} que ${e.payload.about}: ${e.payload.predicate.replace(/_/g, ' ')}.`,
+  }),
+  RUMOR_DISTORTED: def<{ from: string; to: string; about: string; before: string; after: string }>({
+    baseImportance: 0.2,
+    spontaneous: false,
+    check: (p) => needObj(p, { from: str, to: str, about: str, before: str, after: str }),
+    text: (e) => `Al pasar de ${e.payload.from} a ${e.payload.to}, «${e.payload.before.replace(/_/g, ' ')}» se vuelve «${e.payload.after.replace(/_/g, ' ')}».`,
+  }),
+  BELIEF_CORRECTED: def<{ citizenId: string; about: string; predicate: string; by: string; credibility: number; truth: string; truthCredibility: number }>({
+    baseImportance: 0.2,
+    spontaneous: false,
+    check: (p) => needObj(p, {
+      citizenId: str, about: str, predicate: str, by: str, truth: str,
+      credibility: (v) => typeof v === 'number' && v >= 0 && v <= 1, truthCredibility: (v) => typeof v === 'number' && v >= 0 && v <= 1,
+    }),
+    text: (e) => `${e.payload.by} le corrige a ${e.payload.citizenId} que ${e.payload.about}: ${e.payload.truth.replace(/_/g, ' ')}, no ${e.payload.predicate.replace(/_/g, ' ')}.`,
+  }),
   // Memoria (spec 013 §5): lo que se generaliza en la red y los capítulos de la vida. No hay evento por recuerdo.
   SCHEMA_FORMED: def<{ citizenId: string; a: string; b: string; strength: number }>({
     baseImportance: 0.2,

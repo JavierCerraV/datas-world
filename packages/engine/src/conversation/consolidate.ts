@@ -138,7 +138,8 @@ export function consolidateChat(
     }));
 
   // 044 §5: lo que oyó de cada tercero y, si lo cree, la creencia con sus fuentes (función, red o valor).
-  const beliefs: Belief[] = [...(person?.beliefs ?? [])].map((b) => ({ ...b }));
+  // Copia profunda: con la 025 la creencia lleva la lista de a quién se contó.
+  const beliefs = JSON.parse(JSON.stringify(person?.beliefs ?? [])) as Belief[];
   const strongest = new Map<EntityId, { a: ClaimAssessment; believedId: EntityId }>();
   const mind: MindState = JSON.parse(JSON.stringify(person?.mind ?? { active: [] })) as MindState;
   for (const { seq, a } of heard) {

@@ -1,7 +1,7 @@
 ---
 id: 025
 nombre: knowledge
-estado: borrador
+estado: aprobada
 hito: M3
 depende_de: [012, 013, 014, 019, 036, 037, 043, 044]
 version: 0.2
@@ -112,7 +112,10 @@ interface Belief {
 - Rumores, deformaciones y correcciones por año; discusiones que empiezan en un rumor.
 - Alertas: todos saben todo, nadie cuenta nada, creencias que no se corrigen nunca.
 
-## 10. Preguntas abiertas (para el usuario)
+## 9 bis. Decisiones del usuario (2026-09-29)
+Aprobadas las cinco propuestas de §10 (P1 a P5) tal como están.
+
+## 10. Preguntas abiertas (resueltas en §9 bis)
 - **P1 — Temas y mecanismo único.** Los hechos de la vida (perder el empleo, pareja nueva, ruptura, enfermedad, deuda con el gota a gota, discusiones…) se vuelven temas de un catálogo (`rumor_topics`) y se evalúan con el mismo mecanismo que lo que dice el visitante (044). *Propuesta:* sí.
 - **P2 — Quién se entera sin que se lo cuenten.** Quienes participan en el hecho y quienes conviven con la persona (el hogar se entera). Nadie más: los vecinos no ven nada si nadie se lo cuenta. *Propuesta:* sí.
 - **P3 — Contar como conducta aprendida.** Contar en los encuentros depende de la fuerza aprendida de contar, que sube si el otro se interesa y baja si lo cortan. El rumor pierde credibilidad al pasar, y a veces se deforma a una versión peor (del catálogo). *Propuesta:* sí.
@@ -131,3 +134,13 @@ Según la 035 §8:
 | 2026-09-24 | 0.1 | Pregunta abierta: `PersonView` como única entrada del LLM (spec 034) |
 | 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |
 | 2026-09-29 | 0.2 | Reescritura sobre el motor funcional y la 044 (bloque K de M3): temas de la vida como afirmaciones (`rumor_topics`), saber por presenciar o convivir, contar en los encuentros como conducta aprendida con la evaluación de la 044, deformación, ocultar lo propio, corrección, verdad solo para el análisis y lo que sabe en la vista de la charla. La mentira activa sale del alcance. CA-004 y CA-005 nuevos. Preguntas P1 a P5 para el usuario |
+| 2026-09-29 | 0.2 | Decisiones del usuario (§9 bis): P1 a P5 aprobadas |
+| 2026-09-29 | 0.2 | Estado → aprobada |
+| 2026-09-29 | 0.2 | Implementación (bloque K de M3). Precisiones:
+- el tercero del que se habla no es participante del `RUMOR_TOLD` (no se entera de que hablan de él; INV-003);
+- el encuentro solo emite el evento, y la creencia del oyente, sus intenciones y su pensamiento los aplica el sistema de conocimiento al final del tick, para citar el evento como causa (la intención cita el `RUMOR_TOLD`);
+- lo que oye el oyente también empareja su afecto por el tercero (036);
+- la corrección hace entrar la versión de quien corrige con su confianza × credibilidad;
+- el catálogo `rumor_topics` tiene 16 temas con grupo, estado y nivel.
+
+Resultados en 100 personas × 1 año: 2 632 relatos, 32 deformaciones, 18 correcciones, una creencia falsa compartida por 7 personas, credibilidad media 1 → 0,55 → 0,40 → 0,32 por boca; ver `docs/validaciones/M3-creencias.md`. Sin cambios en CA |

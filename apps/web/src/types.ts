@@ -75,6 +75,8 @@ export interface CitizenDetail {
     id: string; name: string | null; labels: string[]; familiarity: number; tension: number; trust: number; encounters: number; affection: number; affectionBack: number;
   }[];
   attachment?: { security: number; avoidance: number; style: string };
+  /** 025: lo que cree de otros; `truth` es solo para quien observa. */
+  beliefs?: { about: string; name: string | null; predicate: string; topic: string; source: string; sourceName: string | null; credibility: number; hops: number; truth: boolean }[];
   events: EventView[];
 }
 

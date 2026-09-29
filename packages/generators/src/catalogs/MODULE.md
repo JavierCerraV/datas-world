@@ -2,8 +2,8 @@
 modulo: catalogs
 ruta: packages/generators/src/catalogs
 estado: en-desarrollo
-specs: [003, 004, 005, 006, 007, 008, 009, 030, 041, 043, 044]
-actualizado: 2026-09-27
+specs: [003, 004, 005, 006, 007, 008, 009, 030, 041, 043, 044, 025]
+actualizado: 2026-09-29
 ---
 
 # Módulo: catalogs
@@ -91,3 +91,4 @@ Las entradas de M1 de `place_kinds` llevan `proto` (el tipo del prototipo), `def
 | 2026-09-27 | charla/l5 (L5.4) | 044 | `chat_scripts` 2026.10.2: guion `revelacion.pareja` (el ejemplo del usuario: proponer una relación abierta y decir que la pareja está de acuerdo), 15 guiones |
 | 2026-09-28 | mf/7-desarrollo (MF7.1, MF7.3) | 041, 032, 036 | Catálogo nuevo `development_episodes` 2026.10.4 (46 episodios por etapa, con efectos, modificadores, condiciones y disparadores de la 030; tasas estimadas, fuentes por verificar). `stimulus_classes` 2026.10.2: roles de la comunidad verbal (`rol.cuidador`, `rol.docente`, `rol.hermano`, `rol.madre`, `rol.padre`, `rol.par`, `rol.pareja`) y `verbal.emocion`. `leisure_activities` 2026.10.1: `traits` y `values` nombran lo aprendido (respuestas y dominios vitales) en lugar de rasgos. `CATALOG_NAMES` pasa a 25 |
 | 2026-09-28 | mf/8-cierre (MF8.2) | 041 | `development_episodes` 2026.10.5: relaciones enseñadas en cinco episodios de crianza (041 R-003). 2026.10.6: episodio `familia.lectura_en_casa` (leer juntos en casa forma el valor del conocimiento en la edad escolar; pesa según la calidez de la familia), 47 episodios |
+| 2026-09-29 | m3/creencias (K1) | 025 | Catálogo nuevo `rumor_topics` 2026.10.1 (16 temas): de qué hechos se habla, con su evento, de quién tratan, estímulo, valor, grupo, estado, nivel y versión deformada; incluye las afirmaciones de la charla que se pueden repetir, sin evento |

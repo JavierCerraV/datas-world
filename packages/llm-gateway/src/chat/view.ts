@@ -45,6 +45,8 @@ export interface ViewInput {
   nRecent?: number;
   /** Texto de un episodio de desarrollo por su clave (041), para los recuerdos de infancia (013). */
   memoryText?: (kind: string) => string | undefined;
+  /** Nombre de un tema del que se habla (025), para lo que cree de otros. */
+  topicText?: (key: string) => string | undefined;
 }
 
 /** Cómo lo recuerda, en palabras (la valencia actual, reconstruida, 013 R-007). */
@@ -149,6 +151,14 @@ export function buildPersonView(input: ViewInput): PersonView {
       const text = memoryText(view, id, m, byId, family, input.memoryText);
       if (text) facts.push({ id: m.id, date: dateOf(m.at), age: ageAt(m.at), text: `${m.source === 'told' ? 'Le contaron' : 'Recuerda'}: ${text} (${feeling(m.valence)})` });
     }
+  }
+  // 025 R-009 (P5): lo que cree de otras personas y de quién lo sabe; nunca si es verdad.
+  const given = (x: string) => view.citizens.get(x as EntityId)?.name?.given ?? x;
+  for (const b of me.beliefs ?? []) {
+    if (!b.about.startsWith('CIT-') || b.about === id || !input.topicText?.(b.predicate)) continue;
+    const how = b.source === 'visto' ? 'Lo vio' : b.source.startsWith('EXT-') ? 'Se lo dijo un visitante' : `Se lo contó ${given(b.source)}`;
+    const sure = b.credibility >= 0.8 ? 'está segura/o' : b.credibility >= 0.5 ? 'lo cree' : 'no está segura/o';
+    facts.push({ id: `CREE-${b.about}-${b.predicate}`, date: dateOf(b.at), age: ageAt(b.at), text: `Cree que ${given(b.about)}: ${input.topicText(b.predicate)!.toLowerCase()}. ${how}; ${sure}.` });
   }
   // El ocio de la última semana, resumido en un hecho.
   const week = mine.filter((e) => e.type === 'LEISURE_DONE' && e.at >= now - 7 * 1440);

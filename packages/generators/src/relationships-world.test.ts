@@ -1,10 +1,11 @@
 // Relaciones en un mundo que vive (spec 012, bloque R de M3): 100 personas × 1 año con la semilla del proyecto.
-import { affectionFor, lifeReport, walk, why } from '@datas-world/engine';
+import { affectionFor, beliefTruth, lifeReport, walk, why } from '@datas-world/engine';
 import type { DayPoint, ProfileKey, WorldEvent } from '@datas-world/engine';
 import { describe, expect, it } from 'vitest';
+import { loadCatalogs } from './catalogs/load.ts';
 import { KIN_FAMILIARITY } from './development/bonds.ts';
 import { generateWorld } from './generate.ts';
-import { lifeRunner } from './life.ts';
+import { knowledgeCatalog, lifeRunner } from './life.ts';
 
 const count = (events: readonly WorldEvent[], type: string) => events.filter((e) => e.type === type).length;
 
@@ -115,5 +116,27 @@ describe('M3 (012, 013, 019 y 020): 100 personas × 1 año', { timeout: 900_000 
     expect(Math.sqrt(resilience.reduce((a, b) => a + (b - mean) ** 2, 0) / resilience.length)).toBeGreaterThan(0.05);
     expect([...trajectory.values()].reduce((s, t) => s + t.length, 0) * 20).toBeLessThan(10 * 1024 * 1024);
     expect(divs / people.length).toBeLessThan(3);
+    // 025 CA-002: una creencia falsa compartida por ≥ 3 personas y al menos una corrección.
+    const topics = knowledgeCatalog(loadCatalogs());
+    const eventsAbout = new Map<string, WorldEvent[]>();
+    for (const e of all) for (const k of ['citizenId', 'a', 'b']) {
+      const v = (e.payload as Record<string, unknown>)[k];
+      if (typeof v === 'string') eventsAbout.set(v, [...(eventsAbout.get(v) ?? []), e]);
+    }
+    const shared = new Map<string, number>();
+    for (const c of people) for (const b of c.beliefs ?? []) {
+      if (b.about.startsWith('CIT-') && !beliefTruth(b, eventsAbout.get(b.about) ?? [], topics)) shared.set(`${b.about}|${b.predicate}`, (shared.get(`${b.about}|${b.predicate}`) ?? 0) + 1);
+    }
+    expect(Math.max(0, ...shared.values())).toBeGreaterThanOrEqual(3);
+    expect(count(events, 'BELIEF_CORRECTED')).toBeGreaterThan(0);
+    // 025 CA-005: la credibilidad no sube al pasar de boca en boca, y la cadena de un rumor llega a su origen.
+    const byHops = new Map<number, number[]>();
+    for (const c of people) for (const b of c.beliefs ?? []) byHops.set(b.hops ?? 0, [...(byHops.get(b.hops ?? 0) ?? []), b.credibility]);
+    const avg = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+    const levels = [...byHops].filter(([, xs]) => xs.length >= 5).sort((a, b) => a[0] - b[0]).map(([, xs]) => avg(xs));
+    for (let i = 1; i < levels.length; i++) expect(levels[i]!).toBeLessThanOrEqual(levels[i - 1]! + 1e-9);
+    const far = events.find((e) => e.type === 'RUMOR_TOLD' && (e.payload as { hops: number }).hops >= 2)!;
+    const origin = [...walk(why((x) => byId.get(x), far.id, { depth: 10, minWeight: 0, maxNodes: 200 })!)].some(({ n, d }) => d > 0 && n.kind === 'event' && !['RUMOR_TOLD', 'BELIEF_CORRECTED'].includes(byId.get(n.ref)!.type));
+    expect(origin).toBe(true);
   });
 });

@@ -62,7 +62,7 @@ export { FIRST_SUPPORTED_YEAR, colombianHolidays, easterSunday, holidayDates } f
 export type { Holiday } from './country/holidays.ts';
 export { seriesAt } from './country/series.ts';
 
-export { LIFE_CAPABILITIES, chatEngineCatalog, lifeRunner, lifeSystems } from './life.ts';
+export { LIFE_CAPABILITIES, chatEngineCatalog, knowledgeCatalog, lifeRunner, lifeSystems } from './life.ts';
 export { buildOntology } from './stimuli/ontology.ts';
 export { generateEconomy } from './economy/generate.ts';
 export type { EconomyResult } from './economy/generate.ts';

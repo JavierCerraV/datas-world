@@ -62,6 +62,8 @@ export interface ChatCatalogs {
   scripts: { key: string; label: string; turns: { text: string; tone: string }[] }[];
   /** Texto de cada episodio de desarrollo (041), para contar los recuerdos de infancia (013); vacío si no se carga. */
   memories: Record<string, string>;
+  /** Nombre de cada tema del que se habla (025 `rumor_topics`, y las afirmaciones de la charla), para lo que cree de otros. */
+  topics: Record<string, string>;
   /** La forma que recibe el motor (`@datas-world/engine`, `conversation/`). */
   engine: ChatCatalog;
 }
@@ -72,9 +74,10 @@ const strs = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => ty
 
 export function chatCatalogs(c: {
   chat_tones: CatalogLike; chat_stances: CatalogLike; chat_scripts: CatalogLike; chat_claims?: CatalogLike; chat_relations?: CatalogLike;
-  development_episodes?: CatalogLike;
+  development_episodes?: CatalogLike; rumor_topics?: CatalogLike;
 }): ChatCatalogs {
   const memories = Object.fromEntries((c.development_episodes?.entries ?? []).map((e) => [e.key, str(e.attrs?.text)]));
+  const topics = Object.fromEntries([...(c.chat_claims?.entries ?? []), ...(c.rumor_topics?.entries ?? [])].map((e) => [e.key, e.name]));
   const tones = c.chat_tones.entries.map((e) => ({
     key: e.key, label: e.name, description: str(e.attrs?.description), examples: strs(e.attrs?.examples), keywords: strs(e.attrs?.keywords),
     stimulus: str(e.attrs?.stimulus), magnitude: num(e.attrs?.magnitude), prior: num(e.attrs?.prior),
@@ -89,7 +92,7 @@ export function chatCatalogs(c: {
     key: e.key, label: e.name, resolve: str(e.attrs?.resolve), closeness: num(e.attrs?.closeness), keywords: strs(e.attrs?.keywords),
   }));
   return {
-    tones, stances, scripts, claims, relations, memories,
+    tones, stances, scripts, claims, relations, memories, topics,
     engine: {
       tones: tones.map(({ key, stimulus, magnitude, prior }) => ({ key, stimulus, magnitude, prior })),
       stances: stances.map(({ key, escape, w0 }) => ({ key, escape, w0 })),

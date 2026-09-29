@@ -31,4 +31,8 @@ Specs: 012 (aprobada, v0.2), 013, 019, 020 y 025 (borradores). Una rama por bloq
   - [x] H2 Capítulos objetivos y divergencias con los recordados (013).
   - [x] H3 Puntos de inflexión con su «¿por qué?», perfil emergente; CLI `citizen:life`, API y sección Informe del visor.
   - [x] H4 CA-001 a CA-006 con 100 personas × 1 año.
-- [ ] K 025 Conocimiento, creencias y rumores (reescritura).
+- [x] K 025 Conocimiento, creencias y rumores (rama `m3/creencias`):
+  - [x] K1 Catálogo `rumor_topics` y módulo `packages/engine/src/knowledge/` (temas, creencias, verdad solo para el análisis).
+  - [x] K2 Contar en los encuentros (012): corrección, relato, ocultar lo propio, deformación y aprendizaje de contar.
+  - [x] K3 Sistema de conocimiento (presenciar, oír, corregir, consecuencias); lo que cree de otros en la charla, la API y el visor.
+  - [x] K4 CA-001 a CA-005.

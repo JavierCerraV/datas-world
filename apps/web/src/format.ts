@@ -169,6 +169,14 @@ export function inspectorTabs(d: CitizenDetail): { estado: Section[]; historia: 
     },
     { title: 'Necesidades', rows: Object.entries(d.needs).map(([k, v]) => ({ label: NEED_ES[k] ?? k, value: pct(v) })) },
     { title: 'Emociones', rows: Object.entries(d.emotions).map(([k, v]) => ({ label: EMO_ES[k] ?? k, value: pct(v) })) },
+    // 025: lo que cree de otros y de quién lo sabe; si es verdad, solo para quien observa.
+    {
+      title: 'Lo que cree de otros',
+      rows: (d.beliefs ?? []).map((b) => ({
+        label: `${b.name ?? b.about}: ${b.topic.toLowerCase()}`,
+        value: `${b.source === 'visto' ? 'lo vio' : b.sourceName ? `se lo contó ${b.sourceName}` : 'se lo dijo un visitante'} · ${pct(b.credibility)} · ${b.truth ? 'verdadero' : 'falso'}`,
+      })),
+    },
     // 012 R6: quién, etiqueta, familiaridad y el afecto de cada lado (el suyo y el que le tienen).
     {
       title: 'Vínculos',
