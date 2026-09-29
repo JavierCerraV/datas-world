@@ -66,6 +66,23 @@ describe('charla: vista de la persona (043 R-002, R-003)', () => {
     expect(memories.some((f) => f.age !== null && f.age < 18)).toBe(true);
   });
 
+  it('025 P5: la vista lleva lo que cree de otros y de quién lo sabe, nunca si es verdad', () => {
+    const me = gen.world.citizens.get(SANTIAGO as never)!;
+    const other = [...gen.world.citizens.values()].find((c) => c.id !== SANTIAGO && c.status === 'active' && !c.ancestor)!;
+    const teller = [...gen.world.citizens.values()].find((c) => c.id !== SANTIAGO && c.id !== other.id && c.status === 'active' && !c.ancestor)!;
+    const before = me.beliefs;
+    me.beliefs = [{ about: other.id, predicate: 'lo_echaron_por_algo', source: teller.id, credibility: 0.55, at: 9000, cause: 'EVT-00000000001' as never, hops: 2 }];
+    try {
+      const pv = buildPersonView({ view, citizenId: SANTIAGO, now: 9355, events, topicText: (k) => cats.topics[k] });
+      const f = pv.facts.find((x) => x.id.startsWith('CREE-'))!;
+      expect(f.text).toBe(`Cree que ${other.name!.given}: lo echaron por algo que hizo. Se lo contó ${teller.name!.given}; lo cree.`);
+      expect(JSON.stringify(pv)).not.toMatch(/falso|verdad/);
+    } finally {
+      me.beliefs = before!;
+      if (before === undefined) delete me.beliefs;
+    }
+  });
+
   it('CA-002: un evento ajeno (el despido de un vecino) no entra en la vista ni en el prompt; uno propio sí', () => {
     const kin = new Set([SANTIAGO, ...pv.family.map((m) => m.id)]);
     const alien = events.find((e) => e.type === 'JOB_LOST' && !e.participants.some((p) => kin.has(p.id)));

@@ -96,6 +96,21 @@ describe('024 CA-002: el inspector muestra la ficha de /api/citizens/:id', () =>
     expect(f).toContain('llegar tarde lleva a despido: 60 %');
   });
 
+  it('025: lo que cree de otros, de quién lo sabe y, para quien observa, si es verdad', () => {
+    const t = inspectorTabs({
+      ...detail,
+      beliefs: [
+        { about: 'CIT-000002', name: 'Luis Rojas', predicate: 'perdio_el_empleo', topic: 'Perdió el empleo', source: 'visto', sourceName: null, credibility: 1, hops: 0, truth: true },
+        { about: 'CIT-000009', name: 'Marta Díaz', predicate: 'lo_echaron_por_algo', topic: 'Lo echaron por algo que hizo', source: 'CIT-000005', sourceName: 'Pedro Gil', credibility: 0.42, hops: 2, truth: false },
+      ],
+    });
+    const rows = t.estado.find((s) => s.title === 'Lo que cree de otros')!.rows.map((r) => `${r.label}: ${r.value}`);
+    expect(rows).toEqual([
+      'Luis Rojas: perdió el empleo: lo vio · 100 % · verdadero',
+      'Marta Díaz: lo echaron por algo que hizo: se lo contó Pedro Gil · 42 % · falso',
+    ]);
+  });
+
   it('012 R6: los vínculos con el afecto de cada lado y el apego como métrica', () => {
     const t = inspectorTabs({
       ...detail,

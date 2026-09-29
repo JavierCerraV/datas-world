@@ -139,13 +139,17 @@ export interface Belief {
   /** Un `CIT-…` o el visitante (`EXT-…`), p. ej. «un extraño anda diciendo cosas» (R-008.4). */
   about: string;
   predicate: string;
-  /** `EXT-0001` (el visitante) o un `CIT-…`. */
+  /** `EXT-0001` (el visitante), un `CIT-…` que se lo contó, o `visto` si lo presenció (025 R-002). */
   source: string;
   /** [0,1]. */
   credibility: number;
   at: WorldMinute;
-  /** Evento `CHAT_CLAIM_BELIEVED` que la creó. */
+  /** Evento que la creó: `CHAT_CLAIM_BELIEVED` (044), el hecho presenciado, `RUMOR_TOLD` o `BELIEF_CORRECTED` (025). */
   cause: EntityId;
+  /** 025: bocas por las que pasó (0 = lo vio). */
+  hops?: number;
+  /** 025: a quién se lo contó ya, los últimos. */
+  told?: EntityId[];
 }
 
 /**

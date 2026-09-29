@@ -15,6 +15,8 @@ import {
   createDecisionSystem,
   createLearningSystem,
   createMemorySystem,
+  createKnowledgeSystem,
+  KNOWLEDGE_DEFAULTS,
   createOriginsSystem,
   createRegistry,
   createRng,
@@ -26,14 +28,14 @@ import {
   routinesSystem,
   rulesSystem,
 } from '@datas-world/engine';
-import type { Capability, ChatCatalog, LoopOptions, RelationResolve, SystemRegistry, World } from '@datas-world/engine';
+import type { Capability, ChatCatalog, KnowledgeCatalog, LoopOptions, RelationResolve, SystemRegistry, TopicDef, World } from '@datas-world/engine';
 import { loadCatalogs } from './catalogs/load.ts';
 import type { Catalogs } from './catalogs/load.ts';
 import { leisureTable } from './leisure/params.ts';
 import { buildOntology } from './stimuli/ontology.ts';
 
 /** Capacidades de la vida diaria (peldaño 1, ADR-005): las que activa `generateWorld` por defecto. */
-export const LIFE_CAPABILITIES: readonly Capability[] = Object.freeze(['clock', 'needs', 'routines', 'mobility', 'economy', 'learning', 'relationships', 'memory', 'consolidation']);
+export const LIFE_CAPABILITIES: readonly Capability[] = Object.freeze(['clock', 'needs', 'routines', 'mobility', 'economy', 'learning', 'relationships', 'memory', 'consolidation', 'beliefs']);
 
 /**
  * Sistemas en orden de fase (021): necesidades, enfermedad y sueño (010), rutina (011), decisiones (017),
@@ -60,7 +62,13 @@ export function lifeSystems(world: World, catalogs: Catalogs = loadCatalogs()): 
       // Consecuencias de la charla (044 R-006 a R-009): llamadas, encuentros y vínculos.
       ...consequenceSystems(chatEngineCatalog(catalogs), CLAIM_DEFAULTS),
       // Relaciones (012): encuentros cotidianos con las posturas de la charla, vínculos, parejas, rupturas y olvido.
-      ...relationshipSystems({ cat: chatEngineCatalog(catalogs), onto, chat: CHAT_DEFAULTS, claim: CLAIM_DEFAULTS, p: RELATIONSHIP_DEFAULTS }),
+      ...relationshipSystems({
+        cat: chatEngineCatalog(catalogs), onto, chat: CHAT_DEFAULTS, claim: CLAIM_DEFAULTS, p: RELATIONSHIP_DEFAULTS,
+        // Lo que se cuenta en los encuentros (025 R-003 a R-006).
+        knowledge: { cat: knowledgeCatalog(catalogs), onto, claim: CLAIM_DEFAULTS, p: KNOWLEDGE_DEFAULTS },
+      }),
+      // Conocimiento (025): lo presenciado, lo oído y lo corregido, con sus consecuencias.
+      createKnowledgeSystem({ cat: knowledgeCatalog(catalogs), chat: chatEngineCatalog(catalogs), onto, claim: CLAIM_DEFAULTS, p: KNOWLEDGE_DEFAULTS }),
       // Memoria autobiográfica (013): codificación, repaso, olvido, consolidación en la red y capítulos.
       createMemorySystem(onto),
       // Origen de los estados (019 R-005): el último hecho detrás del estrés, el sueño, el dinero, la salud…
@@ -86,6 +94,21 @@ export function chatEngineCatalog(catalogs: Catalogs): ChatCatalog {
     })),
     // El celular (044 P2): el tipo de objeto que tiene `callAccess` por estrato.
     ...phoneOf(catalogs),
+  };
+}
+
+/** Temas de los que se habla (025 R-001), desde el catálogo `rumor_topics`, en la forma del motor. */
+export function knowledgeCatalog(catalogs: Catalogs): KnowledgeCatalog {
+  const n = (v: unknown) => (typeof v === 'number' ? v : 0);
+  const s = (v: unknown) => (typeof v === 'string' ? v : '');
+  return {
+    topics: catalogs.rumor_topics.entries.map((e) => ({
+      key: e.key, name: e.name, event: s(e.attrs?.event), subjects: s(e.attrs?.subjects) as TopicDef['subjects'],
+      ...(e.attrs?.when ? { when: e.attrs.when as Record<string, string> } : {}),
+      stimulus: s(e.attrs?.stimulus), magnitude: n(e.attrs?.magnitude), prior: n(e.attrs?.prior),
+      group: s(e.attrs?.group), state: s(e.attrs?.state), level: n(e.attrs?.level),
+      ...(e.attrs?.escalatesTo ? { escalatesTo: s(e.attrs.escalatesTo) } : {}),
+    })),
   };
 }
 

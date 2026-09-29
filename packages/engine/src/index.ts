@@ -452,6 +452,9 @@ export type { Attachment, EncounterDeps, Exchange, RelationshipParams, Side } fr
 // Causalidad hasta el origen (spec 019 v0.2).
 export { ORIGIN_RULES, STRESS_KEYS, WHY_DEFAULTS, createOriginsSystem, originCause, sleepCauses, walk, why, whyLines } from './causality/index.ts';
 export type { OriginKey, StateOrigins, WhyNode, WhyOptions } from './causality/index.ts';
+// Conocimiento, creencias y rumores (spec 025 v0.2).
+export { KNOWLEDGE_DEFAULTS, SEEN, TELL, beliefTruth, closeness, createKnowledgeSystem, hear, learnBelief, tellInEncounter, topicOf, topicsOf } from './knowledge/index.ts';
+export type { Hearing, KnowledgeCatalog, KnowledgeDeps, KnowledgeParams, Listener, TellDeps, TellSide, TopicDef } from './knowledge/index.ts';
 // Informe de vida (spec 020 v0.3).
 export { TURNING_POINTS, concerns, divergences, emergentProfile, lifeReport, objectiveChapters, turningPoints } from './lifereport/index.ts';
 export type { DayPoint, Divergence, EmergentProfile, LifeChapter, LifeReport, ProfileKey, ReportInput, TurningPoint } from './lifereport/index.ts';

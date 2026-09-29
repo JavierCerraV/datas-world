@@ -3,9 +3,9 @@
 import { Buffer } from 'node:buffer';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { eventText, lifeReport, why } from '@datas-world/engine';
+import { beliefTruth, eventText, lifeReport, topicOf, why } from '@datas-world/engine';
 import type { EntityId, WhyNode, WorldEvent } from '@datas-world/engine';
-import { buildOntology, loadCatalogs } from '@datas-world/generators';
+import { buildOntology, knowledgeCatalog, loadCatalogs } from '@datas-world/generators';
 import { DEFAULT_CONFIG, Gateway, anthropicAdapter, chatCatalogs, mockAdapter, openaiCompatibleAdapter, parseConfig } from '@datas-world/llm-gateway';
 import type { LlmRecord, ProviderAdapter, RecordStore } from '@datas-world/llm-gateway';
 import { CONTROL_COMMANDS, SqliteRecordStore, closeDb, enqueueCommand, eventsById, openWorldDb, queryEvents, trajectoryOf } from '@datas-world/persistence';
@@ -110,13 +110,21 @@ export function buildApi(opts: ApiOptions): Api {
 
   app.get('/api/citizens', async () => positions(reader.world));
 
+  const knowledge = knowledgeCatalog(loadCatalogs());
   app.get('/api/citizens/:id', async (req, reply) => {
     const p = citizenParams.safeParse(req.params);
     if (!p.success) return reply.code(400).send({ error: 'id inválido' });
     const events = queryEvents(reader.db, { participant: p.data.id as EntityId, latest: true, limit: 20 });
     const detail = citizenDetail(reader.world, p.data.id as EntityId, events);
     if (!detail) return reply.code(404).send({ error: 'no existe' });
-    return detail;
+    // 025 R-008: lo que cree de otros, con la verdad solo para quien observa.
+    const w = reader.world;
+    const beliefs = (w.citizens.get(p.data.id as EntityId)?.beliefs ?? []).filter((b) => b.about.startsWith('CIT-')).map((b) => ({
+      about: b.about, name: nameOf(w, b.about), predicate: b.predicate, topic: topicOf(knowledge, b.predicate)?.name ?? b.predicate.replace(/_/g, ' '),
+      source: b.source, sourceName: b.source.startsWith('CIT-') ? nameOf(w, b.source) : null, credibility: b.credibility, hops: b.hops ?? 0,
+      truth: beliefTruth(b, queryEvents(reader.db, { participant: b.about as EntityId, limit: 100_000 }), knowledge),
+    }));
+    return { ...detail, beliefs };
   });
 
   // 041 R-009: historia de vida (episodios del desarrollo por etapa) y familiograma extenso.

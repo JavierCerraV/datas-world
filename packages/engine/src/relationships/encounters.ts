@@ -20,7 +20,9 @@ import type { Rng } from '../rng.ts';
 import { rulesOf } from '../rules/routine.ts';
 import type { CauseRef } from '../events.ts';
 import type { DeepReadonly, Patch, System, SystemEvent, SystemOutput, TickCtx, WorldView } from '../simulation/system.ts';
-import type { Bond } from '../world.ts';
+import type { Belief, Bond } from '../world.ts';
+import { tellInEncounter } from '../knowledge/tell.ts';
+import type { TellDeps, TellSide } from '../knowledge/tell.ts';
 import { affectionFor, bondCauses, bondWith, hasPartner, relabel, sameOrg, setLabel, touch } from './bonds.ts';
 import { exchange } from './exchange.ts';
 import { APPROACH, CLASH, personStimulus } from './params.ts';
@@ -45,6 +47,8 @@ export interface EncounterDeps {
   chat: ChatParams;
   claim: ClaimParams;
   p: RelationshipParams;
+  /** 025: lo que se cuenta en los encuentros; sin esto, nadie cuenta nada. */
+  knowledge?: TellDeps;
 }
 
 export function createSocialEncounterSystem(d: EncounterDeps): System {
@@ -72,6 +76,9 @@ export function createSocialEncounterSystem(d: EncounterDeps): System {
       const storeFor = (row: number) => stores.get(row) ?? stores.set(row, storeOf(view, row)).get(row)!;
       const bondsFor = (row: number) =>
         bonds.get(row) ?? bonds.set(row, JSON.parse(JSON.stringify(view.citizens.get(formatId('CIT', row) as EntityId)?.bonds ?? [])) as Bond[]).get(row)!;
+      const beliefs = new Map<number, Belief[]>();
+      const beliefsFor = (row: number) =>
+        beliefs.get(row) ?? beliefs.set(row, JSON.parse(JSON.stringify(view.citizens.get(formatId('CIT', row) as EntityId)?.beliefs ?? [])) as Belief[]).get(row)!;
       const pcFor = (row: number): PersonCtx => {
         const hit = pcs.get(row);
         if (hit) return hit;
@@ -175,6 +182,17 @@ export function createSocialEncounterSystem(d: EncounterDeps): System {
           setLabel(ba, 'pareja', true);
           events.push({ type: 'RELATIONSHIP_STARTED', payload: { a, b }, causes: [{ state: 'funcion_mutua', entity: b, value: round(Math.min(fnAB, fnBA)), weight: 1 }, ...history()], participants: who });
         }
+        // 025 R-003 a R-006: quien se abre corrige o cuenta algo de un tercero (el oyente lo aplica el sistema de
+        // conocimiento al final del tick).
+        if (d.knowledge && view.capabilities.includes('beliefs')) {
+          const side = (row: number, id: EntityId, stance: string): TellSide => ({
+            id, store: storeFor(row), beliefs: beliefsFor(row), net: view.citizens.get(id)?.network as RelationalNetwork | undefined, stance, P, sens: pcFor(row).sens,
+          });
+          const sa = side(ra, a, ex.stanceA);
+          const sb = side(rb, b, ex.stanceB);
+          events.push(...tellInEncounter(view, sa, sb, here, d.knowledge, now, r.fork('cuenta-a')));
+          events.push(...tellInEncounter(view, sb, sa, here, d.knowledge, now, r.fork('cuenta-b')));
+        }
       };
 
       // R-001: por lugar (en orden de id) y por persona (en orden de fila); azar `relationships/<lugar>`.
@@ -202,7 +220,7 @@ export function createSocialEncounterSystem(d: EncounterDeps): System {
       const patches: Patch[] = [];
       for (const row of [...met].sort((x, y) => x - y)) {
         const id = formatId('CIT', row) as EntityId;
-        patches.push({ op: 'entity', id, owned: true, fields: { bonds: bonds.get(row), functions: stores.get(row) } });
+        patches.push({ op: 'entity', id, owned: true, fields: { bonds: bonds.get(row), functions: stores.get(row), ...(beliefs.has(row) ? { beliefs: beliefs.get(row) } : {}) } });
       }
       return { patches, events };
     },
