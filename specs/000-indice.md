@@ -32,7 +32,7 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [022](022-observability.md) | Observación, API y métricas | M4 (versión mínima adelantada: bloque V) | 027, 019, 020 | aprobada | `apps/api`, `apps/web` |
 | [023](023-reproducibility.md) | Reproducibilidad y azar | M0 (base) · M5 (rewind/replay y ramas) | 001, 002 | aprobada | `apps/cli`, `packages/engine`, `packages/engine/src/simulation`, `packages/generators` |
 | [024](024-visualization.md) | Visualización pixel art | M4 (versión mínima adelantada: bloque V) | 022, 003, 004 | aprobada | `apps/web` |
-| [025](025-knowledge.md) | Conocimiento, creencias y rumores | M3 | 012, 013, 014 | borrador | — |
+| [025](025-knowledge.md) | Conocimiento, creencias y rumores | M3 | 012, 013, 014, 019, 036, 037, 043, 044 | borrador | — |
 | [026](026-llm-gateway.md) | Pasarela LLM | Bloque L (lo que necesita la charla, 043) · M6 (decisiones y diarios) | 021, 023, 025, 040 | aprobada | `apps/api`, `packages/llm-gateway`, `packages/persistence` |
 | [027](027-persistence.md) | Persistencia | M0 (base) · M4 (retención) | 001, 002, 014 | aprobada | `apps/cli`, `apps/worker`, `packages/persistence` |
 | [028](028-experiments.md) | Experimentos y ramas | M5 | 023, 027, 022 | borrador | — |
