@@ -449,6 +449,9 @@ export {
   touch,
 } from './relationships/index.ts';
 export type { Attachment, EncounterDeps, Exchange, RelationshipParams, Side } from './relationships/index.ts';
+// Causalidad hasta el origen (spec 019 v0.2).
+export { ORIGIN_RULES, STRESS_KEYS, WHY_DEFAULTS, createOriginsSystem, originCause, sleepCauses, walk, why, whyLines } from './causality/index.ts';
+export type { OriginKey, StateOrigins, WhyNode, WhyOptions } from './causality/index.ts';
 // Memoria autobiográfica (spec 013 v0.3).
 export {
   CHAT_RECALL,

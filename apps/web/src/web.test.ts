@@ -89,7 +89,7 @@ describe('024 CA-002: el inspector muestra la ficha de /api/citizens/:id', () =>
     expect(all).toContain('Ocupación: desempleado/a');
     expect(all).toContain('Alimentación: 80 %');
     expect(all).toContain('Miedo: 20 %');
-    expect(t.historia).toEqual([{ line: '2027-01-04 19:00 · Tiempo libre: Ver series — Ana Rojas Gómez', causes: ['reforzador: diversión (0.6)', 'por un hecho anterior (EVT-00000000002)'] }]);
+    expect(t.historia).toEqual([{ id: expect.stringMatching(/^EVT-/) as unknown as string, line: '2027-01-04 19:00 · Tiempo libre: Ver series — Ana Rojas Gómez', causes: ['reforzador: diversión (0.6)', 'por un hecho anterior (EVT-00000000002)'] }]);
     const f = t.funcional.flatMap((s) => s.rows.map((r) => `${r.label}: ${r.value}`));
     expect(f).toContain('despido: desagradable 62 % · 2 veces');
     expect(f).toContain('buscando empleo (rutina) → trabajo: le funciona (tracking) · peso 0.31');

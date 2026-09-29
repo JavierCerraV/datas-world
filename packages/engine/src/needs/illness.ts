@@ -3,6 +3,7 @@
 import { MINUTES_PER_DAY } from '../calendar.ts';
 import type { NewEvent } from '../events.ts';
 import { formatId } from '../ids.ts';
+import { STRESS_KEYS, originCause, sleepCauses } from '../causality/origins.ts';
 import type { Patch, System } from '../simulation/system.ts';
 import { acuteKeys, needsParams } from './params.ts';
 
@@ -59,8 +60,10 @@ export const illnessSystem: System = {
         participants: [{ id, role: 'paciente' }],
         causes: [
           { state: 'estres', entity: id, value: Math.round(stress * 100) / 100, weight: 0.3 },
+          // 019 R-005: el hecho detrás del estrés y del sueño perdido, con el peso de su estado.
+          ...originCause(view, row, STRESS_KEYS, ctx.now, 0.3),
           { state: 'salud_fisica', entity: id, value: Math.round(physical * 100) / 100, weight: 0.3 },
-          { state: 'deuda_de_sueno', entity: id, value: i['state.sleepDebt']![row]!, weight: 0.2 },
+          ...sleepCauses(view, row, ctx.now, i['state.sleepDebt']![row]!, 0.2),
           { state: 'rng', weight: 0.2 },
         ],
       });

@@ -213,7 +213,11 @@ describe('spec 010 CA-001: quedarse dormido', () => {
       const r = runner(w, new Map(), extra);
       r.advanceDays(4);
       const events = r.drainEvents().filter((e) => e.type === 'OVERSLEPT' && e.at >= 3 * DAY);
-      for (const e of events) expect(e.causes.length).toBe(3);
+      // Deuda de sueño con su origen (019 R-005: lo que le quitó el sueño o su horario), energía y descuento.
+      for (const e of events) {
+        expect(e.causes.some((c) => 'state' in c && c.state === 'deuda_de_sueno')).toBe(true);
+        expect(e.causes.some((c) => 'event' in c || ('state' in c && c.state === 'horario_de_sueno'))).toBe(true);
+      }
       return new Set(events.map((e) => (e.payload as { citizenId: string }).citizenId)).size / n;
     };
     const deprived = late([insomnia]);

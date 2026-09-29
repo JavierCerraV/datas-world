@@ -3,7 +3,8 @@
 import { Buffer } from 'node:buffer';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import type { EntityId, WorldEvent } from '@datas-world/engine';
+import { why } from '@datas-world/engine';
+import type { EntityId, WhyNode, WorldEvent } from '@datas-world/engine';
 import { buildOntology, loadCatalogs } from '@datas-world/generators';
 import { DEFAULT_CONFIG, Gateway, anthropicAdapter, chatCatalogs, mockAdapter, openaiCompatibleAdapter, parseConfig } from '@datas-world/llm-gateway';
 import type { LlmRecord, ProviderAdapter, RecordStore } from '@datas-world/llm-gateway';
@@ -15,7 +16,7 @@ import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { lifeView } from './life.ts';
 import { WorldReader } from './reader.ts';
-import { citizenDetail, dateOf, eventView, positions, worldView } from './views.ts';
+import { citizenDetail, dateOf, eventView, nameOf, positions, worldView } from './views.ts';
 
 export interface ApiOptions {
   db: string;
@@ -145,6 +146,21 @@ export function buildApi(opts: ApiOptions): Api {
       ? queryEvents(reader.db, { afterId: q.data.since as EntityId, limit: q.data.limit })
       : queryEvents(reader.db, { latest: true, limit: q.data.limit });
     return events.map((e) => eventView(reader.world, e));
+  });
+
+  // 019 R-004, R-007: el árbol de causas de un evento, con fechas y nombres.
+  app.get('/api/events/:id/why', async (req, reply) => {
+    const id = (req.params as { id?: string }).id ?? '';
+    const q = req.query as { depth?: string };
+    const depth = Math.min(6, Math.max(1, Number(q.depth ?? 4) || 4));
+    if (!/^EVT-\d+$/.test(id)) return reply.code(400).send({ error: 'id inválido' });
+    const w = reader.world;
+    const tree = why((x) => eventsById(reader.db, [x as EntityId])[0], id, {
+      depth, view: w, names: (s) => s.replace(/CIT-\d+/g, (x) => nameOf(w, x) ?? x),
+    });
+    if (!tree) return reply.code(404).send({ error: 'no existe' });
+    const withDates = (n: WhyNode): WhyNode & { date?: string } => ({ ...n, ...(n.at !== undefined ? { date: dateOf(w, n.at) } : {}), children: n.children.map(withDates) });
+    return withDates(tree);
   });
 
   // R-003: SSE con reconexión; `Last-Event-ID` recupera los eventos perdidos.

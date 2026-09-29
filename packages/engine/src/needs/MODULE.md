@@ -92,3 +92,4 @@ Porta `updateNeeds` (tasas de energía, hambre y soledad; objetivos de estrés y
 - `STRESS_PEAK` cita la carga privada y el disparador del episodio, en lugar del neuroticismo.
 
 Paridad: `docs/validaciones/MF6-paridad-prototipo.md` (estrés 0,251, ya en rango; ánimo, empleo y enfermedades como en MF5). 2 pruebas ajustadas |
+| 2026-09-29 | m3/causalidad (C2) | 019 | 019 R-005: `FELL_ILL` cita, junto al estrés y la deuda de sueño, sus hechos de origen (`originCause` con las claves del estrés; `sleepCauses`: lo que le quitó el sueño o `horario_de_sueno`); `STRESS_PEAK` cita el hecho detrás de los estresores (despido, deuda o enfermedad) |

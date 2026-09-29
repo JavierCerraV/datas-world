@@ -1,5 +1,5 @@
 // 035 CA-001: la cadena del documento rector §12 para 20 conductas al azar de un mundo de 200 personas × 30 días.
-import { createRng } from '@datas-world/engine';
+import { createRng, why, whyLines } from '@datas-world/engine';
 import type { WorldEvent } from '@datas-world/engine';
 import { generateWorld, lifeRunner } from '@datas-world/generators';
 import { describe, expect, it } from 'vitest';
@@ -34,6 +34,18 @@ describe('035 CA-001: la cadena completa de una conducta', () => {
       if (!isComplete(steps)) incomplete.push(`${e.id}: ${steps.filter((s) => s.lines.length === 0).map((s) => s.step).join(', ')}`);
     }
     expect(incomplete, incomplete.join('\n')).toEqual([]);
+  });
+});
+
+describe('019 R-004, R-006: el árbol de causas de una conducta', () => {
+  it('llega, por sus fuentes de control, a los hechos que formaron hoy esas funciones', () => {
+    const { g, all, byId } = lived();
+    const chosen = all.filter((e) => e.at >= 0 && isChosenBehavior(e));
+    const reached = chosen.slice(0, 50).filter((e) => {
+      const tree = why((x) => byId.get(x), e.id, { depth: 3, minWeight: 0, view: g.world })!;
+      return whyLines(tree).some((l) => l.includes('origen actual de esa función'));
+    });
+    expect(reached.length).toBeGreaterThan(25);
   });
 });
 

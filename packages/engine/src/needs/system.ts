@@ -5,6 +5,7 @@ import { MINUTES_PER_DAY } from '../calendar.ts';
 import type { NewEvent } from '../events.ts';
 import { sensitivityOf } from '../functions/sensitivity.ts';
 import { formatId } from '../ids.ts';
+import { originCause } from '../causality/origins.ts';
 import type { EntityId } from '../ids.ts';
 import { loadOf } from '../private/pnr.ts';
 import type { MindState } from '../private/types.ts';
@@ -112,6 +113,8 @@ function step(view: WorldView, ctx: TickCtx): SystemOutput {
         participants: [{ id, role: 'persona' }],
         causes: [
           { state: 'estresores', entity: id, value: Math.round(stressors * 100) / 100, weight: 0.7 },
+          // 019 R-005: el hecho detrás de los estresores (despido, deuda, enfermedad).
+          ...originCause(view, row, ['desempleo', 'dinero', 'enfermedad'], view.now, 0.5),
           ...(privateLoad > 0 ? [{ state: 'carga_privada', entity: id, value: Math.round(privateLoad * 100) / 100, weight: 0.3 }] : []),
           ...(mind?.episode?.cause ? [{ event: mind.episode.cause as EntityId, weight: 0.2 }] : []),
         ],

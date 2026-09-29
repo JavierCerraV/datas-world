@@ -11,6 +11,7 @@ import { allocateId, emptyCounters, idKind, idNumber } from './ids.ts';
 import type { Counters, EntityId, WorldId } from './ids.ts';
 import type { MindState } from './private/types.ts';
 import type { MemoryStore } from './memory/types.ts';
+import type { StateOrigins } from './causality/origins.ts';
 import type { FunctionStore } from './functions/types.ts';
 import type { RelationalNetwork } from './relations/types.ts';
 import type { Rule } from './rules/rules.ts';
@@ -116,6 +117,8 @@ export interface Citizen extends BaseEntity {
   mind?: MindState;
   /** Memoria autobiográfica (013): episodios y capítulos, como los recuerda la persona. */
   memory?: MemoryStore;
+  /** Último hecho detrás de cada estado (019 R-005), para citarlo junto al estado. */
+  origins?: StateOrigins;
 }
 
 /** Intención tras la charla (044 §3). */

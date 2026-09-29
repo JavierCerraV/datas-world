@@ -2,6 +2,7 @@
 // que varios pagos seguidos vean el saldo actualizado) y convierte cada movimiento en un parche `transfer`
 // (015 R-006). También resuelve el déficit en el orden de R-004.
 import type { CauseRef } from '../events.ts';
+import { originCause } from '../causality/origins.ts';
 import { formatId, idNumber } from '../ids.ts';
 import type { EntityId } from '../ids.ts';
 import type { Account, Patch, SystemEvent, WorldView } from '../simulation/system.ts';
@@ -106,6 +107,7 @@ function borrow(ctx: PayCtx, row: number, shortfall: number, concept: string): b
       participants: [{ id, role: 'deudor' }],
       causes: [
         { state: 'deficit', entity: id, value: shortfall, weight: 0.7 },
+        ...originCause(ctx.ledger.view, row, ['desempleo', 'dinero'], ctx.now, 0.5),
         { state: `gasto.${concept}`, entity: id, weight: 0.3 },
       ],
     });
@@ -152,7 +154,11 @@ export function payWithChain(
 }
 
 /** Evento de impago (R-004, paso 5) y, si es el arriendo, `RENT_LATE` (008 CA-004). */
-export function missed(ctx: PayCtx, payer: EntityId, concept: string, amount: number, causes: CauseRef[]): void {
+export function missed(ctx: PayCtx, payer: EntityId, concept: string, amount: number, stateCauses: CauseRef[]): void {
+  // 019 R-005: detrás del saldo insuficiente, el hecho que dejó sin dinero (despido, deuda, impago anterior).
+  const v = ctx.ledger.view;
+  const who = payer.startsWith('HOU-') ? v.households.get(payer)?.headId : payer;
+  const causes = [...stateCauses, ...(who ? originCause(v, idNumber(who), ['desempleo', 'dinero'], ctx.now, 0.5) : [])];
   ctx.events.push({ type: 'PAYMENT_MISSED', payload: { payerId: payer, concept, amount }, participants: [{ id: payer, role: 'pagador' }], causes });
   if (concept === 'arriendo')
     ctx.events.push({ type: 'RENT_LATE', payload: { householdId: payer, amount }, participants: [{ id: payer, role: 'hogar' }], causes });

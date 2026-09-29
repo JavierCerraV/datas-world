@@ -1,7 +1,7 @@
 ---
 id: 019
 nombre: causality
-estado: borrador
+estado: aprobada
 hito: M3
 depende_de: [010, 011, 013, 014, 015, 035, 036, 039, 040]
 version: 0.2
@@ -107,7 +107,10 @@ No define tipos propios. Cambia las causas de los eventos que citan estados (R-0
 - Profundidad media de las cadenas; tipos que terminan siempre en un estado.
 - Bytes de `Citizen.origins` por persona.
 
-## 10. Preguntas abiertas (para el usuario)
+## 9 bis. Decisiones del usuario (2026-09-29)
+Aprobadas las cinco propuestas de §10 (P1 a P5) tal como están.
+
+## 10. Preguntas abiertas (resueltas en §9 bis)
 - **P1 — Pesos como aportes.** Los pesos no suman 1 al crear el evento (R-003); `why` los normaliza al mostrarlos. *Propuesta:* sí; ningún sistema los normaliza hoy y hacerlo mezclaría mecanismos distintos.
 - **P2 — Origen de los estados en el motor.** Cada persona guarda el último hecho de cada tipo de estado (≈ 0,2 KB) y los sistemas lo citan al crear el evento (R-005). La alternativa es adivinarlo al consultar (buscar en el registro hechos recientes que suelen causar ese estado), que no cuesta memoria pero no es la causa que usó el motor. *Propuesta:* en el motor.
 - **P3 — Fuentes de control con su origen actual.** Las causas de una conducta se siguen hasta los hechos que formaron sus funciones con el estado de hoy, avisándolo en el texto (R-006). *Propuesta:* sí; guardar una copia por conducta no cabe.
@@ -125,3 +128,6 @@ Según la 035 §8:
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |
 | 2026-09-29 | 0.2 | Reescritura sobre el motor funcional (bloque C de M3), tras medir el registro (100 personas × 60 días: íntegro, pero el 89 % de los eventos de la vida diaria se corta en un estado): origen de los estados en la persona (R-005), fuentes de control hasta su origen (R-006), rechazo de causas futuras por id (R-002), pesos como aportes (R-003), `why` en el motor con CLI, API y visor. CA-004 y CA-005 nuevos. Preguntas P1 a P5 para el usuario |
+| 2026-09-29 | 0.2 | Decisiones del usuario (§9 bis): P1 a P5 aprobadas |
+| 2026-09-29 | 0.2 | Estado → aprobada |
+| 2026-09-29 | 0.2 | Implementación (bloque C de M3). En 100 personas × 60 días, los eventos que citan un estado y llegan a un hecho en profundidad 3 pasan del 11 % al 73 % (CA-004 se mide con todas las ramas, sin la poda de lectura del árbol). Hallazgo: en la población actual nadie trasnocha por actividades, así que la deuda de sueño sale del horario (`horario_de_sueno`) y «se quedó dormido» no llega a un hecho; es la verdad del modelo, no un hueco del registro. Los eventos del calendario (salario, arriendo, trayectos, inicio del día) solo tienen estados por naturaleza. Resultados en `docs/validaciones/M3-causalidad.md`. Sin cambios en CA |

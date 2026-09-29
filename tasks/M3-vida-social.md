@@ -21,6 +21,10 @@ Specs: 012 (aprobada, v0.2), 013, 019, 020 y 025 (borradores). Una rama por bloq
 - [x] M6 Visor: capítulos y recuerdos en la pestaña **Vida**.
 
 ## Bloques siguientes (specs en borrador: resolver sus preguntas y aprobarlas antes)
-- [ ] C 019 Causalidad con el vector de aportes y la cadena de origen.
+- [x] C 019 Causalidad con el vector de aportes y la cadena de origen (rama `m3/causalidad`):
+  - [x] C1 R-002 en `makeEvent` y módulo `packages/engine/src/causality/`.
+  - [x] C2 Origen de los estados (R-005): sistema `origins` y citas en necesidades, enfermedad, rutina y economía.
+  - [x] C3 `why` (R-004, R-006) en la CLI (`event:why`), la API y el visor («¿por qué?» en la Historia).
+  - [x] C4 CA-001 a CA-005; medición del registro en 1 año.
 - [ ] H 020 Historia retrospectiva funcional y la resiliencia como métrica de trayectoria.
 - [ ] K 025 Conocimiento, creencias y rumores (reescritura).

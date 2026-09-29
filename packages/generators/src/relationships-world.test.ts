@@ -1,5 +1,5 @@
 // Relaciones en un mundo que vive (spec 012, bloque R de M3): 100 personas × 1 año con la semilla del proyecto.
-import { affectionFor } from '@datas-world/engine';
+import { affectionFor, walk, why } from '@datas-world/engine';
 import type { WorldEvent } from '@datas-world/engine';
 import { describe, expect, it } from 'vitest';
 import { KIN_FAMILIARITY } from './development/bonds.ts';
@@ -26,9 +26,9 @@ describe('012 R-007: punto de partida desde el desarrollo', () => {
   });
 });
 
-describe('M3 (012 y 013): 100 personas × 1 año', { timeout: 900_000 }, () => {
-  it('012 CA-001 asimetría, CA-002 vínculos por persona, sin degeneración; 013 memoria acotada y viva', () => {
-    const { world } = generateWorld({ seed: 482917, population: 100 });
+describe('M3 (012, 013 y 019): 100 personas × 1 año', { timeout: 900_000 }, () => {
+  it('012 CA-001 asimetría, CA-002 vínculos por persona, sin degeneración; 013 memoria acotada y viva; 019 registro causal', () => {
+    const { world, events: born } = generateWorld({ seed: 482917, population: 100 });
     const r = lifeRunner(world);
     r.resume('prueba');
     const events: WorldEvent[] = [];
@@ -73,5 +73,14 @@ describe('M3 (012 y 013): 100 personas × 1 año', { timeout: 900_000 }, () => {
     expect(lived.length / people.length).toBeGreaterThan(2);
     expect(count(events, 'SCHEMA_FORMED')).toBeGreaterThan(0);
     expect(lived.some((m) => Math.abs(m.valence - m.valence0) > 0.01)).toBe(true);
+    // 019 CA-002 y CA-003: toda causa de evento existe y es anterior (por id y por minuto de la vida diaria).
+    const all = [...born, ...events];
+    const byId = new Map(all.map((e) => [e.id as string, e]));
+    const valid = (e: WorldEvent) => e.causes.length > 0 && e.causes.every((c) => !('event' in c) || (byId.has(c.event) && c.event < e.id && byId.get(c.event)!.at <= Math.max(e.at, 0)));
+    expect(events.filter(valid).length / events.length).toBeGreaterThanOrEqual(0.95);
+    // 019 CA-004: los eventos que citan un estado llegan a algún hecho del registro en profundidad 3.
+    const citing = events.filter((e) => e.causes.some((c) => 'state' in c));
+    const reached = citing.filter((e) => [...walk(why((x) => byId.get(x), e.id, { depth: 3, minWeight: 0, view: world })!)].some(({ n, d }) => d > 0 && n.kind === 'event'));
+    expect(reached.length / citing.length).toBeGreaterThanOrEqual(0.6);
   });
 });

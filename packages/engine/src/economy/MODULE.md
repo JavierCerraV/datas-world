@@ -100,3 +100,4 @@ Porta el `daily` del prototipo, sustituyendo el costo diario por estrato por los
 |---|---|---|---|
 | 2026-09-25 | m2/f-economia | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-25 | m2/f-economia (F1–F6) | 015, 008, 010, 021 | `params.ts`, `rules.ts`, `ledger.ts`, `income.ts`, `columns.ts`, `system.ts` e `index.ts`. 8 pruebas |
+| 2026-09-29 | m3/causalidad (C2) | 019 | 019 R-005: `DEBT_TAKEN` y `PAYMENT_MISSED`/`RENT_LATE` citan, junto al déficit o el saldo insuficiente, el hecho que dejó sin dinero (despido, deuda o impago anterior; en un hogar, los de su jefe o jefa) |
