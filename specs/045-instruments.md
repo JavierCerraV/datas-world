@@ -151,7 +151,8 @@ Coste: ≈ 50 B por respuesta a un ítem. 180 adultos × 9 ítems × 12 aplicaci
   - culpa o vergüenza: `emo.shame`;
   - rumiación: episodios `PNR_EPISODE` (039);
   - aislamiento: encuentros y trato de sus vínculos (012);
-  - estrés: `state.stress`.
+  - estrés: `state.stress`;
+  - sucesos adversos: lo que le pasó en la ventana (despido, ruptura, muerte de un familiar, enfermedad, deudas, discusiones), además de cómo quedó su estado.
 
   Lo que el motor no modela todavía (por ejemplo, el apetito como síntoma o la ideación suicida) no se aproxima: queda «sin base» y se registra en `docs/investigacion/preguntas-abiertas.md`.
 
@@ -161,7 +162,12 @@ Coste: ≈ 50 B por respuesta a un ítem. 180 adultos × 9 ítems × 12 aplicaci
   - un ruido pequeño del flujo RNG `sys:instrument/<adm>/<cit>` (023).
 
   Misma semilla y mismo mundo dan las mismas respuestas (CLAUDE.md, regla 2). Cada respuesta guarda los indicadores y valores que la produjeron: así el «¿por qué respondió 2?» se puede explicar (019).
-- **R-006** [T] — **Estilo de respuesta.** Aquiescencia, deseabilidad social y precisión salen del temperamento (009) y de la historia de la persona, no del azar. Por ejemplo, una persona con historia de castigo por quejarse infraestima sus síntomas. Esto produce la diferencia entre el estado del motor y la puntuación, que es lo que hace útil al instrumento.
+- **R-006** [T] — **Estilo de respuesta desde la historia** (decisión del usuario, 2026-09-30: «las respuestas deben ser de acuerdo a como la persona ha vivido, su historia, sus eventos de la semana»). La aquiescencia, la deseabilidad social y la precisión salen de los episodios de desarrollo (041) y de las reglas (038) de la persona, no del azar ni del temperamento:
+  - **minimiza** (deseabilidad): expresión castigada, gritos o castigo físico en la crianza, confidencias burladas, defensa castigada, callar ante la burla;
+  - **expresa** (resta a la deseabilidad y baja el ruido): nombrar las emociones, consuelo, un confidente, apoyo de la pareja;
+  - **asiente** (aquiescencia): obedecer sin premio, reglas de obediencia, y la proporción de reglas que sigue por quien las dice (038).
+
+  La deseabilidad reduce el síntoma informado; la aquiescencia acerca la respuesta al acuerdo, también en los ítems invertidos. Cada respuesta guarda su estilo y los episodios que lo explican. Esto produce la diferencia entre el estado del motor y la puntuación, que es lo que hace útil al instrumento. Lo vivido en la ventana entra además por el indicador `sucesos_adversos` (R-004).
 - **R-007** [M] — **A quién se aplica.** El investigador elige una de cuatro formas:
   - **Todos:** todas las personas vivas con edad ≥ `minAge` en el minuto de la aplicación.
   - **Al azar:** `n` personas elegibles por muestreo aleatorio simple o estratificado (por sexo, grupo de edad, barrio…), con el flujo RNG `sys:instrument/<adm>/muestreo`. La semilla se guarda y se muestra; la misma semilla da la misma muestra.
@@ -244,7 +250,7 @@ El modo `observacion` no emite eventos del mundo: sus resultados viven en las ta
 - [x] ~~Para proveedores que no aceptan PDF, ¿extraer el texto en local?~~ No por ahora: `instrumentModels` solo ofrece modelos que aceptan PDF (usuario, 2026-09-30). La extracción local queda para más adelante.
 - [x] ~~¿Modo «entrevista» en el que el LLM responde en la voz de la persona?~~ Más adelante (usuario, 2026-09-30). Esta spec solo tiene el modo determinista (R-005).
 - [ ] ¿Qué indicadores faltan en el motor para los instrumentos prioritarios (depresión, ansiedad, estrés percibido, flexibilidad psicológica como el AAQ-II)? Por ejemplo, el apetito como síntoma, la ideación suicida y la preocupación.
-- [ ] **R-006 y el temperamento.** La 009 R-006 solo deja leer el temperamento a los mecanismos de aprendizaje (prueba de arquitectura). Opciones: (a) sacar el estilo de respuesta solo de la historia (por ejemplo, del castigo por quejarse que aprendió la persona, 036); (b) registrar el estilo de respuesta como mecanismo del temperamento. Mientras se decide, el estilo es neutro y solo hay ruido.
+- [x] ~~R-006 y el temperamento~~: el estilo sale de la historia (episodios de desarrollo y reglas), no del temperamento (usuario, 2026-09-30).
 - [ ] ¿El modo `en_el_mundo` debe afectar a la persona (reactividad a la medición) o solo dejar un recuerdo? Mientras no se decida, solo deja el evento y el recuerdo (R-008).
 
 ## 11. Historial de cambios
@@ -255,3 +261,4 @@ El modo `observacion` no emite eventos del mundo: sus resultados viven en las ta
 | 2026-09-30 | 0.2 | Decisiones del usuario sobre §10: biblioteca con los instrumentos de CliniKLab (Konrad Lorenz); solo modelos que aceptan PDF; modo entrevista más adelante |
 | 2026-09-30 | 0.2 | Estado → aprobada |
 | 2026-09-30 | 0.2 | Implementación del núcleo en `packages/engine/src/instruments` (I1–I3, I7): 12 indicadores con umbrales de síntoma [M] (catálogo `indicators` de los generadores), respuesta determinista, las cuatro formas de selección y la estadística. Pregunta abierta nueva sobre R-006 (el temperamento no se puede leer fuera de sus mecanismos, 009 R-006): el estilo queda neutro por ahora |
+| 2026-09-30 | 0.2 | Decisión del usuario sobre R-006: el estilo de respuesta sale de la historia (episodios de desarrollo 041 y reglas 038). Indicador nuevo `sucesos_adversos` (R-004) para lo vivido en la ventana. Implementado en `instruments/style.ts` |

@@ -8,7 +8,7 @@ import { idNumber } from '../ids.ts';
 import type { DayPoint } from '../lifereport/types.ts';
 import type { WorldView } from '../simulation/system.ts';
 
-export const INDICATORS_VERSION = 1;
+export const INDICATORS_VERSION = 2;
 
 export const INDICATORS = Object.freeze([
   'animo_bajo',
@@ -23,7 +23,17 @@ export const INDICATORS = Object.freeze([
   'miedo',
   'irritabilidad',
   'preocupacion_economica',
+  'sucesos_adversos',
 ] as const);
+
+/**
+ * Peso de cada hecho adverso vivido en la ventana [M] (lo que pasó esa semana, además de cómo quedó su estado).
+ * Las muertes cuentan si quien llama las incluye (las de su familia, como en el informe de vida, 020).
+ */
+export const ADVERSE_WEIGHTS: Readonly<Record<string, number>> = Object.freeze({
+  JOB_LOST: 1, BREAKUP: 1, CITIZEN_DIED: 1, CONFRONTATION: 0.4, FELL_ILL: 0.3, PAYMENT_MISSED: 0.3,
+  RENT_LATE: 0.3, ARGUMENT: 0.3, JOB_WARNING: 0.3, BOND_STRAINED: 0.2, STRESS_PEAK: 0.2,
+});
 export type IndicatorKey = (typeof INDICATORS)[number];
 export const isIndicator = (k: string): k is IndicatorKey => (INDICATORS as readonly string[]).includes(k);
 
@@ -41,6 +51,8 @@ export const INDICATOR_PARAMS = Object.freeze({
   sleepDebtMax: 480,
   /** Fracción de días de la ventana con el hecho que vale 1. */
   daysFull: 0.5,
+  /** Suma de pesos adversos en la ventana que vale 1 (p. ej. un despido y una ruptura). */
+  adverseFull: 2,
   /** Ventana cuando el instrumento pregunta por el estado actual (`recallDays: null`). */
   defaultDays: 14,
 });
@@ -73,7 +85,9 @@ export function indicatorValues(input: IndicatorInput): Record<IndicatorKey, num
   const window = trajectory.filter((p) => p.day > today - days && p.day <= today);
   const mean = (key: 'mood' | 'stress', current: number) =>
     window.length ? window.reduce((s, p) => s + p[key], 0) / window.length : current;
-  const recent = events.filter((e) => e.at > since && e.at <= now && e.participants.some((p) => p.id === id));
+  const inWindow = events.filter((e) => e.at > since && e.at <= now);
+  const recent = inWindow.filter((e) => e.participants.some((p) => p.id === id));
+  const adverse = inWindow.reduce((s, e) => s + (ADVERSE_WEIGHTS[e.type] ?? 0), 0);
   const daysWith = (type: string) => new Set(recent.filter((e) => e.type === type).map((e) => Math.floor(e.at / MINUTES_PER_DAY))).size;
   const byDays = (n: number) => clamp01(n / (days * INDICATOR_PARAMS.daysFull));
 
@@ -100,6 +114,7 @@ export function indicatorValues(input: IndicatorInput): Record<IndicatorKey, num
     miedo: clamp01(at('emo.fear', 0)),
     irritabilidad: clamp01(at('emo.anger', 0)),
     preocupacion_economica: clamp01(pressure + 0.2 * money),
+    sucesos_adversos: clamp01(adverse / INDICATOR_PARAMS.adverseFull),
   };
   for (const k of INDICATORS) v[k] = r3(v[k]);
   return v;

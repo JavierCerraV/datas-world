@@ -1,6 +1,7 @@
 // Tipos de la capa de instrumentos (spec 045 §3), en su parte de cálculo. La ingesta, la biblioteca y las tablas
 // viven fuera del motor (API, pasarela 026, persistencia 027).
 import type { EntityId } from '../ids.ts';
+import type { ResponseStyle } from './style.ts';
 
 export interface InstrumentOption {
   label: string;
@@ -77,5 +78,5 @@ export interface ResponseResult {
   score: number;
   subscores?: Record<string, number>;
   category: string;
-  style: { acquiescence: number; desirability: number; noise: number };
+  style: ResponseStyle;
 }

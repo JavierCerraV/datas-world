@@ -460,10 +460,16 @@ export { TURNING_POINTS, concerns, divergences, emergentProfile, lifeReport, obj
 export type { DayPoint, Divergence, EmergentProfile, LifeChapter, LifeReport, ProfileKey, ReportInput, TurningPoint } from './lifereport/index.ts';
 // Instrumentos psicológicos (spec 045).
 export {
+  ADVERSE_WEIGHTS,
   INDICATORS,
   INDICATORS_VERSION,
   INDICATOR_PARAMS,
+  NEUTRAL_STYLE,
   RESPONSE_NOISE,
+  STYLE_EFFECT,
+  STYLE_EPISODES,
+  STYLE_PARAMS,
+  responseStyle,
   ageGroup,
   answerInstrument,
   candidatesOf,
@@ -495,6 +501,7 @@ export type {
   InstrumentOption,
   ResolvedSelection,
   ResponseResult,
+  ResponseStyle,
   Selection,
 } from './instruments/index.ts';
 // Memoria autobiográfica (spec 013 v0.3).

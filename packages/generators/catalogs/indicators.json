@@ -1,6 +1,6 @@
 {
   "name": "indicators",
-  "version": "2026.09.1",
+  "version": "2026.09.2",
   "source": "Spec 045 R-004: catálogo cerrado de indicadores que calcula packages/engine/src/instruments/indicators.ts (INDICATORS_VERSION 1). Lo usan la pasarela (correspondencia de ítems, R-002) y el visor. Cada valor está en [0,1]: 0 = sin síntoma, 1 = extremo, en la ventana de días del instrumento. No forma parte de la generación del mundo (no está en CATALOG_NAMES).",
   "entries": [
     {
@@ -91,6 +91,15 @@
       "attrs": {
         "description": "Días con episodios de pensamiento negativo repetitivo en la ventana (la mitad de los días = 1).",
         "source": "PNR_EPISODE (039)"
+      }
+    },
+    {
+      "key": "indicador.sucesos_adversos",
+      "name": "Sucesos adversos recientes",
+      "since": "M4",
+      "attrs": {
+        "description": "Lo que le pasó en la ventana, además de cómo quedó su estado: despido, ruptura o muerte de un familiar (1 cada uno), confrontación (0,4), enfermedad, pago o arriendo atrasado, discusión o advertencia en el trabajo (0,3), vínculo tenso o pico de estrés (0,2). Una suma de 2 vale 1.",
+        "source": "JOB_LOST, BREAKUP, CITIZEN_DIED, CONFRONTATION, FELL_ILL, PAYMENT_MISSED, RENT_LATE, ARGUMENT, JOB_WARNING, BOND_STRAINED, STRESS_PEAK"
       }
     },
     {

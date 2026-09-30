@@ -3,6 +3,7 @@ import type { EntityId } from '../ids.ts';
 import type { Rng } from '../rng.ts';
 import { isIndicator } from './indicators.ts';
 import type { IndicatorKey } from './indicators.ts';
+import type { ResponseStyle } from './style.ts';
 import type { Answer, Instrument, InstrumentItem, ResponseResult } from './types.ts';
 
 /** Ruido de la respuesta (045 §8, [M]). */
@@ -27,13 +28,23 @@ export function checkInstrument(ins: Instrument): void {
   }
 }
 
-function answerItem(it: InstrumentItem, values: Readonly<Record<IndicatorKey, number>>, rng: Rng): Answer {
+/** Estilo neutro: sin sesgos, solo el ruido base. */
+export const NEUTRAL_STYLE: ResponseStyle = Object.freeze({ acquiescence: 0, desirability: 0, noise: RESPONSE_NOISE, basis: [] });
+
+/** Cuánto mueve cada sesgo la intensidad [M]: la deseabilidad reduce el síntoma; la aquiescencia acerca al acuerdo. */
+export const STYLE_EFFECT = Object.freeze({ desirability: 0.5, acquiescence: 0.25 });
+
+function answerItem(it: InstrumentItem, values: Readonly<Record<IndicatorKey, number>>, rng: Rng, style: ResponseStyle): Answer {
   const basis = it.mapping.map((m) => ({ indicator: m.indicator, value: values[m.indicator as IndicatorKey] }));
   const total = it.mapping.reduce((s, m) => s + Math.abs(m.weight), 0);
   if (!total) return { n: it.n, value: null, basis, intensity: null };
   const latent = it.mapping.reduce((s, m, i) => s + Math.abs(m.weight) * (m.weight >= 0 ? basis[i]!.value : 1 - basis[i]!.value), 0) / total;
-  const noisy = clamp01(latent + rng.normal(0, RESPONSE_NOISE));
-  const intensity = it.reversed ? 1 - noisy : noisy;
+  // R-006: quien minimiza informa menos síntoma; el ruido es el de su estilo; tras invertir, la aquiescencia
+  // acerca la respuesta al acuerdo (opciones altas), sea cual sea el sentido del ítem.
+  const reported = latent * (1 - STYLE_EFFECT.desirability * style.desirability);
+  const noisy = clamp01(reported + rng.normal(0, style.noise));
+  const oriented = it.reversed ? 1 - noisy : noisy;
+  const intensity = oriented + STYLE_EFFECT.acquiescence * style.acquiescence * (1 - oriented);
   const vals = it.options.map((o) => o.value);
   const lo = Math.min(...vals);
   const hi = Math.max(...vals);
@@ -61,19 +72,19 @@ export function categoryOf(ins: Instrument, score: number): string {
 
 /**
  * CA-003: la respuesta de la persona. `values` son sus indicadores (`indicatorValues`) y `rng` su flujo
- * (`responseRng`). El estilo de respuesta (R-006) es neutro hasta decidir de dónde sale (MODULE.md §8).
+ * (`responseRng`) y `style` su estilo de respuesta (`responseStyle`, R-006; neutro si no se da).
  */
-export function answerInstrument(ins: Instrument, values: Readonly<Record<IndicatorKey, number>>, rng: Rng): ResponseResult {
+export function answerInstrument(
+  ins: Instrument,
+  values: Readonly<Record<IndicatorKey, number>>,
+  rng: Rng,
+  style: ResponseStyle = NEUTRAL_STYLE,
+): ResponseResult {
   checkInstrument(ins);
   const items = [...ins.items].sort((a, b) => a.n - b.n);
-  const answers = items.map((it) => answerItem(it, values, rng.fork(it.n)));
+  const answers = items.map((it) => answerItem(it, values, rng.fork(it.n), style));
   const score = scoreOf(ins, answers);
-  const result: ResponseResult = {
-    answers,
-    score,
-    category: categoryOf(ins, score),
-    style: { acquiescence: 0, desirability: 0, noise: RESPONSE_NOISE },
-  };
+  const result: ResponseResult = { answers, score, category: categoryOf(ins, score), style };
   if (ins.scoring.subscales?.length)
     result.subscores = Object.fromEntries(ins.scoring.subscales.map((s) => [s.name, scoreOf(ins, answers, s.items)]));
   return result;

@@ -18,7 +18,7 @@ No lee el registro de eventos ni la base de datos: quien llama (la API o la CLI)
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 045 | CA-003 (respuestas idénticas con la misma semilla; el mundo no cambia), CA-008 (cuatro formas de selección), CA-009 (descriptiva, grupos y *d*). R-004, R-005, R-007 y R-009 en su parte de cálculo | CA-001, CA-002, CA-007, CA-010 (ingesta, revisión y biblioteca: API); CA-004 y CA-005 (validación en el mundo de ejemplo, I10); CA-006 (muestras: persistencia); R-006 (estilo de respuesta, ver §8); R-008 `en_el_mundo` |
+| 045 | CA-003 (respuestas idénticas con la misma semilla; el mundo no cambia), CA-008 (cuatro formas de selección), CA-009 (descriptiva, grupos y *d*). R-004, R-005, R-006, R-007 y R-009 en su parte de cálculo | CA-001, CA-002, CA-007, CA-010 (ingesta, revisión y biblioteca: API); CA-004 y CA-005 (validación en el mundo de ejemplo, I10); CA-006 (muestras: persistencia); R-008 `en_el_mundo` |
 
 ## 3. API pública
 Desde `@datas-world/engine`:
@@ -27,7 +27,9 @@ Desde `@datas-world/engine`:
 |---|---|
 | `INDICATORS`, `INDICATORS_VERSION`, `IndicatorKey` | Catálogo cerrado de indicadores (R-004). `catalogs/indicators.json` de los generadores lo describe para la pasarela y el visor; una prueba comprueba que coinciden |
 | `indicatorValues(input)` | Valores en [0,1] de todos los indicadores para una persona en la ventana de `recallDays` días. `input`: la vista del mundo, el id, sus hechos, su trayectoria y el minuto |
-| `answerInstrument(instrument, values, rng)` | Respuesta de la persona (R-005): opción de cada ítem con su base, puntuación, subescalas y categoría. `rng` es el flujo `sys:instrument/<adm>/<cit>` |
+| `answerInstrument(instrument, values, rng, style?)` | Respuesta de la persona (R-005): opción de cada ítem con su base e intensidad, puntuación, subescalas, categoría y estilo. `rng` es el flujo `sys:instrument/<adm>/<cit>`; sin `style`, `NEUTRAL_STYLE` |
+| `responseStyle(view, id, events, noise)`, `STYLE_EPISODES`, `STYLE_PARAMS`, `STYLE_EFFECT`, tipo `ResponseStyle` | Estilo de respuesta desde la historia (R-006): aquiescencia, deseabilidad y ruido, con los `DEVELOPMENT_YEAR` que lo explican |
+| `ADVERSE_WEIGHTS` | Peso de cada hecho adverso de la ventana en el indicador `sucesos_adversos` |
 | `responseRng(root, administration, citizen)` | El flujo con nombre de una respuesta (023) |
 | `scoreOf(instrument, answers)`, `categoryOf(instrument, score)` | Puntuación y categoría |
 | `candidatesOf(view, extra?)`, `ageGroup(age)` | Personas del mundo (sin antepasados fuera del mundo), con edad, si viven y sus variables de agrupación (`sexo`, `edad` en grupos de 10 años y las que añada `extra`), en orden de id |
@@ -39,6 +41,8 @@ Desde `@datas-world/engine`:
 - **Entradas ya leídas.** Igual que `lifereport`: la API lee los hechos y la trayectoria de SQLite y se los pasa. El motor no hace E/S.
 - **Indicadores calibrados como síntomas.** Cada indicador vale 0 cuando no hay síntoma y 1 en el extremo, con umbrales [M] en `INDICATOR_PARAMS` (p. ej. el ánimo bajo empieza a contar por debajo de 0,6). Sin esto, el ánimo medio del pueblo (≈ 0,5) daría a todos una puntuación moderada. Los umbrales se calibran con la validación I10 (CA-004, CA-005).
 - **Respuesta.** Intensidad latente = media ponderada de los indicadores del ítem (con peso negativo cuenta `1 − v`), más ruido normal (σ = 0,05) del flujo de la persona; en los ítems invertidos, `1 − intensidad`. La opción es la de valor más cercano a la intensidad escalada al rango de opciones (empate: la menor). Un ítem sin correspondencia no puntúa (`value: null`).
+- **Estilo desde la historia (R-006, decisión del usuario).** Se cuentan los episodios de desarrollo (041) de tres familias: los que enseñan a callar el malestar (expresión castigada, confidencia burlada…) suben la deseabilidad; los que enseñan a nombrarlo (nombrar la emoción, consuelo, confidente) la bajan y reducen el ruido; los de obediencia sin premio, junto con la proporción de reglas seguidas por quien las dice (038), suben la aquiescencia. 0,12 por episodio, con tope de 0,6 [M]. En la respuesta, la deseabilidad reduce hasta la mitad el síntoma informado y la aquiescencia acerca hasta un 25 % al acuerdo tras invertir el ítem. No lee el temperamento (009 R-006).
+- **Lo vivido en la ventana.** Además del estado que dejó, el indicador `sucesos_adversos` suma los hechos adversos de la ventana (un despido y una ruptura valen 1).
 - **Azar.** Cada respuesta tiene su flujo (`sys:instrument` → aplicación → persona) y el muestreo el suyo (`sys:instrument` → aplicación → `muestreo`). Cambiar a quién se aplica no cambia la respuesta de nadie.
 - **Muestreo estratificado.** Asignación proporcional con restos mayores (empates por nombre de estrato), y dentro de cada estrato muestreo sin reemplazo por Fisher-Yates parcial. Cada estrato queda a ±1 de su proporción (CA-008).
 - **Estadística.** Desviación típica muestral (n − 1), cuartiles por interpolación lineal (tipo 7), *d* de Cohen con la desviación típica combinada y alfa de Cronbach con varianzas muestrales. Sin pruebas de significación (fuera de alcance, 045 §2).
@@ -52,13 +56,13 @@ Desde `@datas-world/engine`:
 
 ## 6. Cómo se prueba
 - `src/instruments/instruments.test.ts`: indicadores, respuesta, selección y estadística con el mundo de prueba de `testing.ts` y datos sintéticos.
+- `src/instruments/style.test.ts`: estilo desde los episodios y las reglas, su efecto en la puntuación y el indicador de sucesos adversos.
 - `pnpm test`.
 
 ## 7. Paridad con el prototipo
 No aplica: el prototipo no tiene instrumentos.
 
 ## 8. Pendientes y deuda
-- [ ] R-006 (estilo de respuesta): la spec lo deriva del temperamento, pero 009 R-006 solo deja leer el temperamento a los mecanismos de aprendizaje. Hasta decidirlo con el usuario, el estilo es neutro (aquiescencia y deseabilidad 0) y solo hay ruido.
 - [ ] Validación en el mundo de ejemplo tras 60 días (I10): varianza, alfa y validez convergente.
 - [ ] Modo `en_el_mundo` (R-008): evento `INSTRUMENT_ANSWERED` y recuerdo.
 
@@ -66,3 +70,4 @@ No aplica: el prototipo no tiene instrumentos.
 | Fecha | Tarea / commit | Specs | Cambio |
 |---|---|---|---|
 | 2026-09-30 | I1–I3, I7 | 045 | Módulo nuevo: indicadores, respuesta determinista, selección (todos, azar, seleccionados, individual) y estadística (descriptiva, grupos, *d*, alfa, Pearson) |
+| 2026-09-30 | I2 (R-006) | 045 | Estilo de respuesta desde la historia (`style.ts`, decisión del usuario) e indicador `sucesos_adversos`; `INDICATORS_VERSION` 2 |

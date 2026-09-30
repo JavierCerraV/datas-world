@@ -4,7 +4,7 @@ Spec: 045 v0.2 (aprobada por el usuario el 2026-09-30). Orden: en paralelo a la 
 
 - [x] I0 Revisar y aprobar la spec 045 con el usuario (preguntas abiertas de §10: instrumentos de la biblioteca, texto de PDF para proveedores sin PDF, modo entrevista, indicadores que faltan, reactividad).
 - [x] I1 Catálogo de indicadores (`catalogs/indicators.json`) y sus funciones puras sobre la ventana de días (045 R-004), con pruebas.
-- [x] I2 Motor de respuesta determinista: intensidad y ruido con su flujo RNG (R-005; CA-003). Estilo de respuesta (R-006) neutro hasta resolver la pregunta abierta de §10.
+- [x] I2 Motor de respuesta determinista: intensidad y ruido con su flujo RNG (R-005; CA-003), y estilo de respuesta desde la historia con el indicador de sucesos adversos (R-006, decisión del usuario).
 - [x] I3 Selección: todos, al azar (simple y estratificado), seleccionados e individual, con exclusiones (R-007; CA-008).
 - [ ] I4 Tablas en SQLite: biblioteca (`data/instruments.db`), aplicaciones, respuestas y muestras con miembros (027; R-013).
 - [ ] I5 Ingesta: propósito `instrument` y `instrumentModels` en la pasarela (026); PDF con el modelo elegido, salida estructurada y Zod; correspondencia con el catálogo (R-001, R-002; CA-001, CA-007).
