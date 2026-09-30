@@ -58,8 +58,15 @@ export function setupInspector(d: InspectorDeps): Inspector {
       });
     }
     box.querySelector('#pop-intro')!.textContent = d.intro();
-    box.querySelector('#people-list')!.innerHTML = populationHtml(populationRows(d.people(), query, d.doing));
+    // Solo se repinta la lista si cambió (lleva un retrato por persona).
+    const html = populationHtml(populationRows(d.people(), query, d.doing));
+    const list = box.querySelector<HTMLElement>('#people-list')!;
+    if (full || html !== lastList || !list.firstChild) {
+      list.innerHTML = html;
+      lastList = html;
+    }
   };
+  let lastList = '';
 
   const renderPerson = () => {
     if (!detail) return;

@@ -22,7 +22,8 @@ export interface WorldView {
   date: string;
   epoch: string;
   status: string;
-  geo: { width: number; height: number; tiles: number[] } | null;
+  /** `tileMeters`: metros por tile de este mundo (003 v0.4: 40; los mundos anteriores, 8). */
+  geo: { width: number; height: number; tileMeters?: number; tiles: number[] } | null;
   places: PlaceView[];
   population: number;
   /** 022 R-012: por dónde se entra a cada lugar (también a las viviendas), en tiles. */

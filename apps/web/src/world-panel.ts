@@ -68,7 +68,7 @@ export function renderWorldPanel(m: Metrics): string {
     + lineChart('Dinero de las personas (mediana)', dates, [{ name: 'Dinero', values: m.days.map((d) => d.money) }])
     + lineChart('Eventos por día (los más frecuentes)', dates, topEvents(m.events).map(([t, v]) => ({ name: EVENT_ES[t] ?? kindOf(t)[0], values: v })));
   const table = `<details><summary>Ver como tabla (últimos 14 días)</summary><table class="report"><thead><tr><th>Día</th><th>Ánimo</th><th>Estrés</th><th>Dinero</th></tr></thead><tbody>${m.days.slice(-14).reverse().map((d) => `<tr><td class="mono">${esc(d.date)}</td><td>${d.mood.toFixed(2)} ± ${d.moodSd.toFixed(2)}</td><td>${d.stress.toFixed(2)} ± ${d.stressSd.toFixed(2)}</td><td>${short(d.money)}</td></tr>`).join('')}</tbody></table></details>`;
-  return `${alerts}${charts}${table}${exportLinks()}`;
+  return `${alerts}<div class="charts3">${charts}</div>${table}${exportLinks()}`;
 }
 
 const exportLinks = () => '<p class="export">Descargar para analizar fuera: <a href="/api/export/trajectory.csv" download>trayectorias (CSV)</a> · <a href="/api/export/events.csv" download>eventos (CSV)</a></p>';

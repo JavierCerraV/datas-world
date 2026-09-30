@@ -134,7 +134,7 @@ const chat = setupChat({
   clock: (m) => (world ? clockOf(world.epoch, m).time : ''),
 });
 
-const dashboard = setupDashboard({ fetch: api.demographics, metrics: api.metrics });
+const dashboard = setupDashboard({ fetch: api.demographics, metrics: api.metrics, network: api.network, open: (id) => router.go({ view: 'expediente', person: id }) });
 
 const router = setupRouter((r: Route, prev) => {
   if (prev?.view === 'charla' && r.view !== 'charla') chat.leave();

@@ -131,7 +131,7 @@ describe('024 R-023: dashboard', () => {
 
   it('CA-015: la pirámide y la ocupación dibujan una barra por valor, con su cuenta', () => {
     const p = pyramidSvg(g.pyramid);
-    expect(p.match(/<rect class="bar"/g)).toHaveLength(4);
+    expect(p.match(/<path class="bar"/g)).toHaveLength(4);
     expect(p).toContain('10–19 · hombres: 4');
     const o = occupationSvg(g.occupations, g.population);
     expect(o).toContain('Empleo formal: 6 (60 %)');

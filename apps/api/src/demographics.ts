@@ -4,6 +4,8 @@
 import { ACTIVITY_COLUMN, MINUTES_PER_DAY, formatId, idNumber } from '@datas-world/engine';
 import type { EntityId, World } from '@datas-world/engine';
 import type { Db } from '@datas-world/persistence';
+import { distributionsOf } from './distributions.ts';
+import { statsOf } from './observe.ts';
 import { ACTIVITY_NAME, dateOf, living } from './views.ts';
 
 const YEAR = 365.25 * MINUTES_PER_DAY;
@@ -75,6 +77,7 @@ export function demographicsOf(w: World, db: Db, period: Period) {
   const deaths = count(db, 'CITIZEN_DIED', from, w.now);
   const perThousand = (n: number) => (people.length ? Math.round((n / people.length) * 1000 * 10) / 10 : 0);
   const households = [...w.households.values()].filter((h) => h.memberIds.some((m) => w.citizens.get(m)?.status === 'active' && !w.citizens.get(m)?.ancestor));
+  const stats = statsOf(w, 0, null);
   const members = households.reduce((s, h) => s + h.memberIds.filter((m) => w.citizens.get(m)?.status === 'active').length, 0);
   return {
     date: dateOf(w, w.now),
@@ -89,6 +92,10 @@ export function demographicsOf(w: World, db: Db, period: Period) {
     pyramid,
     occupations: [...occ].map(([name, n]) => ({ name, count: n })).sort((a, b) => b.count - a.count || OCCUPATIONS.indexOf(a.name as never) - OCCUPATIONS.indexOf(b.name as never)),
     now: NOW_KINDS.map((k) => ({ kind: k, count: now.get(k)! })),
+    // R-017: ánimo medio, empleo y distribuciones.
+    moodMean: stats.moodMean,
+    employedPct: stats.employedPct,
+    ...distributionsOf(w, people, households),
   };
 }
 export type Demographics = ReturnType<typeof demographicsOf>;

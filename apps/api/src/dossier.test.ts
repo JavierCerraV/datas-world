@@ -91,6 +91,30 @@ describe('022 R-016: demografía', () => {
     expect((await api.app.inject({ url: '/api/demographics?period=siglo' })).statusCode).toBe(400);
   });
 
+  it('CA-014 (v0.6): los histogramas suman la población, el Gini está en [0,1] y la red no repite aristas', async () => {
+    const w = api.reader.world;
+    const g = await get<Demographics & { mood: number[]; stress: number[]; money: { bins: { count: number }[]; gini: number; median: number }; householdSizes: { count: number }[] }>('/api/demographics');
+    const n = living(w).length;
+    const sum = (xs: readonly number[]) => xs.reduce((s, x) => s + x, 0);
+    expect(sum(g.mood)).toBe(n);
+    expect(sum(g.stress)).toBe(n);
+    expect(sum(g.money.bins.map((b) => b.count))).toBe(n);
+    expect(g.money.gini).toBeGreaterThanOrEqual(0);
+    expect(g.money.gini).toBeLessThanOrEqual(1);
+    expect(sum(g.householdSizes.map((h) => h.count))).toBe(g.households.count);
+    const net = await get<{ nodes: { id: string }[]; edges: { a: string; b: string; kind: string }[] }>('/api/network');
+    expect(net.nodes.length).toBe(n);
+    const ids = new Set(net.nodes.map((x) => x.id));
+    const keys = new Set<string>();
+    for (const e of net.edges) {
+      expect(ids.has(e.a) && ids.has(e.b)).toBe(true);
+      expect(e.a < e.b).toBe(true);
+      expect(keys.has(`${e.a}|${e.b}`)).toBe(false);
+      keys.add(`${e.a}|${e.b}`);
+    }
+    expect(net.edges.some((e) => e.kind === 'pareja')).toBe(true);
+  });
+
   it('024 CA-016: cada persona cae en una sola categoría de «Ahora»', () => {
     const w = api.reader.world;
     for (const c of living(w)) expect(NOW_KINDS).toContain(nowKindOf(w, c.id as EntityId));

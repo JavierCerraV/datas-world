@@ -4,6 +4,7 @@
 import { occupationEs } from './card.ts';
 import { ACTIVITY_ES, causeEs, money } from './format.ts';
 import type { Dossier } from './dossier-types.ts';
+import { portraitSvg } from './portrait.ts';
 import type { CitizenDetail } from './types.ts';
 
 export const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
@@ -61,9 +62,10 @@ export function compactCard(d: CitizenDetail, doing: string, dos: Dossier | null
   const why = whyHere(d, dos, doing).map((w) => `<li>${esc(w.text)}<small>${esc(w.causes)}</small></li>`).join('');
   return `<div class="cc">
     <button class="back" data-back type="button">← Población</button>
+    <div class="cc-head"><span class="portrait-tile">${portraitSvg(d.id, d.name, 5)}</span><div>
     <span class="mono id">${esc(d.id)}</span>
     <h2>${esc(d.name)}</h2>
-    <p class="sub">${esc(sexAge(d))} · ${esc(workShort(d))}</p>
+    <p class="sub">${esc(sexAge(d))} · ${esc(workShort(d))}</p></div></div>
     <div class="cc-actions"><a class="btn primary" href="#/expediente/${esc(d.id)}">Ampliar expediente</a><a class="btn" href="#/charla/${esc(d.id)}">Charlar</a><button class="btn" id="card-follow" type="button" aria-pressed="${following}">Seguir</button></div>
     <dl class="kv2">${kv.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
     <h3>Estado</h3>${bars}${warn}

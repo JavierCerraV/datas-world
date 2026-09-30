@@ -319,9 +319,90 @@ details.card[open] > summary::before {
 }
 
 /* Dashboard */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+.grid-net {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+.grid-net > .col > .card + .card {
+  margin-top: 16px;
+}
+.grid-3 > .card + .card,
+.grid-net > .card + .col {
+  margin-top: 0;
+}
+.chart-box svg {
+  max-width: 100%;
+  height: auto;
+}
+.chart-card .sub {
+  margin: -4px 0 8px;
+}
+.dchart .bar.good {
+  fill: var(--good);
+}
+.dchart .bar.bad {
+  fill: var(--bad);
+}
+.hist .bar,
+.hbars .bar {
+  fill: var(--ink-2);
+}
+.net-ctl {
+  display: flex;
+  gap: 6px;
+}
+.net-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+.net-stage {
+  position: relative;
+  height: 480px;
+  border-radius: 8px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.net-stage canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+.net-stage canvas:active {
+  cursor: grabbing;
+}
+#net-wait {
+  position: absolute;
+  inset: 16px;
+}
+.net-tip {
+  position: absolute;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--panel);
+  font-size: 12px;
+  pointer-events: none;
+}
+.net-tip b {
+  display: block;
+}
 .kpis {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--panel);
@@ -425,8 +506,13 @@ details.card[open] > summary::before {
 
 @media (max-width: 1000px) {
   .grid-2,
-  .grid-2-1 {
+  .grid-2-1,
+  .grid-3,
+  .grid-net {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .net-stage {
+    height: 360px;
   }
   .kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));

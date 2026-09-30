@@ -825,8 +825,8 @@ label.inline select {
   border: 0;
   background: none;
   display: grid;
-  grid-template-columns: 12px minmax(0, 1fr) auto;
-  gap: 2px 8px;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 2px 10px;
   align-items: center;
   padding: 7px 4px;
   border-bottom: 1px solid var(--soft);
@@ -1015,6 +1015,100 @@ label.inline select {
 }
 .kv dd {
   margin: 0;
+}
+
+/* Retrato pixel art (024 R-025) */
+.portrait {
+  display: block;
+  image-rendering: pixelated;
+}
+.portrait-tile {
+  flex: none;
+  display: inline-grid;
+  place-items: end center;
+  padding: 6px 8px 0;
+  border-radius: 10px;
+  background: linear-gradient(var(--soft), var(--soft)) bottom / 100% 55% no-repeat, var(--panel-2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.portrait-tile.sm {
+  padding: 3px 4px 0;
+  border-radius: 6px;
+}
+.cc-head {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.people .pp {
+  position: relative;
+  grid-row: 1 / 3;
+  width: 28px;
+  height: 30px;
+  border-radius: 6px;
+  background: var(--soft);
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+}
+.people .pp .dot {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--panel);
+}
+/* Carga (024 R-026) */
+.skeleton {
+  display: grid;
+  gap: 10px;
+  padding: 4px 0;
+}
+.skeleton i {
+  display: block;
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--soft) 0%, var(--line) 50%, var(--soft) 100%) 0 0 / 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+.sk-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.spinner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--line-2);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton i,
+  .spinner {
+    animation: none;
+  }
+}
+.more-row {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 0;
 }
 
 /* Acceso */

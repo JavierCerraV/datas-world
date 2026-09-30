@@ -9,6 +9,11 @@ import { tabEmociones, tabEstado, tabHistoria, tabResumen } from './exp-tabs.ts'
 import type { ExpData, HistFilter } from './exp-tabs.ts';
 import { tabAprendizaje, tabCharlas, tabCreenciasExp, tabEconomia, tabMemoria, tabSalud, tabVinculos } from './exp-tabs2.ts';
 import { ACTIVITY_ES } from './format.ts';
+import { skeletonTab } from './loading.ts';
+import { portraitSvg } from './portrait.ts';
+
+/** Eventos de la pestaña Historia que se pintan de una vez; «Ver más» añade el doble. */
+const HIST_PAGE = 100;
 import type { CitizenDetail } from './types.ts';
 import { bindWhy } from './why.ts';
 
@@ -45,7 +50,7 @@ export function identityStrip(d: CitizenDetail, dos: Dossier | null): string {
   const born = i ? ` (n. ${i.birthDate}${i.birthplace ? `, ${i.birthplace}` : ''})` : '';
   const parts = [sexAge(d) + born, i?.education, d.occupation?.orgName ? String(d.occupation.orgName) : null, d.household ? `Hogar ${d.household.id}` : null].filter(Boolean) as string[];
   const crit = criticalNeeds(d);
-  return `<div class="idstrip"><div><h1>${esc(d.name)}</h1><p class="sub">${esc(parts.join(' · '))}</p></div><span class="grow"></span>`
+  return `<div class="idstrip"><span class="portrait-tile">${portraitSvg(d.id, d.name, 6)}</span><div><h1>${esc(d.name)}</h1><p class="sub">${esc(parts.join(' · '))}</p></div><span class="grow"></span>`
     + `<dl class="chips"><div><dt>Ahora</dt><dd>${esc(d.moving ? 'En camino' : (ACTIVITY_ES[d.activity] ?? d.activity).replace(/^./, (c) => c.toUpperCase()))}</dd></div>`
     + `<div><dt>Ánimo</dt><dd class="mono">${dec(d.state.mood)}</dd></div><div><dt>Estrés</dt><dd class="mono">${dec(d.state.stress)}</dd></div>`
     + `<div class="${crit.length ? 'alert' : ''}"><dt>Alertas</dt><dd>${crit.length ? `${crit.length} · ${esc(crit.map((c) => c.label.toLowerCase()).join(', '))}` : 'ninguna'}</dd></div></dl></div>`;
@@ -57,6 +62,7 @@ export function setupExpediente(dp: ExpDeps): { show: (id: string, tab?: string)
   let id: string | null = null;
   let tab = 'resumen';
   let hist: HistFilter = 'todos';
+  let histShown = HIST_PAGE;
   let detail: CitizenDetail | null = null;
   let dossier: Dossier | null = null;
   let timer: ReturnType<typeof setInterval> | undefined;
@@ -69,7 +75,7 @@ export function setupExpediente(dp: ExpDeps): { show: (id: string, tab?: string)
     switch (tab) {
       case 'estado': return tabEstado(x);
       case 'emociones': return tabEmociones(x);
-      case 'historia': return tabHistoria(x, hist);
+      case 'historia': return tabHistoria(x, hist, histShown);
       case 'vinculos': return tabVinculos(x, life.life);
       case 'memoria': return tabMemoria(life.life);
       case 'creencias': return tabCreenciasExp(x);
@@ -96,15 +102,33 @@ export function setupExpediente(dp: ExpDeps): { show: (id: string, tab?: string)
     if (s.innerHTML !== strip) s.innerHTML = strip;
     const x = data();
     const el = root.querySelector<HTMLElement>('#exp-body')!;
-    const html = x ? body(x) : '<p class="empty">Cargando el expediente…</p>';
+    const html = x ? body(x) : skeletonTab('el expediente');
     if (html === lastBody) return;
     // La pestaña Charlas tiene un formulario: no se repinta sola (se perdería lo elegido).
-    if (!full && lastBody && tab === 'charlas') return;
+    if (!full && lastBody && tab === 'charlas' && !lastBody.includes('aria-busy')) return;
     // Se repinta la pestaña solo si cambió y no hay nada desplegado que se perdería.
     if (!full && lastBody && el.querySelector('details[open]:not([data-why])')) return;
     el.innerHTML = html;
     lastBody = html;
     if (tab === 'charlas' && x) void showChatHistory(el.querySelector('#exp-chats')!, x.d.id, dp.auth, dp.askAuth);
+  };
+
+  /**
+   * Cambio de pestaña o de filtro (R-026): se marca la pestaña y se pone el esqueleto al instante; el contenido se
+   * pinta en el cuadro siguiente, para que se vea la respuesta aunque la pestaña sea grande.
+   */
+  let pending = 0;
+  const switchBody = () => {
+    const el = root.querySelector<HTMLElement>('#exp-body');
+    if (!el) return render(true);
+    for (const b of root.querySelectorAll<HTMLElement>('[data-etab]')) b.setAttribute('aria-selected', String(b.dataset.etab === tab));
+    const label = EXP_TABS.find(([k]) => k === tab)?.[1].toLowerCase() ?? 'la pestaña';
+    el.innerHTML = skeletonTab(label);
+    lastBody = '';
+    const ticket = ++pending;
+    requestAnimationFrame(() => setTimeout(() => {
+      if (ticket === pending) render(false);
+    }, 0));
   };
 
   const load = async (full: boolean) => {
@@ -122,14 +146,18 @@ export function setupExpediente(dp: ExpDeps): { show: (id: string, tab?: string)
     const t = e.target as HTMLElement;
     const tb = t.closest<HTMLElement>('[data-etab]');
     if (tb && id) {
-      tab = tb.dataset.etab!;
-      dp.setTab(id, tab);
+      if (tb.dataset.etab !== tab) dp.setTab(id, tb.dataset.etab!);
       return;
     }
     const hb = t.closest<HTMLElement>('[data-hist]');
     if (hb) {
       hist = hb.dataset.hist as HistFilter;
-      return render(true);
+      histShown = HIST_PAGE;
+      return switchBody();
+    }
+    if (t.closest('[data-hist-more]')) {
+      histShown += HIST_PAGE * 2;
+      return switchBody();
     }
     const p = t.closest<HTMLElement>('[data-person]');
     if (p) return void (location.hash = `#/expediente/${p.dataset.person}`);
@@ -161,10 +189,13 @@ export function setupExpediente(dp: ExpDeps): { show: (id: string, tab?: string)
         dossier = null;
         hist = 'todos';
         life.reset();
-        root.innerHTML = '<p class="empty pad">Cargando el expediente…</p>';
+        root.innerHTML = `<div class="exp-scroll">${skeletonTab('el expediente')}</div>`;
         void load(true);
-      } else if (tabChanged || !root.querySelector('#exp-body')) {
+      } else if (!root.querySelector('#exp-body')) {
         render(true);
+      } else if (tabChanged) {
+        histShown = HIST_PAGE;
+        switchBody();
       }
       clearInterval(timer);
       // En vivo: la ficha cada 5 s y el expediente completo cada 30 s.

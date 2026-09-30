@@ -213,14 +213,29 @@ h4 {
   position: relative;
   margin: 16px 0;
 }
-.chart figcaption {
-  font-size: 14px;
-  font-weight: 700;
-}
 .chart svg {
   width: 100%;
   height: auto;
   display: block;
+}
+/* 024 R-027: los trazos no engordan al ensanchar la gráfica. */
+.chart svg path,
+.chart svg line {
+  vector-effect: non-scaling-stroke;
+}
+.charts3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 20px;
+}
+@media (max-width: 1000px) {
+  .charts3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.chart figcaption {
+  font-size: 13px;
+  font-weight: 600;
 }
 .chart .grid {
   stroke: var(--line);
@@ -236,7 +251,7 @@ h4 {
 }
 .chart .series {
   fill: none;
-  stroke-width: 2;
+  stroke-width: 1.75;
   stroke-linejoin: round;
 }
 .chart .band {

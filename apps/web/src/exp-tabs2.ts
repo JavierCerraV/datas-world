@@ -8,6 +8,7 @@ import type { ExpData } from './exp-tabs.ts';
 import { KIND_ES, TYPE_ES, money, stimulusEs } from './format.ts';
 import { renderDevelopment, renderFamily } from './life.ts';
 import type { LifeView } from './life.ts';
+import { skeleton } from './loading.ts';
 
 const who = (id: string, name: string) => `<button class="who" data-person="${esc(id)}">${esc(name)}</button> <span class="mono id">${esc(id)}</span>`;
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -16,10 +17,10 @@ export function tabVinculos(x: ExpData, life: LifeView | null): string {
   const fam = table(['Persona', 'Parentesco', 'Situación'], x.dos.family.map((f) => [who(f.id, f.name), esc(cap(f.relation)), esc(f.situation)]), 'Sin familia registrada.');
   const net = table(['Desde', 'Relación', 'Hacia', 'Fuerza'], x.d.relations.map((r) => [esc(stimulusEs(r.a)), esc(TYPE_ES[r.type] ?? r.type), esc(stimulusEs(r.b)), `<span class="mono">${dec(r.strength)}</span>`]), 'Sin relaciones enseñadas.');
   return `<div class="grid-2"><div class="col">${card('Familia', fam)}${card('Vínculos <span class="h-note">desde las dos perspectivas (012)</span>', tabRelaciones(x.d))}</div>`
-    + `<div class="col">${card('Familiograma', life ? renderFamily(life).replace(/^<h3>Familiograma<\/h3>/, '') : '<p>Cargando…</p>')}${card('Red relacional <span class="h-note">(037)</span>', net)}</div></div>`;
+    + `<div class="col">${card('Familiograma', life ? renderFamily(life).replace(/^<h3>Familiograma<\/h3>/, '') : skeleton('el familiograma', 6))}${card('Red relacional <span class="h-note">(037)</span>', net)}</div></div>`;
 }
 
-export const tabMemoria = (life: LifeView | null) => card('Memoria <span class="h-note">lo que recuerda, no lo que pasó (013)</span>', life ? renderMemories(life) : '<p>Cargando sus recuerdos…</p>');
+export const tabMemoria = (life: LifeView | null) => card('Memoria <span class="h-note">lo que recuerda, no lo que pasó (013)</span>', life ? renderMemories(life) : skeleton('sus recuerdos', 6));
 export const tabCreenciasExp = (x: ExpData) => card('Creencias <span class="h-note">lo que cree y lo que se dice (025)</span>', tabCreencias(x.d));
 
 export function tabAprendizaje(x: ExpData, life: LifeView | null): string {
@@ -30,7 +31,7 @@ export function tabAprendizaje(x: ExpData, life: LifeView | null): string {
   const learned = kv([['Descuento de lo demorado (k, por día)', `<span class="mono">${d.learned.discountK.toFixed(3).replace('.', ',')}</span>`], ['Variabilidad de la conducta', `<span class="mono">${dec(d.learned.variability)}</span>`]]);
   const TEMPER: Record<string, string> = { extraversion: 'Extraversión', neuroticism: 'Reactividad emocional', conscientiousness: 'Responsabilidad', impulsivity: 'Impulsividad', resilience: 'Resiliencia', openness: 'Apertura', agreeableness: 'Amabilidad' };
   const temper = Object.entries(d.temperament).map(([k, v]) => meter(TEMPER[k] ?? k, v)).join('');
-  const dev = life ? `<details class="card"><summary><h2>Historia de aprendizaje por etapas <span class="h-note">(041)</span></h2></summary>${renderDevelopment(life)}</details>` : '';
+  const dev = life ? `<details class="card"><summary><h2>Historia de aprendizaje por etapas <span class="h-note">(041)</span></h2></summary>${renderDevelopment(life)}</details>` : `<section class="card" style="margin-top:16px">${skeleton('la historia de aprendizaje', 3)}</section>`;
   return `<div class="grid-2"><div class="col">${card('Funciones de estímulos <span class="h-note">(036) · −1 aversivo, +1 apetitivo</span>', fn)}${card('Reglas verbales <span class="h-note">(038)</span>', rules)}</div>`
     + `<div class="col">${card('Fuerza de respuestas <span class="h-note">(036)</span>', resp)}${card('Estados aprendidos', learned)}${card('Temperamento <span class="h-note">(009) · solo parametriza el aprendizaje</span>', temper)}</div></div>${dev}`;
 }
@@ -79,5 +80,5 @@ export function tabCharlas(x: ExpData): string {
     <label class="check"><input type="checkbox" id="exp-test"> Modo prueba (etiquetar el tono de cada mensaje)</label>
     <p class="note">${esc(avail)}</p>
     <button class="btn primary" type="submit">Iniciar charla</button></form>`;
-  return `<div class="grid-2">${card('Charlas', '<div id="exp-chats"><p>Cargando charlas…</p></div><p class="note">Cada charla en el mundo queda aquí con sus tonos y posturas (043).</p>')}${card('Iniciar una charla', form)}</div>`;
+  return `<div class="grid-2">${card('Charlas', `<div id="exp-chats">${skeleton('las charlas', 3)}</div><p class="note">Cada charla en el mundo queda aquí con sus tonos y posturas (043).</p>`)}${card('Iniciar una charla', form)}</div>`;
 }

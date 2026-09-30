@@ -41,4 +41,12 @@ export interface Demographics {
   pyramid: { group: string; F: number; M: number }[];
   occupations: { name: string; count: number }[];
   now: { kind: string; count: number }[];
+  /** 022 R-017 (opcionales en respuestas anteriores). */
+  moodMean?: number;
+  employedPct?: number;
+  mood?: number[];
+  stress?: number[];
+  money?: { bins: { label: string; count: number }[]; median: number; gini: number };
+  householdSizes?: { size: string; count: number }[];
+  employers?: { id: string; name: string; count: number }[];
 }

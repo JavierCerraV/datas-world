@@ -7,6 +7,7 @@ import { lifeCourseSvg } from './lifecourse.ts';
 import { kindOf, linkNames } from './log.ts';
 import { renderReport } from './report.ts';
 import type { ReportView } from './report.ts';
+import { skeleton } from './loading.ts';
 import type { CitizenDetail } from './types.ts';
 import { whyToggle } from './why.ts';
 
@@ -99,15 +100,18 @@ export function tabEmociones(x: ExpData): string {
 }
 
 export type HistFilter = 'todos' | 'origen' | 'simulacion';
-export function tabHistoria(x: ExpData, filter: HistFilter): string {
+export function tabHistoria(x: ExpData, filter: HistFilter, limit = Number.POSITIVE_INFINITY): string {
   const all = x.dos.events;
   const shown = all.filter((e) => filter === 'todos' || (filter === 'origen') === e.origin);
   const btn = (k: HistFilter, l: string) => `<button type="button" data-hist="${k}" aria-pressed="${k === filter}">${l}</button>`;
-  const rows = [...shown].reverse().map((e) => {
+  // R-026: se pintan los más recientes primero, por páginas, para que la pestaña responda al instante.
+  const page = [...shown].reverse().slice(0, limit);
+  const more = shown.length > page.length ? `<p class="more-row"><button class="btn" type="button" data-hist-more>Ver más (${shown.length - page.length} anteriores)</button></p>` : '';
+  const rows = page.map((e) => {
     const [label, tone] = kindOf(e.type);
     return [`<span class="mono">${esc(e.origin ? e.date.slice(0, 10) : e.date)}</span>`, `<span class="kind k-${tone}">${esc(label)}</span><span class="code mono">${esc(e.type)}</span>`, evText(e), `<span class="causes">${esc(e.causes.map(causeEs).join(' · ') || '—')}</span>`, whyToggle(e.id)];
   });
   const head = `<div class="card-head"><h2>Eventos <span class="h-note">${all.length} · del más reciente al más antiguo</span></h2><div class="seg" role="group" aria-label="Filtro de eventos">${btn('todos', 'Todos')}${btn('origen', 'Historia de origen')}${btn('simulacion', 'Simulación')}</div></div>`;
-  const report = x.report ? `<details class="card"><summary><h2>Informe de vida de ${esc(name1(x.d))}</h2></summary>${renderReport(x.report)}</details>` : '';
-  return `<section class="card">${head}${table(['Fecha', 'Tipo', 'Descripción', 'Causas', ''], rows, 'Sin eventos de este tipo.')}</section>${report}`;
+  const report = x.report ? `<details class="card"><summary><h2>Informe de vida de ${esc(name1(x.d))}</h2></summary>${renderReport(x.report)}</details>` : `<section class="card" style="margin-top:16px">${skeleton('el informe de vida', 3)}</section>`;
+  return `<section class="card">${head}${table(['Fecha', 'Tipo', 'Descripción', 'Causas', ''], rows, 'Sin eventos de este tipo.')}${more}</section>${report}`;
 }

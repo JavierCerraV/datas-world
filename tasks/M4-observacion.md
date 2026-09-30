@@ -30,4 +30,7 @@ Specs: 024 v0.4, 022 v0.4 y 027 v0.5.
 - [x] A2 Expediente de vida de pantalla completa con sus pestañas (024 R-022).
 - [x] A3 Dashboard: indicadores, pirámide, ocupación y periodo (024 R-023).
 - [x] A4 Charla de pantalla completa con su panel lateral (024 R-024).
+- [x] A6 Retrato pixel art, indicador de carga y pantalla Datos rediseñada con red 3D (024 v0.6, R-025 a R-027; 022 R-017, R-018).
+- [x] A7 Escala del mapa: 40 m por tile (003 v0.4) y `lookahead` de 60 min (016).
+- [ ] A8 Elegir una de las 5 propuestas de rediseño del lienzo «Datas World — 5 propuestas de rediseño» y especificarla.
 - [ ] A5 Capturas de las cuatro pantallas (`docs/validaciones/M4-visor-aplus.md`, hechas) y aceptación del usuario (024 CA-017).

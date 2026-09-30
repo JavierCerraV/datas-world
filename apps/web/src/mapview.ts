@@ -182,7 +182,7 @@ export function setupMap(d: MapDeps): MapView {
     } else tag.hidden = true;
     if (frame.s !== lastScale) {
       lastScale = frame.s;
-      renderScale(TS * frame.s);
+      renderScale(TS * frame.s, d.world.geo?.tileMeters ?? 8);
     }
     frames++;
     if (now - fpsAt > 1000) {

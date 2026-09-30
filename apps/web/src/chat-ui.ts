@@ -8,6 +8,7 @@ import type { DoneMsg, OpenResult, StanceMsg } from './chat.ts';
 import { dec } from './card-compact.ts';
 import type { Dossier } from './dossier-types.ts';
 import { ACTIVITY_ES } from './format.ts';
+import { portraitSvg } from './portrait.ts';
 import type { CitizenDetail } from './types.ts';
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
@@ -79,7 +80,7 @@ export function setupChat(d: ChatUiDeps): ChatPage {
     q('#chat-state').innerHTML = `<dl class="kv2"><dt>Ánimo (en vivo)</dt><dd class="mono">${dec(person.state.mood)}</dd><dt>Estrés (en vivo)</dt><dd class="mono">${dec(person.state.stress)}</dd>${food !== undefined ? `<dt>Alimentación (en vivo)</dt><dd class="mono">${dec(food)}</dd>` : ''}<dt>Turnos</dt><dd class="mono">${turns}</dd><dt>Verificación</dt><dd class="mono">${checks.ok} ✓ · ${checks.bad} ✗</dd></dl>`;
   };
 
-  const shell = (p: CitizenDetail) => `<header class="bar"><a href="#/expediente/${esc(p.id)}">Expediente ${esc(p.id)}</a><span class="sub">/</span><h1>Charla con ${esc(p.name)}</h1><span class="mono sub" id="chat-id"></span><span class="grow"></span>`
+  const shell = (p: CitizenDetail) => `<header class="bar"><a href="#/expediente/${esc(p.id)}">Expediente ${esc(p.id)}</a><span class="sub">/</span><span class="portrait-tile sm">${portraitSvg(p.id, p.name, 2)}</span><h1>Charla con ${esc(p.name)}</h1><span class="mono sub" id="chat-id"></span><span class="grow"></span>`
     + `<span class="sub" id="chat-testlbl" hidden>Modo prueba</span><button class="btn primary" id="chat-end" type="button" hidden>Despedirse</button><a class="btn" href="#/mundo/${esc(p.id)}">Volver al mundo</a></header>`
     + `<div class="chat-strip" id="chat-strip"></div>`
     + `<div class="chat-grid"><section class="chat-col"><p id="chat-status" class="chat-status" role="status" aria-live="polite"></p>`
