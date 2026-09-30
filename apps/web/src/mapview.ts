@@ -1,11 +1,14 @@
-// El mapa en vivo (spec 024 R-001, R-013 a R-015), como el prototipo: cámara ajustada con zoom y seguimiento, las
-// personas en el minuto de la vista (solo quien camina o está al aire libre), la noche con las ventanas encendidas,
-// la selección, el tooltip y los clics. Solo dibuja lo que ya pasó en el mundo.
+// El mapa en vivo (spec 024 R-001, R-013, R-015 y R-021): cámara ajustada con zoom y seguimiento, las personas en el
+// minuto de la vista (solo quien camina o está al aire libre), la noche con las ventanas encendidas, las capas del
+// Visor A+ (nombres de lugares, vínculos de la persona elegida, ánimo), la etiqueta de la persona elegida, la escala,
+// el tooltip y los clics. Solo dibuja lo que ya pasó en el mundo.
 import { clampZoom, frameOf, toMap } from './camera.ts';
 import type { Cam } from './camera.ts';
 import { darkness, drawArrow, drawFigure, drawFrame, drawNight } from './figures.ts';
 import { TS } from './logic.ts';
-import { kindEs, placeAt } from './panels.ts';
+import { drawPlan, renderScale } from './overlays.ts';
+import type { Layers } from './overlays.ts';
+import { kindEs, moodColor, placeAt } from './panels.ts';
 import type { MoveBook, Where } from './replay.ts';
 import type { MapLayer } from './render.ts';
 import { occupancy, outdoorRects, scene } from './scene.ts';
@@ -27,6 +30,10 @@ export interface MapDeps {
   doing: (c: CitizenPosition) => string;
   onPerson: (id: string) => void;
   onPlace: (id: string) => void;
+  /** Capas del mapa (R-021). */
+  layers: () => Layers;
+  /** Con quién tiene vínculo la persona elegida (para la capa Vínculos). */
+  bonds: () => readonly string[];
 }
 
 export interface MapView {
@@ -53,6 +60,9 @@ export function setupMap(d: MapDeps): MapView {
     const pt = points[p.id];
     if (p.rect && pt && !p.kind.startsWith('territorio')) rectByPoint.set(`${pt[0]},${pt[1]}`, p.rect);
   }
+  const tag = document.querySelector<HTMLElement>('#seltag')!;
+  const labelled = d.world.places.filter((p) => p.rect && !p.kind.startsWith('territorio') && !p.kind.startsWith('vivienda'));
+  let lastScale = 0;
   const cam: Cam = { x: mapW / 2, y: mapH / 2, z: 1 };
   let follow = false;
   let figures: Figure[] = [];
@@ -78,10 +88,10 @@ export function setupMap(d: MapDeps): MapView {
     const sc = scene({ t, people, book: d.book(), points, outdoor, route: d.route });
     figures = sc.figures;
     where = sc.where;
-    const sel = d.selected();
-    if (follow && sel.person) {
-      const f = figures.find((x) => x.id === sel.person);
-      const w2 = where.get(sel.person);
+    const selNow = d.selected();
+    if (follow && selNow.person) {
+      const f = figures.find((x) => x.id === selNow.person);
+      const w2 = where.get(selNow.person);
       const pt = w2?.kind === 'at' && w2.place ? points[w2.place] : undefined;
       if (f) Object.assign(cam, { x: f.x, y: f.y });
       else if (pt) Object.assign(cam, { x: pt[0] * TS, y: pt[1] * TS });
@@ -93,9 +103,43 @@ export function setupMap(d: MapDeps): MapView {
     g.setTransform(dpr * frame.s, 0, 0, dpr * frame.s, dpr * (r.width / 2 - frame.cx * frame.s), dpr * (r.height / 2 - frame.cy * frame.s));
     g.imageSmoothingEnabled = false;
     g.drawImage(d.layer.canvas, 0, 0);
+    const sel = d.selected();
+    const plan = drawPlan(d.layers(), !!sel.person);
+    if (!plan.figures) figures = [];
+    // Punto de una persona en el mapa (px): su figura o la puerta de donde está.
+    const pointOf = (id: string): Point | null => {
+      const f = figures.find((x) => x.id === id);
+      if (f) return { x: f.x, y: f.y - 4 };
+      const w2 = where.get(id);
+      const pt = w2?.kind === 'at' && w2.place ? points[w2.place] : undefined;
+      return pt ? { x: pt[0] * TS + TS / 2, y: pt[1] * TS + TS / 2 } : null;
+    };
+    if (plan.bonds && sel.person) {
+      const a = pointOf(sel.person);
+      g.lineWidth = 1 / frame.s;
+      g.strokeStyle = 'rgba(240,165,142,.9)';
+      g.setLineDash([3 / frame.s, 2 / frame.s]);
+      for (const id of d.bonds()) {
+        const b = pointOf(id);
+        if (!a || !b) continue;
+        g.beginPath();
+        g.moveTo(a.x, a.y);
+        g.lineTo(b.x, b.y);
+        g.stroke();
+      }
+      g.setLineDash([]);
+    }
     for (const f of figures) drawFigure(g, f);
-    drawNight(g, darkness(t % 1440), { w: mapW, h: mapH }, d.layer.windows, occupancy(where, people, points));
+    if (plan.mood) {
+      const mood = new Map(people.map((c) => [c.id, c.mood]));
+      for (const f of figures) {
+        g.fillStyle = moodColor(mood.get(f.id) ?? 0.5);
+        g.fillRect(f.x - 1, f.y - (f.small ? 10 : 12), 3, 2);
+      }
+    }
+    if (plan.night) drawNight(g, darkness(t % 1440), { w: mapW, h: mapH }, d.layer.windows, occupancy(where, people, points));
     const blink = Math.floor(now / 400) % 2 === 0;
+    const toScreen = (p: Point) => ({ x: (p.x - frame.cx) * frame.s + r.width / 2, y: (p.y - frame.cy) * frame.s + r.height / 2 });
     if (sel.place) {
       const p = d.world.places.find((x) => x.id === sel.place);
       if (p?.rect) drawFrame(g, p.rect, frame.s * dpr);
@@ -109,6 +153,36 @@ export function setupMap(d: MapDeps): MapView {
         const rect = pt ? rectByPoint.get(`${pt[0]},${pt[1]}`) ?? outdoor.get(w2.place) : undefined;
         if (rect) drawFrame(g, rect, frame.s * dpr);
       }
+    }
+    // Nombres de los lugares (capa Lugares) y etiqueta de la persona elegida, en px de pantalla.
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (plan.labels) {
+      g.font = '500 11px "IBM Plex Sans", system-ui, sans-serif';
+      g.textAlign = 'center';
+      g.lineWidth = 3;
+      g.strokeStyle = 'rgba(29,33,38,.85)';
+      g.fillStyle = '#ffffff';
+      for (const p of labelled) {
+        const c = toScreen({ x: (p.rect!.x + p.rect!.w / 2) * TS, y: p.rect!.y * TS + 6 });
+        if (p.rect!.w * TS * frame.s < 44) continue;
+        g.strokeText(p.name, c.x, c.y + 4);
+        g.fillText(p.name, c.x, c.y + 4);
+      }
+    }
+    const pt = sel.person ? pointOf(sel.person) : null;
+    if (pt && sel.person) {
+      const c = toScreen(pt);
+      tag.hidden = false;
+      const half = tag.offsetWidth / 2;
+      tag.style.left = `${Math.round(Math.min(Math.max(c.x, half + 6), r.width - half - 6))}px`;
+      tag.style.top = `${Math.round(c.y - 18 - 4 * frame.s)}px`;
+      const who = d.people().find((x) => x.id === sel.person);
+      const text = who ? `${who.id} · ${who.name} · ${d.doing(who)}` : '';
+      if (tag.textContent !== text) tag.textContent = text;
+    } else tag.hidden = true;
+    if (frame.s !== lastScale) {
+      lastScale = frame.s;
+      renderScale(TS * frame.s);
     }
     frames++;
     if (now - fpsAt > 1000) {

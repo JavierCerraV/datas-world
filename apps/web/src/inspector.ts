@@ -1,27 +1,21 @@
-// Inspector a la derecha (spec 024 R-014, R-017), como el prototipo: sin nadie elegido, la población; con un lugar,
-// su ficha; con una persona, su ficha de vida con pestañas. Se refresca con el mundo sin perder la búsqueda, las
-// pestañas ni los desplegables abiertos. Solo lee de la API.
-import { LifeData, renderHistory, renderLifeTab, renderMemories } from './card-life.ts';
-import type { LifeSub } from './card-life.ts';
-import { cardHead, nowLine, tabCreencias, tabEstado, tabFuncional, tabRelaciones } from './card.ts';
-import type { Tab } from './card.ts';
-import { showChatHistory } from './chat-history.ts';
+// Panel a la derecha del mapa (spec 024 R-008, R-021): sin nadie elegido, la población; con un lugar, su ficha; con
+// una persona, su ficha compacta, que lleva al expediente y a la charla. Se refresca con el mundo sin perder la
+// búsqueda. Solo lee de la API.
+import { compactCard } from './card-compact.ts';
+import type { Dossier } from './dossier-types.ts';
 import { placeHtml, populationHtml, populationRows } from './panels.ts';
 import type { CitizenDetail, CitizenPosition, PlaceDetail } from './types.ts';
-import { bindWhy } from './why.ts';
 
 export interface InspectorDeps {
   people: () => readonly CitizenPosition[];
   doing: (c: CitizenPosition) => string;
   intro: () => string;
   fetchPerson: (id: string) => Promise<CitizenDetail>;
+  fetchDossier: (id: string) => Promise<Dossier>;
   fetchPlace: (id: string) => Promise<PlaceDetail>;
-  auth: () => string | null;
-  askAuth: () => Promise<boolean>;
-  /** Avisos al resto del visor: quién o qué está elegido, charlar y seguir. */
+  /** Avisos al resto del visor: quién o qué está elegido. */
   onSelect: (person: string | null, place: string | null) => void;
-  onChat: (d: CitizenDetail) => void;
-  /** «Seguir en el mapa»: lo lleva el mapa (también se activa desde allí). */
+  /** «Seguir»: lo lleva el mapa (también se activa desde allí). */
   toggleFollow: () => void;
   following: () => boolean;
 }
@@ -36,6 +30,7 @@ export interface Inspector {
 }
 
 const REFETCH_MS = 1500;
+const DOSSIER_MS = 15000;
 
 export function setupInspector(d: InspectorDeps): Inspector {
   const box = document.querySelector<HTMLElement>('#inspector')!;
@@ -43,12 +38,11 @@ export function setupInspector(d: InspectorDeps): Inspector {
   let personId: string | null = null;
   let placeId: string | null = null;
   let detail: CitizenDetail | null = null;
-  let tab: Tab = 'estado';
-  let sub: LifeSub = 'informe';
+  let dossier: Dossier | null = null;
+  let dossierAt = 0;
   let query = '';
   let fetchedAt = 0;
-  const life = new LifeData();
-  bindWhy(box);
+  let last = '';
 
   const renderPopulation = (full: boolean) => {
     if (full || !box.querySelector('#people-list')) {
@@ -67,61 +61,29 @@ export function setupInspector(d: InspectorDeps): Inspector {
     box.querySelector('#people-list')!.innerHTML = populationHtml(populationRows(d.people(), query, d.doing));
   };
 
-  const tabBody = (): string => {
-    if (!detail) return '';
-    switch (tab) {
-      case 'estado':
-        return tabEstado(detail);
-      case 'relaciones':
-        return tabRelaciones(detail);
-      case 'creencias':
-        return tabCreencias(detail);
-      case 'funcional':
-        return tabFuncional(detail);
-      case 'historia':
-        return renderHistory(detail, life.report);
-      case 'memoria':
-        return life.life ? renderMemories(life.life) : '<p>Cargando sus recuerdos…</p>';
-      case 'vida':
-        return renderLifeTab(sub, life.life, life.report);
-      case 'charlas':
-        return '';
-    }
-  };
-
-  let lastBody = '';
-  const renderPerson = (full: boolean) => {
+  const renderPerson = () => {
     if (!detail) return;
     const person = d.people().find((c) => c.id === detail!.id);
-    const doing = person ? d.doing(person) : '';
-    if (full || !box.querySelector('#tab-body')) {
-      box.innerHTML = `<div class="ins-pad">${cardHead(detail, doing, tab)}<div id="tab-body"></div></div>`;
-      box.querySelector('#card-follow')!.setAttribute('aria-pressed', String(d.following()));
-      lastBody = '';
-    } else {
-      const line = box.querySelector('#nowLine');
-      const html = nowLine(detail, doing);
-      if (line && line.innerHTML !== html) line.innerHTML = html;
-    }
-    const body = box.querySelector<HTMLElement>('#tab-body')!;
-    if (tab === 'charlas') {
-      if (full) void showChatHistory(body, detail.id, d.auth, d.askAuth);
-      return;
-    }
-    const html = tabBody();
-    if (html !== lastBody) {
-      body.innerHTML = html;
-      lastBody = html;
+    const html = `<div class="ins-pad">${compactCard(detail, person ? d.doing(person) : '', dossier, d.following())}</div>`;
+    if (html !== last) {
+      box.innerHTML = html;
+      last = html;
     }
   };
 
-  const loadPerson = async (id: string, full: boolean) => {
+  const loadPerson = async (id: string) => {
     fetchedAt = Date.now();
     const got = await d.fetchPerson(id);
     if (personId !== id || mode !== 'person') return;
     detail = got;
-    life.load(id, () => renderPerson(false));
-    renderPerson(full);
+    renderPerson();
+    if (Date.now() - dossierAt > DOSSIER_MS || dossier?.id !== id) {
+      dossierAt = Date.now();
+      const dos = await d.fetchDossier(id).catch(() => null);
+      if (personId !== id) return;
+      dossier = dos;
+      renderPerson();
+    }
   };
 
   const loadPlace = async (id: string) => {
@@ -135,14 +97,15 @@ export function setupInspector(d: InspectorDeps): Inspector {
     select: (id) => {
       if (mode !== 'person' || personId !== id) {
         detail = null;
-        life.reset();
+        dossier = null;
+        last = '';
         box.innerHTML = '<div class="ins-pad"><p>Cargando su ficha…</p></div>';
       }
       mode = 'person';
       personId = id;
       placeId = null;
       d.onSelect(id, null);
-      void loadPerson(id, true);
+      void loadPerson(id);
     },
     showPlace: (id) => {
       mode = 'place';
@@ -163,7 +126,7 @@ export function setupInspector(d: InspectorDeps): Inspector {
     refresh: () => {
       if (mode === 'population') return renderPopulation(false);
       if (Date.now() - fetchedAt < REFETCH_MS) return;
-      if (mode === 'person' && personId) void loadPerson(personId, false);
+      if (mode === 'person' && personId) void loadPerson(personId);
       if (mode === 'place' && placeId) void loadPlace(placeId);
     },
     detail: () => detail,
@@ -176,17 +139,6 @@ export function setupInspector(d: InspectorDeps): Inspector {
     const place = t.closest<HTMLElement>('[data-place]');
     if (place) return api.showPlace(place.dataset.place!);
     if (t.closest('[data-back]')) return api.showPopulation();
-    const tb = t.closest<HTMLElement>('[data-tab]');
-    if (tb) {
-      tab = tb.dataset.tab as Tab;
-      return renderPerson(true);
-    }
-    const sb = t.closest<HTMLElement>('[data-sub]');
-    if (sb) {
-      sub = sb.dataset.sub as LifeSub;
-      return renderPerson(false);
-    }
-    if (t.closest('#card-chat') && detail) return d.onChat(detail);
     if (t.closest('#card-follow')) d.toggleFollow();
   });
   renderPopulation(true);

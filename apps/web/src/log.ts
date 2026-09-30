@@ -65,6 +65,11 @@ const KINDS: Record<string, [string, Tone, Category]> = {
   CHAPTER_OPENED: ['Nueva etapa', 'info', 'info'],
   CHAPTER_CLOSED: ['Cierra una etapa', 'info', 'info'],
   TRIP_TAKEN: ['Viaje', 'info', 'info'],
+  LEISURE_DONE: ['Ocio', 'info', 'info'],
+  LEISURE_TAKEN_UP: ['Afición nueva', 'good', 'info'],
+  CHILDHOOD_EVENT: ['Infancia', 'info', 'info'],
+  MIGRATED: ['Migración', 'info', 'info'],
+  HEALTH_INSURANCE_SET: ['Afiliación a salud', 'info', 'salud'],
 };
 
 /** Menores: rutina y ruido del sistema; solo con «Incluir menores» (como el prototipo). */
@@ -116,4 +121,12 @@ export function logRow(e: EventView, today: string, withKind = true): string {
   const text = eventText(e);
   const why = [...new Set(e.causes.slice(0, 4).map(causeEs))];
   return `<li><time>${esc(stamp(e.date, today))}</time>${withKind ? `<span class="kind k-${tone}">${esc(label)}</span>` : ''}<span class="txt">${linkNames(text, names)}${why.length ? `<span class="why">Por qué: ${esc(why.join('; '))}</span>` : ''}</span></li>`;
+}
+
+/** Una fila de la tabla del registro del Visor A+ (024 R-021): hora, tipo (etiqueta y código), qué pasó y causas. */
+export function logTableRow(e: EventView, today: string): string {
+  const [label, tone] = kindOf(e.type);
+  const names = (id: string) => e.names?.[id] ?? e.participants.find((p) => p.id === id)?.name ?? null;
+  const why = [...new Set(e.causes.slice(0, 4).map(causeEs))];
+  return `<tr><td class="mono">${esc(stamp(e.date, today))}</td><td><span class="kind k-${tone}">${esc(label)}</span><span class="code mono">${esc(e.type)}</span></td><td>${linkNames(eventText(e), names)}</td><td class="causes">${esc(why.join(' · ')) || '—'}</td></tr>`;
 }

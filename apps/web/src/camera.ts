@@ -36,7 +36,7 @@ const DAYS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', '
 const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
 /** La hora, la fecha y el día de simulación del minuto `m` del mundo (desde su `epoch`, `2026-01-01T00:00`). */
-export function clockOf(epoch: string, m: number): { time: string; date: string; day: string; iso: string } {
+export function clockOf(epoch: string, m: number): { time: string; date: string; day: string; iso: string; weekday: string } {
   const [d, t] = epoch.split('T');
   const [y, mo, da] = (d ?? '2026-01-01').split('-').map(Number);
   const [hh, mm] = (t ?? '00:00').split(':').map(Number);
@@ -48,5 +48,6 @@ export function clockOf(epoch: string, m: number): { time: string; date: string;
     date: `${DAYS[at.getUTCDay()]} ${at.getUTCDate()} ${MONTHS[at.getUTCMonth()]} ${at.getUTCFullYear()}`,
     day: `Día ${Math.floor(m / 1440) + 1} de simulación`,
     iso,
+    weekday: DAYS[at.getUTCDay()]!.toLowerCase(),
   };
 }

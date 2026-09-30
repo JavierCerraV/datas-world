@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { renderHistory, renderLifeTab, renderMemories } from './card-life.ts';
-import { TABS, cardHead, nowLine, tabCreencias, tabEstado, tabFuncional, tabRelaciones } from './card.ts';
+import { renderMemories } from './card-life.ts';
+import { tabCreencias, tabRelaciones } from './card.ts';
 import type { LifeView } from './life.ts';
-import type { ReportView } from './report.ts';
 import type { CitizenDetail } from './types.ts';
 
-// Ficha de vida (024 R-017, CA-012).
+// Piezas de la ficha que usa el expediente: vínculos, creencias y memoria (024 R-022, CA-012 y CA-014).
 const detail: CitizenDetail = {
   id: 'CIT-000058', name: 'Luis López Vargas', sex: 'M', age: 15,
   occupation: { kind: 'none', reason: 'student' }, household: { id: 'HH-0001', members: 3 }, money: 0,
@@ -21,21 +20,8 @@ const detail: CitizenDetail = {
   home: { id: 'PLC-0102', name: 'Vivienda 02-F, Edificio 02' }, district: 'La Esperanza', until: '2026-03-04 15:00',
 };
 
-describe('024 R-017: ficha de vida', () => {
-  it('CA-012: cabecera con las ocho pestañas, vivienda, barrio y «Ahora» con el lugar como enlace', () => {
-    const head = cardHead(detail, 'estudiando en Colegio Los Alisos', 'estado');
-    expect(TABS.map(([k]) => k)).toEqual(['estado', 'relaciones', 'memoria', 'historia', 'creencias', 'vida', 'funcional', 'charlas']);
-    expect(head.match(/data-tab=/g)).toHaveLength(8);
-    expect(head).toContain('15 años, Vivienda 02-F, Edificio 02, barrio La Esperanza');
-    expect(head).toContain('Charlar con Luis');
-    expect(nowLine(detail, 'estudiando en Colegio Los Alisos')).toBe('Ahora: estudiando en <button class="who" data-place="PLC-0020">Colegio Los Alisos</button> hasta las 15:00');
-  });
-
-  it('CA-012: Estado en barras (hambre y soledad invertidas), Relaciones desde las dos perspectivas, Creencias con lo que otros creen', () => {
-    const estado = tabEstado(detail);
-    expect(estado).toContain('<span>Soledad</span>');
-    expect(estado).toContain('width:90%'); // soledad = 1 − 0,1
-    expect(estado).toContain('Estudiante');
+describe('024 R-022: piezas de la ficha', () => {
+  it('CA-012: Relaciones desde las dos perspectivas, Creencias con lo que otros creen', () => {
     const rel = tabRelaciones(detail);
     expect(rel).toContain('Afecto de Luis');
     expect(rel).toContain('Afecto de Óscar');
@@ -47,10 +33,9 @@ describe('024 R-017: ficha de vida', () => {
     expect(cre).toContain('Coincide con la realidad');
     expect(cre).toContain('Lo que se dice de Luis');
     expect(cre).toContain('«Anda peleando con alguien» <span class="ok">cierto</span>');
-    expect(tabFuncional(detail)).toContain('Lo que ha aprendido');
   });
 
-  it('CA-012: Memoria, Historia y Vida con sus subpestañas', () => {
+  it('CA-012: Memoria', () => {
     const life: LifeView = {
       id: detail.id, name: detail.name, genogram: { nodes: [], partners: [] }, stages: [],
       chapters: [{ id: 'CH1', theme: 'adolescencia', from: '2022-11-04', to: null, fromAge: 12, tone: -0.2, openedBy: null }],
@@ -63,14 +48,5 @@ describe('024 R-017: ficha de vida', () => {
     expect(mem).toContain('Recuerdos (2)');
     expect(mem).toContain('Lo recuerda peor de lo que lo vivió');
     expect(mem).toContain('class="faded"'); // casi olvidado
-    const report = { chapters: [{ theme: 'adolescencia', from: 0, tone: -0.2, date: '2022-11-04', opened: null }], remembered: [], divergences: [], turningPoints: [], profile: { values: {}, basis: {} }, trajectory: [{ day: 0, mood: 0.7, stress: 0.2, money: 0 }, { day: 63, mood: 0.39, stress: 0.25, money: 0 }] } as ReportView;
-    const hist = renderHistory(detail, report);
-    expect(hist).toContain('70 % → 39 %');
-    expect(hist).toContain('Adolescencia, difícil');
-    expect(hist).toContain('poner un límite'); // las posturas en palabras
-    expect(hist).toContain('data-why="EVT-000000000009"');
-    const vida = renderLifeTab('familia', life, report);
-    expect(vida.match(/data-sub=/g)).toHaveLength(3);
-    expect(vida).toContain('Familiograma');
   });
 });

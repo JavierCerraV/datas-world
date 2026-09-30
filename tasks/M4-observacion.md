@@ -25,9 +25,9 @@ Specs: 024 v0.4, 022 v0.4 y 027 v0.5.
 - [x] P5 Mundo de demostración con el motor actual (el mundo anterior se conserva con otro nombre).
 - [x] P6 Guía para el equipo (`docs/guia-visor.md`, 024 R-019) y validación con capturas lado a lado (`docs/validaciones/M4-paridad-prototipo.md`).
 - [ ] P7 Revisión del usuario de la paridad (024 CA-013) y decisión sobre la escala del mapa y los viajes por persona (motor: 003, 016, rutinas).
-  - 2026-09-30: el usuario indica que la referencia de la interfaz es el lienzo «Visor A+» y que faltan el expediente de vida y el dashboard. Propuesta v0.5 en la 024 (*Preguntas abiertas*), pendiente de aprobación.
-- [ ] A1 Menú lateral, estilo y pantalla Mundo con ficha compacta, capas y panel «Ahora» (024 R-020, R-021, propuesta).
-- [ ] A2 Expediente de vida de pantalla completa con sus pestañas (024 R-022, propuesta).
-- [ ] A3 Dashboard: indicadores, pirámide, ocupación y periodo (024 R-023, propuesta).
-- [ ] A4 Charla de pantalla completa con su panel lateral (024 R-024, propuesta).
-- [ ] A5 Capturas lado a lado con las cuatro pantallas del lienzo y aceptación del usuario (024 CA-017, propuesta).
+  - 2026-09-30: el usuario indica que la referencia de la interfaz es el lienzo «Visor A+» y que faltan el expediente de vida y el dashboard. Aprobada como 024 v0.5 el mismo día.
+- [x] A1 Menú lateral, estilo y pantalla Mundo con ficha compacta, capas y panel «Ahora» (024 R-020, R-021).
+- [x] A2 Expediente de vida de pantalla completa con sus pestañas (024 R-022).
+- [x] A3 Dashboard: indicadores, pirámide, ocupación y periodo (024 R-023).
+- [x] A4 Charla de pantalla completa con su panel lateral (024 R-024).
+- [ ] A5 Capturas de las cuatro pantallas (`docs/validaciones/M4-visor-aplus.md`, hechas) y aceptación del usuario (024 CA-017).

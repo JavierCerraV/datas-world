@@ -73,17 +73,6 @@ export function renderWorldPanel(m: Metrics): string {
 
 const exportLinks = () => '<p class="export">Descargar para analizar fuera: <a href="/api/export/trajectory.csv" download>trayectorias (CSV)</a> · <a href="/api/export/events.csv" download>eventos (CSV)</a></p>';
 
-/** Abre el diálogo del mundo desde el botón de la cabecera y pide las métricas cada vez que se abre. */
-export function setupWorldPanel(o: { button: HTMLButtonElement; dialog: HTMLDialogElement; body: HTMLElement; close: HTMLButtonElement; fetch: () => Promise<Metrics> }): void {
-  bindChartHover(o.body);
-  o.button.addEventListener('click', () => {
-    o.body.innerHTML = '<p class="muted">Cargando…</p>';
-    o.dialog.showModal();
-    o.fetch().then((m) => { o.body.innerHTML = renderWorldPanel(m); }, (e: unknown) => { o.body.innerHTML = `<p class="muted">No se pudieron leer las métricas (${esc(String(e))}).</p>`; });
-  });
-  o.close.addEventListener('click', () => o.dialog.close());
-}
-
 /** Cursor y tooltip: al pasar sobre una columna, la línea vertical y los valores de ese día. */
 export function bindChartHover(root: HTMLElement): void {
   root.addEventListener('pointerover', (ev) => {

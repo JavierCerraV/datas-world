@@ -1,22 +1,26 @@
-// Visor de Data's World (spec 024 v0.4), como el prototipo: barra superior, mapa en vivo con los trayectos
-// reproducidos, registro de eventos e inspector. Une los módulos; solo lee de la API (022) y envía órdenes de
-// control. No tiene lógica de simulación (INV-002).
+// Visor de Data's World (spec 024 v0.5, Visor A+): menú lateral con las pantallas Mundo, Datos, el expediente de vida
+// y la charla. Une los módulos; solo lee de la API (022) y envía órdenes de control. No tiene lógica de simulación
+// (INV-002).
 import { api, stream } from './api.ts';
 import { askAuth, auth, send } from './auth.ts';
-import { setupChat } from './chat-ui.ts';
 import { clockOf } from './camera.ts';
+import { setupChat } from './chat-ui.ts';
+import { setupDashboard } from './dashboard.ts';
+import { setupExpediente } from './expediente.ts';
 import { setupInspector } from './inspector.ts';
 import { setupLog } from './logview.ts';
 import { setupMap } from './mapview.ts';
+import { renderNow, setupLayers } from './overlays.ts';
 import { doingOf, populationIntro } from './panels.ts';
 import { drawMap } from './render.ts';
 import { MoveBook, stepView } from './replay.ts';
+import { setupRouter } from './router.ts';
+import type { Route } from './router.ts';
 import { routeCache } from './streets.ts';
 import { setupTimeline, urlsFor } from './timeline.ts';
 import type { Moment } from './timeline.ts';
 import { SPEEDS, setupTopbar } from './topbar.ts';
 import type { CitizenDetail, CitizenPosition, Stats, WorldView } from './types.ts';
-import { setupWorldPanel } from './world-panel.ts';
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
 let msgTimer: ReturnType<typeof setTimeout> | undefined;
@@ -26,7 +30,24 @@ const message = (text: string) => {
   if (text) msgTimer = setTimeout(() => ($('#msg').textContent = ''), 6000);
 };
 
-let world: WorldView;
+// Tema claro u oscuro: el del sistema, salvo que se elija otro (se recuerda en este navegador).
+try {
+  const t = localStorage.getItem('dw.theme');
+  if (t) document.documentElement.dataset.theme = t;
+} catch {
+  // Sin almacenamiento local, el del sistema.
+}
+$('#theme').addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+  try {
+    localStorage.setItem('dw.theme', document.documentElement.dataset.theme);
+  } catch {
+    // No importa.
+  }
+});
+
+let world: WorldView | null = null;
 let people: CitizenPosition[] = [];
 const book = new MoveBook();
 const pastBook = new MoveBook(); // en un día pasado no hay viajes: todos en su sitio
@@ -35,11 +56,13 @@ let view: number | null = null; // minuto de la vista (024 R-013)
 let status = 'running';
 let speed = 1;
 let stats: Stats | null = null;
+let orgs: number | undefined;
 let moment: Moment = { mode: 'live' };
 const selected = { person: null as string | null, place: null as string | null };
 
-const names = (id: string) => world.names?.[id] ?? world.places.find((p) => p.id === id)?.name;
+const names = (id: string) => world?.names?.[id] ?? world?.places.find((p) => p.id === id)?.name;
 const minuteNow = () => (moment.mode === 'past' ? moment.day * 1440 : view ?? latest);
+const worldDate = () => (world ? (({ iso, time }) => `${iso} ${time}`)(clockOf(world.epoch, minuteNow())) : '');
 
 async function loadPeople(): Promise<void> {
   people = await api.at<CitizenPosition[]>(urlsFor(moment).citizens);
@@ -47,16 +70,26 @@ async function loadPeople(): Promise<void> {
 
 async function loadStats(): Promise<void> {
   if (moment.mode !== 'live') return;
-  stats = await api.stats();
-  topbar.setStats(stats, latest);
+  const [s, g] = await Promise.all([api.stats(), api.demographics('year').catch(() => null)]);
+  stats = s;
+  if (g) {
+    orgs = g.organizations;
+    renderNow(g.now);
+  }
+  topbar.setStats(stats, latest, orgs);
 }
 
 const topbar = setupTopbar({ message, status: () => status });
-const log = setupLog({ openPerson: (id) => inspector.select(id) });
+const layers = setupLayers();
+const log = setupLog({ openPerson: (id) => router.go({ view: 'mundo', person: id }) });
 
-// Se crean en `start`, cuando ya se conoce el mapa.
+// Se crea en `start`, cuando ya se conoce el mapa.
 let map: ReturnType<typeof setupMap> | null = null;
 const doing = (c: CitizenPosition) => doingOf(c, map?.where(c.id), names);
+const doingId = (id: string) => {
+  const c = people.find((x) => x.id === id);
+  return c ? doing(c) : '';
+};
 const fetchPerson = (id: string) => api.at<CitizenDetail>(urlsFor(moment).citizen(id));
 
 const inspector = setupInspector({
@@ -64,29 +97,57 @@ const inspector = setupInspector({
   doing,
   intro: () => populationIntro(stats?.population ?? people.length, stats?.households ?? 0, stats?.districts ?? 0),
   fetchPerson,
+  fetchDossier: api.dossier,
   fetchPlace: (id) => api.place(id),
-  auth,
-  askAuth,
   onSelect: (person, place) => {
     selected.person = person;
     selected.place = place;
     if (!person) map?.setFollow(false);
+    const want = person ? `#/mundo/${person}` : '#/mundo';
+    if (router.current().view === 'mundo' && location.hash !== want) history.replaceState(null, '', want);
   },
-  onChat: (d) => chat.open(d),
   toggleFollow: () => map?.setFollow(!map.following()),
   following: () => map?.following() ?? false,
 });
 
+const expediente = setupExpediente({
+  fetchPerson,
+  fetchDossier: api.dossier,
+  today: worldDate,
+  doing: doingId,
+  auth,
+  askAuth,
+  onStartChat: (id, mode, test) => {
+    chatPrefs = { mode, test };
+    router.go({ view: 'charla', person: id });
+  },
+  setTab: (id, tab) => router.go({ view: 'expediente', person: id, tab }),
+});
+
+let chatPrefs: { mode: 'in_world' | 'sandbox'; test: boolean } | undefined;
 const chat = setupChat({
   auth,
   askAuth,
   fetchPerson,
-  onClose: () => {
-    if (selected.person) inspector.select(selected.person);
-  },
+  fetchDossier: api.dossier,
+  worldMinute: minuteNow,
+  clock: (m) => (world ? clockOf(world.epoch, m).time : ''),
 });
 
-setupWorldPanel({ button: $('#btn-world') as HTMLButtonElement, dialog: $('#world') as HTMLDialogElement, body: $('#world-body'), close: $('#world-close') as HTMLButtonElement, fetch: api.metrics });
+const dashboard = setupDashboard({ fetch: api.demographics, metrics: api.metrics });
+
+const router = setupRouter((r: Route, prev) => {
+  if (prev?.view === 'charla' && r.view !== 'charla') chat.leave();
+  if (prev?.view === 'expediente' && r.view !== 'expediente') expediente.hide();
+  if (r.view === 'mundo') {
+    if (r.person && r.person !== selected.person) inspector.select(r.person);
+    else if (!r.person && prev?.view === 'mundo' && selected.person) inspector.showPopulation();
+  } else if (r.view === 'expediente') expediente.show(r.person, r.tab);
+  else if (r.view === 'charla') {
+    chat.show(r.person, chatPrefs);
+    chatPrefs = undefined;
+  } else if (r.view === 'datos') dashboard.show();
+});
 
 const timeline = setupTimeline({
   fetchDays: api.days,
@@ -96,25 +157,32 @@ const timeline = setupTimeline({
     if (selected.person) inspector.select(selected.person);
   },
 });
+$('#tl-open').addEventListener('click', () => {
+  const row = $('#tlrow');
+  row.hidden = !row.hidden;
+  $('#tl-open').setAttribute('aria-expanded', String(!row.hidden));
+  $('#tl-open').textContent = row.hidden ? 'Abrir línea de tiempo' : 'Cerrar línea de tiempo';
+});
 
 let shownMinute = -1;
 async function start(): Promise<void> {
-  world = await api.world();
-  if (!world.geo) throw new Error('El mundo no tiene mapa');
-  $('#title').textContent = world.name;
-  latest = world.now;
-  status = world.status;
-  const [health, moves, events] = await Promise.all([api.health(), api.moves(world.now - 180), api.events(200)]);
+  const w = await api.world();
+  world = w;
+  if (!w.geo) throw new Error('El mundo no tiene mapa');
+  $('#crumb').textContent = w.name;
+  latest = w.now;
+  status = w.status;
+  const [health, moves, events] = await Promise.all([api.health(), api.moves(w.now - 180), api.events(200)]);
   speed = health.speed;
   book.add(moves);
   log.add(events);
   await Promise.all([loadPeople(), loadStats(), timeline.refresh()]);
   topbar.setWorld(status, speed);
-  inspector.showPopulation();
+  if (!selected.person) inspector.showPopulation();
   map = setupMap({
-    world,
-    layer: drawMap(world),
-    route: routeCache(world.geo),
+    world: w,
+    layer: drawMap(w),
+    route: routeCache(w.geo),
     book: () => (moment.mode === 'past' ? pastBook : book),
     people: () => people,
     tick: (dt) => {
@@ -122,15 +190,17 @@ async function start(): Promise<void> {
       const m = Math.floor(minuteNow());
       if (m !== shownMinute) {
         shownMinute = m;
-        topbar.setClock(world.epoch, m);
-        log.setToday(clockOf(world.epoch, m).iso);
+        topbar.setClock(w.epoch, m);
+        log.setToday(clockOf(w.epoch, m).iso);
       }
       return minuteNow();
     },
     selected: () => selected,
     doing,
-    onPerson: (id) => inspector.select(id),
+    onPerson: (id) => router.go({ view: 'mundo', person: id }),
     onPlace: (id) => inspector.showPlace(id),
+    layers: layers.get,
+    bonds: () => (inspector.detail()?.bonds ?? []).map((b) => b.id),
   });
   stream({
     tick: (t) => {
@@ -157,9 +227,11 @@ async function start(): Promise<void> {
   setInterval(() => inspector.refresh(), 1000);
 }
 
-// Teclado (024 R-005): espacio pausa, + y − velocidad, flechas mueven la cámara, Esc vuelve a la población.
+// Teclado (024 R-005), solo en la pantalla Mundo: espacio pausa, + y − velocidad, flechas mueven la cámara, Esc
+// vuelve a la población.
 window.addEventListener('keydown', (e) => {
-  if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName) || chat.isOpen() || document.querySelector('dialog[open]')) return;
+  if (router.current().view !== 'mundo') return;
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName) || document.querySelector('dialog[open]')) return;
   const i = SPEEDS.findIndex(([v]) => Math.abs(v - speed) < 1e-9);
   if (e.key === ' ') {
     e.preventDefault();
@@ -170,7 +242,7 @@ window.addEventListener('keydown', (e) => {
   else if (e.key === 'ArrowRight') map?.pan(40, 0);
   else if (e.key === 'ArrowUp') map?.pan(0, -40);
   else if (e.key === 'ArrowDown') map?.pan(0, 40);
-  else if (e.key === 'Escape') inspector.showPopulation();
+  else if (e.key === 'Escape') router.go({ view: 'mundo' });
 });
 
 start().catch((err: unknown) => message(`No se pudo conectar con la API: ${String(err)}. ¿Está corriendo \`pnpm dev\`?`));
