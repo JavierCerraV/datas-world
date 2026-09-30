@@ -4,7 +4,7 @@ import { ACTIVITY, ACTIVITY_COLUMN, affectionFor, attachmentOf, formatId, idNumb
 import type { EntityId, Place, World, WorldEvent } from '@datas-world/engine';
 
 const YEAR = 365.25 * 1440;
-const ACTIVITY_NAME = Object.fromEntries(Object.entries(ACTIVITY).map(([k, v]) => [v, k])) as Record<number, string>;
+export const ACTIVITY_NAME = Object.fromEntries(Object.entries(ACTIVITY).map(([k, v]) => [v, k])) as Record<number, string>;
 const round = (x: number, d = 2) => Math.round(x * 10 ** d) / 10 ** d;
 
 /** Fecha y hora del mundo (`2027-01-04 07:35`). */
@@ -34,9 +34,13 @@ export interface CitizenPosition {
   placeId: EntityId | null;
   moving: boolean;
   mood: number;
+  /** 024 R-008: edad, para la lista de la población. */
+  age: number;
+  /** 022 R-008: el viaje en curso con sus dos puertas en el mapa, para dibujar el recorrido por las calles. */
+  trip?: { from: { x: number; y: number }; to: { x: number; y: number }; departAt: number; arriveAt: number };
 }
 
-const living = (world: World) => [...world.citizens.values()].filter((c) => !c.ancestor && world.components.u8.active?.[idNumber(c.id)] === 1);
+export const living = (world: World) => [...world.citizens.values()].filter((c) => !c.ancestor && world.components.u8.active?.[idNumber(c.id)] === 1);
 
 /**
  * 022 R-005: posición de cada persona viva. En su lugar, la puerta; en un viaje, la interpolación lineal entre las
@@ -50,6 +54,7 @@ export function positions(world: World): CitizenPosition[] {
     const to = i['trip.to']?.[row] ?? 0;
     let pt: { x: number; y: number } | undefined;
     let moving = false;
+    let trip: CitizenPosition['trip'];
     if (to > 0) {
       moving = true;
       const a = placePoint(world, i['trip.from']?.[row] ?? 0);
@@ -57,8 +62,10 @@ export function positions(world: World): CitizenPosition[] {
       const t0 = i['trip.departAt']?.[row] ?? world.now;
       const t1 = i['trip.arriveAt']?.[row] ?? world.now;
       const f = t1 > t0 ? Math.min(1, Math.max(0, (world.now - t0) / (t1 - t0))) : 1;
-      if (a && b) pt = { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f };
-      else pt = f < 0.5 ? a : b;
+      if (a && b) {
+        pt = { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f };
+        trip = { from: a, to: b, departAt: t0, arriveAt: t1 };
+      } else pt = f < 0.5 ? a : b;
     } else {
       pt = placePoint(world, i['loc.place']?.[row] ?? 0);
     }
@@ -72,14 +79,18 @@ export function positions(world: World): CitizenPosition[] {
       placeId: place > 0 && !moving ? formatId('PLC', place) : null,
       moving,
       mood: round(world.components.f32['state.mood']?.[row] ?? 0.5),
+      age: Math.floor((world.now - (i['demo.birthMinute']?.[row] ?? 0)) / YEAR),
+      ...(trip ? { trip } : {}),
     });
   }
   return out;
 }
 
+/** Horario de un lugar en texto. */
+export const open = (p: Place) => (p.openingHours === null ? 'privado' : p.openingHours === '24h' ? '24h' : p.openingHours ? `${p.openingHours.open}-${p.openingHours.close}` : 'sin horario');
+
 /** 022 `/api/world`: configuración, mapa y lugares. */
 export function worldView(world: World) {
-  const open = (p: Place) => (p.openingHours === null ? 'privado' : p.openingHours === '24h' ? '24h' : p.openingHours ? `${p.openingHours.open}-${p.openingHours.close}` : 'sin horario');
   return {
     name: world.config.name,
     now: world.now,

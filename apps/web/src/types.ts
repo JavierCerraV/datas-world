@@ -36,6 +36,21 @@ export interface CitizenPosition {
   placeId: string | null;
   moving: boolean;
   mood: number;
+  /** 024 R-008 (opcional en respuestas antiguas). */
+  age?: number;
+  /** 022 R-008: el viaje en curso, para dibujarlo por las calles. */
+  trip?: { from: { x: number; y: number }; to: { x: number; y: number }; departAt: number; arriveAt: number };
+}
+
+/** 022 R-007: ficha de un lugar. */
+export interface PlaceDetail {
+  id: string;
+  name: string;
+  kind: string;
+  district: string | null;
+  open: string;
+  inside: { id: string; name: string; activity: string }[];
+  residents: { id: string; name: string }[];
 }
 
 export type Cause = { event: string; weight: number } | { state: string; value: number | null; weight: number };

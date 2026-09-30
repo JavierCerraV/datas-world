@@ -2,7 +2,7 @@
 import { copyFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { idNumber } from '@datas-world/engine';
+import { idNumber, stateHash } from '@datas-world/engine';
 import type { EntityId } from '@datas-world/engine';
 import { WorldRepository, closeDb, openReadonly, pendingCommands } from '@datas-world/persistence';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -77,6 +77,39 @@ describe('022: API de solo lectura', () => {
     const after = (await api.app.inject({ url: `/api/events?since=${last[1]!.id}&limit=10` })).json() as { id: string }[];
     expect(after.map((e) => e.id)).toEqual(last.slice(2).map((e) => e.id));
     expect((await api.app.inject({ url: '/api/events?limit=5000' })).statusCode).toBe(400);
+  });
+
+  it('022 CA-006: un día pasado da las posiciones y la ficha de su instantánea, sin tocar el presente', async () => {
+    const hashBefore = stateHash(api.reader.world);
+    const { days, today } = (await api.app.inject({ url: '/api/days' })).json() as { today: number; days: { day: number; date: string }[] };
+    expect(days.length).toBeGreaterThan(2);
+    expect(today).toBe(days.at(-1)!.day);
+    const day = days[1]!.day;
+    const h = openReadonly(db);
+    const snap = new WorldRepository(h).loadSnapshot(day * 1440)!;
+    closeDb(h);
+    const past = (await api.app.inject({ url: `/api/days/${day}/citizens` })).json() as { id: string; activity: string }[];
+    expect(past).toEqual(JSON.parse(JSON.stringify(positions(snap))));
+    const id = past[0]!.id;
+    const detail = (await api.app.inject({ url: `/api/days/${day}/citizens/${id}` })).json() as { id: string; state: { mood: number } };
+    expect(detail.id).toBe(id);
+    expect(detail.state.mood).toBe(Math.round(snap.components.f32['state.mood']![idNumber(id as EntityId)]! * 100) / 100);
+    expect((await api.app.inject({ url: '/api/days/99999/citizens' })).statusCode).toBe(404);
+    expect(stateHash(api.reader.world)).toBe(hashBefore);
+  });
+
+  it('022 CA-005: /api/places/:id lista a quien está dentro y a los residentes de una vivienda, como el estado guardado', async () => {
+    const h = openReadonly(db);
+    const w = new WorldRepository(h).loadWorld();
+    closeDb(h);
+    const here = positions(w).find((c) => c.placeId)!;
+    const p = (await api.app.inject({ url: `/api/places/${here.placeId}` })).json() as { inside: { id: string }[]; residents: { id: string }[]; open: string };
+    expect(p.inside.some((x) => x.id === here.id)).toBe(true);
+    const home = w.households.values().next().value!;
+    const dwelling = (await api.app.inject({ url: `/api/places/${home.dwellingId}` })).json() as { residents: { id: string }[] };
+    expect(dwelling.residents.map((x) => x.id).sort()).toEqual([...home.memberIds].filter((m) => w.citizens.get(m)?.status === 'active').sort());
+    expect((await api.app.inject({ url: '/api/places/nada' })).statusCode).toBe(400);
+    expect((await api.app.inject({ url: '/api/places/PLC-9999' })).statusCode).toBe(404);
   });
 
   it('020 R-007: /api/citizens/:id/report da el informe con etapas, puntos de inflexión y perfil; 404 si no existe', async () => {

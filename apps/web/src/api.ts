@@ -1,6 +1,7 @@
 // Cliente de la API (spec 022): lecturas con fetch, flujo en vivo con EventSource (reconecta solo y envía
 // Last-Event-ID) y controles con basic auth.
-import type { CitizenDetail, CitizenPosition, EventView, Health, WorldView } from './types.ts';
+import type { Metrics } from './world-panel.ts';
+import type { CitizenDetail, CitizenPosition, EventView, Health, PlaceDetail, WorldView } from './types.ts';
 
 async function get<T>(path: string): Promise<T> {
   const r = await fetch(path);
@@ -12,6 +13,13 @@ export const api = {
   world: () => get<WorldView>('/api/world'),
   citizens: () => get<CitizenPosition[]>('/api/citizens'),
   citizen: (id: string) => get<CitizenDetail>(`/api/citizens/${id}`),
+  place: (id: string) => get<PlaceDetail>(`/api/places/${id}`),
+  /** 022 R-009: los días con instantánea (la línea temporal). */
+  days: () => get<{ today: number; days: { day: number; date: string }[] }>('/api/days'),
+  /** Posiciones o ficha de una ruta dada (la del presente o la de un día pasado, 024 R-010). */
+  at: <T>(path: string) => get<T>(path),
+  /** 022 R-010: métricas por día y alertas (el panel del mundo). */
+  metrics: () => get<Metrics>('/api/metrics'),
   events: (limit = 30) => get<EventView[]>(`/api/events?limit=${limit}`),
   health: () => get<Health>('/api/health'),
 };

@@ -11,6 +11,9 @@ import type { LlmRecord, ProviderAdapter, RecordStore } from '@datas-world/llm-g
 import { CONTROL_COMMANDS, SqliteRecordStore, closeDb, enqueueCommand, eventsById, openWorldDb, queryEvents, trajectoryOf } from '@datas-world/persistence';
 import type { ControlCommandName, Db } from '@datas-world/persistence';
 import { registerChatRoutes } from './chat.ts';
+import { placeDetail } from './places.ts';
+import { registerDayRoutes } from './days.ts';
+import { registerMetricsRoutes } from './metrics.ts';
 import Fastify from 'fastify';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
@@ -109,6 +112,17 @@ export function buildApi(opts: ApiOptions): Api {
   app.get('/api/world', async () => worldView(reader.world));
 
   app.get('/api/citizens', async () => positions(reader.world));
+
+  registerDayRoutes(app, reader); // 022 R-009: días pasados
+  registerMetricsRoutes(app, reader); // 022 R-010, R-011: métricas y exportación
+
+  // 022 R-007: ficha de un lugar.
+  app.get('/api/places/:id', async (req, reply) => {
+    const id = (req.params as { id?: string }).id ?? '';
+    if (!/^PLC-\d+$/.test(id)) return reply.code(400).send({ error: 'id inválido' });
+    const p = placeDetail(reader.world, id as EntityId);
+    return p ?? reply.code(404).send({ error: 'no existe' });
+  });
 
   const knowledge = knowledgeCatalog(loadCatalogs());
   app.get('/api/citizens/:id', async (req, reply) => {

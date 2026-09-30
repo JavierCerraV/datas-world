@@ -334,6 +334,11 @@ export class WorldRepository {
     return (this.db.prepare('SELECT COUNT(*) AS n FROM snapshots').get() as { n: number }).n;
   }
 
+  /** Minutos con instantánea, en orden (022 R-009: la línea temporal). */
+  snapshotTimes(): number[] {
+    return (this.db.prepare('SELECT at FROM snapshots ORDER BY at').all() as { at: number }[]).map((r) => r.at);
+  }
+
   /** Última entrada externa registrada, para continuar su numeración (`Runner.continueInputsAfter`). */
   lastInput(): { at: number; seq: number } | null {
     const row = this.db.prepare('SELECT at, seq FROM external_inputs ORDER BY at DESC, seq DESC LIMIT 1').get() as

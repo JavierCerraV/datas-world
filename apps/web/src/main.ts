@@ -9,6 +9,12 @@ import { eventEs, inspectorTabs } from './format.ts';
 import type { Section } from './format.ts';
 import { TS, interpolate, nightAlpha, spread, timeOf } from './logic.ts';
 import { drawMap, drawPerson } from './render.ts';
+import { placeAt, setupPeoplePanel } from './panels.ts';
+import { onTheWay, routeCache } from './streets.ts';
+import { setupMapInput } from './input.ts';
+import { setupTimeline, urlsFor } from './timeline.ts';
+import type { Moment } from './timeline.ts';
+import { setupWorldPanel } from './world-panel.ts';
 import type { CitizenDetail, CitizenPosition, WorldView } from './types.ts';
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
@@ -37,13 +43,22 @@ function sessionStorageGet(k: string): string | null {
   }
 }
 
+let nowMin = 0; // minuto del mundo de la última actualización
+let route: ReturnType<typeof routeCache> | null = null; // 024 R-009
+let people: ReturnType<typeof setupPeoplePanel> | null = null; // 024 R-008
+let moment: Moment = { mode: 'live' }; // 024 R-010: el presente o un día pasado
+let timeline: ReturnType<typeof setupTimeline> | null = null;
+
 async function refreshPeople(): Promise<void> {
-  const list = await api.citizens();
+  // 024 R-009: quien va de camino se dibuja por la calle, no en línea recta (en un día pasado, a medianoche).
+  const minute = moment.mode === 'past' ? moment.day * 1440 : nowMin;
+  const list = (await api.at<CitizenPosition[]>(urlsFor(moment).citizens)).map((c) => (c.trip && route ? { ...c, ...onTheWay(route, c.trip, minute) } : c));
   prev = new Map(next.map((c) => [c.id, c]));
   next = list;
   updatedAt = performance.now();
   $('#pop').textContent = `${list.length} personas`;
   if (selected) void openInspector(selected, false);
+  else people?.refresh();
 }
 
 function resize(): void {
@@ -122,8 +137,9 @@ function renderInspector(): void {
 
 async function openInspector(id: string, focus = true): Promise<void> {
   selected = id;
-  detail = await api.citizen(id);
+  detail = await api.at<CitizenDetail>(urlsFor(moment).citizen(id));
   $('#inspector').hidden = false;
+  $('#people').hidden = true;
   renderInspector();
   if (focus) $<HTMLButtonElement>('#insp-close').focus();
 }
@@ -132,12 +148,12 @@ function closeInspector(): void {
   selected = null;
   detail = null;
   $('#inspector').hidden = true;
+  $('#people').hidden = false;
+  people?.refresh();
 }
 
-function pick(clientX: number, clientY: number): string | null {
-  const r = canvas.getBoundingClientRect();
-  const mx = (clientX - r.left) / scale / TS + cam.x / TS;
-  const my = (clientY - r.top) / scale / TS + cam.y / TS;
+/** La persona dibujada más cerca de un punto del mapa (en tiles). */
+function pick(mx: number, my: number): string | null {
   let best: { id: string; d: number } | null = null;
   for (const p of drawn) {
     const d = Math.hypot(p.x - mx, p.y - 0.4 - my);
@@ -194,6 +210,17 @@ async function start(): Promise<void> {
   world = await api.world();
   if (!world.geo) throw new Error('El mundo no tiene mapa');
   mapLayer = drawMap(world);
+  route = routeCache(world.geo);
+  nowMin = world.now;
+  people = setupPeoplePanel({ list: () => next, openPerson: (id) => void openInspector(id), fetchPlace: (id) => api.place(id) });
+  timeline = setupTimeline({
+    fetchDays: api.days,
+    onChange: (m) => {
+      moment = m;
+      void refreshPeople();
+    },
+  });
+  await timeline.refresh();
   $('#title').textContent = world.name;
   clock = { date: world.date, status: world.status };
   $('#date').textContent = world.date;
@@ -206,9 +233,13 @@ async function start(): Promise<void> {
   await refreshPeople();
   stream({
     tick: (t) => {
+      // Un día nuevo trae una instantánea más para la línea temporal.
+      if (Math.floor(t.now / 1440) !== Math.floor(nowMin / 1440)) void timeline?.refresh();
       clock = t;
+      nowMin = t.now;
       $('#date').textContent = `${t.date}${t.status === 'paused' ? ' · en pausa' : ''}`;
-      void refreshPeople();
+      // Mirando el pasado, el mapa no se mueve con los ticks.
+      if (moment.mode === 'live') void refreshPeople();
     },
     event: (e) => {
       if (e.type !== 'DAY_STARTED' && e.type !== 'TRIP_TAKEN') addLog(eventEs(e));
@@ -219,30 +250,22 @@ async function start(): Promise<void> {
   requestAnimationFrame(frame);
 }
 
-// Interacción: arrastrar mueve la cámara; la rueda y los botones cambian el zoom; clic abre el inspector.
-let drag: { x: number; y: number; moved: boolean } | null = null;
-canvas.addEventListener('pointerdown', (e) => (drag = { x: e.clientX, y: e.clientY, moved: false }));
-canvas.addEventListener('pointermove', (e) => {
-  if (!drag) return;
-  const dx = e.clientX - drag.x;
-  const dy = e.clientY - drag.y;
-  if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
-  if (drag.moved) {
-    cam = { x: cam.x - dx / scale, y: cam.y - dy / scale };
-    drag = { x: e.clientX, y: e.clientY, moved: true };
-  }
-});
-canvas.addEventListener('pointerup', (e) => {
-  if (drag && !drag.moved) {
-    const id = pick(e.clientX, e.clientY);
-    if (id) void openInspector(id);
-  }
-  drag = null;
-});
-canvas.addEventListener('wheel', (e) => {
-  e.preventDefault();
-  const r = canvas.getBoundingClientRect();
-  setScale(scale + (e.deltaY < 0 ? 1 : -1), e.clientX - r.left, e.clientY - r.top);
+// Interacción: arrastrar mueve la cámara; la rueda y los botones cambian el zoom; un clic abre a la persona o, si no
+// hay nadie, la ficha del lugar (024 R-008).
+setupMapInput({
+  canvas,
+  pan: (dx, dy) => (cam = { x: cam.x - dx / scale, y: cam.y - dy / scale }),
+  zoom: (step, cx, cy) => setScale(scale + step, cx, cy),
+  click: (x, y) => {
+    const mx = x / scale / TS + cam.x / TS;
+    const my = y / scale / TS + cam.y / TS;
+    const id = pick(mx, my);
+    if (id) return void openInspector(id);
+    const p = placeAt(world.places, mx, my);
+    if (!p) return;
+    closeInspector();
+    void people?.showPlace(p.id);
+  },
 });
 window.addEventListener('resize', resize);
 window.addEventListener('keydown', (e) => {
@@ -276,6 +299,7 @@ for (const b of document.querySelectorAll<HTMLButtonElement>('.tabs button'))
   });
 
 setupChat({ citizen: () => (detail ? { id: detail.id, name: detail.name } : null), auth: () => credentials, askAuth });
+setupWorldPanel({ button: $('#btn-world') as HTMLButtonElement, dialog: $('#world') as HTMLDialogElement, body: $('#world-body'), close: $('#world-close') as HTMLButtonElement, fetch: api.metrics });
 
 start().catch((err: unknown) => {
   $('#msg').textContent = `No se pudo conectar con la API: ${String(err)}. ¿Está corriendo \`pnpm dev\`?`;

@@ -13,6 +13,7 @@
       <span id="live">○ conectando…</span>
       <span id="pop"></span>
       <span id="fps"></span>
+      <button id="btn-world" type="button" title="Métricas del mundo, alertas y exportación">📈 Mundo</button>
     </header>
     <main>
       <div class="mapwrap">
@@ -25,10 +26,20 @@
           <button id="btn-zout" title="Alejar">−</button>
           <span id="zoom">×3</span>
           <button id="btn-zin" title="Acercar">+</button>
+          <label class="tl">Día <input id="tl" type="range" min="0" max="0" value="0" aria-label="Línea temporal: elige un día pasado" /></label>
+          <button id="tl-live" disabled title="Volver al presente">⏵ Presente</button>
         </div>
+        <p id="tl-banner" class="banner" role="status" hidden></p>
         <p id="msg" role="status" aria-live="polite"></p>
       </div>
       <aside>
+        <section id="people" aria-labelledby="people-title">
+          <div class="insp-head">
+            <h2 id="people-title">Población</h2>
+            <input id="people-q" type="search" placeholder="Buscar por nombre" aria-label="Buscar persona" />
+          </div>
+          <div id="people-body"></div>
+        </section>
         <section id="inspector" hidden aria-labelledby="insp-name">
           <div class="insp-head">
             <h2 id="insp-name"></h2>
@@ -84,6 +95,14 @@
           <ul id="chat-knows"></ul>
         </aside>
       </div>
+    </dialog>
+    <dialog id="world" aria-labelledby="world-title">
+      <div class="chat-head">
+        <h2 id="world-title">El mundo en el tiempo</h2>
+        <span class="grow"></span>
+        <button id="world-close" type="button" aria-label="Cerrar el panel del mundo">✕</button>
+      </div>
+      <div id="world-body" class="world-body"></div>
     </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>

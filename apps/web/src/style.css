@@ -7,6 +7,12 @@
   --line: #c5cdd5;
   --accent: #4535c0;
   --accent-soft: #e3e0f8;
+  /* Orden categórico fijo de las gráficas (024 R-011); en oscuro, sus pasos propios. */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
   color: var(--ink);
   background: var(--paper);
@@ -20,6 +26,11 @@
     --line: #2c3641;
     --accent: #9d93ff;
     --accent-soft: #2b2750;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --series-5: #d55181;
   }
 }
 * {
@@ -99,6 +110,24 @@ button:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 1px;
 }
+/* Línea temporal (024 R-010): aviso de que se mira un día pasado. */
+.banner {
+  position: absolute;
+  top: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: #7a4b00;
+  color: #fff;
+  font-size: 13px;
+}
+.ctl .tl {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 #msg {
   position: absolute;
   top: 8px;
@@ -116,11 +145,56 @@ aside {
   background: var(--panel);
   border-left: 1px solid var(--line);
 }
-#inspector {
+#inspector,
+#people {
   padding: 12px 16px;
   border-bottom: 1px solid var(--line);
   overflow: auto;
   max-height: 65%;
+}
+/* Población y lugares (024 R-008). */
+#people-q {
+  flex: 1;
+  min-width: 0;
+}
+ul.people {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0;
+}
+ul.people button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 3px 2px;
+  color: inherit;
+  cursor: pointer;
+}
+ul.people button:hover,
+ul.people button:focus-visible {
+  background: rgba(127, 127, 127, 0.15);
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+ul.people .nm {
+  flex: 1;
+}
+ul.people .age,
+ul.people .doing,
+.muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+button.back {
+  margin-bottom: 6px;
 }
 .insp-head {
   display: flex;
@@ -576,4 +650,99 @@ table.report small {
   .chat-form {
     flex-wrap: wrap;
   }
+}
+
+/* Panel del mundo (024 R-011): gráficas de líneas finas, rejilla recesiva, texto con los tokens de texto. */
+#world {
+  width: min(760px, 96vw);
+  max-height: 92vh;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+}
+#world::backdrop {
+  background: rgb(0 0 0 / 0.35);
+}
+.world-body {
+  padding: 8px 16px 16px;
+  overflow-y: auto;
+}
+.world-body .alerts {
+  padding-left: 0;
+  list-style: none;
+}
+.chart {
+  position: relative;
+  margin: 16px 0;
+}
+.chart figcaption {
+  font-size: 14px;
+  font-weight: 600;
+}
+.chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.chart .grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.chart .tick,
+.chart .label {
+  font-size: 11px;
+  fill: var(--muted);
+}
+.chart .label {
+  fill: var(--ink);
+}
+.chart .series {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.chart .band {
+  opacity: 0.15;
+}
+.chart .cursor {
+  stroke: var(--muted);
+  stroke-dasharray: 3 3;
+}
+.chart .hit {
+  fill: transparent;
+}
+.legend,
+.chart .tip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 4px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.legend i,
+.chart .tip i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-radius: 2px;
+}
+.chart .tip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--ink);
+}
+.chart .tip[hidden] {
+  display: none;
+}
+.export {
+  font-size: 13px;
 }
