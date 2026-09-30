@@ -2,7 +2,6 @@
 // de aprendizaje por etapas. Solo lee `/api/citizens/:id/life` (022). El familiograma usa la simbología habitual:
 // cuadrado hombre, círculo mujer, borde doble la persona, cruz si murió, borde punteado si vive fuera del mundo, y
 // la relación con la persona en verde (cercana), rojo en zigzag (conflictiva) o gris punteado (distante).
-import { showReport } from './report.ts';
 
 export type Quality = 'cercana' | 'conflictiva' | 'distante' | 'sin_datos';
 export interface GenoNode {
@@ -178,24 +177,19 @@ const learnedText = (l: { label: string; delta: number }[]) =>
 
 /** La pestaña completa: familiograma y episodios por etapa (041 CA-005). */
 export function renderLife(v: LifeView): string {
+  return `${renderFamily(v)}${renderMemory(v)}${renderDevelopment(v)}`;
+}
+
+/** 024 R-017, subpestaña Familia: el familiograma con su leyenda. */
+export const renderFamily = (v: LifeView): string => `<h3>Familiograma</h3><div class="genogram-wrap">${genogramSvg(v.genogram)}</div>${LEGEND}`;
+
+/** 024 R-017, subpestaña Desarrollo: lo que vivió por etapas y lo que aprendió en cada episodio. */
+export function renderDevelopment(v: LifeView): string {
   const total = v.stages.reduce((a, s) => a + s.episodes.length, 0);
   const stages = v.stages
     .map((s, i) => `<details class="life-stage"${i === 0 ? ' open' : ''}><summary>${esc(STAGE[s.stage] ?? s.stage)} · ${s.episodes.length} episodios</summary><ol class="life">${s.episodes
       .map((e) => `<li class="${e.valence > 0 ? 'pos' : e.valence < 0 ? 'neg' : ''}"><span class="mono">${esc(e.date)}</span> · ${e.age} años${e.speaker ? ` · ${esc(e.speaker)}${e.speakerName ? ` (${esc(e.speakerName)})` : ''}` : ''}<br>${esc(e.text)}<small>aprendió: ${learnedText(e.learned)}${e.cause ? `<br>por: ${esc(e.cause)}` : ''}</small></li>`)
       .join('')}</ol></details>`)
     .join('');
-  return `<h3>Familiograma</h3><div class="genogram-wrap">${genogramSvg(v.genogram)}</div>${LEGEND}${renderMemory(v)}<h3>Historia de vida (lo que vivió)</h3>${total ? stages : '<p>Este mundo no tiene historia de desarrollo (se creó antes de la spec 041).</p>'}`;
-}
-
-/** Carga y muestra la historia de vida de una persona. */
-export async function showLife(el: HTMLElement, id: string): Promise<void> {
-  el.innerHTML = '<p>Cargando su historia…</p>';
-  const r = await fetch(`/api/citizens/${id}/life`);
-  if (!r.ok) {
-    el.innerHTML = '<p>No se pudo cargar su historia.</p>';
-    return;
-  }
-  // 020: el informe va arriba, en su propio contenedor; se carga aparte para no retrasar la historia.
-  el.innerHTML = `<div class="life-report"><p>Cargando el informe…</p></div>${renderLife((await r.json()) as LifeView)}`;
-  await showReport(el.querySelector<HTMLElement>('.life-report')!, id);
+  return `<h3>Historia de vida (lo que vivió)</h3>${total ? stages : '<p>Este mundo no tiene historia de desarrollo (se creó antes de la spec 041).</p>'}`;
 }

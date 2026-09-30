@@ -9,7 +9,10 @@ const LOOP_MS = 100;
 const { values } = parseArgs({
   options: { db: { type: 'string', default: 'data/world.db' }, speed: { type: 'string' } },
 });
-const worker = new WorldWorker(values.db, values.speed === undefined ? {} : { speed: Number(values.speed) as Speed });
+const worker = new WorldWorker(values.db, {
+  clock: () => performance.now(),
+  ...(values.speed === undefined ? {} : { speed: Number(values.speed) as Speed }),
+});
 process.stdout.write(
   `worker: ${worker.world.id} en el minuto ${worker.world.now}, ${worker.world.status}, ${worker.runner.speed}x\n`,
 );
@@ -32,7 +35,7 @@ function loop(): void {
   const whole = Math.floor(ms);
   fraction = ms - whole;
   if (worker.pump(whole).stop) return stop('orden stop');
-  timer = setTimeout(loop, LOOP_MS);
+  timer = setTimeout(loop, worker.advance ? 0 : LOOP_MS); // en un avance sin observar, sin esperas (027 R-015)
 }
 
 process.on('SIGTERM', () => stop('SIGTERM'));

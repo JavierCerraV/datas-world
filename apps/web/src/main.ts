@@ -1,282 +1,176 @@
-// Visor mínimo (spec 024): mapa, personas, día y noche, inspector, registro de eventos y controles. Solo lee de la
-// API (022); no tiene lógica de simulación (INV-002).
-import { api, control, stream } from './api.ts';
-import { showChatHistory } from './chat-history.ts';
-import { showLife } from './life.ts';
-import { bindWhy, whyToggle } from './why.ts';
+// Visor de Data's World (spec 024 v0.4), como el prototipo: barra superior, mapa en vivo con los trayectos
+// reproducidos, registro de eventos e inspector. Une los módulos; solo lee de la API (022) y envía órdenes de
+// control. No tiene lógica de simulación (INV-002).
+import { api, stream } from './api.ts';
+import { askAuth, auth, send } from './auth.ts';
 import { setupChat } from './chat-ui.ts';
-import { eventEs, inspectorTabs } from './format.ts';
-import type { Section } from './format.ts';
-import { TS, interpolate, nightAlpha, spread, timeOf } from './logic.ts';
-import { drawMap, drawPerson } from './render.ts';
-import type { CitizenDetail, CitizenPosition, WorldView } from './types.ts';
+import { clockOf } from './camera.ts';
+import { setupInspector } from './inspector.ts';
+import { setupLog } from './logview.ts';
+import { setupMap } from './mapview.ts';
+import { doingOf, populationIntro } from './panels.ts';
+import { drawMap } from './render.ts';
+import { MoveBook, stepView } from './replay.ts';
+import { routeCache } from './streets.ts';
+import { setupTimeline, urlsFor } from './timeline.ts';
+import type { Moment } from './timeline.ts';
+import { SPEEDS, setupTopbar } from './topbar.ts';
+import type { CitizenDetail, CitizenPosition, Stats, WorldView } from './types.ts';
+import { setupWorldPanel } from './world-panel.ts';
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
-const canvas = $<HTMLCanvasElement>('#map');
-const g = canvas.getContext('2d')!;
-const SPEEDS = [0, 1 / 60, 1, 10, 100, 1000]; // 1/60 = tiempo real (002 R-003)
+let msgTimer: ReturnType<typeof setTimeout> | undefined;
+const message = (text: string) => {
+  $('#msg').textContent = text;
+  clearTimeout(msgTimer);
+  if (text) msgTimer = setTimeout(() => ($('#msg').textContent = ''), 6000);
+};
 
 let world: WorldView;
-let mapLayer: HTMLCanvasElement;
-let scale = 3;
-let cam = { x: 0, y: 0 }; // esquina superior izquierda, en px del mapa
-let prev = new Map<string, CitizenPosition>();
-let next: CitizenPosition[] = [];
-let updatedAt = 0;
-let drawn: { id: string; x: number; y: number }[] = [];
-let selected: string | null = null;
-let clock = { date: '', status: '' };
+let people: CitizenPosition[] = [];
+const book = new MoveBook();
+const pastBook = new MoveBook(); // en un día pasado no hay viajes: todos en su sitio
+let latest = 0; // último minuto guardado
+let view: number | null = null; // minuto de la vista (024 R-013)
+let status = 'running';
 let speed = 1;
-let credentials: string | null = sessionStorageGet('dw-auth');
+let stats: Stats | null = null;
+let moment: Moment = { mode: 'live' };
+const selected = { person: null as string | null, place: null as string | null };
 
-function sessionStorageGet(k: string): string | null {
-  try {
-    return sessionStorage.getItem(k);
-  } catch {
-    return null;
-  }
+const names = (id: string) => world.names?.[id] ?? world.places.find((p) => p.id === id)?.name;
+const minuteNow = () => (moment.mode === 'past' ? moment.day * 1440 : view ?? latest);
+
+async function loadPeople(): Promise<void> {
+  people = await api.at<CitizenPosition[]>(urlsFor(moment).citizens);
 }
 
-async function refreshPeople(): Promise<void> {
-  const list = await api.citizens();
-  prev = new Map(next.map((c) => [c.id, c]));
-  next = list;
-  updatedAt = performance.now();
-  $('#pop').textContent = `${list.length} personas`;
-  if (selected) void openInspector(selected, false);
+async function loadStats(): Promise<void> {
+  if (moment.mode !== 'live') return;
+  stats = await api.stats();
+  topbar.setStats(stats, latest);
 }
 
-function resize(): void {
-  const r = canvas.getBoundingClientRect();
-  canvas.width = Math.floor(r.width);
-  canvas.height = Math.floor(r.height);
-  g.imageSmoothingEnabled = false;
-}
+const topbar = setupTopbar({ message, status: () => status });
+const log = setupLog({ openPerson: (id) => inspector.select(id) });
 
-let frames = 0;
-let fpsAt = performance.now();
-function frame(t: number): void {
-  const w = canvas.width;
-  const h = canvas.height;
-  g.fillStyle = '#5B8440';
-  g.fillRect(0, 0, w, h);
-  g.imageSmoothingEnabled = false;
-  g.drawImage(mapLayer, -cam.x * scale, -cam.y * scale, mapLayer.width * scale, mapLayer.height * scale);
-  drawn = spread(interpolate(prev, next, (t - updatedAt) / 1000));
-  for (const p of drawn) drawPerson(g, p.id, (p.x * TS - cam.x) * scale, (p.y * TS - cam.y) * scale, Math.max(1, Math.floor(scale / 2)), p.id === selected);
-  const { hour, minute } = timeOf(clock.date);
-  const a = nightAlpha(hour, minute);
-  if (a > 0) {
-    g.fillStyle = `rgba(16,24,64,${a})`;
-    g.fillRect(0, 0, w, h);
-  }
-  frames++;
-  if (t - fpsAt > 1000) {
-    $('#fps').textContent = `${Math.round((frames * 1000) / (t - fpsAt))} fps`;
-    frames = 0;
-    fpsAt = t;
-  }
-  requestAnimationFrame(frame);
-}
+// Se crean en `start`, cuando ya se conoce el mapa.
+let map: ReturnType<typeof setupMap> | null = null;
+const doing = (c: CitizenPosition) => doingOf(c, map?.where(c.id), names);
+const fetchPerson = (id: string) => api.at<CitizenDetail>(urlsFor(moment).citizen(id));
 
-function renderSections(sections: Section[]): string {
-  return sections
-    .filter((s) => s.rows.length)
-    .map((s) => `<h3>${s.title}</h3><dl>${s.rows.map((r) => `<dt>${esc(r.label)}</dt><dd>${esc(r.value)}</dd>`).join('')}</dl>`)
-    .join('');
-}
-const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+const inspector = setupInspector({
+  people: () => people,
+  doing,
+  intro: () => populationIntro(stats?.population ?? people.length, stats?.households ?? 0, stats?.districts ?? 0),
+  fetchPerson,
+  fetchPlace: (id) => api.place(id),
+  auth,
+  askAuth,
+  onSelect: (person, place) => {
+    selected.person = person;
+    selected.place = place;
+    if (!person) map?.setFollow(false);
+  },
+  onChat: (d) => chat.open(d),
+  toggleFollow: () => map?.setFollow(!map.following()),
+  following: () => map?.following() ?? false,
+});
 
-let tab: 'estado' | 'historia' | 'funcional' | 'vida' | 'charlas' = 'estado';
-let detail: CitizenDetail | null = null;
-let chatsShownFor: string | null = null;
-let lifeShownFor: string | null = null;
-function renderInspector(): void {
-  if (!detail) return;
-  const t = inspectorTabs(detail);
-  $('#insp-name').textContent = detail.name;
-  for (const b of document.querySelectorAll<HTMLButtonElement>('.tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === tab));
-  // Las charlas no cambian con cada tick: se cargan al entrar en la pestaña o al cambiar de persona.
-  if (tab === 'charlas') {
-    if (chatsShownFor !== detail.id) void showChatHistory($('#insp-body'), detail.id, () => credentials, askAuth);
-    chatsShownFor = detail.id;
-    return;
-  }
-  chatsShownFor = null;
-  // La historia de vida (041 R-009) tampoco cambia con los ticks: se carga una vez por persona.
-  if (tab === 'vida') {
-    if (lifeShownFor !== detail.id) void showLife($('#insp-body'), detail.id);
-    lifeShownFor = detail.id;
-    return;
-  }
-  lifeShownFor = null;
-  $('#insp-body').innerHTML =
-    tab === 'estado'
-      ? renderSections(t.estado)
-      : tab === 'funcional'
-        ? renderSections(t.funcional)
-        : t.historia.length
-          ? `<ol class="hist">${t.historia.map((h) => `<li>${esc(h.line)}${h.causes.length ? `<small>por: ${h.causes.map(esc).join(' · ')}</small>` : ''}${whyToggle(h.id)}</li>`).join('')}</ol>`
-          : '<p>Sin hechos recientes.</p>';
-}
+const chat = setupChat({
+  auth,
+  askAuth,
+  fetchPerson,
+  onClose: () => {
+    if (selected.person) inspector.select(selected.person);
+  },
+});
 
-async function openInspector(id: string, focus = true): Promise<void> {
-  selected = id;
-  detail = await api.citizen(id);
-  $('#inspector').hidden = false;
-  renderInspector();
-  if (focus) $<HTMLButtonElement>('#insp-close').focus();
-}
+setupWorldPanel({ button: $('#btn-world') as HTMLButtonElement, dialog: $('#world') as HTMLDialogElement, body: $('#world-body'), close: $('#world-close') as HTMLButtonElement, fetch: api.metrics });
 
-function closeInspector(): void {
-  selected = null;
-  detail = null;
-  $('#inspector').hidden = true;
-}
+const timeline = setupTimeline({
+  fetchDays: api.days,
+  onChange: (m) => {
+    moment = m;
+    void loadPeople().then(() => inspector.refresh());
+    if (selected.person) inspector.select(selected.person);
+  },
+});
 
-function pick(clientX: number, clientY: number): string | null {
-  const r = canvas.getBoundingClientRect();
-  const mx = (clientX - r.left) / scale / TS + cam.x / TS;
-  const my = (clientY - r.top) / scale / TS + cam.y / TS;
-  let best: { id: string; d: number } | null = null;
-  for (const p of drawn) {
-    const d = Math.hypot(p.x - mx, p.y - 0.4 - my);
-    if (d < 0.9 && (!best || d < best.d)) best = { id: p.id, d };
-  }
-  return best?.id ?? null;
-}
-
-function addLog(line: string): void {
-  const li = document.createElement('li');
-  li.textContent = line;
-  const ul = $('#log');
-  ul.prepend(li);
-  while (ul.children.length > 60) ul.lastChild!.remove();
-}
-
-/** Pide usuario y contraseña de los controles (y de la charla); devuelve false si se cancela. */
-function askAuth(): boolean {
-  const user = prompt('Usuario de los controles');
-  const pass = user ? prompt('Contraseña') : null;
-  if (!user || !pass) return false;
-  credentials = btoa(`${user}:${pass}`);
-  try {
-    sessionStorage.setItem('dw-auth', credentials);
-  } catch {
-    /* sin almacenamiento: se pedirá otra vez */
-  }
-  return true;
-}
-
-async function send(cmd: 'pause' | 'resume' | 'speed' | 'step', arg?: number): Promise<void> {
-  let code = await control(cmd, arg, credentials);
-  if (code === 401) {
-    if (!askAuth()) return;
-    code = await control(cmd, arg, credentials);
-  }
-  $('#msg').textContent = code === 200 ? 'Orden enviada' : code === 503 ? 'Controles desactivados (define DATAS_WORLD_USER y DATAS_WORLD_PASSWORD)' : `No se pudo (${code})`;
-}
-
-function setSpeed(delta: number): void {
-  const i = Math.max(0, Math.min(SPEEDS.length - 1, SPEEDS.indexOf(speed) + delta));
-  speed = SPEEDS[i]!;
-  void send('speed', speed);
-}
-
-function setScale(s: number, cx = canvas.width / 2, cy = canvas.height / 2): void {
-  const ns = Math.max(1, Math.min(6, s));
-  cam = { x: cam.x + cx / scale - cx / ns, y: cam.y + cy / scale - cy / ns };
-  scale = ns;
-  $('#zoom').textContent = `×${scale}`;
-}
-
+let shownMinute = -1;
 async function start(): Promise<void> {
   world = await api.world();
   if (!world.geo) throw new Error('El mundo no tiene mapa');
-  mapLayer = drawMap(world);
   $('#title').textContent = world.name;
-  clock = { date: world.date, status: world.status };
-  $('#date').textContent = world.date;
-  resize();
-  scale = Math.max(1, Math.min(6, Math.floor(Math.min(canvas.width / mapLayer.width, canvas.height / mapLayer.height)) || 1));
-  $('#zoom').textContent = `×${scale}`;
-  const h = await api.health();
-  speed = h.speed;
-  for (const e of (await api.events(30)).reverse()) addLog(eventEs(e));
-  await refreshPeople();
+  latest = world.now;
+  status = world.status;
+  const [health, moves, events] = await Promise.all([api.health(), api.moves(world.now - 180), api.events(200)]);
+  speed = health.speed;
+  book.add(moves);
+  log.add(events);
+  await Promise.all([loadPeople(), loadStats(), timeline.refresh()]);
+  topbar.setWorld(status, speed);
+  inspector.showPopulation();
+  map = setupMap({
+    world,
+    layer: drawMap(world),
+    route: routeCache(world.geo),
+    book: () => (moment.mode === 'past' ? pastBook : book),
+    people: () => people,
+    tick: (dt) => {
+      view = stepView(view, latest, speed, dt, status === 'paused');
+      const m = Math.floor(minuteNow());
+      if (m !== shownMinute) {
+        shownMinute = m;
+        topbar.setClock(world.epoch, m);
+        log.setToday(clockOf(world.epoch, m).iso);
+      }
+      return minuteNow();
+    },
+    selected: () => selected,
+    doing,
+    onPerson: (id) => inspector.select(id),
+    onPlace: (id) => inspector.showPlace(id),
+  });
   stream({
     tick: (t) => {
-      clock = t;
-      $('#date').textContent = `${t.date}${t.status === 'paused' ? ' · en pausa' : ''}`;
-      void refreshPeople();
+      const newDay = Math.floor(t.now / 1440) !== Math.floor(latest / 1440);
+      latest = t.now;
+      status = t.status;
+      topbar.setWorld(status, speed);
+      if (t.moves) book.add(t.moves);
+      book.prune((view ?? latest) - 1440);
+      if (newDay) void timeline.refresh();
+      if (moment.mode === 'live') void loadPeople().then(() => inspector.refresh());
+      void loadStats();
     },
     event: (e) => {
-      if (e.type !== 'DAY_STARTED' && e.type !== 'TRIP_TAKEN') addLog(eventEs(e));
-      if (e.type === 'SPEED_CHANGED') speed = (e.payload.to as number) ?? speed;
+      log.add([e]);
+      if (e.type === 'SPEED_CHANGED') {
+        speed = (e.payload.to as number) ?? speed;
+        topbar.setWorld(status, speed);
+      }
     },
     status: (ok) => ($('#live').textContent = ok ? '● en vivo' : '○ reconectando…'),
   });
-  requestAnimationFrame(frame);
+  // La población y la ficha se repintan cada segundo aunque no llegue un tick (el reloj de la vista avanza).
+  setInterval(() => inspector.refresh(), 1000);
 }
 
-// Interacción: arrastrar mueve la cámara; la rueda y los botones cambian el zoom; clic abre el inspector.
-let drag: { x: number; y: number; moved: boolean } | null = null;
-canvas.addEventListener('pointerdown', (e) => (drag = { x: e.clientX, y: e.clientY, moved: false }));
-canvas.addEventListener('pointermove', (e) => {
-  if (!drag) return;
-  const dx = e.clientX - drag.x;
-  const dy = e.clientY - drag.y;
-  if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
-  if (drag.moved) {
-    cam = { x: cam.x - dx / scale, y: cam.y - dy / scale };
-    drag = { x: e.clientX, y: e.clientY, moved: true };
-  }
-});
-canvas.addEventListener('pointerup', (e) => {
-  if (drag && !drag.moved) {
-    const id = pick(e.clientX, e.clientY);
-    if (id) void openInspector(id);
-  }
-  drag = null;
-});
-canvas.addEventListener('wheel', (e) => {
-  e.preventDefault();
-  const r = canvas.getBoundingClientRect();
-  setScale(scale + (e.deltaY < 0 ? 1 : -1), e.clientX - r.left, e.clientY - r.top);
-});
-window.addEventListener('resize', resize);
+// Teclado (024 R-005): espacio pausa, + y − velocidad, flechas mueven la cámara, Esc vuelve a la población.
 window.addEventListener('keydown', (e) => {
-  // Los atajos no actúan al escribir ni con la charla abierta (043 R-017).
-  if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName) || $<HTMLDialogElement>('#chat').open) return;
-  const step = 24 / scale;
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName) || chat.isOpen() || document.querySelector('dialog[open]')) return;
+  const i = SPEEDS.findIndex(([v]) => Math.abs(v - speed) < 1e-9);
   if (e.key === ' ') {
     e.preventDefault();
-    void send(clock.status === 'paused' ? 'resume' : 'pause');
-  } else if (e.key === '+') setSpeed(1);
-  else if (e.key === '-') setSpeed(-1);
-  else if (e.key === 'ArrowLeft') cam = { ...cam, x: cam.x - step };
-  else if (e.key === 'ArrowRight') cam = { ...cam, x: cam.x + step };
-  else if (e.key === 'ArrowUp') cam = { ...cam, y: cam.y - step };
-  else if (e.key === 'ArrowDown') cam = { ...cam, y: cam.y + step };
-  else if (e.key === 'Escape') closeInspector();
+    void send(status === 'paused' ? 'resume' : 'pause').then((m) => message(m ?? ''));
+  } else if (e.key === '+' && i < SPEEDS.length - 1) void send('speed', SPEEDS[i + 1]![0]).then((m) => message(m ?? ''));
+  else if (e.key === '-' && i > 0) void send('speed', SPEEDS[i - 1]![0]).then((m) => message(m ?? ''));
+  else if (e.key === 'ArrowLeft') map?.pan(-40, 0);
+  else if (e.key === 'ArrowRight') map?.pan(40, 0);
+  else if (e.key === 'ArrowUp') map?.pan(0, -40);
+  else if (e.key === 'ArrowDown') map?.pan(0, 40);
+  else if (e.key === 'Escape') inspector.showPopulation();
 });
-$('#btn-pause').addEventListener('click', () => void send(clock.status === 'paused' ? 'resume' : 'pause'));
-$('#btn-step').addEventListener('click', () => void send('step'));
-$('#btn-slower').addEventListener('click', () => setSpeed(-1));
-$('#btn-faster').addEventListener('click', () => setSpeed(1));
-$('#btn-zin').addEventListener('click', () => setScale(scale + 1));
-$('#btn-zout').addEventListener('click', () => setScale(scale - 1));
-$('#insp-close').addEventListener('click', closeInspector);
-bindWhy($('#insp-body')); // 019: «¿por qué?» de cada evento de la historia
-for (const b of document.querySelectorAll<HTMLButtonElement>('.tabs button'))
-  b.addEventListener('click', () => {
-    tab = b.dataset.tab as typeof tab;
-    chatsShownFor = null; // pulsar la pestaña vuelve a cargar las charlas
-    renderInspector();
-  });
 
-setupChat({ citizen: () => (detail ? { id: detail.id, name: detail.name } : null), auth: () => credentials, askAuth });
-
-start().catch((err: unknown) => {
-  $('#msg').textContent = `No se pudo conectar con la API: ${String(err)}. ¿Está corriendo \`pnpm dev\`?`;
-});
+start().catch((err: unknown) => message(`No se pudo conectar con la API: ${String(err)}. ¿Está corriendo \`pnpm dev\`?`));

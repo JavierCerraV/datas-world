@@ -2,6 +2,8 @@
 // (spec 027 R-002, R-004). La usan el worker y `world:advance` de la CLI.
 import { MINUTES_PER_DAY } from '@datas-world/engine';
 import type { Runner, World } from '@datas-world/engine';
+import { TripTracker } from './movements.ts';
+import type { Movement } from './movements.ts';
 import { FLUSH_TICKS, SNAPSHOT_EVERY_DAYS } from './params.ts';
 import type { WorldRepository } from './repository.ts';
 
@@ -26,8 +28,30 @@ export class WorldSession {
     return this.runner.world;
   }
 
-  /** Anota ticks ejecutados; hace flush al llegar a FLUSH_TICKS. */
-  ticked(n: number): void {
+  /** Ticks ejecutados y aún sin guardar (R-014: el worker hace flush también por tiempo real). */
+  get pendingTicks(): number {
+    return this.#ticksSinceFlush;
+  }
+
+  /**
+   * R-013: activa la anotación de viajes para el visor: `ticked` anota los viajes que empiezan y se guardan con el
+   * siguiente flush.
+   */
+  trackMoves(): void {
+    if (this.#tracker) return;
+    this.#tracker = new TripTracker();
+    this.#moves.push(...this.#tracker.scan(this.world)); // los que ya están en curso (repetirlos no duplica: misma clave)
+  }
+
+  #tracker: TripTracker | undefined;
+  #moves: Movement[] = [];
+
+  /**
+   * Anota ticks ejecutados; hace flush al llegar a FLUSH_TICKS. Con la anotación de viajes activa, mira los viajes
+   * nuevos: para no perder ninguno, quien la activa debe llamarla tras cada tick (n ≤ 1).
+   */
+  ticked(n: number, track = true): void {
+    if (n > 0 && track && this.#tracker) this.#moves.push(...this.#tracker.scan(this.world));
     this.#ticksSinceFlush += n;
     if (this.#ticksSinceFlush >= FLUSH_TICKS) this.flush();
   }
@@ -43,7 +67,9 @@ export class WorldSession {
       events: this.runner.drainEvents(),
       inputs: inputs.slice(this.#inputsWritten),
       checkpoint,
+      ...(this.#tracker ? { moves: this.#moves } : {}),
     });
+    this.#moves = [];
     this.#inputsWritten = inputs.length;
     this.#ticksSinceFlush = 0;
     const period = Math.floor(this.world.now / SNAPSHOT_MINUTES);

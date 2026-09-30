@@ -1,10 +1,10 @@
 // Vistas de solo lectura del mundo para la API (spec 022): funciones puras sobre un `World` cargado de la base.
 // No cambian el estado (R-001) y no leen el reloj.
-import { ACTIVITY, ACTIVITY_COLUMN, affectionFor, attachmentOf, formatId, idNumber, kindOf, ruleContribution, toCalendar } from '@datas-world/engine';
+import { ACTIVITY, ACTIVITY_COLUMN, affectionFor, attachmentOf, eventText, formatId, idNumber, kindOf, ruleContribution, toCalendar } from '@datas-world/engine';
 import type { EntityId, Place, World, WorldEvent } from '@datas-world/engine';
 
 const YEAR = 365.25 * 1440;
-const ACTIVITY_NAME = Object.fromEntries(Object.entries(ACTIVITY).map(([k, v]) => [v, k])) as Record<number, string>;
+export const ACTIVITY_NAME = Object.fromEntries(Object.entries(ACTIVITY).map(([k, v]) => [v, k])) as Record<number, string>;
 const round = (x: number, d = 2) => Math.round(x * 10 ** d) / 10 ** d;
 
 /** Fecha y hora del mundo (`2027-01-04 07:35`). */
@@ -34,9 +34,15 @@ export interface CitizenPosition {
   placeId: EntityId | null;
   moving: boolean;
   mood: number;
+  /** 024 R-008: edad, para la lista de la población. */
+  age: number;
+  /** 024 R-017: su vivienda, para decir «en casa» o «camino a casa». */
+  homeId: EntityId | null;
+  /** 022 R-008: el viaje en curso con sus dos puertas en el mapa, para dibujar el recorrido por las calles. */
+  trip?: { from: { x: number; y: number }; to: { x: number; y: number }; departAt: number; arriveAt: number };
 }
 
-const living = (world: World) => [...world.citizens.values()].filter((c) => !c.ancestor && world.components.u8.active?.[idNumber(c.id)] === 1);
+export const living = (world: World) => [...world.citizens.values()].filter((c) => !c.ancestor && world.components.u8.active?.[idNumber(c.id)] === 1);
 
 /**
  * 022 R-005: posición de cada persona viva. En su lugar, la puerta; en un viaje, la interpolación lineal entre las
@@ -50,6 +56,7 @@ export function positions(world: World): CitizenPosition[] {
     const to = i['trip.to']?.[row] ?? 0;
     let pt: { x: number; y: number } | undefined;
     let moving = false;
+    let trip: CitizenPosition['trip'];
     if (to > 0) {
       moving = true;
       const a = placePoint(world, i['trip.from']?.[row] ?? 0);
@@ -57,8 +64,10 @@ export function positions(world: World): CitizenPosition[] {
       const t0 = i['trip.departAt']?.[row] ?? world.now;
       const t1 = i['trip.arriveAt']?.[row] ?? world.now;
       const f = t1 > t0 ? Math.min(1, Math.max(0, (world.now - t0) / (t1 - t0))) : 1;
-      if (a && b) pt = { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f };
-      else pt = f < 0.5 ? a : b;
+      if (a && b) {
+        pt = { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f };
+        trip = { from: a, to: b, departAt: t0, arriveAt: t1 };
+      } else pt = f < 0.5 ? a : b;
     } else {
       pt = placePoint(world, i['loc.place']?.[row] ?? 0);
     }
@@ -72,14 +81,19 @@ export function positions(world: World): CitizenPosition[] {
       placeId: place > 0 && !moving ? formatId('PLC', place) : null,
       moving,
       mood: round(world.components.f32['state.mood']?.[row] ?? 0.5),
+      age: Math.floor((world.now - (i['demo.birthMinute']?.[row] ?? 0)) / YEAR),
+      homeId: (c.householdId ? world.households.get(c.householdId)?.dwellingId : undefined) ?? null,
+      ...(trip ? { trip } : {}),
     });
   }
   return out;
 }
 
+/** Horario de un lugar en texto. */
+export const open = (p: Place) => (p.openingHours === null ? 'privado' : p.openingHours === '24h' ? '24h' : p.openingHours ? `${p.openingHours.open}-${p.openingHours.close}` : 'sin horario');
+
 /** 022 `/api/world`: configuración, mapa y lugares. */
 export function worldView(world: World) {
-  const open = (p: Place) => (p.openingHours === null ? 'privado' : p.openingHours === '24h' ? '24h' : p.openingHours ? `${p.openingHours.open}-${p.openingHours.close}` : 'sin horario');
   return {
     name: world.config.name,
     now: world.now,
@@ -91,7 +105,45 @@ export function worldView(world: World) {
       .filter((p) => p.door || p.rect)
       .map((p) => ({ id: p.id, kind: p.kind, name: p.name, ...(p.rect ? { rect: p.rect } : {}), ...(p.door ? { door: p.door } : {}), open: open(p) })),
     population: living(world).length,
+    points: entryPoints(world),
+    // 024 R-017: el nombre de cada lugar (también de las viviendas de un edificio), para decir dónde está cada uno.
+    names: Object.fromEntries([...world.places.values()].filter((p) => !p.kind.startsWith('territorio')).map((p) => [p.id, p.name])),
   };
+}
+
+/**
+ * 022 R-012: por dónde se entra a cada lugar (también a las viviendas de un edificio), para trazar los trayectos: la
+ * puerta del lugar o la del primer contenedor que la tenga; si ninguno la tiene, el centro de su área. Fuera del
+ * mapa (La Capital), sin punto.
+ */
+export function entryPoints(world: World): Record<string, [number, number]> {
+  const out: Record<string, [number, number]> = {};
+  for (const p of world.places.values()) {
+    let q: Place | undefined = p;
+    for (let k = 0; q && k < 4 && !q.door; k++) q = q.parentId ? world.places.get(q.parentId) : undefined;
+    if (q?.door) out[p.id] = [q.door.x + 0.5, q.door.y + 0.5];
+    else if (p.rect) out[p.id] = [p.rect.x + p.rect.w / 2, p.rect.y + p.rect.h / 2];
+  }
+  return out;
+}
+
+let topicName: (key: string) => string | undefined = () => undefined;
+/** Los nombres de los temas de rumor (catálogo `rumor_topics`, 025) para los textos de los eventos. */
+export const setTopicNames = (fn: (key: string) => string | undefined): void => void (topicName = fn);
+
+/** «que CIT-1: se recupero» → «que CIT-1 se recuperó», con el nombre del tema del catálogo. */
+function readable(text: string, e: WorldEvent): string {
+  let out = text;
+  const p = e.payload as Record<string, unknown>;
+  for (const k of ['predicate', 'before', 'after', 'truth']) {
+    const key = p[k];
+    const name = typeof key === 'string' ? topicName(key) : undefined;
+    if (!name) continue;
+    const raw = (key as string).replace(/_/g, ' ');
+    const low = name.charAt(0).toLowerCase() + name.slice(1);
+    out = out.replace(`: ${raw}`, ` ${low}`).replace(raw, low);
+  }
+  return out;
 }
 
 /** Evento como lo ve el visor: tipo, fecha, participantes, datos y causas. */
@@ -102,6 +154,10 @@ export function eventView(world: World, e: WorldEvent) {
     at: e.at,
     date: dateOf(world, e.at),
     participants: e.participants.map((p) => ({ id: p.id, role: p.role, name: nameOf(world, p.id) })),
+    // 024 R-016: el texto del evento con lugares, organizaciones y temas de rumor en palabras; las personas quedan por
+    // id (con su nombre en `names`) para que el visor las muestre como nombres pulsables.
+    text: readable(eventText(e), e).replace(/(PLC|ORG)-\d+/g, (x) => nameOf(world, x) ?? x),
+    names: Object.fromEntries([...new Set(eventText(e).match(/CIT-\d+/g) ?? [])].map((id) => [id, nameOf(world, id)])),
     payload: e.payload,
     causes: e.causes.map((c) => ('event' in c ? { event: c.event, weight: c.weight } : { state: c.state, value: c.value ?? null, weight: c.weight })),
   };

@@ -25,6 +25,21 @@ export interface WorldView {
   geo: { width: number; height: number; tiles: number[] } | null;
   places: PlaceView[];
   population: number;
+  /** 022 R-012: por dónde se entra a cada lugar (también a las viviendas), en tiles. */
+  points?: Record<string, [number, number]>;
+  /** 024 R-017: nombre de cada lugar. */
+  names?: Record<string, string>;
+}
+
+/** 022 R-013: indicadores de la barra superior. */
+export interface Stats {
+  population: number;
+  households: number;
+  districts: number;
+  employedPct: number;
+  moodMean: number;
+  eventsToday: number;
+  advance: { from: number; to: number } | null;
 }
 
 export interface CitizenPosition {
@@ -36,6 +51,25 @@ export interface CitizenPosition {
   placeId: string | null;
   moving: boolean;
   mood: number;
+  /** 024 R-008 (opcional en respuestas antiguas). */
+  age?: number;
+  /** 024 R-017: su vivienda. */
+  homeId?: string | null;
+  /** 022 R-008: el viaje en curso, para dibujarlo por las calles. */
+  trip?: { from: { x: number; y: number }; to: { x: number; y: number }; departAt: number; arriveAt: number };
+}
+
+/** 022 R-007: ficha de un lugar. */
+export interface PlaceDetail {
+  id: string;
+  name: string;
+  kind: string;
+  district: string | null;
+  open: string;
+  inside: { id: string; name: string; activity: string }[];
+  residents: { id: string; name: string }[];
+  /** 022 R-014: quién trabaja aquí. */
+  staff?: { id: string; name: string; title: string; org: string; boss: boolean }[];
 }
 
 export type Cause = { event: string; weight: number } | { state: string; value: number | null; weight: number };
@@ -48,6 +82,10 @@ export interface EventView {
   participants: { id: string; role: string; name: string | null }[];
   payload: Record<string, unknown>;
   causes: Cause[];
+  /** 024 R-016: texto del evento; las personas van por id (`CIT-000012`) para mostrarlas como nombres pulsables. */
+  text?: string;
+  /** Nombre de cada persona que menciona el texto. */
+  names?: Record<string, string | null>;
 }
 
 export interface CitizenDetail {
@@ -78,6 +116,11 @@ export interface CitizenDetail {
   /** 025: lo que cree de otros; `truth` es solo para quien observa. */
   beliefs?: { about: string; name: string | null; predicate: string; topic: string; source: string; sourceName: string | null; credibility: number; hops: number; truth: boolean }[];
   events: EventView[];
+  /** 022 R-014: vivienda, barrio, hasta cuándo dura lo que hace y lo que otros creen de la persona. */
+  home?: { id: string; name: string } | null;
+  district?: string | null;
+  until?: string | null;
+  aboutMe?: { predicate: string; topic: string; true: boolean; holders: { id: string; name: string; credibility: number }[] }[];
 }
 
 export interface Health {

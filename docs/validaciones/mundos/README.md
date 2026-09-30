@@ -26,3 +26,9 @@ La prueba `apps/cli/src/m1.test.ts` copia el archivo, lo carga con el motor actu
 **Trayectoria (bloque H de M3, 2026-09-29).** Los dos archivos se migraron al esquema 3, que solo añade la tabla `trajectory` (spec 020 R-001), vacía: son anteriores a la trayectoria, y su informe de vida sale sin gráfica ni resiliencia. El estado del mundo y su hash no cambian.
 
 **Desarrollo (bloque MF7, 2026-09-28).** Desde la 041, un mundo nuevo trae la historia de aprendizaje de cada persona: ≈ 200 000 episodios en ≈ 7 000 eventos `DEVELOPMENT_YEAR`, y una base de ≈ 24 MB con 199 personas. No se guarda un mundo de ejemplo de este peldaño: pesaría demasiado para el repositorio. Las pruebas que lo necesitan (`apps/api/src/life.test.ts`) lo generan al vuelo. Los dos mundos de arriba se siguen cargando; no tienen historia de desarrollo, y la pestaña **Vida** del visor lo dice.
+
+**Paridad del visor (M4, 2026-09-29).** Los dos archivos se migraron al esquema 5:
+- la 004 añade la tabla `movements` (viajes para el visor, spec 027 R-013), vacía;
+- la 005 añade un índice de `event_participants` por evento.
+
+El estado del mundo y su hash no cambian.

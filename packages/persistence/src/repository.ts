@@ -23,6 +23,8 @@ import type {
 import { columnFromLE, columnToLE, decodeSnapshot, encodeSnapshot } from './codec.ts';
 import type { Db } from './db.ts';
 import { rowsToEvents } from './queries.ts';
+import { saveMoves } from './movements.ts';
+import type { Movement } from './movements.ts';
 import { saveTrajectory } from './trajectory.ts';
 import type { EventRow } from './queries.ts';
 
@@ -37,6 +39,8 @@ export interface FlushBatch {
    * estado como "posterior al último punto de control". Lo usan el final de un avance, la pausa y el cierre.
    */
   checkpoint?: boolean;
+  /** R-013: viajes empezados desde el último flush, para el visor (no son estado del mundo). */
+  moves?: readonly Movement[];
 }
 
 const ENTITY_LISTS = ['citizens', 'households', 'organizations', 'places', 'objects'] as const;
@@ -86,6 +90,7 @@ export class WorldRepository {
     this.#flushTx = db.transaction((batch: FlushBatch) => {
       const seq = this.#appendEvents(batch.events ?? []);
       this.#appendInputs(batch.inputs ?? []);
+      if (batch.moves) saveMoves(this.db, batch.moves, batch.world.now);
       return { lastSeq: seq, written: this.#saveState(batch.world, batch.checkpoint ?? false) };
     });
   }
@@ -109,6 +114,17 @@ export class WorldRepository {
     this.#setMeta('state_hash', hash);
     this.#setMeta('state_hash_at', String(world.now));
     this.#setMeta('state_dirty', '0');
+  }
+
+  /** R-015: el avance sin observar en curso (`meta.advance`), o ninguno. */
+  setAdvance(a: { from: number; to: number } | null): void {
+    if (a) this.#setMeta('advance', JSON.stringify(a));
+    else this.db.prepare("DELETE FROM meta WHERE key = 'advance'").run();
+  }
+
+  get advance(): { from: number; to: number } | null {
+    const v = this.#meta('advance');
+    return v === undefined ? null : (JSON.parse(v) as { from: number; to: number });
   }
 
   hasWorld(): boolean {
@@ -332,6 +348,11 @@ export class WorldRepository {
 
   countSnapshots(): number {
     return (this.db.prepare('SELECT COUNT(*) AS n FROM snapshots').get() as { n: number }).n;
+  }
+
+  /** Minutos con instantánea, en orden (022 R-009: la línea temporal). */
+  snapshotTimes(): number[] {
+    return (this.db.prepare('SELECT at FROM snapshots ORDER BY at').all() as { at: number }[]).map((r) => r.at);
   }
 
   /** Última entrada externa registrada, para continuar su numeración (`Runner.continueInputsAfter`). */

@@ -2,9 +2,9 @@
 id: 022
 nombre: observability
 estado: aprobada
-hito: M4 (versión mínima adelantada: bloque V)
+hito: M4
 depende_de: [027, 019, 020]
-version: 0.2
+version: 0.4
 ---
 
 # 022 — Observación, API y métricas
@@ -19,7 +19,9 @@ Ver el mundo sin alterarlo: API de consulta, flujo en vivo, controles de tiempo,
 - controles de tiempo autenticados;
 - salud del proceso.
 
-**Fuera de alcance hasta M4:** árbol causal (`/why`, 019), informe de vida (020), relaciones, memoria y creencias (M3), exportación CSV, métricas de degeneración.
+**En M3** llegaron el árbol causal (`/api/events/:id/why`, 019), el informe de vida (`/api/citizens/:id/report`, 020), los vínculos, recuerdos y creencias en la ficha.
+
+**En M4 (v0.3):** lugares, viaje para dibujar el recorrido, días pasados, métricas con alertas de degeneración y exportación CSV (R-007 a R-011).
 
 ## 3. Modelo de datos
 ```ts
@@ -34,7 +36,8 @@ Ver el mundo sin alterarlo: API de consulta, flujo en vivo, controles de tiempo,
 //                                     reglas con su aporte y tipo, red (aristas), últimos 20 eventos con causas
 // GET  /api/events?since=&limit=  → eventos posteriores a `since` (id), como mucho `limit` (≤ 200)
 // GET  /api/stream                → SSE: `tick` { now, date } y `event` (id = id del evento); Last-Event-ID
-// POST /api/control { cmd: pause|resume|speed|step, arg? }   (basic auth)
+// POST /api/control { cmd: pause|resume|speed|step|advance, arg? }   (basic auth)
+// GET  /api/moves?since=, GET /api/stats   (v0.4)
 ```
 
 ## 4. Reglas
@@ -45,6 +48,31 @@ Ver el mundo sin alterarlo: API de consulta, flujo en vivo, controles de tiempo,
 - **R-005** [M] — **Posición de una persona:** la puerta de su lugar (`loc.place`) o, en un viaje, la interpolación lineal entre la puerta de origen y la de destino según `trip.departAt`/`trip.arriveAt`. Un lugar fuera del mapa (La Capital) no tiene posición: la persona se marca `moving` fuera del mapa.
 - **R-006** [M] — **Lectura del mundo:** la API recarga el mundo de la base cuando cambia el minuto persistido (consulta cada segundo). No lee el reloj dentro de la lógica de respuesta (solo el bucle de sondeo).
 
+### Ampliación de M4 (v0.3, decisiones del usuario del 2026-09-29)
+- **R-007** [M] — **Lugares (P1).** `GET /api/places/:id` devuelve el lugar (nombre, tipo, barrio, horario), quién está dentro ahora y, si es vivienda, quién vive allí.
+- **R-008** [M] — **El viaje para dibujarlo (P2).** Cada posición en camino lleva su viaje: puerta de origen y de destino, y minuto de salida y de llegada. El visor dibuja el recorrido por las calles; el motor no cambia (el tiempo de viaje sigue siendo el de la 016).
+- **R-009** [M] — **Días pasados (P3).**
+  - `GET /api/days` da los días con instantánea;
+  - `GET /api/days/:day/citizens` y `GET /api/days/:day/citizens/:id` dan las posiciones y la ficha tal como estaban ese día, leídas de la instantánea (027 R-004);
+  - se guardan en memoria como mucho `DAY_CACHE` instantáneas decodificadas.
+- **R-010** [M] — **Métricas del mundo (P4).** `GET /api/metrics` da, por día:
+  - de la trayectoria (020 R-001): ánimo y estrés medios con su desviación, y la mediana del dinero;
+  - del registro: los eventos por tipo;
+  - alertas de degeneración: desviación entre personas casi nula (< 0,01), más de la mitad de las personas en 0 o en 1, o una serie que crece sin parar los últimos 30 días.
+- **R-011** [M] — **Exportación (P4).** `GET /api/export/trajectory.csv` y `GET /api/export/events.csv` (tipo, minuto, participantes, payload y causas en JSON), en streaming, para analizar fuera (019: la inferencia estadística se hace fuera).
+
+### Paridad con el prototipo (v0.4, decisiones del usuario del 2026-09-29, P1 a P4)
+- **R-012** [M] — **Movimientos (P1).** `GET /api/moves?since=<minuto>` da los viajes de `movements` (027 R-013) con salida posterior a `since` o aún en curso, en orden de salida. Cada `tick` del SSE lleva los viajes nuevos desde el tick anterior (`moves`), para que el visor reproduzca cada trayecto a su hora.
+- **R-013** [M] — **Indicadores y avance (P2).**
+  - `GET /api/stats`: personas, hogares, barrios, porcentaje con empleo (personas de 18 a 64 años que no estudian ni están jubiladas), ánimo medio, eventos de hoy y, si hay un avance sin observar en curso, su inicio y su destino (027 R-015);
+  - `POST /api/control` acepta `advance` con los minutos a avanzar (1440, 10080, 43200 o 525600).
+- **R-014** [M] — **Ficha completa (P3).**
+  - La ficha del ciudadano añade:
+    - el nombre de su vivienda y su barrio;
+    - hasta cuándo dura lo que hace;
+    - lo que otras personas creen de ella (`aboutMe`): por tema, la verdad del mundo, lo que ella cuenta y quién cree cada versión (solo para quien observa, 025 R-008).
+  - La ficha del lugar añade su personal: quién trabaja allí y quién lo dirige.
+
 ## 5. Eventos
 No define tipos propios (usa los de otras specs).
 
@@ -53,6 +81,13 @@ No define tipos propios (usa los de otras specs).
 - **INV-002** — Ningún cambio se aplica fuera del flujo de acciones validadas (CLAUDE.md, regla 4).
 
 ## 7. Criterios de aceptación
+- **CA-005** — *Dado* un lugar con gente dentro, *entonces* `/api/places/:id` los lista con los mismos datos que el estado guardado; una vivienda lista a sus residentes.
+- **CA-006** — *Dado* un día pasado con instantánea, *entonces* sus posiciones y fichas coinciden con las de esa instantánea, y pedir días pasados no cambia el `stateHash` del presente.
+- **CA-007** — *Dado* un mundo con trayectoria, *entonces* `/api/metrics` da una fila por día con sus medias, y una serie constante entre personas levanta la alerta de desviación nula.
+- **CA-008** — *Dado* un mundo con eventos, *entonces* los CSV se leen de vuelta con el mismo número de filas que la base.
+- **CA-009** — *Dado* un mundo con movimientos guardados, *entonces* `/api/moves?since=` devuelve los que salen después de `since` y los que siguen en curso, con los mismos datos que la base.
+- **CA-010** — *Dado* un mundo, *entonces* `/api/stats` coincide con el cálculo sobre el estado guardado, y `advance` con un número de minutos no admitido responde 400.
+- **CA-011** — *Dado* una persona sobre la que circula un rumor, *entonces* su ficha lista en `aboutMe` cada versión con quién la cree y si es verdad; la ficha de un lugar de trabajo lista su personal.
 - **CA-001** — *Dado* el worker corriendo, *entonces* `/api/health` responde en < 50 ms.
 - **CA-002** — *Dado* un cliente SSE desconectado, *cuando* reconecta con `Last-Event-ID`, *entonces* recibe los eventos perdidos.
 - **CA-003** — *Dado* una petición a `/api/control` sin credenciales, *entonces* 401; con ellas, la orden queda en `control_commands`.
@@ -63,6 +98,8 @@ No define tipos propios (usa los de otras specs).
 |---|---|---|
 | Sondeo de la base | 1 s | [M] |
 | Tope de eventos por consulta | 200 | [M] |
+| `DAY_CACHE` (instantáneas decodificadas en memoria) | 2 | [M] |
+| Alertas: desviación nula · saturación · crecimiento | < 0,01 · > 50 % en 0 o 1 · 30 días seguidos al alza | [M] |
 | Puerto | 8787 (`DATAS_WORLD_API_PORT`) | [M] |
 
 ## 9. Métricas
@@ -79,3 +116,7 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 | 2026-09-26 | 0.2 | Estado → aprobada |
 | 2026-09-26 | 0.2 | Implementación del bloque V1 (`apps/api`). Precisiones: la posición de una vivienda sin puerta propia es la de su edificio, o el centro de su área; sin `Last-Event-ID`, el SSE empieza por el último evento guardado; la velocidad vigente sale del último `SPEED_CHANGED`; la API solo escucha en 127.0.0.1. CA-001 a CA-004 verdes. Sin cambios en CA |
 | 2026-09-28 | — | 041 R-009: ruta de solo lectura `GET /api/citizens/:id/life` (episodios del desarrollo y familiograma). Sin cambios en CA |
+| 2026-09-29 | 0.3 | Ampliación de M4, aprobada por el usuario (P1 a P5): lugares (R-007), el viaje para dibujar el recorrido por las calles (R-008), días pasados desde las instantáneas (R-009), métricas con alertas de degeneración (R-010) y exportación CSV (R-011). CA-005 a CA-008 nuevos. En M3 llegaron el árbol causal y el informe de vida |
+| 2026-09-29 | 0.3 | Implementación de M4 (O1–O4, `apps/api`). Precisión de R-010: la fila de trayectoria del día d se guarda a las 00:00 del día d y resume el día d − 1, así que cada punto de `/api/metrics` lleva la fecha y los eventos de ese día cerrado. CA-005 a CA-008 verdes. Sin cambios en CA |
+| 2026-09-29 | 0.4 | Paridad con el prototipo, aprobada por el usuario (P1 a P4): movimientos para reproducir los trayectos (R-012), indicadores de la barra superior y avance sin observar (R-013), ficha completa con lo que otros creen de la persona y personal del lugar (R-014). CA-009 a CA-011 nuevos |
+| 2026-09-29 | 0.4 | Implementación de la paridad (P1 a P4). Precisiones, sin cambios en CA: `/api/world` añade `points` (por dónde se entra a cada lugar, también a las viviendas de un edificio) y `names`; las posiciones, `homeId`; cada evento, `text` legible (lugares, organizaciones y temas de rumor en palabras) y `names`. R-004: los 401 no llevan `WWW-Authenticate`, porque el navegador abría su propia ventana de acceso y la petición del visor quedaba colgada; las credenciales las pide el visor. La verdad de las creencias lee solo los tipos de evento que la deciden. CA-009 a CA-011 verdes |

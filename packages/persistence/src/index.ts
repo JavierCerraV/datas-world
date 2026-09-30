@@ -4,7 +4,9 @@ export type { Db } from './db.ts';
 
 export { columnFromLE, columnToLE, decodeSnapshot, encodeSnapshot } from './codec.ts';
 
-export { FLUSH_TICKS, SNAPSHOT_EVERY_DAYS } from './params.ts';
+export { ADVANCE_MINUTES, ADVANCE_SLICE_MS, FLUSH_MS, FLUSH_TICKS, MOVES_KEEP_DAYS, SNAPSHOT_EVERY_DAYS } from './params.ts';
+export { TripTracker, movesSince, saveMoves } from './movements.ts';
+export type { Movement } from './movements.ts';
 
 export {
   CONTROL_COMMANDS,

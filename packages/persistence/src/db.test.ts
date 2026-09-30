@@ -31,6 +31,7 @@ describe('migraciones (R-006) y pragmas (R-003)', () => {
       'llm_records',
       'memory_archive',
       'meta',
+      'movements', // 027 R-013
       'snapshots',
       'trajectory', // 020 R-001
     ]);
