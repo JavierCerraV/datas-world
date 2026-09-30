@@ -1,0 +1,115 @@
+{
+  "name": "indicators",
+  "version": "2026.09.1",
+  "source": "Spec 045 R-004: catálogo cerrado de indicadores que calcula packages/engine/src/instruments/indicators.ts (INDICATORS_VERSION 1). Lo usan la pasarela (correspondencia de ítems, R-002) y el visor. Cada valor está en [0,1]: 0 = sin síntoma, 1 = extremo, en la ventana de días del instrumento. No forma parte de la generación del mundo (no está en CATALOG_NAMES).",
+  "entries": [
+    {
+      "key": "indicador.aislamiento",
+      "name": "Aislamiento",
+      "since": "M4",
+      "attrs": {
+        "description": "Mitad: necesidad de compañía poco satisfecha. Mitad: pocos encuentros, charlas o llamadas en la ventana.",
+        "source": "need.social (010), ENCOUNTER, CONVERSATION_HELD, PHONE_CALL_MADE (012)"
+      }
+    },
+    {
+      "key": "indicador.anhedonia",
+      "name": "Pérdida de interés o de disfrute",
+      "since": "M4",
+      "attrs": {
+        "description": "Mitad: necesidad de disfrute poco satisfecha. Mitad: caída del ocio realizado frente a la ventana anterior.",
+        "source": "need.fun (010), LEISURE_DONE (032)"
+      }
+    },
+    {
+      "key": "indicador.animo_bajo",
+      "name": "Ánimo bajo",
+      "since": "M4",
+      "attrs": {
+        "description": "Ánimo medio de la ventana (trayectoria diaria) por debajo de 0,6; vale 1 en 0,2.",
+        "source": "state.mood (010), trayectoria (020)"
+      }
+    },
+    {
+      "key": "indicador.culpa",
+      "name": "Culpa o vergüenza",
+      "since": "M4",
+      "attrs": {
+        "description": "Emoción de vergüenza actual.",
+        "source": "emo.shame (010)"
+      }
+    },
+    {
+      "key": "indicador.energia_baja",
+      "name": "Cansancio o poca energía",
+      "since": "M4",
+      "attrs": {
+        "description": "Energía por debajo de 0,7; vale 1 en 0,1.",
+        "source": "need.energy (010)"
+      }
+    },
+    {
+      "key": "indicador.estres",
+      "name": "Estrés",
+      "since": "M4",
+      "attrs": {
+        "description": "Estrés medio de la ventana por encima de 0,2; vale 1 en 0,8.",
+        "source": "state.stress (010), trayectoria (020)"
+      }
+    },
+    {
+      "key": "indicador.irritabilidad",
+      "name": "Irritabilidad",
+      "since": "M4",
+      "attrs": {
+        "description": "Emoción de enfado actual.",
+        "source": "emo.anger (010)"
+      }
+    },
+    {
+      "key": "indicador.miedo",
+      "name": "Miedo o nerviosismo",
+      "since": "M4",
+      "attrs": {
+        "description": "Emoción de miedo actual.",
+        "source": "emo.fear (010)"
+      }
+    },
+    {
+      "key": "indicador.preocupacion_economica",
+      "name": "Preocupación económica",
+      "since": "M4",
+      "attrs": {
+        "description": "Presión de deuda activa (0,6) más 0,2 por cada pago o arriendo atrasado en la ventana.",
+        "source": "econ.debtPressure, PAYMENT_MISSED, RENT_LATE (015)"
+      }
+    },
+    {
+      "key": "indicador.rumiacion",
+      "name": "Rumiación o preocupación repetitiva",
+      "since": "M4",
+      "attrs": {
+        "description": "Días con episodios de pensamiento negativo repetitivo en la ventana (la mitad de los días = 1).",
+        "source": "PNR_EPISODE (039)"
+      }
+    },
+    {
+      "key": "indicador.sueno_alterado",
+      "name": "Sueño alterado",
+      "since": "M4",
+      "attrs": {
+        "description": "Lo mayor entre los días con OVERSLEPT en la ventana y la deuda de sueño actual (8 h = 1).",
+        "source": "OVERSLEPT (011), state.sleepDebt (010)"
+      }
+    },
+    {
+      "key": "indicador.tristeza",
+      "name": "Tristeza",
+      "since": "M4",
+      "attrs": {
+        "description": "Emoción de tristeza actual.",
+        "source": "emo.sadness (010)"
+      }
+    }
+  ]
+}

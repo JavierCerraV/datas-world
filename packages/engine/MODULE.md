@@ -2,7 +2,7 @@
 modulo: engine
 ruta: packages/engine
 estado: en-desarrollo
-specs: [001, 002, 003, 004, 005, 006, 007, 008, 009, 014, 023, 029, 030, 035, 039, 041, 043, 044]
+specs: [001, 002, 003, 004, 005, 006, 007, 008, 009, 014, 023, 029, 030, 035, 039, 041, 043, 044, 045]
 actualizado: 2026-09-24
 ---
 
@@ -168,3 +168,4 @@ Porta `RNG`/`sm32` (023), `ev` (014) y `tick` (021, en su submódulo). Ver docs/
 | 2026-09-29 | m3/creencias (K1–K4) | 025 | Módulo nuevo `knowledge/` (ver su MODULE.md). `Belief` añade `hops` y `told`; su fuente puede ser `visto`. Eventos nuevos `RUMOR_TOLD`, `RUMOR_DISTORTED` y `BELIEF_CORRECTED`. El índice exporta el módulo (`learn` como `learnBelief`) |
 | 2026-09-29 | m3/cierre | 013, 019, 020, 025 | Correcciones de la revisión de 5 informes de vida (ver `docs/validaciones/M3-cierre.md`); el índice exporta `themeOf` |
 | 2026-09-30 | m4/visor-a-plus | 016 | `testing.ts`: `mobility.habits.lookahead` del perfil de pruebas pasa de 30 a 60 min, como los perfiles (escala de 40 m por tile, 003 v0.4) |
+| 2026-09-30 | r/instrumentos (I1–I3, I7) | 045 | El índice exporta el módulo `instruments` (indicadores, respuesta, selección y estadística de la capa de investigación) |

@@ -458,6 +458,45 @@ export type { Hearing, KnowledgeCatalog, KnowledgeDeps, KnowledgeParams, Listene
 // Informe de vida (spec 020 v0.3).
 export { TURNING_POINTS, concerns, divergences, emergentProfile, lifeReport, objectiveChapters, turningCandidates, turningPoints } from './lifereport/index.ts';
 export type { DayPoint, Divergence, EmergentProfile, LifeChapter, LifeReport, ProfileKey, ReportInput, TurningPoint } from './lifereport/index.ts';
+// Instrumentos psicológicos (spec 045).
+export {
+  INDICATORS,
+  INDICATORS_VERSION,
+  INDICATOR_PARAMS,
+  RESPONSE_NOISE,
+  ageGroup,
+  answerInstrument,
+  candidatesOf,
+  categoryOf,
+  checkInstrument,
+  cohenD,
+  cronbachAlpha,
+  describeScores,
+  groupStats,
+  indicatorValues,
+  isIndicator,
+  pearson,
+  resolveSelection,
+  responseRng,
+  samplingRng,
+  scoreOf,
+} from './instruments/index.ts';
+export type {
+  Answer,
+  Candidate,
+  Cutoff,
+  Descriptive,
+  ExclusionReason,
+  GroupRow,
+  IndicatorInput,
+  IndicatorKey,
+  Instrument,
+  InstrumentItem,
+  InstrumentOption,
+  ResolvedSelection,
+  ResponseResult,
+  Selection,
+} from './instruments/index.ts';
 // Memoria autobiográfica (spec 013 v0.3).
 export {
   CHAT_RECALL,

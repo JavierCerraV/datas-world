@@ -2,7 +2,7 @@
 modulo: generators
 ruta: packages/generators
 estado: en-desarrollo
-specs: [001, 023, 041, 044]
+specs: [001, 023, 041, 044, 045]
 actualizado: 2026-09-23
 ---
 
@@ -91,3 +91,4 @@ Porta `genWorld`, `buildPlaces`, `genPopulation`, `newAgent`, `genJobs`, `genRel
 | 2026-09-29 | m3/creencias (K3, K4) | 025 | `knowledgeCatalog` (temas de `rumor_topics` en la forma del motor); `lifeSystems` pasa el conocimiento a los encuentros y monta el sistema de conocimiento; `LIFE_CAPABILITIES` incluye `beliefs`. Cambia el hash de los mundos que viven. La prueba del año comprueba 025 CA-002 y CA-005 |
 | 2026-09-29 | m3/cierre | 020 | Solo pruebas: CA-001 del informe cuenta los candidatos a punto de inflexión con `turningCandidates` y exige que el 70 % de las personas llegue a tres en un año; el título de la prueba del año incluye la 025 |
 | 2026-09-30 | m4/visor-a-plus | 003, 016 | Perfiles `CO-2026.09` y `prototipo`: `mobility.habits.lookahead` de 30 a 60 min, por la nueva escala de 40 m por tile (003 v0.4) |
+| 2026-09-30 | r/instrumentos (I1) | 045 | Catálogo `catalogs/indicators.json` 2026.09.1 (12 indicadores de la 045 R-004), fuera de `CATALOG_NAMES`: no entra en la generación ni en el hash del mundo |

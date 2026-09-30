@@ -1,7 +1,7 @@
 ---
 id: 045
 nombre: instruments
-estado: borrador
+estado: aprobada
 hito: Capa de investigación (en paralelo al rediseño del visor; antes de la capa clínica 034)
 depende_de: [010, 011, 013, 019, 020, 022, 023, 024, 025, 026, 027, 028, 034, 039, 040, 043]
 version: 0.2
@@ -125,7 +125,7 @@ Coste: ≈ 50 B por respuesta a un ítem. 180 adultos × 9 ítems × 12 aplicaci
 - **R-001** [M] — **Ingesta desde PDF con el modelo elegido.**
   - El investigador sube un PDF en «Investigación › Instrumentos» y elige el modelo en una lista.
   - La lista sale de la configuración de la pasarela: el propósito nuevo `instrument` de `config/llm.json` (026 R-006) da el modelo por defecto (`claude-haiku-4-5`) y `instrumentModels` enumera los permitidos (proveedor y modelo). Cambiar la lista no requiere tocar código.
-  - La API envía el PDF por la pasarela como bloque `document` en base64 a los proveedores que lo admiten (Anthropic). Para los demás (`openai_compatible`), envía el texto extraído del PDF, página a página, para no perder la cita (ver §10).
+  - La API envía el PDF por la pasarela como bloque `document` en base64. `instrumentModels` solo admite modelos cuyo proveedor acepta PDF (hoy, Anthropic); la extracción local del texto para otros proveedores queda fuera por ahora (§10).
   - Pide una salida estructurada con el esquema `Instrument` sin `mapping`. Cada ítem cita su página.
   - La respuesta se valida con Zod en el borde (CLAUDE.md §3). Si no valida, se reintenta una vez; si sigue sin validar, se muestra el error sin guardar nada.
   - Se guarda el registro de la pasarela (proveedor, modelo, tokens, coste y hash del PDF). La clave incluye el modelo: el mismo PDF con el mismo modelo no se vuelve a pagar, y con otro modelo sí se puede volver a procesar para comparar.
@@ -240,14 +240,18 @@ El modo `observacion` no emite eventos del mundo: sus resultados viven en las ta
 ## 10. Preguntas abiertas
 - [x] ~~¿Qué modelo procesa el PDF?~~ Cualquiera de la lista configurable; Haiku 4.5 por defecto (usuario, 2026-09-30).
 - [x] ~~¿Las muestras se congelan o se recalculan con cada aplicación?~~ Se congelan: son las personas que el investigador agrega, con su procedencia, y se pueden ampliar o retirar a mano (usuario, 2026-09-30: «agrupar para seleccionar y agregar a la muestra»).
-- [ ] ¿Qué instrumentos se procesan primero y se incluyen en la biblioteca del repositorio? Propuesta: PHQ-9 (depresión) y GAD-7 (ansiedad), de libre uso. El BDI-II y otros con derechos de autor, solo si quien los sube declara la licencia, y no se incluyen en el repositorio.
-- [ ] Para proveedores que no aceptan PDF, ¿extraer el texto en local? Requiere una dependencia de lectura de PDF (por ejemplo `unpdf`, ≈ 1 MB, solo en la API). Alternativa: ofrecer solo modelos que acepten PDF.
-- [ ] ¿Solo el modo determinista (R-005), o también un modo «entrevista» en el que el LLM responde en la voz de la persona con su vista subjetiva (043)? Es más natural, pero cuesta dinero, no es determinista y hay que validarlo contra R-005.
+- [x] ~~¿Qué instrumentos van en la biblioteca del repositorio?~~ Los de los recursos de CliniKLab de la Fundación Universitaria Konrad Lorenz (https://la.konradlorenz.edu.co/cliniklab-recursos/#year1), con la licencia y la fuente que declare esa página (usuario, 2026-09-30). La lista concreta se fija al descargarlos (tarea I6).
+- [x] ~~Para proveedores que no aceptan PDF, ¿extraer el texto en local?~~ No por ahora: `instrumentModels` solo ofrece modelos que aceptan PDF (usuario, 2026-09-30). La extracción local queda para más adelante.
+- [x] ~~¿Modo «entrevista» en el que el LLM responde en la voz de la persona?~~ Más adelante (usuario, 2026-09-30). Esta spec solo tiene el modo determinista (R-005).
 - [ ] ¿Qué indicadores faltan en el motor para los instrumentos prioritarios (depresión, ansiedad, estrés percibido, flexibilidad psicológica como el AAQ-II)? Por ejemplo, el apetito como síntoma, la ideación suicida y la preocupación.
-- [ ] ¿El modo `en_el_mundo` debe afectar a la persona (reactividad a la medición) o solo dejar un recuerdo?
+- [ ] **R-006 y el temperamento.** La 009 R-006 solo deja leer el temperamento a los mecanismos de aprendizaje (prueba de arquitectura). Opciones: (a) sacar el estilo de respuesta solo de la historia (por ejemplo, del castigo por quejarse que aprendió la persona, 036); (b) registrar el estilo de respuesta como mecanismo del temperamento. Mientras se decide, el estilo es neutro y solo hay ruido.
+- [ ] ¿El modo `en_el_mundo` debe afectar a la persona (reactividad a la medición) o solo dejar un recuerdo? Mientras no se decida, solo deja el evento y el recuerdo (R-008).
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-09-30 | 0.1 | Borrador inicial a partir de la propuesta del usuario (encuestas desde PDF con Haiku 4.5, aplicación a los adultos, análisis por historia de vida y reclutamiento para terapia). Pendiente de desarrollar después del rediseño del visor |
 | 2026-09-30 | 0.2 | Precisiones del usuario:<br>- el modelo de la ingesta es configurable (propósito `instrument` y lista `instrumentModels` de la pasarela; Haiku 4.5 por defecto; R-001, CA-007);<br>- biblioteca de instrumentos ya procesados (R-013, CA-010);<br>- cuatro formas de aplicar: todos, al azar (simple o estratificado), seleccionados e individual (R-007, CA-008);<br>- estadística descriptiva y agrupación por variables e historia de vida, con tamaño del efecto (R-009, CA-009);<br>- selección por reglas o a mano y «Agregar a la muestra» con procedencia de cada miembro (R-010, INV-004).<br>Se desarrolla en paralelo a la elección del rediseño; la pantalla adoptará el estilo elegido |
+| 2026-09-30 | 0.2 | Decisiones del usuario sobre §10: biblioteca con los instrumentos de CliniKLab (Konrad Lorenz); solo modelos que aceptan PDF; modo entrevista más adelante |
+| 2026-09-30 | 0.2 | Estado → aprobada |
+| 2026-09-30 | 0.2 | Implementación del núcleo en `packages/engine/src/instruments` (I1–I3, I7): 12 indicadores con umbrales de síntoma [M] (catálogo `indicators` de los generadores), respuesta determinista, las cuatro formas de selección y la estadística. Pregunta abierta nueva sobre R-006 (el temperamento no se puede leer fuera de sus mecanismos, 009 R-006): el estilo queda neutro por ahora |
