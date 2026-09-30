@@ -4,13 +4,13 @@ nombre: visualization
 estado: aprobada
 hito: M4
 depende_de: [022, 003, 004]
-version: 0.4
+version: 0.5
 ---
 
 # 024 — Visualización pixel art
 
 ## 1. Propósito
-Ventana visual al mundo en pixel art 2D: mapa, personas moviéndose, día/noche, inspector y línea temporal. Solo lectura. Referencia: `prototipo/index.html`.
+Ventana visual al mundo en pixel art 2D: mapa, personas moviéndose, día/noche, inspector y línea temporal. Solo lectura. Referencia: el lienzo aprobado «Visor A+» (v0.5).
 
 ## 2. Alcance
 **Incluye (bloque V, versión mínima adelantada):**
@@ -112,6 +112,33 @@ Tras la revisión del usuario («no se parece en nada al prototipo; las personas
   - Al despedirse, un resumen de lo que cambió en la persona durante la charla (ánimo y estrés antes y después, y si la recordará).
 - **R-019** [M] — **Guía para el equipo (P6).** Una guía breve en `docs/` explica cómo arrancar el visor y qué muestra cada parte.
 
+### Visor A+ (v0.5, decisiones del usuario del 2026-09-30)
+La referencia de la interfaz pasa a ser el lienzo aprobado «Datas World — Visor A+» (https://claude.ai/artifact/L27kh8DDNoNa5R9uimn97B). `prototipo/index.html` ya cumplió su función de guiar la etapa temprana y deja de ser la referencia. Estas reglas sustituyen a la R-014 y a la R-017, amplían la R-011 y sustituyen el panel de la R-018 por una pantalla. Se conservan el modo oscuro y las pestañas Memoria y Creencias.
+
+- **R-020** [M] — **Estructura y estilo.** Menú lateral oscuro de 64 px con *Mundo* y *Datos*, y bajo «Investig.» *Estudio* y *Muestra* desactivados con su aviso (028 y 034). Cabecera blanca de 56 px con migas de pan. Estilo del lienzo: IBM Plex Sans y Mono, fondo #f5f4f1, acento #a84a32, bordes #e3e0d9, con modo oscuro equivalente. El mapa sigue en pixel art (R-001, R-006, R-007, R-009, R-013).
+- **R-021** [M] — **Pantalla Mundo.**
+  - Cabecera: «Mundo · Data's World › barrio», fecha y hora grandes con «día N de simulación», estado (Simulando / En pausa), velocidades y «+1 día» (se mantienen semana, mes y año en un menú), y personas, hogares y organizaciones.
+  - Sobre el mapa: panel **Capas** (Personas, Lugares, Objetos, Vínculos, Ánimo, Día/noche) y panel **Ahora** (cuántas personas trabajan, están en clase, en casa y en la calle), escala en metros y botones + y −.
+  - Etiqueta flotante sobre la persona elegida («id · nombre · actividad»).
+  - Registro de eventos bajo el mapa en tabla: Hora, Tipo, Qué pasó y Causas, con filtro y «Abrir línea de tiempo».
+  - A la derecha, **ficha compacta**: id, nombre, sexo, edad y trabajo; botones «Ampliar expediente» y «Charlar»; actividad, lugar, hogar y dinero; barras de estado con el aviso de necesidad crítica; «Por qué está aquí» con sus causas; y el enlace «Ver historia, vínculos, aprendizaje y salud →».
+- **R-022** [M] — **Expediente de vida (pantalla completa).**
+  - Cabecera: Mundo / Personas / Expediente id, «datos al … · en vivo», y los botones «Exportar JSON», «Charlar» y «Reducir» (vuelve al mapa con la ficha compacta).
+  - Franja de identidad: nombre completo, sexo, edad, fecha y lugar de nacimiento, estudios, trabajo y hogar; y «Ahora», ánimo, estrés y alertas.
+  - Pestañas:
+    - **Resumen:** identidad, «por qué está donde está», curso de vida en una línea temporal por lugares (historia de origen de la 030 y simulación) y contadores de eventos, estímulos con función, reglas verbales y charlas;
+    - **Estado y necesidades:** ánimo, estrés, necesidades con su umbral crítico explicado y la agenda de hoy (rutina prevista en una franja de 24 h con «ahora», lugar, si se mueve y cuándo queda libre);
+    - **Emociones:** las activas con su evento de origen, o el texto de que no hay ninguna;
+    - **Historia:** tabla cronológica con filtro Todos / Historia de origen / Simulación, y su «¿por qué?»;
+    - **Vínculos:** familia en tabla (parentesco y situación), las relaciones desde las dos perspectivas y la red relacional (037);
+    - **Aprendizaje:** funciones de estímulos, reglas verbales, fuerza de respuestas, estados aprendidos y temperamento;
+    - **Salud:** aseguramiento (031), condiciones y episodios;
+    - **Economía y objetos:** dinero, ocupación, cargo, hogar y objetos con dueño, fecha y precio;
+    - **Charlas:** las anteriores con su resumen, y el formulario para iniciar una (modo En el mundo o Sandbox, modo prueba, y la disponibilidad según su rutina).
+  - Memoria y Creencias (M3), que el lienzo no dibuja, se conservan como dos pestañas más tras Vínculos. El Informe y el Desarrollo de la pestaña Vida pasan a Resumen e Historia.
+- **R-023** [M] — **Dashboard (pantalla Datos).** Cabecera con «datos al …», periodo (Último mes, Último año, Desde la fundación) y «Exportar CSV». Indicadores: personas, nacidos y fallecidos del periodo con su tasa bruta por mil, hogares con su tamaño medio y organizaciones. Gráficas: pirámide por edad y sexo en grupos de 10 años, y personas por ocupación, cada una con «Ver como tabla» y el valor al pasar el cursor. Debajo, las series por día y las alertas de la R-011. El aviso de Estudio y Muestra queda al pie.
+- **R-024** [M] — **Charla (pantalla completa, sustituye al panel de la R-018).** Cabecera con el expediente de origen, id de la charla, «Modo prueba» y «Despedirse»; franja con el modo, la hora de inicio y la duración, hasta cuándo está libre, el lugar y «El mundo sigue en tiempo real». Mensajes con número, hora, tono o postura y tiempo de respuesta, y las afirmaciones verificadas. Selector de tono en modo prueba. Panel lateral: por qué respondió así en el último turno (aportes de las fuentes de la 040 y probabilidades), estado de la charla (valor del visitante, malestar, necesidades en vivo, verificación) y lo que sabe la persona.
+
 ## 5. Eventos
 No define tipos propios (usa los de otras specs).
 
@@ -133,6 +160,10 @@ No define tipos propios (usa los de otras specs).
 - **CA-011** — El filtro del registro clasifica cada tipo de evento en su categoría y oculta los menores salvo que se pidan (prueba del formateo).
 - **CA-012** — Cada pestaña de la ficha muestra los datos de una ficha de ejemplo, incluidas las perspectivas de un vínculo y lo que otros creen de la persona (prueba del formateo).
 - **CA-013** — Revisión visual: capturas del visor y del prototipo lado a lado (claro, oscuro y 375 px) en `docs/validaciones/`, y aceptación del usuario.
+- **CA-014** — Cada pestaña del expediente muestra los datos de un expediente de ejemplo (prueba del formateo).
+- **CA-015** — La pirámide y la ocupación cuentan bien una población de ejemplo, y el periodo cambia los nacidos y los fallecidos (pruebas de la API y del formateo).
+- **CA-016** — El panel «Ahora» cuenta a cada persona en una sola categoría y las capas ocultan lo que se apaga (prueba de la lógica).
+- **CA-017** — Revisión visual: capturas del visor junto a las cuatro pantallas del lienzo en `docs/validaciones/`, y aceptación del usuario. Sustituye a la CA-013.
 
 ## 8. Parámetros y calibración
 | Parámetro | Valor | Estado |
@@ -146,34 +177,7 @@ No define tipos propios (usa los de otras specs).
 Fps del render (visible en el visor).
 
 ## 10. Preguntas abiertas
-- [ ] **Propuesta v0.5 · paridad con el prototipo aprobado «Visor A+» (pendiente de aprobación del usuario, 2026-09-30).** El usuario aclara que el prototipo aprobado para la interfaz es el lienzo «Datas World — Visor A+» (https://claude.ai/artifact/L27kh8DDNoNa5R9uimn97B), con cuatro pantallas: *Mundo · mapa y ficha*, *Ficha ampliada · expediente de vida*, *Dashboard · información del mundo* y *Charla con un ciudadano*. La v0.4 se hizo sobre `prototipo/index.html` y le faltan el expediente y el dashboard. Reglas propuestas (sustituyen a la R-014 y a la R-017, y amplían la R-011 y la R-018):
-  - **R-020 · Estructura y estilo.** Menú lateral oscuro de 64 px con *Mundo* y *Datos*, y bajo «Investig.» *Estudio* y *Muestra* desactivados con su aviso (028 y 034). Cabecera blanca de 56 px con migas de pan. Estilo del lienzo: IBM Plex Sans y Mono, fondo #f5f4f1, acento #a84a32, bordes #e3e0d9. El mapa sigue en pixel art (R-001, R-006, R-007, R-009, R-013).
-  - **R-021 · Pantalla Mundo.**
-    - Cabecera: «Mundo · Data's World › barrio», fecha y hora grandes con «día N de simulación», estado (Simulando / En pausa), velocidades y «+1 día» (se mantienen semana, mes y año en un menú), y personas, hogares y organizaciones.
-    - Sobre el mapa: panel **Capas** (Personas, Lugares, Objetos, Vínculos, Ánimo, Día/noche) y panel **Ahora** (cuántas personas trabajan, están en clase, en casa y en la calle), escala en metros y botones + y −.
-    - Etiqueta flotante sobre la persona elegida («id · nombre · actividad»).
-    - Registro de eventos bajo el mapa en tabla: Hora, Tipo, Qué pasó y Causas, con filtro y «Abrir línea de tiempo».
-    - A la derecha, **ficha compacta**: id, nombre, sexo, edad y trabajo; botones «Ampliar expediente» y «Charlar»; actividad, lugar, hogar y dinero; barras de estado con el aviso de necesidad crítica; «Por qué está aquí» con sus causas; y el enlace «Ver historia, vínculos, aprendizaje y salud →».
-  - **R-022 · Expediente de vida (pantalla completa).**
-    - Cabecera: Mundo / Personas / Expediente id, «datos al … · en vivo», y los botones «Exportar JSON», «Charlar» y «Reducir» (vuelve al mapa con la ficha compacta).
-    - Franja de identidad: nombre completo, sexo, edad, fecha y lugar de nacimiento, estudios, trabajo y hogar; y «Ahora», ánimo, estrés y alertas.
-    - Pestañas:
-      - **Resumen:** identidad, «por qué está donde está», curso de vida en una línea temporal por lugares (historia de origen de la 030 y simulación) y contadores de eventos, estímulos con función, reglas verbales y charlas;
-      - **Estado y necesidades:** ánimo, estrés, necesidades con su umbral crítico explicado y la agenda de hoy (rutina prevista en una franja de 24 h con «ahora», lugar, si se mueve y cuándo queda libre);
-      - **Emociones:** las activas con su evento de origen, o el texto de que no hay ninguna;
-      - **Historia:** tabla cronológica con filtro Todos / Historia de origen / Simulación, y su «¿por qué?»;
-      - **Vínculos:** familia en tabla (parentesco y situación), las relaciones desde las dos perspectivas y la red relacional (037);
-      - **Aprendizaje:** funciones de estímulos, reglas verbales, fuerza de respuestas, estados aprendidos y temperamento;
-      - **Salud:** aseguramiento (031), condiciones y episodios;
-      - **Economía y objetos:** dinero, ocupación, cargo, hogar y objetos con dueño, fecha y precio;
-      - **Charlas:** las anteriores con su resumen, y el formulario para iniciar una (modo En el mundo o Sandbox, modo prueba, y la disponibilidad según su rutina).
-    - Memoria y Creencias (M3), que el lienzo no dibuja, se conservan como dos pestañas más tras Vínculos. El Informe y el Desarrollo de la pestaña Vida pasan a Resumen e Historia.
-  - **R-023 · Dashboard (pantalla Datos).** Cabecera con «datos al …», periodo (Último mes, Último año, Desde la fundación) y «Exportar CSV». Indicadores: personas, nacidos y fallecidos del periodo con su tasa bruta por mil, hogares con su tamaño medio y organizaciones. Gráficas: pirámide por edad y sexo en grupos de 10 años, y personas por ocupación, cada una con «Ver como tabla» y el valor al pasar el cursor. Debajo, las series por día y las alertas de la R-011. El aviso de Estudio y Muestra queda al pie.
-  - **R-024 · Charla (pantalla completa, sustituye al panel de la R-018).** Cabecera con el expediente de origen, id de la charla, «Modo prueba» y «Despedirse»; franja con el modo, la hora de inicio y la duración, hasta cuándo está libre, el lugar y «El mundo sigue en tiempo real». Mensajes con número, hora, tono o postura y tiempo de respuesta, y las afirmaciones verificadas. Selector de tono en modo prueba. Panel lateral: por qué respondió así en el último turno (aportes de las fuentes de la 040 y probabilidades), estado de la charla (valor del visitante, malestar, necesidades en vivo, verificación) y lo que sabe la persona.
-  - **CA propuestos:** CA-014 (cada pestaña del expediente muestra los datos de una ficha de ejemplo), CA-015 (la pirámide y la ocupación cuentan bien una población de ejemplo, y el periodo cambia nacidos y fallecidos), CA-016 (el panel Ahora y las capas: prueba de la lógica), CA-017 (capturas lado a lado con las cuatro pantallas del lienzo y aceptación del usuario; sustituye a la CA-013).
-  - **Preguntas para el usuario:** (a) ¿el lienzo Visor A+ pasa a ser la referencia de la interfaz, y `prototipo/index.html` sigue siéndolo para el comportamiento del motor (CLAUDE.md, regla 10, y `docs/prototipo-referencia.md`)?; (b) ¿se conservan el modo oscuro y las pestañas Memoria y Creencias, que el lienzo no dibuja?; (c) ¿la charla pasa a pantalla completa como en el lienzo, dejando el panel junto al mapa de la R-018?
-- [ ] ¿Sprites propios dibujados a mano o generados proceduralmente (como el prototipo)? En el bloque V, procedurales.
-
+- [x] Paridad con el prototipo aprobado «Visor A+»: resuelta en la v0.5 (R-020 a R-024).
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
@@ -188,3 +192,4 @@ Fps del render (visible en el visor).
 | 2026-09-29 | 0.4 | Paridad con el prototipo, aprobada por el usuario (P1 a P6) tras su revisión («no se parece en nada al prototipo»): reproducción del movimiento con reloj de vista (R-013, sustituye a la R-002), disposición del prototipo (R-014), interacción con el mapa (R-015), registro con filtros (R-016), ficha de vida con pestañas y subpestañas (R-017), charla mejorada (R-018, amplía la 043 R-017) y guía para el equipo (R-019). Opacidad de la noche 0,5, como el prototipo. CA-009 a CA-013 nuevos |
 | 2026-09-29 | 0.4 | Implementación de la paridad (P1 a P6), probada de punta a punta con capturas (`docs/validaciones/M4-paridad-prototipo.md`). Precisiones:<br>- las pestañas de la ficha pasan a dos líneas cuando no caben;<br>- el lugar de «Ahora» es un enlace a su ficha;<br>- el acceso usa un formulario propio;<br>- `pnpm dev` arranca a 1 min/s y con credenciales locales si no hay otras.<br>Hallazgo: el visor dibuja cada trayecto simulado, pero hay mucha menos gente en la calle que en el prototipo (0,36 personas de media), por el modelo: 8 m por tile (≈ 45 m en el prototipo) y unos 0,7 viajes por persona y día. Queda para decisión del usuario. CA-009 a CA-012 verdes; CA-013 pendiente de su revisión |
 | 2026-09-30 | — | Propuesta v0.5 en *Preguntas abiertas*: paridad con el prototipo aprobado «Visor A+» (menú lateral, ficha compacta, expediente de vida de pantalla completa, dashboard y charla de pantalla completa). Pendiente de aprobación; sin cambios en reglas ni CA vigentes |
+| 2026-09-30 | 0.5 | Visor A+, aprobado por el usuario: el lienzo pasa a ser la referencia de la interfaz y `prototipo/index.html` deja de serlo. Menú lateral y estilo (R-020), pantalla Mundo con ficha compacta, capas y «Ahora» (R-021), expediente de vida de pantalla completa (R-022), dashboard (R-023) y charla de pantalla completa (R-024). Se conservan el modo oscuro y las pestañas Memoria y Creencias. CA-014 a CA-017 nuevos; la CA-017 sustituye a la CA-013 |
