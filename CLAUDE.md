@@ -22,7 +22,7 @@ Pregunta guía de todo el proyecto: *¿estas personas parecen haber vivido, y po
 7. **El LLM no es el núcleo.** El MVP funciona sin LLM. Cuando exista, solo genera expresión o propuestas de acción que el motor valida (spec 026).
 8. **Presupuesto de servidor real.** Se desarrolla en local (ADR-004), pero el diseño debe caber en 1 GB de RAM, medio vCore y 5 GB de disco, el servidor previsto para publicarlo. Cualquier dependencia o estructura de datos nueva debe justificar su coste de memoria (`pnpm bench`).
 9. **Documentación viva.** Todo cambio de código de un módulo actualiza en el mismo cambio su `MODULE.md`: API, diseño, criterios cubiertos y una fila nueva en la bitácora. Lo verifican los guardarraíles (§10).
-10. **El prototipo es la referencia.** `prototipo/index.html` define el comportamiento mínimo esperado. Se porta el comportamiento, no el código, y se mide la paridad (`docs/prototipo-referencia.md`).
+10. **Referencias.** La interfaz sigue el lienzo aprobado «Visor A+» (spec 024 v0.5). `prototipo/index.html` guió la etapa temprana y ya cumplió su función (decisión del usuario, 2026-09-30): queda como registro histórico de solo lectura y su línea base es informativa, no obligatoria (`docs/prototipo-referencia.md`).
 
 ## 3. Stack (decidido en `docs/adr/ADR-001-stack-tecnologico.md`)
 
@@ -50,7 +50,7 @@ apps/
 specs/           Especificaciones numeradas (SDD).
 docs/            Visión, ADR, arquitectura, roadmap, despliegue, glosario.
 tasks/           Planes de trabajo por hito, con casillas.
-prototipo/       Prototipo HTML: referencia de comportamiento y visual (solo lectura).
+prototipo/       Prototipo HTML de la etapa temprana (registro histórico, solo lectura).
 scripts/         guardrails/ (hooks y verificaciones), prototipo/ (línea base), aprobar-spec.mjs.
 .claude/         settings.json (hooks) y commands/ (comandos personalizados).
 .githooks/       pre-commit y commit-msg (se activan con `git config core.hooksPath .githooks`).
@@ -63,12 +63,12 @@ Cada paquete, cada app y cada sistema del motor o de los generadores (`packages/
 
 1. Elegir la siguiente tarea en `tasks/` según `docs/roadmap.md` (el hook de inicio de sesión muestra cuál es).
 2. Trabajar en una rama corta: `git switch -c m0/rng`.
-3. Leer las specs que la tarea cita, el `MODULE.md` del módulo y su fila en `docs/prototipo-referencia.md`. Si hay ambigüedad, proponer cambio en la spec (*Preguntas abiertas*) y pedir aprobación antes de codificar. **Nunca cambies el `estado` de una spec sin la aprobación explícita del usuario en la conversación.** Con su "sí", lo ejecuta Claude con `node scripts/aprobar-spec.mjs` (decisión del usuario, 2026-09-24). Lo mismo vale para los demás pasos que antes eran manuales (fusionar PRs, etc.): Claude propone, el usuario aprueba y Claude ejecuta. Cuando un paso solo pueda hacerlo el usuario, dale instrucciones numeradas y concretas.
+3. Leer las specs que la tarea cita, y el `MODULE.md` del módulo. Si hay ambigüedad, proponer cambio en la spec (*Preguntas abiertas*) y pedir aprobación antes de codificar. **Nunca cambies el `estado` de una spec sin la aprobación explícita del usuario en la conversación.** Con su "sí", lo ejecuta Claude con `node scripts/aprobar-spec.mjs` (decisión del usuario, 2026-09-24). Lo mismo vale para los demás pasos que antes eran manuales (fusionar PRs, etc.): Claude propone, el usuario aprueba y Claude ejecuta. Cuando un paso solo pueda hacerlo el usuario, dale instrucciones numeradas y concretas.
 4. Si el módulo no existe, crear su `MODULE.md` desde `docs/modulos/_plantilla-MODULE.md` antes que cualquier código.
 5. Escribir primero las pruebas de los criterios de aceptación (`CA-xxx`).
 6. Implementar lo mínimo para que pasen.
 7. Actualizar el `MODULE.md`: API pública, diseño, tabla de criterios, paridad y fila en la bitácora.
-8. Ejecutar `pnpm check` (tipos, lint, pruebas y guardarraíles). Si cambia comportamiento de simulación (desde M2), `pnpm cli validate:parity`.
+8. Ejecutar `pnpm check` (tipos, lint, pruebas y guardarraíles). `pnpm cli validate:parity` es opcional e informativo.
 9. Actualizar la spec si la implementación reveló algo (con fila en su *Historial de cambios*).
 10. Marcar la casilla en `tasks/`, hacer commit con los IDs de spec (`feat(engine): reloj global [002 CA-001..CA-004]`) y proponer el PR.
 
@@ -100,7 +100,6 @@ Comandos personalizados disponibles en `.claude/commands/`: `/nueva-spec`, `/imp
 - No generar estados "de fábrica" arbitrarios al consultar una persona: todo lo que se muestra debe salir del estado persistido o de eventos.
 - No mezclar lógica en `apps/web`: la web solo lee.
 - No desactivar, rodear ni editar los guardarraíles (`scripts/guardrails/`, `.claude/settings.json`, `.githooks/`) sin que el usuario lo pida expresamente. Si un guardarraíl bloquea, lee su mensaje, corrige la causa o pide al usuario la acción que indica.
-- No copiar el código del prototipo tal cual: portar su comportamiento con tipos, eventos con causas y RNG por flujos.
 - No optimizar antes de medir; pero sí medir memoria en cada hito (`pnpm bench`).
 
 ## 9. Referencia rápida de comandos (a crear en M0)

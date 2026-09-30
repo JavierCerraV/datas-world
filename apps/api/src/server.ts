@@ -8,9 +8,13 @@ import type { EntityId, WhyNode, WorldEvent } from '@datas-world/engine';
 import { buildOntology, knowledgeCatalog, loadCatalogs } from '@datas-world/generators';
 import { DEFAULT_CONFIG, Gateway, anthropicAdapter, chatCatalogs, mockAdapter, openaiCompatibleAdapter, parseConfig } from '@datas-world/llm-gateway';
 import type { LlmRecord, ProviderAdapter, RecordStore } from '@datas-world/llm-gateway';
-import { ADVANCE_MINUTES, CONTROL_COMMANDS, SqliteRecordStore, closeDb, enqueueCommand, eventsById, openWorldDb, queryEvents, trajectoryOf } from '@datas-world/persistence';
+import { ADVANCE_MINUTES, CONTROL_COMMANDS, SqliteRecordStore, chatSessionsOf, movesSince, closeDb, enqueueCommand, eventsById, openWorldDb, queryEvents, trajectoryOf } from '@datas-world/persistence';
 import type { ControlCommandName, Db } from '@datas-world/persistence';
 import { registerChatRoutes } from './chat.ts';
+import { demographicsOf } from './demographics.ts';
+import type { Period } from './demographics.ts';
+import { dossierView } from './dossier.ts';
+import { networkOf } from './network.ts';
 import { placeDetail } from './places.ts';
 import { registerDayRoutes } from './days.ts';
 import { registerMetricsRoutes } from './metrics.ts';
@@ -155,8 +159,31 @@ export function buildApi(opts: ApiOptions): Api {
     return { ...detail, ...whereAndUntil(w, p.data.id as EntityId), beliefs, aboutMe: about };
   });
 
-  // 041 R-009: historia de vida (episodios del desarrollo por etapa) y familiograma extenso.
   const lifeCatalogs = loadCatalogs();
+  // 022 R-015: el expediente de vida (024 R-022).
+  app.get('/api/citizens/:id/dossier', async (req, reply) => {
+    const p = citizenParams.safeParse(req.params);
+    if (!p.success) return reply.code(400).send({ error: 'id inválido' });
+    const id = p.data.id as EntityId;
+    const w = reader.world;
+    const events = queryEvents(reader.db, { participant: id, limit: 5000 });
+    const dayStart = Math.floor(w.now / 1440) * 1440;
+    const moves = movesSince(reader.db, dayStart - 1440).filter((m) => m.citizenId === id);
+    const d = dossierView(w, id, events, moves, lifeCatalogs, chatSessionsOf(reader.db, id).length);
+    return d ?? reply.code(404).send({ error: 'no existe' });
+  });
+
+  // 022 R-018: red de vínculos para la red 3D del dashboard (024 R-027).
+  app.get('/api/network', async () => networkOf(reader.world));
+
+  // 022 R-016: demografía para el dashboard (024 R-023) y el panel «Ahora» (R-021).
+  app.get('/api/demographics', async (req, reply) => {
+    const period = ((req.query as { period?: string }).period ?? 'year') as Period;
+    if (!['month', 'year', 'all'].includes(period)) return reply.code(400).send({ error: 'periodo inválido' });
+    return demographicsOf(reader.world, reader.db, period);
+  });
+
+  // 041 R-009: historia de vida (episodios del desarrollo por etapa) y familiograma extenso.
   app.get('/api/citizens/:id/life', async (req, reply) => {
     const p = citizenParams.safeParse(req.params);
     if (!p.success) return reply.code(400).send({ error: 'id inválido' });

@@ -25,3 +25,12 @@ Specs: 024 v0.4, 022 v0.4 y 027 v0.5.
 - [x] P5 Mundo de demostración con el motor actual (el mundo anterior se conserva con otro nombre).
 - [x] P6 Guía para el equipo (`docs/guia-visor.md`, 024 R-019) y validación con capturas lado a lado (`docs/validaciones/M4-paridad-prototipo.md`).
 - [ ] P7 Revisión del usuario de la paridad (024 CA-013) y decisión sobre la escala del mapa y los viajes por persona (motor: 003, 016, rutinas).
+  - 2026-09-30: el usuario indica que la referencia de la interfaz es el lienzo «Visor A+» y que faltan el expediente de vida y el dashboard. Aprobada como 024 v0.5 el mismo día.
+- [x] A1 Menú lateral, estilo y pantalla Mundo con ficha compacta, capas y panel «Ahora» (024 R-020, R-021).
+- [x] A2 Expediente de vida de pantalla completa con sus pestañas (024 R-022).
+- [x] A3 Dashboard: indicadores, pirámide, ocupación y periodo (024 R-023).
+- [x] A4 Charla de pantalla completa con su panel lateral (024 R-024).
+- [x] A6 Retrato pixel art, indicador de carga y pantalla Datos rediseñada con red 3D (024 v0.6, R-025 a R-027; 022 R-017, R-018).
+- [x] A7 Escala del mapa: 40 m por tile (003 v0.4) y `lookahead` de 60 min (016).
+- [ ] A8 Elegir una de las 5 propuestas de rediseño del lienzo «Datas World — 5 propuestas de rediseño» y especificarla.
+- [ ] A5 Capturas de las cuatro pantallas (`docs/validaciones/M4-visor-aplus.md`, hechas) y aceptación del usuario (024 CA-017).

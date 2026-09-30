@@ -32,7 +32,7 @@ Desde `@datas-world/generators`:
 | `SAFETY_BY_STRATUM`, `DEFAULT_DEPARTMENT` | Parámetros por defecto |
 
 ## 4. Diseño interno y decisiones
-- **La plantilla es el prototipo:** 64 × 40 tiles de 8 m; calles de 2 tiles en `x ∈ {5, 17, 29, 41, 53}` e `y ∈ {4, 14, 24, 34}`; manzanas en `COLS`/`ROWS`; parcelas y puertas como `buildPlaces`. La única diferencia es la iglesia, que ocupa la primera casa de la tercera manzana de San Martín (004 R-001).
+- **La plantilla es el prototipo:** 64 × 40 tiles de 40 m (003 v0.4; antes 8 m); calles de 2 tiles en `x ∈ {5, 17, 29, 41, 53}` e `y ∈ {4, 14, 24, 34}`; manzanas en `COLS`/`ROWS`; parcelas y puertas como `buildPlaces`. La única diferencia es la iglesia, que ocupa la primera casa de la tercera manzana de San Martín (004 R-001).
 - **Plantilla de Data's World (`datas-world-v1`, 033, perfil colombiano)**:
   - 80 × 50 tiles; calles en `x ∈ {5, 17, 29, 41, 53, 65}` e `y ∈ {4, 14, 24, 34, 44}`;
   - 4 filas de 5 manzanas;
@@ -75,3 +75,4 @@ Porta `isRoad`, `ROAD_X`, `ROAD_Y`, `COLS`, `ROWS`, `LAYOUT`, `BARRIOS` y el cá
 | 2026-09-24 | m1/b-geografia | — | Documento creado desde la plantilla (sin código) |
 | 2026-09-24 | m1/b-geografia (B1–B3) | 003 | Plantilla `prototipo-64x40` con parcelas y puertas; `generateGeography` (mapa y jerarquía territorial con estrato y DIVIPOLA ficticio); `districtAt`. 7 pruebas: 003 CA-001 a CA-005 |
 | 2026-09-24 | m1/j-dotacion | 003, 033 | Plantilla `datas-world-v1` (80 × 50, plaza central, parcelas comerciales `@com`), celdas `plaza`, `COMMERCIAL_LOT` y nombres propios por plantilla (`names`). Las pruebas de la 033 cubren la plantilla nueva |
+| 2026-09-30 | m4/visor-a-plus | 003 | `tileMeters` de las dos plantillas pasa de 8 a 40 m (decisión del usuario): trayectos a pie de 10 a 25 min, como en el prototipo. La prueba de la plantilla lo comprueba |

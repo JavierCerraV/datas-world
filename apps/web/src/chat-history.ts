@@ -1,6 +1,7 @@
 // Pestaña «Charlas» de la ficha (spec 043 R-017, decisión del usuario 2026-09-27): las charlas guardadas de la
 // persona para revisarlas después, con cada turno, su tono y la postura con que respondió. Solo lee `/api/chat/*`.
 import { stanceLabel, toneLabel } from './chat.ts';
+import { skeleton } from './loading.ts';
 
 export interface ChatRow {
   id: string;
@@ -61,7 +62,7 @@ export async function fetchTurns(auth: Auth, id: string): Promise<ChatTurn[] | n
 
 /** Rellena la pestaña: pide credenciales si hacen falta y carga cada transcripción al desplegarla. */
 export async function showChatHistory(el: HTMLElement, citizenId: string, auth: Auth, askAuth: () => Promise<boolean>): Promise<void> {
-  el.innerHTML = '<p>Cargando charlas…</p>';
+  el.innerHTML = skeleton('las charlas', 3);
   let r = await fetchChats(auth, citizenId);
   if (r.status === 401 && (await askAuth())) r = await fetchChats(auth, citizenId);
   if (r.status === 401) return void (el.innerHTML = '<p>Las charlas necesitan usuario y contraseña.</p>');

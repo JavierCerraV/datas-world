@@ -35,7 +35,7 @@ describe('spec 003: geografía', () => {
   it('CA-004: las calles y las manzanas coinciden con el prototipo', () => {
     const { world } = generate();
     const g = world.geo!;
-    expect([g.width, g.height, g.tileMeters]).toEqual([64, 40, 8]);
+    expect([g.width, g.height, g.tileMeters]).toEqual([64, 40, 40]);
     for (let y = 0; y < 40; y++) {
       for (let x = 0; x < 64; x++) expect(tileAt(g, x, y) === TILE.road, `(${x},${y})`).toBe(protoIsRoad(x, y));
     }

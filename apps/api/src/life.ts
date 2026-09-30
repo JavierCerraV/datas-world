@@ -98,7 +98,7 @@ const col = (world: World, name: string, id: string) => (world.components.i32[na
 const yearOf = (world: World, at: number) => Number(dateOf(world, at).slice(0, 4));
 
 /** CA-006: parientes conocidos hasta los bisabuelos, y hermanos, tíos, primos, pareja e hijos, con su generación. */
-function relatives(world: World, id: EntityId): Map<string, { generation: number; relation: (sex: 'F' | 'M') => string }> {
+export function relatives(world: World, id: EntityId): Map<string, { generation: number; relation: (sex: 'F' | 'M') => string }> {
   const out = new Map<string, { generation: number; relation: (sex: 'F' | 'M') => string }>();
   const g = (f: string, m: string) => (sex: 'F' | 'M') => (sex === 'F' ? f : m);
   const put = (x: string | undefined, generation: number, relation: (sex: 'F' | 'M') => string) => {

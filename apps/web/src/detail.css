@@ -201,20 +201,8 @@ h4 {
 }
 
 /* Panel del mundo (024 R-011): gráficas de líneas finas, rejilla recesiva, texto con los tokens de texto. */
-#world {
-  width: min(760px, 96vw);
-  max-height: 92vh;
-  padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--panel);
-  color: var(--ink);
-}
-#world::backdrop {
-  background: rgb(0 0 0 / 0.35);
-}
 .world-body {
-  padding: 8px 16px 16px;
+  padding: 0;
   overflow-y: auto;
 }
 .world-body .alerts {
@@ -225,14 +213,29 @@ h4 {
   position: relative;
   margin: 16px 0;
 }
-.chart figcaption {
-  font-size: 14px;
-  font-weight: 700;
-}
 .chart svg {
   width: 100%;
   height: auto;
   display: block;
+}
+/* 024 R-027: los trazos no engordan al ensanchar la gráfica. */
+.chart svg path,
+.chart svg line {
+  vector-effect: non-scaling-stroke;
+}
+.charts3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 20px;
+}
+@media (max-width: 1000px) {
+  .charts3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.chart figcaption {
+  font-size: 13px;
+  font-weight: 600;
 }
 .chart .grid {
   stroke: var(--line);
@@ -248,7 +251,7 @@ h4 {
 }
 .chart .series {
   fill: none;
-  stroke-width: 2;
+  stroke-width: 1.75;
   stroke-linejoin: round;
 }
 .chart .band {

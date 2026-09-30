@@ -1,6 +1,7 @@
-// Registro de eventos bajo el mapa (spec 024 R-016): guarda los últimos eventos, los filtra por categoría y menores,
-// y pinta como mucho 150, el más reciente arriba, como el prototipo. Un nombre abre la ficha de esa persona.
-import { CATEGORIES, logRow, passes } from './log.ts';
+// Registro de eventos bajo el mapa (spec 024 R-016 y R-021): guarda los últimos eventos, los filtra por categoría y
+// menores, y pinta como mucho 150 en una tabla (hora, tipo, qué pasó y causas), el más reciente arriba. Un nombre
+// abre la ficha de esa persona.
+import { CATEGORIES, logTableRow, passes } from './log.ts';
 import type { Category } from './log.ts';
 import type { EventView } from './types.ts';
 
@@ -14,14 +15,15 @@ export interface LogView {
 }
 
 export function setupLog(o: { openPerson: (id: string) => void }): LogView {
-  const list = document.querySelector<HTMLUListElement>('#events')!;
-  const chips = document.querySelector<HTMLElement>('#chips')!;
+  const list = document.querySelector<HTMLElement>('#events')!;
+  const chips = document.querySelector<HTMLSelectElement>('#log-filter')!;
+  const sub = document.querySelector<HTMLElement>('#log-sub')!;
   const minorBox = document.querySelector<HTMLInputElement>('#show-minor')!;
   let events: EventView[] = [];
   let filter: Category | 'all' = 'all';
   let today = '';
   let dirty = true;
-  chips.innerHTML = CATEGORIES.map(([k, l]) => `<button data-f="${k}" aria-pressed="${k === 'all'}">${l}</button>`).join('');
+  chips.innerHTML = CATEGORIES.map(([k, l]) => `<option value="${k}">${k === 'all' ? 'todos los tipos' : l}</option>`).join('');
 
   const render = () => {
     if (!dirty) return;
@@ -29,18 +31,17 @@ export function setupLog(o: { openPerson: (id: string) => void }): LogView {
     const shown: string[] = [];
     for (let i = events.length - 1; i >= 0 && shown.length < SHOWN; i--) {
       const e = events[i]!;
-      if (passes(e.type, filter, minorBox.checked)) shown.push(logRow(e, today));
+      if (passes(e.type, filter, minorBox.checked)) shown.push(logTableRow(e, today));
     }
-    list.innerHTML = shown.join('') || '<li class="empty">Aún no hay eventos de este tipo. Sube la velocidad o avanza un día para que el mundo produzca historia.</li>';
+    list.innerHTML = shown.join('') || '<tr><td colspan="4" class="empty">Aún no hay eventos de este tipo. Sube la velocidad o avanza un día para que el mundo produzca historia.</td></tr>';
+    const todayN = events.filter((e) => e.date.startsWith(today)).length;
+    sub.textContent = `en vivo · ${todayN} ${todayN === 1 ? 'evento' : 'eventos'} hoy en el registro`;
   };
   // Como el prototipo, se repinta como mucho dos veces por segundo.
   setInterval(render, 500);
 
-  chips.addEventListener('click', (e) => {
-    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-f]');
-    if (!b) return;
-    filter = b.dataset.f as Category | 'all';
-    for (const x of chips.querySelectorAll('[data-f]')) x.setAttribute('aria-pressed', String(x === b));
+  chips.addEventListener('change', () => {
+    filter = chips.value as Category | 'all';
     dirty = true;
     render();
   });

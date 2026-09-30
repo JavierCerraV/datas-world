@@ -24,7 +24,7 @@ Espacio físico del mundo: mapa de tiles, barrios con estrato, calles y distanci
 ```ts
 type TileKind = 'grass' | 'road' | 'building' | 'water' | 'park' | 'plaza';
 interface GeoMap {
-  width: number; height: number; tileMeters: number;  // 64 × 40, 8 m (prototipo)
+  width: number; height: number; tileMeters: number;  // 64 × 40 (o 80 × 50), 40 m por tile
   tiles: Uint8Array;                                  // índice y*width+x → TileKind (enum u8)
   districts: District[];                              // orden por id
 }
@@ -75,7 +75,7 @@ Cada criterio indica el hito en que se prueba.
 ## 8. Parámetros y calibración
 | Parámetro | Valor por defecto | Rango | Fuente / justificación |
 |---|---|---|---|
-| `tileMeters` | 8 | — | prototipo (`TS`) |
+| `tileMeters` | 40 | — | escala del prototipo (≈ 45 m por tile: trayectos de 12 a 24 min); decisión del usuario del 2026-09-30. Antes, 8 m (el `TS` del prototipo, que es su tamaño en píxeles) |
 | `MAP_TEMPLATE` | `prototipo-64x40` | — | prototipo (`TW`, `TH`, `ROAD_X`, `ROAD_Y`) |
 | barrios | 3 | 3–8 | prototipo (`BARRIOS`) |
 | `safety` por estrato | 2 → 0,5 · 3 → 0,65 · 4 → 0,8 | [0,1] | provisional, sin efecto hasta M2 |
@@ -97,3 +97,4 @@ Número de puertas, longitud media de las rutas y la ruta más larga. Alerta si 
 | 2026-09-24 | 0.4 | Implementación del bloque B: la plantilla es fija y no consume azar (el flujo `gen:geography` queda para plantillas procedurales); los barrios son franjas de filas que parten el mapa (La Esperanza y 0–14, Centro 15–24, San Martín 25–39); DIVIPOLA ficticio con prefijo `00` (comuna y barrio siguen la jerarquía, no son códigos oficiales); seguridad por estrato para los estratos 1 a 6; el municipio se llama como el mundo. Sin cambios en CA |
 | 2026-09-25 | 0.4 | Estado → implementada |
 | 2026-09-25 | 0.4 | Spec 033 (bloque J, decisión del usuario): plantilla nueva `datas-world-v1` para el perfil colombiano. Es de 80 × 50, con plaza central (tile `plaza`) y el Centro en dos filas de manzanas (y 15–34). El perfil elige la plantilla con `gen.map.template`; el prototipo conserva la suya, así que CA-004 no cambia. Sin cambios en CA |
+| 2026-09-30 | 0.4 | `tileMeters` pasa de 8 a 40 m (decisión del usuario del 2026-09-30): con 8 m el pueblo medía 640 × 400 m, un paseo duraba unos 3 min y apenas se veía gente en la calle; con 40 m los trayectos a pie duran de 10 a 25 min, como en el prototipo. Solo afecta a los mundos nuevos: cada mundo guarda su escala. Sin cambios en CA |

@@ -1,6 +1,6 @@
-// Barra superior (spec 024 R-014), como el prototipo: reloj grande con la fecha y el día de simulación, Pausar, las
-// velocidades del motor (002) en minutos de mundo por segundo, «Avanzar» 1 día, semana, mes o año con el aviso de
-// «Simulando sin observar» (022 R-013) y los indicadores. Solo muestra y envía órdenes; no decide nada.
+// Cabecera de la pantalla Mundo (spec 024 R-021, Visor A+): fecha y hora grandes con el día de simulación, el estado
+// (Simulando / En pausa, que pausa o reanuda), las velocidades del motor (002), «+1 día» y el resto de avances sin
+// observar (022 R-013), y personas, hogares y organizaciones. Solo muestra y envía órdenes; no decide nada.
 import { send } from './auth.ts';
 import type { Command } from './auth.ts';
 import { clockOf } from './camera.ts';
@@ -35,15 +35,16 @@ export interface Topbar {
   /** Estado y velocidad del mundo (del último tick y del último cambio de velocidad). */
   setWorld: (status: string, speed: number) => void;
   setClock: (epoch: string, minute: number) => void;
-  setStats: (s: Stats, now: number) => void;
+  setStats: (s: Stats, now: number, orgs?: number) => void;
 }
 
 export function setupTopbar(o: { message: (text: string) => void; status: () => string }): Topbar {
   const play = $<HTMLButtonElement>('#play');
   const speeds = $('#speeds');
-  const adv = $('#advance');
-  speeds.innerHTML = SPEEDS.map(([v, label, title]) => `<button data-speed="${v}" title="${title}" aria-pressed="false">${label}</button>`).join('');
-  adv.innerHTML = ADVANCES.map(([v, label]) => `<button data-adv="${v}" title="Avanzar ${label} sin mirar, tan rápido como se pueda">${label}</button>`).join('');
+  const day = $<HTMLButtonElement>('#adv-day');
+  const more = $<HTMLSelectElement>('#adv-more');
+  speeds.innerHTML = SPEEDS.map(([v, label, title]) => `<button type="button" data-speed="${v}" title="${title}" aria-pressed="false">${label}</button>`).join('');
+  more.innerHTML += ADVANCES.slice(1).map(([v, label]) => `<option value="${v}">${label}</option>`).join('');
   const order = async (cmd: Command, arg?: number) => {
     const m = await send(cmd, arg);
     o.message(m ?? '');
@@ -53,31 +54,33 @@ export function setupTopbar(o: { message: (text: string) => void; status: () => 
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-speed]');
     if (b) void order('speed', Number(b.dataset.speed));
   });
-  adv.addEventListener('click', (e) => {
-    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-adv]');
-    if (b) void order('advance', Number(b.dataset.adv));
+  day.addEventListener('click', () => void order('advance', ADVANCES[0]![0]));
+  more.addEventListener('change', () => {
+    const v = Number(more.value);
+    more.value = '';
+    if (v) void order('advance', v);
   });
   return {
     setWorld: (status, speed) => {
       const paused = status === 'paused';
-      play.textContent = paused ? 'Reanudar' : 'Pausar';
+      play.querySelector('span')!.textContent = paused ? 'En pausa' : 'Simulando';
+      play.classList.toggle('paused', paused);
       play.setAttribute('aria-label', paused ? 'Reanudar la simulación' : 'Pausar la simulación');
+      play.title = paused ? 'Reanudar' : 'Pausar';
       for (const b of speeds.querySelectorAll<HTMLButtonElement>('[data-speed]')) b.setAttribute('aria-pressed', String(Math.abs(Number(b.dataset.speed) - speed) < 1e-9));
     },
     setClock: (epoch, minute) => {
       const c = clockOf(epoch, minute);
-      $('#clk-time').textContent = c.time;
-      $('#clk-date').textContent = c.date;
-      $('#clk-day').textContent = c.day;
+      $('#clk-time').textContent = `${c.iso} ${c.time}`;
+      $('#clk-day').textContent = `${c.weekday} · ${c.day.toLowerCase()}`;
     },
-    setStats: (s, now) => {
+    setStats: (s, now, orgs) => {
       $('#st-pop').textContent = String(s.population);
-      $('#st-job').textContent = pctText(s.employedPct);
-      $('#st-mood').textContent = String(Math.round(s.moodMean * 100));
-      $('#st-ev').textContent = String(s.eventsToday);
+      $('#st-sub').textContent = `${s.households} hogares${orgs !== undefined ? ` · ${orgs} org.` : ''} · ${pctText(s.employedPct)} con empleo · ánimo ${Math.round(s.moodMean * 100)}`;
       const p = advanceProgress(s.advance, now);
       $('#progress').classList.toggle('on', p !== null);
-      for (const b of adv.querySelectorAll<HTMLButtonElement>('button')) b.disabled = p !== null;
+      day.disabled = p !== null;
+      more.disabled = p !== null;
       if (p !== null) {
         $('#prog-pct').textContent = pctText(p);
         $('#prog-bar').style.width = pctText(p);

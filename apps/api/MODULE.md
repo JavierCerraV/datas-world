@@ -3,7 +3,7 @@ modulo: api
 ruta: apps/api
 estado: en-desarrollo
 specs: [022, 043, 026, 044, 041]
-actualizado: 2026-09-26
+actualizado: 2026-09-30
 ---
 
 # Módulo: api
@@ -16,7 +16,7 @@ HTTP de consulta y SSE sobre la base que escribe el worker; controles de tiempo 
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 022 | CA-001 a CA-011; R-001 a R-014 | — |
+| 022 | CA-001 a CA-014; R-001 a R-018 | — |
 
 ## 3. API pública
 Proceso: `pnpm api [--db data/world.db] [--port 8787]` (`src/main.ts`). Controles con `DATAS_WORLD_USER` y `DATAS_WORLD_PASSWORD`; sin ellas, desactivados (503).
@@ -24,7 +24,7 @@ Proceso: `pnpm api [--db data/world.db] [--port 8787]` (`src/main.ts`). Controle
 | Ruta | Respuesta |
 |---|---|
 | `GET /api/health` | `{ now, date, status, speed, citizens, rssMb, dbMb }` |
-| `GET /api/world` | `{ name, now, date, epoch, status, geo: { width, height, tiles[] }, places: [{ id, kind, name, rect?, door?, open }], population, points, names }`; `points`: por dónde se entra a cada lugar, también a las viviendas (R-012); `names`: el nombre de cada lugar |
+| `GET /api/world` | `{ name, now, date, epoch, status, geo: { width, height, tileMeters, tiles[] }, places: [{ id, kind, name, rect?, door?, open }], population, points, names }`; `points`: por dónde se entra a cada lugar, también a las viviendas (R-012); `names`: el nombre de cada lugar |
 | `GET /api/citizens` | posiciones: `[{ id, name, x, y, activity, placeId, moving, mood, age, homeId, trip? }]` (R-005; `trip` = `{ from, to, departAt, arriveAt }` con las puertas, R-008) |
 | `GET /api/places/:id` | ficha del lugar: `{ id, name, kind, district, open, inside[], residents[], staff[] }`, con los lugares de dentro de un edificio (R-007) y el personal con su puesto y quién dirige (R-014); 400/404 |
 | `GET /api/moves?since=` | viajes de `movements` que llegan después de `since` (R-012) |
@@ -34,6 +34,9 @@ Proceso: `pnpm api [--db data/world.db] [--port 8787]` (`src/main.ts`). Controle
 | `GET /api/metrics` | `{ days: [{ day, date, n, mood, moodSd, stress, stressSd, money, saturated }], events: { TIPO: número por día }, alerts: [{ metric, kind, note }] }` (R-010) |
 | `GET /api/export/trajectory.csv`, `GET /api/export/events.csv` | CSV en streaming de la trayectoria y del registro (R-011) |
 | `GET /api/citizens/:id` | ficha: identidad, edad, ocupación, hogar, dinero, actividad, lugar, estado, necesidades, emociones, descriptores de temperamento, estados aprendidos, funciones y respuestas más fuertes, reglas (tipo y aporte), relaciones, vínculos, creencias y últimos 20 eventos; desde la v0.4, `home`, `district`, `until` y `aboutMe` (lo que otros creen de la persona, R-014) |
+| `GET /api/citizens/:id/dossier` | expediente (R-015): `identity` (nacimiento, lugar, estudios, llegada, hogar), `why` (los hechos que explican dónde está), `until`, `agenda` (`blocks` de 0 a 24 h con su clase, `now`, `free`), `family` (padres, pareja, hijos y hermanos con su situación), `health` (régimen, condiciones, enfermedades, veces dormido de más), `objects`, `debts`, `events` (todos, con `origin` = historia de origen) y `counts` |
+| `GET /api/demographics?period=month\|year\|all` | demografía (R-016): personas, mujeres y hombres, `births` y `deaths` del periodo con su tasa por mil, `households` con su tamaño medio, `organizations`, `pyramid` (9 grupos de edad × sexo), `occupations` y `now` (trabajando, en clase, en casa, en la calle, en otro lugar); desde la v0.6 también `moodMean`, `employedPct`, `mood` y `stress` (10 tramos), `money` (tramos, mediana y Gini), `householdSizes` y `employers` (R-017); 400 con otro periodo |
+| `GET /api/network` | red de vínculos (R-018): `nodes` (id, nombre, edad, sexo, barrio, hogar, ánimo) y `edges` sin repetir (`a` < `b`, `kind`: pareja, familia, amistad, companeros u otros; trato y tensión), de los vínculos (012) y del parentesco de los hogares (008) |
 | `GET /api/events?since=&limit=` | los últimos `limit` (≤ 200) o los posteriores a `since`; cada evento lleva `text` (con lugares, organizaciones y temas de rumor en palabras) y `names` (el nombre de cada persona que menciona) |
 | `GET /api/stream` | SSE: `tick` (`{ now, date, status, moves }`, con los viajes nuevos, R-012) y `event` con `id` = id del evento; `Last-Event-ID` recupera los perdidos |
 | `POST /api/control` | `{ cmd: pause\|resume\|speed\|step\|advance, arg? }` con basic auth → `{ queued }`; `advance` solo con 1440, 10080, 43200 o 525600 minutos (si no, 400) |
@@ -53,6 +56,12 @@ Código: `buildApi(opts)` → `{ app, reader, poll, close }` (`server.ts`); `Wor
   - **Indicadores:** `statsOf` cuenta el empleo como el prototipo: de las personas de 18 a 64 años que no estudian ni están pensionadas.
   - **Lo que otros creen:** `aboutMe` agrupa por tema las creencias de los demás sobre la persona, con su verdad (`beliefTruth`).
   - **Verdad de las creencias:** para decidirla se leen solo los eventos de los tipos que hacen verdad un tema (`TRUTH_TYPES`), una vez por persona y petición. Antes se leían todos: la ficha tardaba 1,8 s y ahora 13 ms, junto con el índice de la migración 005.
+- **Expediente y demografía (v0.5, `dossier.ts`, `demographics.ts`):**
+  - La agenda es el plan del día de la 011 (`planAt`) en casillas de 10 minutos, con los viajes del día encima como desplazamiento, agrupada en bloques contiguos.
+  - La historia de origen son los eventos con minuto negativo (030); la simulación, el resto.
+  - La familia usa `relatives` de `life.ts` (ahora exportada) y se queda con el primer grado.
+  - Nacidos y fallecidos cuentan `CITIZEN_BORN` y `CITIZEN_DIED` en el periodo; «desde la fundación» incluye la historia de origen.
+  - «Ahora» pone a cada persona en una sola categoría: en camino o en un espacio público, «en la calle»; trabajando; estudiando; en su vivienda; o en otro lugar.
 - **Acceso sin `WWW-Authenticate`.** Los 401 de los controles y de la charla no llevan esa cabecera: con ella, el navegador abría su propia ventana de acceso y la petición del visor quedaba colgada. Las credenciales las pide el visor.
 - **Dependencias:** Fastify (ADR-001) y Zod para validar las entradas (R-002). Memoria del proceso: el mundo cargado (≈ 5 MB con 254 personas) más Fastify.
 
@@ -88,3 +97,5 @@ Expone lo que el inspector del prototipo muestra (menos relaciones, memoria y cr
 | 2026-09-29 | m3/creencias (K3) | 025, 022 | La ficha del ciudadano lleva `beliefs`: lo que cree de otros (tema, de quién lo sabe, credibilidad y bocas) y, solo para quien observa, si es verdad (`beliefTruth` con los hechos de esa persona, 025 R-008) |
 | 2026-09-29 | m4/observacion (O1–O4) | 022 | Rutas nuevas: `/api/places/:id` (`places.ts`, R-007), `/api/days` y los días pasados (`days.ts`, R-009, caché de 2 instantáneas), `/api/metrics` y la exportación CSV en streaming (`metrics.ts`, R-010 y R-011). Las posiciones llevan `age` y `trip` (R-008). Las métricas asignan a cada punto de trayectoria los eventos del día que cierra. 4 pruebas nuevas (CA-005 a CA-008) |
 | 2026-09-29 | m4/observacion (paridad, P1–P4) | 022, 024 | `observe.ts`: `/api/moves`, viajes en cada `tick` del SSE, `/api/stats` con el avance en curso, `aboutMe` y vivienda, barrio y «hasta cuándo» en la ficha; personal en la ficha del lugar; `advance` en `/api/control`. `/api/world` añade `points` y `names`; las posiciones, `homeId`; los eventos, `text` legible y `names`. La verdad de las creencias lee solo los tipos de evento que la deciden (1,8 s → 13 ms). Los 401 sin `WWW-Authenticate` (el navegador abría su ventana de acceso). 3 pruebas nuevas (CA-009 a CA-011) |
+| 2026-09-30 | m4/visor-a-plus | 022 | Rutas nuevas `GET /api/citizens/:id/dossier` (`dossier.ts`, R-015) y `GET /api/demographics` (`demographics.ts`, R-016) para el expediente y el dashboard del Visor A+. `relatives` de `life.ts` se exporta. `dossier.test.ts`: 4 pruebas (CA-012, CA-013 y la CA-016 de la 024) |
+| 2026-09-30 | m4/visor-a-plus (v0.6) | 022 | Distribuciones en `/api/demographics` (`distributions.ts`: `histogram`, `gini`, `median`, `moneyBins`, R-017) y ruta `/api/network` (`network.ts`, R-018); `/api/world` da `geo.tileMeters`. 1 prueba nueva (CA-014) |

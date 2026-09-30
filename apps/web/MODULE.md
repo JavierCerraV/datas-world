@@ -3,7 +3,7 @@ modulo: web
 ruta: apps/web
 estado: en-desarrollo
 specs: [024, 022, 043, 044, 041]
-actualizado: 2026-09-29
+actualizado: 2026-09-30
 ---
 
 # Módulo: web
@@ -11,40 +11,46 @@ actualizado: 2026-09-29
 > Documentación viva. Se actualiza en el mismo cambio en que se toca el código (lo exigen los guardarraíles).
 
 ## 1. Propósito
-Visor pixel art y paneles de observación, con la disposición y el comportamiento del prototipo (`prototipo/index.html`). Solo lee de la API (022) y no tiene lógica de simulación (024 INV-002). Guía de uso para el equipo: `docs/guia-visor.md`.
+Visor pixel art y paneles de observación, con la disposición del lienzo aprobado «Visor A+» (024 v0.5): menú lateral, pantalla Mundo, expediente de vida, dashboard y charla. Solo lee de la API (022) y no tiene lógica de simulación (024 INV-002). Guía de uso para el equipo: `docs/guia-visor.md`.
 
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 024 | CA-002, CA-004 a CA-012 con pruebas; CA-001 y CA-003 aceptados por el usuario (2026-09-27); R-001 y R-003 a R-019 (la R-002 la sustituye la R-013) | CA-013: revisión del usuario de las capturas lado a lado (`docs/validaciones/M4-paridad-prototipo.md`) |
+| 024 | CA-002, CA-004 a CA-012, CA-014 a CA-016 y CA-018 a CA-020 con pruebas; CA-001 y CA-003 aceptados por el usuario (2026-09-27); R-001, R-003 a R-013, R-015, R-016 y R-018 a R-027 (la R-002 la sustituye la R-013; la R-014 y la R-017, la R-021 y la R-022) | CA-017: revisión del usuario de las capturas frente al lienzo (`docs/validaciones/M4-visor-aplus.md`); sustituye a la CA-013 |
 
 ## 3. API pública
 Aplicación: `pnpm dev` (worker + API + visor; `scripts/dev.mjs`) y abrir `http://127.0.0.1:5180` (puerto propio, `DATAS_WORLD_WEB_PORT` para cambiarlo). Solo el visor: `pnpm --filter @datas-world/web dev` (necesita la API en el puerto 8787).
 
 | Archivo | Contenido |
 |---|---|
-| `index.html`, `src/style.css` | Disposición del prototipo: barra superior, mapa con sus controles, registro bajo el mapa, inspector y panel de charla; colores, fuentes y modo oscuro del prototipo |
-| `src/detail.css`, `src/chat.css` | Estilos del informe, familiograma, «¿por qué?», charlas guardadas y panel del mundo; y de la charla |
-| `src/main.ts` | Une los módulos: datos iniciales, flujo en vivo (SSE), reloj de vista, teclado |
-| `src/types.ts`, `src/api.ts` | Tipos de las respuestas; `api.*` (fetch, también `moves`, `stats`, `metrics`), `stream` (SSE con `Tick.moves`) y `control` |
+| `index.html`, `src/style.css` | Armazón del Visor A+ (R-020): menú lateral, las cuatro pantallas y la pantalla Mundo; colores e IBM Plex del lienzo, con modo oscuro |
+| `src/expediente.css`, `src/detail.css`, `src/chat.css` | Expediente y dashboard (tarjetas, pestañas, curso de vida, agenda, gráficas); informe, familiograma, «¿por qué?» y series; charla |
+| `src/router.ts` | Pantallas por dirección (R-020), puro: `parseRoute`, `hrefOf`; `setupRouter` |
+| `src/main.ts` | Une los módulos y las pantallas: datos iniciales, flujo en vivo (SSE), reloj de vista, tema, teclado |
+| `src/types.ts`, `src/api.ts` | Tipos de las respuestas; `api.*` (fetch, también `moves`, `stats`, `metrics`, `dossier`, `demographics`); `dossier-types.ts` con el expediente y la demografía (022 R-015, R-016), `stream` (SSE con `Tick.moves`) y `control` |
 | `src/auth.ts` | Acceso a los controles con formulario propio (`askAuth`), credenciales de la sesión (`auth`) y envío de órdenes con reintento (`send`) |
 | `src/replay.ts` | Reproducción del movimiento (R-013), pura: `MoveBook` (viajes por persona y `where`), `stepView` (reloj de vista), `VIEW_LAG_MAX` |
 | `src/scene.ts` | Quién se dibuja y dónde (R-013), pura: `scene`, `spotIn`, `isOutdoor`, `outdoorRects`, `occupancy` |
 | `src/camera.ts` | Cámara (R-014), pura: `frameOf`, `toMap`, `clampZoom`; reloj en español: `clockOf` |
 | `src/render.ts` | Mapa del prototipo en un lienzo aparte (`drawMap` → `MapLayer` con las ventanas de cada edificio) |
 | `src/figures.ts` | Figuras, noche y selección: `drawFigure`, `darkness`, `drawNight`, `drawArrow`, `drawFrame` |
-| `src/mapview.ts` | El mapa en vivo (R-013 a R-015): dibujo por cuadro, tooltip, clics, arrastre, rueda, «Seguir» y «Ver todo» |
+| `src/mapview.ts` | El mapa en vivo (R-013, R-015, R-021): dibujo por cuadro con las capas, etiqueta de la persona elegida, escala, tooltip, clics, arrastre, rueda, «Seguir» y «Ver todo» |
+| `src/overlays.ts` | Capas, panel «Ahora» y escala (R-021): `LAYERS`, `drawPlan`, `nowRows`, `scaleBar` (puros); `setupLayers`, `renderNow`, `renderScale` |
 | `src/scenery.ts` | Detalle del prototipo, puro (R-012): `treeSpots`, `parkTrees`, `decorOf`, `TREE_DENSITY` |
 | `src/streets.ts` | Ruta por las calles (R-009): `streetPath` (BFS por calles y plazas), `alongPath`, `routeCache` |
-| `src/topbar.ts` | Barra superior (R-014): reloj, Pausar, `SPEEDS`, `ADVANCES` con «Simulando sin observar», indicadores |
-| `src/log.ts`, `src/logview.ts` | Registro (R-016): `CATEGORIES`, `kindOf`, `isMinor`, `passes`, `linkNames`, `eventText`, `logRow`; su vista con filtros |
-| `src/inspector.ts` | Inspector (R-017): población, ficha del lugar y ficha de la persona con pestañas |
+| `src/topbar.ts` | Cabecera de Mundo (R-021): fecha y hora, Simulando / En pausa, `SPEEDS`, «+1 día» y `ADVANCES` con «Simulando sin observar», personas, hogares y organizaciones |
+| `src/log.ts`, `src/logview.ts` | Registro (R-016): `CATEGORIES`, `kindOf`, `isMinor`, `passes`, `linkNames`, `eventText`, `logRow`, `logTableRow`; su vista en tabla con filtro |
+| `src/inspector.ts`, `src/card-compact.ts` | Panel de la derecha (R-021): población, ficha del lugar y ficha compacta (`compactCard`, `criticalNeeds`, `meter`, `whyHere`) |
 | `src/panels.ts` | Formato de la población y del lugar: `populationRows`, `populationHtml`, `populationIntro`, `doingOf`, `placeHtml`, `kindEs`, `moodColor`, `placeAt` |
-| `src/card.ts` | Ficha: `TABS`, `cardHead`, `nowLine`, `tabEstado`, `tabRelaciones`, `tabCreencias`, `tabFuncional`, `bar`, `mini` |
-| `src/card-life.ts` | Pestañas que cargan datos aparte: `renderMemories`, `renderHistory`, `renderLifeTab` (subpestañas Informe, Desarrollo, Familia), `LifeData` |
+| `src/expediente.ts`, `src/exp-tabs.ts`, `src/exp-tabs2.ts` | Expediente de vida (R-022): cabecera, `identityStrip`, `EXP_TABS` y una función por pestaña (Resumen, Estado, Emociones, Historia, Vínculos, Memoria, Creencias, Aprendizaje, Salud, Economía, Charlas) |
+| `src/portrait.ts`, `src/loading.ts` | Retrato pixel art (R-025): `portraitRects`, `portraitSvg`; esqueleto de carga (R-026): `skeleton`, `skeletonTab` |
+| `src/dash-charts.ts`, `src/network3d.ts` | Gráficas del dashboard (R-027): `pyramidSvg`, `hbarsSvg`, `histogramSvg`, `miniTable`; red 3D: `layout3d`, `project`, `mountNetwork` |
+| `src/lifecourse.ts` | Curso de vida del Resumen: `milestones`, `placeLabels`, `lifeCourseSvg` |
+| `src/card.ts`, `src/card-life.ts` | Piezas reutilizadas: `tabRelaciones`, `tabCreencias`, `occupationEs`, `mini`; `renderMemories` y `LifeData` |
+| `src/dashboard.ts` | Dashboard (R-023, R-027): `renderDashboard`, `occupationSvg`, `setupDashboard` (demografía, distribuciones, red 3D y series) |
 | `src/life.ts`, `src/report.ts`, `src/why.ts` | Familiograma y desarrollo (`renderFamily`, `renderDevelopment`), informe de vida (`renderReport`) y árbol «¿por qué?» |
-| `src/chat.ts`, `src/chat-ui.ts`, `src/chat-history.ts` | Charla (043 R-017, 024 R-018): cliente de `/api/chat/*`; panel con burbujas, porqué por respuesta y resumen (`summaryHtml`); pestaña Charlas |
-| `src/timeline.ts`, `src/world-panel.ts` | Línea temporal (R-010) y panel del mundo (R-011) |
+| `src/chat.ts`, `src/chat-ui.ts`, `src/chat-history.ts` | Charla (043 R-017, 024 R-024): cliente de `/api/chat/*`; pantalla completa con mensajes numerados, panel del porqué (`whyPanel`), estado y lo que sabe, y resumen (`summaryHtml`); charlas guardadas |
+| `src/timeline.ts`, `src/world-panel.ts` | Línea temporal (R-010) y series del mundo (R-011), que ahora van en el dashboard |
 | `src/format.ts`, `src/logic.ts` | Formato en español (actividades, eventos, causas `causeEs`) y colores y aspecto del prototipo (`styleOf`, `lookOf`, `hash`) |
 | `vite.config.ts` | Vite con proxy de `/api` a la API local |
 
@@ -54,16 +60,20 @@ Aplicación: `pnpm dev` (worker + API + visor; `scripts/dev.mjs`) y abrir `http:
   - Los viajes llegan con cada `tick` del SSE (022 R-012). Con ellos y la posición de partida (`/api/citizens`), `MoveBook.where` dice dónde estaba cada persona en cada minuto.
   - Se dibuja, como el prototipo, solo a quien camina (por las calles, con su paso) o está en un parque o una plaza. Quien está dentro de un edificio no se ve; de noche se encienden las ventanas de los edificios con alguien despierto.
   - Los viajes de más de un día se olvidan, salvo el último de cada persona.
-- **Disposición (R-014).** Es la del prototipo: barra superior en dos filas, mapa y registro a la izquierda e inspector de 410 px a la derecha. La charla ocupa esa columna, ensanchada a 520 px, para que el mapa siga a la vista.
-  - Fuentes: Atkinson Hyperlegible y Pixelify Sans, de Google Fonts, como el prototipo.
-  - La cámara ajusta el mapa a su espacio, con zoom de 1 a 6 sobre el ajuste y escala entera desde ×3.
+- **Pantallas (R-020).** Menú lateral y cuatro pantallas con dirección propia (`#/mundo/CIT-…`, `#/expediente/CIT-…/pestaña`, `#/charla/CIT-…`, `#/datos`): el navegador puede volver atrás y los enlaces se comparten. Las pantallas ocultas no se destruyen: el mapa sigue corriendo detrás.
+  - Estilo del lienzo: IBM Plex Sans y Mono, fondo cálido, acento teja, tarjetas blancas; modo oscuro por el sistema o con el botón del menú (se recuerda en este navegador).
+  - Por debajo de 1000 px el panel pasa bajo el mapa; por debajo de 700 px el menú va abajo.
+- **Capas (R-021).** Personas, Lugares (nombres de los edificios, no de las viviendas), Vínculos (líneas de la persona elegida a sus vínculos), Ánimo (marca de color sobre cada figura) y Día/noche. Objetos se muestra bloqueada: los objetos no tienen posición en el mapa. Las capas se recuerdan en este navegador.
+- **Expediente (R-022).** Pide la ficha cada 5 s y el expediente completo cada 30 s. Solo repinta la pestaña si cambió y no hay nada desplegado; la pestaña Charlas no se repinta sola, para no borrar lo elegido en su formulario. Exportar JSON descarga la ficha, el expediente, la historia de vida y el informe.
+- **Dashboard (R-023, R-027).** La demografía se pide al abrir la pantalla y al cambiar de periodo; la red y las series, una vez. Las gráficas tienen su ancho natural en SVG y solo se encogen; las series llevan `vector-effect: non-scaling-stroke`, porque antes se estiraban al ancho de la tarjeta y la línea engordaba. Barras de 24 px como mucho con el extremo redondeado.
+  - **Red 3D:** modelo de fuerzas en 3D (repulsión entre todos, atracción por vínculo, tirón al centro) con posiciones iniciales por hash del id: la misma red siempre se ve igual. 199 nodos y 160 iteraciones tardan unos 50 ms. Se dibuja en Canvas 2D con perspectiva y anillo del color de la superficie en cada nodo; gira sola salvo con movimiento reducido.
+- **Retrato (R-025).** Busto de 12 × 14 píxeles en SVG `crispEdges` con los colores de `lookOf`; pelo largo y mechón por hash. En la lista de población, la lista solo se repinta si cambia (lleva 199 retratos).
+- **Carga (R-026).** El cambio de pestaña marca la pestaña y pone el esqueleto al instante, y pinta el contenido en el cuadro siguiente; antes reconstruía toda la pantalla. La Historia se pinta por páginas de 100 eventos con «Ver más».
+- **Charla (R-024).** Pantalla completa. Si se llega desde la pestaña Charlas del expediente, empieza sola con el modo elegido. Salir de la pantalla es despedirse (043 R-019.6).
 - **Velocidades.** Son las del motor (002), rotuladas en minutos del mundo por segundo. `pnpm dev` arranca a 1 min/s para que se vea caminar.
 - **Avanzar.** Envía la orden `advance`; el progreso sale de `/api/stats`.
 - **Accesos.** Los controles y la charla piden las credenciales con un formulario propio, que se guardan solo durante la sesión. La API ya no responde con `WWW-Authenticate`: con esa cabecera, el navegador abría su propia ventana y la petición quedaba colgada.
-- **Inspector (R-017).**
-  - Se refresca cada segundo: la población con el texto de lo que hace cada uno según el reloj de vista, y la ficha, pedida de nuevo cada 1,5 s.
-  - Solo se repinta lo que cambia: se conserva la búsqueda escrita, la pestaña y los «¿por qué?» abiertos.
-  - Memoria, Historia y Vida se cargan una vez por persona (`LifeData`).
+- **Panel de la derecha (R-021).** Se refresca cada segundo; la ficha compacta se pide de nuevo cada 1,5 s y el expediente (para «Por qué está aquí») cada 15 s. Solo se repinta lo que cambia.
 - **Registro (R-016).**
   - Guarda los últimos 600 eventos y pinta como mucho 150, dos veces por segundo, como el prototipo.
   - Las personas del texto (`EventView.text` con `names`) son botones que abren su ficha.
@@ -79,30 +89,29 @@ Solo lee: la única escritura es pedir órdenes de control y la charla a la API 
 - **`src/web.test.ts`:**
   - CA-004: aspecto por id, noche del prototipo y estilos;
   - cámara y reloj;
-  - CA-002: el inspector muestra una ficha de ejemplo.
+  - CA-002: formato de la ficha (estímulos, causas y eventos).
 - **`src/replay.test.ts`** (CA-009, CA-010): dónde está cada persona antes, durante y después de un viaje; quién se dibuja; ventanas; reloj de vista.
-- **`src/log.test.ts`** (CA-011) y **`src/card.test.ts`** (CA-012, las ocho pestañas).
+- **`src/log.test.ts`** (CA-011) y **`src/card.test.ts`** (CA-012: vínculos, creencias y memoria).
+- **`src/exp.test.ts`:** CA-014 (cada pestaña del expediente), CA-015 (dashboard), CA-016 (capas, «Ahora» y escala), ficha compacta y direcciones.
 - **`panels.test.ts`:** CA-005, CA-006 y lo que hace cada persona.
 - **`timeline.test.ts`** (CA-007), **`world-panel.test.ts`** (CA-008) y **`scenery.test.ts`** (R-012).
-- **Prueba de punta a punta con Edge sin ventana** sobre el mundo de demostración: mapa, noche, tooltip, «Seguir», ficha de un lugar, las pestañas, avanzar un día, día pasado, panel del mundo, charla sandbox completa, oscuro y 375 px (`docs/validaciones/M4-paridad-prototipo.md`).
+- **Prueba de punta a punta con Chromium** sobre el mundo de ejemplo: las cuatro pantallas, las pestañas del expediente, charla sandbox completa con modo prueba, oscuro y 375 px (`docs/validaciones/M4-visor-aplus.md`).
 
 ## 7. Paridad con el prototipo
-**Se portan del prototipo:**
-- la disposición, los colores, las fuentes, el mapa y sus detalles;
-- las figuras con su paso y la noche con las ventanas encendidas;
-- quién se ve en el mapa, el tooltip, «Seguir» y «Ver todo»;
-- el registro con filtros y porqué, la población con lo que hace cada uno y dónde;
-- las fichas de persona y lugar, con las pestañas del prototipo (Estado, Relaciones, Memoria, Historia, Creencias).
+Desde la 024 v0.5 la referencia de la interfaz es el lienzo «Visor A+»; `prototipo/index.html` queda como registro histórico (decisión del usuario, 2026-09-30). Del prototipo siguen el mapa, sus detalles, las figuras con su paso, la noche con las ventanas y quién se ve en el mapa.
 
-**Diferencias:**
-- Se añaden las pestañas Vida, Funcional y Charlas, el panel del mundo, la línea temporal y la charla.
-- No hay «Semilla / Regenerar»: el visor no crea mundos (se hace con la CLI).
+**Diferencias con el lienzo** (detalle en `docs/validaciones/M4-visor-aplus.md`):
+- se conservan las pestañas Memoria y Creencias y el modo oscuro, que el lienzo no dibuja;
+- las velocidades son las del motor, en minutos por segundo;
+- la capa Objetos está bloqueada;
+- el panel de la charla no muestra el valor del visitante ni el malestar acumulado: la API de la charla aún no los expone.
 - Hay menos gente en la calle que en el prototipo. Es del motor, no del visor: la escala del mapa (8 m por tile frente a ≈ 45 m) y los viajes por persona (unos 0,7 al día). Queda pendiente de decisión del usuario.
 
 ## 8. Pendientes y deuda
 - [x] CA-001 y CA-003: aceptados en la revisión del usuario (2026-09-27).
 - [x] Recorridos por las calles, línea temporal navegable y pestañas de M3 (M4).
-- [ ] CA-013: revisión del usuario de la paridad con el prototipo.
+- [ ] CA-017: revisión del usuario frente al lienzo Visor A+ (sustituye a la CA-013).
+- [ ] Valor del visitante y malestar acumulado en el panel de la charla (necesita la API de la 043).
 - [ ] Decisión del usuario sobre la escala del mapa y los viajes por persona (specs 003, 016 y de rutinas), para que haya tanta gente en la calle como en el prototipo.
 - [ ] 500 personas reales: el generador llega hoy a 254 con el mapa actual.
 
@@ -126,3 +135,5 @@ Solo lee: la única escritura es pedir órdenes de control y la charla a la API 
 | 2026-09-29 | m3/creencias (K3) | 025, 024 | Sección **Lo que cree de otros** en el estado de la ficha: de quién, qué, de quién lo sabe, cuánto lo cree y si es verdadero o falso (para quien observa). 1 prueba |
 | 2026-09-29 | m4/observacion (O1–O5) | 024, 022 | Ampliación de M4 (P1 a P5): panel de población con buscador y color de ánimo, ficha del lugar al hacer clic (`panels.ts`, `input.ts`, R-008); personas que caminan por las calles (`streets.ts`, R-009); línea temporal con los días pasados (`timeline.ts`, R-010); panel del mundo con gráficas, alertas y CSV (`world-panel.ts`, R-011); árboles, parques, plazas y adornos del prototipo (`scenery.ts`, `render.ts`, R-012). Con 500 figuras, 2,2 ms por cuadro. 12 pruebas nuevas (CA-005 a CA-008 y R-012) |
 | 2026-09-29 | m4/observacion (paridad, P1–P6) | 024, 022, 043 | Visor rehecho sobre el prototipo tras la revisión del usuario (024 v0.4). Reproducción del movimiento con reloj de vista y viajes anotados (`replay.ts`, `scene.ts`; sustituye a la interpolación y al reparto en la puerta, que se eliminan de `logic.ts`, y a `input.ts`). Disposición, barra superior con velocidades, «Avanzar» e indicadores (`topbar.ts`), cámara con «Seguir» y «Ver todo» (`camera.ts`, `mapview.ts`), noche con ventanas y selección (`figures.ts`), registro con filtros (`log.ts`, `logview.ts`), inspector con ficha de ocho pestañas y subpestañas de Vida (`inspector.ts`, `card.ts`, `card-life.ts`), formulario de acceso (`auth.ts`) y charla en panel con burbujas, porqué y resumen (`chat-ui.ts`, `chat.css`). 13 pruebas nuevas (CA-009 a CA-012) |
+| 2026-09-30 | m4/visor-a-plus | 024, 022, 043 | Visor A+ (024 v0.5): menú lateral y pantallas con dirección (`router.ts`); estilo del lienzo con IBM Plex y modo oscuro (`style.css`, `expediente.css`, `chat.css`); pantalla Mundo con cabecera nueva (`topbar.ts`), capas, panel «Ahora» y escala (`overlays.ts`, `mapview.ts`), registro en tabla (`logTableRow`) y ficha compacta (`card-compact.ts`, `inspector.ts`); expediente de vida de pantalla completa con once pestañas y curso de vida (`expediente.ts`, `exp-tabs.ts`, `exp-tabs2.ts`, `lifecourse.ts`); dashboard con indicadores, pirámide y ocupación (`dashboard.ts`); charla de pantalla completa (`chat-ui.ts`). Se eliminan la ficha de ocho pestañas (`cardHead`, `tabEstado`, `tabFuncional`, `renderHistory`, `renderLifeTab`), `inspectorTabs` y el diálogo del panel del mundo. 15 pruebas nuevas (`exp.test.ts`: CA-014 a CA-016) |
+| 2026-09-30 | m4/visor-a-plus (v0.6) | 024, 022 | Retrato pixel art en la ficha compacta, el expediente, la charla y la población (`portrait.ts`, R-025); esqueleto de carga y cambio de pestaña instantáneo, Historia por páginas (`loading.ts`, `expediente.ts`, R-026); pantalla Datos rediseñada con distribuciones del ánimo, el estrés y el dinero, hogares, empleadores y red de vínculos en 3D (`dash-charts.ts`, `network3d.ts`, `dashboard.ts`, R-027); series por día en tres gráficas con trazo fino (`world-panel.ts`, `detail.css`); la escala del mapa usa los metros por tile del mundo (`overlays.ts`). 5 pruebas nuevas (`datos.test.ts`: CA-018 a CA-020) |

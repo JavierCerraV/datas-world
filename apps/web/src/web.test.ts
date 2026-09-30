@@ -1,6 +1,6 @@
-// Visor (spec 024): CA-002 (el inspector muestra la ficha de la API) y CA-004 (lógica determinista y probada).
+// Visor (spec 024): CA-002 (formato de la ficha de la API) y CA-004 (lógica determinista y probada).
 import { describe, expect, it } from 'vitest';
-import { causeEs, eventEs, inspectorTabs, stimulusEs } from './format.ts';
+import { causeEs, eventEs, stimulusEs } from './format.ts';
 import { clockOf, frameOf } from './camera.ts';
 import { darkness } from './figures.ts';
 import { hash, lookOf, styleOf } from './logic.ts';
@@ -33,11 +33,11 @@ describe('024 CA-004: lógica pura del visor', () => {
     const z = frameOf({ x: 0, y: 0, z: 3.4 }, 800, 400, 640, 400);
     expect(z.s).toBe(3);
     expect(z.cx).toBeCloseTo(800 / 3 / 2, 5); // sin salirse del mapa
-    expect(clockOf('2026-01-01T00:00', 1440 + 7 * 60 + 35)).toEqual({ time: '07:35', date: 'viernes 2 ene 2026', day: 'Día 2 de simulación', iso: '2026-01-02' });
+    expect(clockOf('2026-01-01T00:00', 1440 + 7 * 60 + 35)).toEqual({ time: '07:35', date: 'viernes 2 ene 2026', day: 'Día 2 de simulación', iso: '2026-01-02', weekday: 'viernes' });
   });
 });
 
-describe('024 CA-002: el inspector muestra la ficha de /api/citizens/:id', () => {
+describe('024 CA-002: formato de la ficha de /api/citizens/:id (el expediente, en exp.test.ts)', () => {
   const detail: CitizenDetail = {
     id: 'CIT-000042',
     name: 'Ana Rojas Gómez',
@@ -73,56 +73,6 @@ describe('024 CA-002: el inspector muestra la ficha de /api/citizens/:id', () =>
       },
     ],
   };
-
-  it('Estado, Historia y Funcional con los valores de la ficha', () => {
-    const t = inspectorTabs(detail);
-    const all = t.estado.flatMap((s) => s.rows.map((r) => `${r.label}: ${r.value}`));
-    expect(all).toContain('Qué hace: buscando empleo');
-    expect(all).toContain('Dónde: Vivienda 3');
-    expect(all).toContain('Ánimo: 46 %');
-    expect(all).toContain('Ocupación: desempleado/a');
-    expect(all).toContain('Alimentación: 80 %');
-    expect(all).toContain('Miedo: 20 %');
-    expect(t.historia).toEqual([{ id: expect.stringMatching(/^EVT-/) as unknown as string, line: '2027-01-04 19:00 · Tiempo libre: Ver series — Ana Rojas Gómez', causes: ['le gusta: diversión', 'un hecho anterior'] }]);
-    const f = t.funcional.flatMap((s) => s.rows.map((r) => `${r.label}: ${r.value}`));
-    expect(f).toContain('despido: desagradable 62 % · 2 veces');
-    expect(f).toContain('buscando empleo (rutina) → trabajo: le funciona (tracking) · peso 0.31');
-    expect(f).toContain('llegar tarde lleva a despido: 60 %');
-  });
-
-  it('025: lo que cree de otros, de quién lo sabe y, para quien observa, si es verdad', () => {
-    const t = inspectorTabs({
-      ...detail,
-      beliefs: [
-        { about: 'CIT-000002', name: 'Luis Rojas', predicate: 'perdio_el_empleo', topic: 'Perdió el empleo', source: 'visto', sourceName: null, credibility: 1, hops: 0, truth: true },
-        { about: 'CIT-000009', name: 'Marta Díaz', predicate: 'lo_echaron_por_algo', topic: 'Lo echaron por algo que hizo', source: 'CIT-000005', sourceName: 'Pedro Gil', credibility: 0.42, hops: 2, truth: false },
-      ],
-    });
-    const rows = t.estado.find((s) => s.title === 'Lo que cree de otros')!.rows.map((r) => `${r.label}: ${r.value}`);
-    expect(rows).toEqual([
-      'Luis Rojas: perdió el empleo: lo vio · 100 % · verdadero',
-      'Marta Díaz: lo echaron por algo que hizo: se lo contó Pedro Gil · 42 % · falso',
-    ]);
-  });
-
-  it('012 R6: los vínculos con el afecto de cada lado y el apego como métrica', () => {
-    const t = inspectorTabs({
-      ...detail,
-      bonds: [
-        { id: 'CIT-000002', name: 'Luis Rojas', labels: ['familia', 'pareja'], familiarity: 0.93, tension: 0.3, trust: 0.6, encounters: 40, affection: 0.21, affectionBack: -0.05 },
-        { id: 'CIT-000009', name: 'Marta Díaz', labels: ['amigo', 'conocido'], familiarity: 0.5, tension: 0, trust: 0.5, encounters: 12, affection: 0.18, affectionBack: 0.16 },
-      ],
-      attachment: { security: 0.62, avoidance: 0.35, style: 'seguro' },
-    });
-    const bonds = t.estado.find((s) => s.title === 'Vínculos')!.rows.map((r) => `${r.label}: ${r.value}`);
-    expect(bonds).toEqual([
-      'Luis Rojas (familia, pareja): trato 93 % · afecto +21 / -5 · tensión 30 %',
-      'Marta Díaz (amistad): trato 50 % · afecto +18 / +16',
-    ]);
-    const f = t.funcional.flatMap((s) => s.rows.map((r) => `${r.label}: ${r.value}`));
-    expect(f).toContain('Estilo: seguro');
-    expect(f).toContain('Seguridad con quienes le criaron: 62 %');
-  });
 
   it('estímulos, causas y eventos legibles', () => {
     expect(stimulusEs('actividad.deporte.futbol')).toBe('futbol (actividad)');

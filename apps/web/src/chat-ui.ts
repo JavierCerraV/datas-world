@@ -1,9 +1,14 @@
-// Charla con una persona (spec 043 R-017, ampliada en la 024 R-018): panel junto al mapa (el mundo sigue a la
-// vista), con su figura, su ánimo y su estrés; mensajes en burbujas con «escribiendo…»; en cada respuesta, por qué
-// respondió así; y al despedirse, un resumen de lo que cambió. Solo muestra lo que devuelve la API.
-import { drawFigure } from './figures.ts';
+// Charla a pantalla completa (spec 024 R-024, Visor A+; 043 R-017): cabecera con el expediente de origen, el id de la
+// charla, el modo prueba y «Despedirse»; una franja con el modo, cuándo empezó y cuánto lleva, hasta cuándo está libre
+// y el lugar; los mensajes numerados con su hora, tono o postura y tiempo de respuesta, y las afirmaciones
+// verificadas; y un panel con por qué respondió así en el último turno, el estado de la charla y lo que sabe la
+// persona. Al despedirse, un resumen de lo que cambió. Solo muestra lo que devuelve la API.
 import { TONES, claimLine, endChat, openChat, sendTurn, sourceLabel, stanceLabel, toneLabel, topProbabilities, verdictMark, verification } from './chat.ts';
 import type { DoneMsg, OpenResult, StanceMsg } from './chat.ts';
+import { dec } from './card-compact.ts';
+import type { Dossier } from './dossier-types.ts';
+import { ACTIVITY_ES } from './format.ts';
+import { portraitSvg } from './portrait.ts';
 import type { CitizenDetail } from './types.ts';
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
@@ -12,85 +17,84 @@ const pct = (x: number) => Math.round(x * 100);
 export interface ChatUiDeps {
   auth: () => string | null;
   askAuth: () => Promise<boolean>;
-  /** La ficha de la persona, pedida de nuevo (para el ánimo y el estrés en vivo y el resumen final). */
   fetchPerson: (id: string) => Promise<CitizenDetail>;
-  /** Al cerrar el panel, se vuelve a la ficha. */
-  onClose: () => void;
+  fetchDossier: (id: string) => Promise<Dossier>;
+  /** Minuto del mundo que se ve y su hora (`17:10`). */
+  worldMinute: () => number;
+  clock: (minute: number) => string;
 }
 
 /** 024 R-018: el resumen de lo que cambió durante la charla. */
 export function summaryHtml(before: CitizenDetail, after: CitizenDetail | null, mode: 'in_world' | 'sandbox', remembered: boolean): string {
   if (mode === 'sandbox') return '<p>Charla de prueba (sandbox): no cambió nada en el mundo y no la recordará.</p>';
-  if (!after) return '<p>La charla se guardó; sus efectos aparecerán en la ficha en cuanto el mundo la procese.</p>';
+  if (!after) return '<p>La charla se guardó; sus efectos aparecerán en el expediente en cuanto el mundo la procese.</p>';
   const row = (label: string, a: number, b: number) => `<div><span>${label}</span><b>${pct(a)} → ${pct(b)}</b></div>`;
   return `<div class="report">${row('Ánimo', before.state.mood, after.state.mood)}${row('Estrés', before.state.stress, after.state.stress)}</div><p>${remembered ? 'La recordará: ya forma parte de su historia.' : 'Aún no aparece en su historia; puede tardar unos segundos.'}</p>`;
 }
 
-export interface ChatUi {
-  open: (d: CitizenDetail) => void;
-  isOpen: () => boolean;
+/** El panel «por qué respondió así» del último turno: aportes de las fuentes (040) y probabilidades. */
+export function whyPanel(s: StanceMsg | null): string {
+  if (!s) return '<p class="empty">Aparecerá con la primera respuesta.</p>';
+  const max = Math.max(0.01, ...s.sources.map((x) => Math.abs(x.contribution)));
+  const rows = s.sources.map((x) => `<div class="meter"><span>${esc(sourceLabel(x))}</span><div class="track"><i class="ink" style="width:${Math.round((Math.abs(x.contribution) / max) * 100)}%"></i></div><span class="mono">${dec(x.contribution)}</span></div>`).join('');
+  return `${rows}<p class="note">Probabilidades: ${esc(topProbabilities(s.probabilities, 5))}</p>`;
 }
 
-export function setupChat(d: ChatUiDeps): ChatUi {
-  const panel = document.querySelector<HTMLElement>('#chat')!;
-  const main = document.querySelector<HTMLElement>('#main')!;
+export interface ChatPage {
+  show: (id: string, prefs?: { mode: 'in_world' | 'sandbox'; test: boolean }) => void;
+  /** Al salir de la pantalla: despedirse si hay una charla abierta (043 R-019.6). */
+  leave: () => void;
+}
+
+export function setupChat(d: ChatUiDeps): ChatPage {
+  const root = document.querySelector<HTMLElement>('#view-charla')!;
   let person: CitizenDetail | null = null;
+  let dossier: Dossier | null = null;
   let session: OpenResult | null = null;
   let mode: 'in_world' | 'sandbox' = 'in_world';
+  let test = false;
   let busy = false;
+  let startedAt = 0;
+  let turns = 0;
+  let checks = { ok: 0, bad: 0 };
   let live: ReturnType<typeof setInterval> | undefined;
-  const q = <T extends HTMLElement>(s: string) => panel.querySelector(s) as T;
+  const q = <T extends HTMLElement>(s: string) => root.querySelector(s) as T;
   const status = (text: string) => (q('#chat-status').textContent = text);
-  // Cerrar la página es despedirse: si no, la charla seguía abierta en la API y no dejaba abrir otra (043 R-019.6).
   window.addEventListener('pagehide', () => {
     if (session?.id) void endChat(d.auth, session.id);
   });
 
-  const shell = (p: CitizenDetail) => `
-    <div class="chat-head"><canvas class="avatar" width="5" height="8" aria-hidden="true"></canvas>
-      <div class="grow"><h2 id="chat-title">Charla con ${esc(p.name)}</h2><span class="sub" id="chat-mode">${p.age} años</span></div>
-      <button class="btn" id="chat-end" type="button" hidden>Despedirse</button>
-      <button class="btn" id="chat-close" type="button" aria-label="Cerrar la charla y volver a la ficha">✕</button></div>
-    <div class="chat-state" id="chat-state"></div>
-    <p id="chat-status" class="chat-status" role="status" aria-live="polite"></p>
-    <form class="chat-start" id="chat-start">
-      <p>¿Cómo quieres charlar?</p>
-      <label class="choice"><input type="radio" name="chat-mode" value="in_world" checked><span><b>En el mundo</b><br>Es un encuentro real: lo recordará y puede cambiar su ánimo, su estrés y lo que cree. El mundo sigue su curso.</span></label>
-      <label class="choice"><input type="radio" name="chat-mode" value="sandbox"><span><b>De prueba (sandbox)</b><br>Responde igual, pero nada cambia en el mundo ni lo recordará.</span></label>
-      <label class="check"><input type="checkbox" id="chat-test"> Modo prueba: elegir yo el tono de cada mensaje</label>
-      <button class="btn primary" type="submit">Empezar la charla</button>
-    </form>
-    <div class="chat-main" id="chat-main" hidden>
-      <details class="knows"><summary>Lo que sabe de sí (lo que usa para responder)</summary><ul id="chat-knows"></ul></details>
-      <ol class="chat-msgs" id="chat-msgs"></ol>
-      <form class="chat-form" id="chat-form">
-        <label id="chat-tone-l" hidden>Tono <select id="chat-tone"><option value="">Automático</option>${Object.entries(TONES).map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('')}</select></label>
-        <textarea id="chat-text" rows="2" maxlength="1000" placeholder="Escribe y pulsa Enter (Mayúsculas+Enter para otra línea)" aria-label="Tu mensaje"></textarea>
-        <button class="btn primary" id="chat-send" type="submit">Enviar</button>
-      </form>
-    </div>`;
-
-  const drawAvatar = (p: CitizenDetail) => {
-    // La figura del mapa (5 × 8 px) ampliada por CSS sin suavizado.
-    drawFigure(q<HTMLCanvasElement>('canvas.avatar').getContext('2d')!, { id: p.id, x: 2, y: 7, walk: false, frame: 0, small: p.age < 12 });
+  const strip = () => {
+    if (!person) return;
+    const f = dossier?.agenda.free;
+    const place = person.moving ? 'en camino' : person.place?.name ?? 'fuera del pueblo';
+    const since = session ? `<span><span class="sub">Charla desde las</span> <span class="mono">${d.clock(startedAt)}</span> <span class="sub">· lleva</span> <span class="mono">${Math.max(0, Math.round(d.worldMinute() - startedAt))} min</span></span>` : `<span class="sub">Ahora: ${esc(ACTIVITY_ES[person.activity] ?? person.activity)}</span>`;
+    q('#chat-strip').innerHTML = `<span class="dotlbl"><i class="acc"></i><b>${mode === 'in_world' ? 'En el mundo' : 'Sandbox'}</b><span class="sub"> · ${mode === 'in_world' ? 'deja recuerdo y aprendizaje' : 'no cambia el mundo'}</span></span>${since}`
+      + (f ? `<span class="sub">Libre de <span class="mono">${f.from}</span> a <span class="mono">${f.to}</span></span>` : '')
+      + `<span class="dotlbl ok"><i></i>El mundo sigue en tiempo real</span><span class="sub">Lugar: ${esc(place)}</span>`;
   };
 
-  const stateBar = (p: CitizenDetail) => {
-    const bar = (label: string, v: number, hot: boolean) => `<div class="mini"><span>${label}</span><div class="track"><i class="${hot && v > 0.6 ? 'hot' : ''}" style="width:${pct(v)}%"></i></div><span>${pct(v)}</span></div>`;
-    q('#chat-state').innerHTML = bar('Ánimo', p.state.mood, false) + bar('Estrés', p.state.stress, true);
+  const state = () => {
+    if (!person) return;
+    const food = person.needs.hunger;
+    q('#chat-state').innerHTML = `<dl class="kv2"><dt>Ánimo (en vivo)</dt><dd class="mono">${dec(person.state.mood)}</dd><dt>Estrés (en vivo)</dt><dd class="mono">${dec(person.state.stress)}</dd>${food !== undefined ? `<dt>Alimentación (en vivo)</dt><dd class="mono">${dec(food)}</dd>` : ''}<dt>Turnos</dt><dd class="mono">${turns}</dd><dt>Verificación</dt><dd class="mono">${checks.ok} ✓ · ${checks.bad} ✗</dd></dl>`;
   };
 
-  const close = async () => {
-    clearInterval(live);
-    const id = session?.id;
-    session = null;
-    if (id) await endChat(d.auth, id);
-    panel.hidden = true;
-    panel.innerHTML = '';
-    main.classList.remove('chatting');
-    document.querySelector<HTMLElement>('#inspector')!.hidden = false;
-    d.onClose();
-  };
+  const shell = (p: CitizenDetail) => `<header class="bar"><a href="#/expediente/${esc(p.id)}">Expediente ${esc(p.id)}</a><span class="sub">/</span><span class="portrait-tile sm">${portraitSvg(p.id, p.name, 2)}</span><h1>Charla con ${esc(p.name)}</h1><span class="mono sub" id="chat-id"></span><span class="grow"></span>`
+    + `<span class="sub" id="chat-testlbl" hidden>Modo prueba</span><button class="btn primary" id="chat-end" type="button" hidden>Despedirse</button><a class="btn" href="#/mundo/${esc(p.id)}">Volver al mundo</a></header>`
+    + `<div class="chat-strip" id="chat-strip"></div>`
+    + `<div class="chat-grid"><section class="chat-col"><p id="chat-status" class="chat-status" role="status" aria-live="polite"></p>`
+    + `<form class="chat-start" id="chat-start"><h2>¿Cómo quieres charlar con ${esc(p.name.split(' ')[0]!)}?</h2>
+        <label class="choice"><input type="radio" name="chat-mode" value="in_world" checked><span><b>En el mundo</b> · es un encuentro real: lo recordará y puede cambiar su ánimo, su estrés y lo que cree.</span></label>
+        <label class="choice"><input type="radio" name="chat-mode" value="sandbox"><span><b>Sandbox</b> · responde igual, pero nada cambia en el mundo ni lo recordará.</span></label>
+        <label class="check"><input type="checkbox" id="chat-test"> Modo prueba: etiquetar yo el tono de cada mensaje</label>
+        <button class="btn primary" type="submit">Iniciar charla</button></form>`
+    + `<ol class="chat-msgs" id="chat-msgs" hidden></ol>`
+    + `<form class="chat-form" id="chat-form" hidden><label id="chat-tone-l" hidden>Tono (prueba)<select id="chat-tone"><option value="">Automático</option>${Object.entries(TONES).map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('')}</select></label>`
+    + `<label class="grow">Mensaje<textarea id="chat-text" rows="1" maxlength="1000" placeholder="Escribe y pulsa Enter (Mayúsculas+Enter para otra línea)"></textarea></label><button class="btn accent" id="chat-send" type="submit">Enviar</button></form></section>`
+    + `<aside class="chat-side"><section><h2 id="why-title">Último turno · por qué respondió así</h2><p class="sub">Aportes de las fuentes de control (040)</p><div id="chat-why">${whyPanel(null)}</div></section>`
+    + `<section><h2>Estado de la charla</h2><div id="chat-state"></div></section>`
+    + `<section><h2>Lo que sabe ${esc(p.name.split(' ')[0]!)} <span class="h-note">(vista usada)</span></h2><ul id="chat-knows"><li class="empty">Aparece al iniciar la charla.</li></ul><p class="note">Solo lo que vivió o presenció (043 R-002, R-003).</p></section></aside></div>`;
 
   const finish = async () => {
     const id = session?.id;
@@ -103,7 +107,6 @@ export function setupChat(d: ChatUiDeps): ChatUi {
     await endChat(d.auth, id);
     let after: CitizenDetail | null = null;
     let remembered = false;
-    // En el mundo, la charla la aplica el worker (043 R-019): se espera a que aparezca en su historia.
     for (let k = 0; mode === 'in_world' && k < 8 && !remembered; k++) {
       await new Promise((r) => setTimeout(r, 1500));
       after = await d.fetchPerson(before.id).catch(() => null);
@@ -124,27 +127,29 @@ export function setupChat(d: ChatUiDeps): ChatUi {
     q<HTMLTextAreaElement>('#chat-text').value = '';
     const tag = q<HTMLSelectElement>('#chat-tone').value || undefined;
     const msgs = q('#chat-msgs');
+    const n = ++turns;
     const mine = document.createElement('li');
     mine.className = 'msg visitor';
-    mine.innerHTML = `<div class="bubble">${esc(text)}</div><div class="meta">tú${tag ? ` · tono ${esc(toneLabel(tag))}` : ''}</div>`;
+    mine.innerHTML = `<div class="meta mono">#${n * 2 - 1} · ${d.clock(d.worldMinute())}${tag ? ` · tono ${esc(toneLabel(tag))} (etiqueta)` : ''}</div><div class="bubble">${esc(text)}</div>`;
     const theirs = document.createElement('li');
     theirs.className = 'msg citizen';
-    theirs.innerHTML = '<div class="bubble"><span class="typing" aria-label="escribiendo"><i></i><i></i><i></i></span></div><div class="meta"></div><details class="whybox" hidden><summary>¿Por qué respondió así?</summary><div class="why-body"></div></details><div class="marks"></div>';
+    theirs.innerHTML = '<div class="meta mono"></div><div class="bubble"><span class="typing" aria-label="escribiendo"><i></i><i></i><i></i></span></div><div class="marks"></div>';
     msgs.append(mine, theirs);
     msgs.scrollTop = msgs.scrollHeight;
     const bubble = theirs.querySelector('.bubble')!;
     const meta = theirs.querySelector('.meta')!;
     let first = true;
+    let stanceText = '';
     const code = await sendTurn(d.auth, session.id, text, tag, (event, data) => {
       if (event === 'stance') {
         const s = data as StanceMsg;
-        const detected = s.tone.toneLlm && s.tone.toneLlm !== s.tone.tone ? ` (el clasificador dijo ${toneLabel(s.tone.toneLlm)})` : '';
-        mine.querySelector('.meta')!.textContent = `tú · tono ${toneLabel(s.tone.tone)}${s.tone.toneTag ? ' (elegido)' : ''}${detected}`;
-        meta.textContent = `${stanceLabel(s.stance)}${s.forced ? ' · tiene que irse' : ''}`;
+        const detected = s.tone.toneLlm ? ` · clasificador: ${toneLabel(s.tone.toneLlm)}` : '';
+        mine.querySelector('.meta')!.textContent = `#${n * 2 - 1} · ${d.clock(d.worldMinute())} · tono ${toneLabel(s.tone.tone)}${s.tone.toneTag ? ' (etiqueta)' : ''}${detected}`;
+        stanceText = `postura ${stanceLabel(s.stance)}${s.forced ? ' · tiene que irse' : ''}`;
+        meta.innerHTML = `#${n * 2} · ${d.clock(d.worldMinute())} · <b class="stance-${esc(s.stance)}">${esc(stanceText)}</b>`;
         const heard = (s.claims ?? []).map((c) => `<p class="claim">${esc(claimLine(c))}</p>`).join('');
-        const box = theirs.querySelector<HTMLDetailsElement>('.whybox')!;
-        box.querySelector('.why-body')!.innerHTML = `${heard}<p>Postura: <b>${esc(stanceLabel(s.stance))}</b>. Lo que más pesó:</p><ul>${s.sources.map((x) => `<li>${esc(sourceLabel(x))} <span class="mono">${x.contribution.toFixed(2)}</span></li>`).join('')}</ul><p class="muted">Otras posturas posibles: ${esc(topProbabilities(s.probabilities))}</p>`;
-        box.hidden = false;
+        q('#why-title').textContent = `Último turno · por qué ${stanceLabel(s.stance) === 'abrirse' ? 'se abrió' : `eligió ${stanceLabel(s.stance)}`}`;
+        q('#chat-why').innerHTML = heard + whyPanel(s);
       } else if (event === 'token') {
         if (first) bubble.textContent = '';
         first = false;
@@ -152,11 +157,16 @@ export function setupChat(d: ChatUiDeps): ChatUi {
       } else if (event === 'done') {
         const dn = data as DoneMsg;
         if (first) bubble.textContent = dn.reply;
-        meta.textContent += ` · ${dn.expression === 'template' ? 'plantilla (sin LLM)' : `${(dn.latencyMs.total / 1000).toFixed(1)} s`}`;
+        meta.innerHTML += ` · ${dn.expression === 'template' ? 'plantilla (sin LLM)' : `${(dn.latencyMs.total / 1000).toFixed(1).replace('.', ',')} s`}`;
         const poll = async (left: number) => {
           const v = session?.id ? await verification(d.auth, session.id, dn.seq) : null;
-          if (v) theirs.querySelector('.marks')!.textContent = [...v.claims.map((c) => `${verdictMark(c.verdict)} ${c.predicate} ${c.value}`), v.stanceCheck === 'mismatch' ? '⚠ no expresa la postura' : ''].filter(Boolean).join(' · ');
-          else if (left > 0) setTimeout(() => void poll(left - 1), 1500);
+          if (v) {
+            checks = { ok: checks.ok + v.claims.filter((c) => c.verdict === 'supported').length, bad: checks.bad + v.claims.filter((c) => c.verdict !== 'supported').length };
+            theirs.querySelector('.marks')!.innerHTML = v.claims.length || v.stanceCheck === 'mismatch'
+              ? `Afirmaciones: ${[...v.claims.map((c) => `<span class="${c.verdict === 'supported' ? 'ok' : 'no'}">${esc(`${verdictMark(c.verdict)} ${c.predicate.replace(/_/g, ' ')} ${c.value}`)}</span>`), v.stanceCheck === 'mismatch' ? '<span class="no">⚠ no expresa la postura</span>' : 'Adherencia a la postura: <span class="ok">✓</span>'].join(' · ')}`
+              : '';
+            state();
+          } else if (left > 0) setTimeout(() => void poll(left - 1), 1500);
         };
         void poll(4);
         if (dn.ended) void finish();
@@ -167,11 +177,8 @@ export function setupChat(d: ChatUiDeps): ChatUi {
     busy = false;
   };
 
-  const start = async (ev: Event) => {
-    ev.preventDefault();
+  const start = async () => {
     if (!person) return;
-    mode = (q<HTMLInputElement>('input[name="chat-mode"]:checked').value) as 'in_world' | 'sandbox';
-    const test = q<HTMLInputElement>('#chat-test').checked;
     status('Abriendo la charla…');
     let r = await openChat(d.auth, person.id, mode, test);
     if (r.status === 401 && (await d.askAuth())) r = await openChat(d.auth, person.id, mode, test);
@@ -181,50 +188,78 @@ export function setupChat(d: ChatUiDeps): ChatUi {
     if (!r.body) return status(`No se pudo abrir la charla (${r.status}).`);
     if (r.body.status === 'declined') return status(`${person.name} no puede charlar ahora: ${r.body.reason ?? 'sin motivo'}.`);
     session = r.body;
+    startedAt = d.worldMinute();
+    turns = 0;
+    checks = { ok: 0, bad: 0 };
     q('#chat-start').hidden = true;
-    q('#chat-main').hidden = false;
+    q('#chat-msgs').hidden = false;
+    q('#chat-form').hidden = false;
     q('#chat-end').hidden = false;
     q('#chat-tone-l').hidden = !test;
-    q('#chat-mode').textContent = `${person.age} años · ${mode === 'in_world' ? 'en el mundo: lo recordará' : 'de prueba: no cambia el mundo'}`;
+    q('#chat-testlbl').hidden = !test;
+    q('#chat-id').textContent = session.id ?? '';
     const v = session.view!;
     q('#chat-knows').innerHTML = [
-      `<li><b>${esc(v.name)}</b>, ${v.age ?? '?'} años · nació en ${esc(v.birthplace ?? 'sin datos')} · ${esc(v.occupation)}</li>`,
+      `<li>${esc(v.name)}, ${v.age ?? '?'} años · nació en ${esc(v.birthplace ?? 'sin datos')} · ${esc(v.occupation)}</li>`,
       ...v.family.map((m) => `<li>${esc(m.relation)}: ${esc(m.name)}${m.alive ? '' : ' (murió)'}</li>`),
       ...v.facts.map((f) => `<li><span class="mono">${esc(f.date)}</span> ${esc(f.text)}</li>`),
     ].join('');
     status('');
+    strip();
+    state();
     q<HTMLTextAreaElement>('#chat-text').focus();
   };
 
-  return {
-    open: (p) => {
-      person = p;
-      session = null;
-      mode = 'in_world';
-      panel.innerHTML = shell(p);
-      panel.hidden = false;
-      document.querySelector<HTMLElement>('#inspector')!.hidden = true;
-      main.classList.add('chatting');
-      drawAvatar(p);
-      stateBar(p);
-      // Ánimo y estrés en vivo mientras dura el panel.
-      live = setInterval(() => {
-        void d.fetchPerson(p.id).then((x) => stateBar(x), () => undefined);
-      }, 3000);
-      q('#chat-start').addEventListener('submit', (e) => void start(e));
-      q('#chat-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        void send();
+  root.addEventListener('submit', (e) => {
+    const f = e.target as HTMLFormElement;
+    e.preventDefault();
+    if (f.id === 'chat-start') {
+      mode = (q<HTMLInputElement>('input[name="chat-mode"]:checked').value) as 'in_world' | 'sandbox';
+      test = q<HTMLInputElement>('#chat-test').checked;
+      void start();
+    } else if (f.id === 'chat-form') void send();
+  });
+  root.addEventListener('keydown', (e) => {
+    if ((e.target as HTMLElement).id === 'chat-text' && e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      void send();
+    }
+  });
+  root.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('#chat-end')) void finish();
+  });
+
+  const api: ChatPage = {
+    show: (id, prefs) => {
+      if (person?.id === id && session) return;
+      api.leave();
+      person = null;
+      root.innerHTML = '<p class="empty pad">Cargando…</p>';
+      void Promise.all([d.fetchPerson(id), d.fetchDossier(id).catch(() => null)]).then(([p, dos]) => {
+        person = p;
+        dossier = dos;
+        mode = prefs?.mode ?? 'in_world';
+        test = prefs?.test ?? false;
+        root.innerHTML = shell(p);
+        strip();
+        state();
+        if (prefs) void start();
+        clearInterval(live);
+        live = setInterval(() => {
+          void d.fetchPerson(id).then((x) => {
+            if (person?.id !== id) return;
+            person = x;
+            strip();
+            state();
+          }, () => undefined);
+        }, 3000);
       });
-      q<HTMLTextAreaElement>('#chat-text').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          void send();
-        }
-      });
-      q('#chat-end').addEventListener('click', () => void finish());
-      q('#chat-close').addEventListener('click', () => void close());
     },
-    isOpen: () => !panel.hidden,
+    leave: () => {
+      clearInterval(live);
+      if (session?.id) void endChat(d.auth, session.id);
+      session = null;
+    },
   };
+  return api;
 }

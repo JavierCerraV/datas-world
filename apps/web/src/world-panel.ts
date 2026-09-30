@@ -68,21 +68,10 @@ export function renderWorldPanel(m: Metrics): string {
     + lineChart('Dinero de las personas (mediana)', dates, [{ name: 'Dinero', values: m.days.map((d) => d.money) }])
     + lineChart('Eventos por día (los más frecuentes)', dates, topEvents(m.events).map(([t, v]) => ({ name: EVENT_ES[t] ?? kindOf(t)[0], values: v })));
   const table = `<details><summary>Ver como tabla (últimos 14 días)</summary><table class="report"><thead><tr><th>Día</th><th>Ánimo</th><th>Estrés</th><th>Dinero</th></tr></thead><tbody>${m.days.slice(-14).reverse().map((d) => `<tr><td class="mono">${esc(d.date)}</td><td>${d.mood.toFixed(2)} ± ${d.moodSd.toFixed(2)}</td><td>${d.stress.toFixed(2)} ± ${d.stressSd.toFixed(2)}</td><td>${short(d.money)}</td></tr>`).join('')}</tbody></table></details>`;
-  return `${alerts}${charts}${table}${exportLinks()}`;
+  return `${alerts}<div class="charts3">${charts}</div>${table}${exportLinks()}`;
 }
 
 const exportLinks = () => '<p class="export">Descargar para analizar fuera: <a href="/api/export/trajectory.csv" download>trayectorias (CSV)</a> · <a href="/api/export/events.csv" download>eventos (CSV)</a></p>';
-
-/** Abre el diálogo del mundo desde el botón de la cabecera y pide las métricas cada vez que se abre. */
-export function setupWorldPanel(o: { button: HTMLButtonElement; dialog: HTMLDialogElement; body: HTMLElement; close: HTMLButtonElement; fetch: () => Promise<Metrics> }): void {
-  bindChartHover(o.body);
-  o.button.addEventListener('click', () => {
-    o.body.innerHTML = '<p class="muted">Cargando…</p>';
-    o.dialog.showModal();
-    o.fetch().then((m) => { o.body.innerHTML = renderWorldPanel(m); }, (e: unknown) => { o.body.innerHTML = `<p class="muted">No se pudieron leer las métricas (${esc(String(e))}).</p>`; });
-  });
-  o.close.addEventListener('click', () => o.dialog.close());
-}
 
 /** Cursor y tooltip: al pasar sobre una columna, la línea vertical y los valores de ese día. */
 export function bindChartHover(root: HTMLElement): void {

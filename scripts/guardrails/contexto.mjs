@@ -22,4 +22,4 @@ console.log(`## Estado del proyecto (generado al iniciar la sesión)
 - Specs por estado: ${Object.entries(byState).map(([k, v]) => `${k}: ${v.sort().join(', ')}`).join(' | ')}
 - Módulos documentados: ${moduleDocs().map((p) => p.replace('/MODULE.md', '')).join(', ') || 'ninguno'}
 - Siguiente tarea pendiente: ${next ?? 'ninguna'}
-Recuerda: solo specs aprobadas; al tocar un módulo actualiza su MODULE.md (API, diseño, bitácora); el prototipo es la referencia de comportamiento (docs/prototipo-referencia.md).`);
+Recuerda: solo specs aprobadas; al tocar un módulo actualiza su MODULE.md (API, diseño, bitácora); la interfaz sigue el lienzo aprobado «Visor A+» (spec 024); el prototipo HTML es solo registro histórico (docs/prototipo-referencia.md).`);
