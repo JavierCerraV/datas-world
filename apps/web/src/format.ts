@@ -74,6 +74,18 @@ export const EVENT_ES: Record<string, string> = {
   RELATIONSHIP_STARTED: 'Empezó una relación de pareja',
   BREAKUP: 'Terminó una relación',
   BOND_FORGOTTEN: 'Perdió el contacto',
+  RUMOR_TOLD: 'Contó un rumor',
+  RUMOR_DISTORTED: 'Rumor deformado',
+  BELIEF_CORRECTED: 'Corrigió lo que creía',
+  SCHEMA_FORMED: 'Aprendió de su vida',
+  SCHEMA_REVISED: 'Revisó lo aprendido',
+  CHAPTER_OPENED: 'Empezó una etapa',
+  CHAPTER_CLOSED: 'Cerró una etapa',
+  PNR_EPISODE: 'Rumiación',
+  CONVERSATION_STARTED: 'Empezó una charla',
+  CONVERSATION_HELD: 'Tuvo una charla',
+  CONVERSATION_DECLINED: 'No pudo charlar',
+  LEARNED_FROM_CONVERSATION: 'Aprendió de una charla',
 };
 
 const LABEL_ES: Record<string, string> = { amigo: 'amistad', companero: 'trabajo', conocido: 'conocido', ex: 'expareja', familia: 'familia', pareja: 'pareja' };
@@ -116,13 +128,41 @@ export function stimulusEs(s: string): string {
   return last;
 }
 
-/** Una causa legible (019): una fuente de la decisión, un estado o un evento anterior. */
+/** Estados que aparecen como causa, en palabras (019). */
+const STATE_ES: Record<string, string> = {
+  mismo_lugar: 'estaban en el mismo lugar',
+  sin_contacto: 'llevaban tiempo sin verse',
+  quincena: 'día de pago',
+  energia: 'energía',
+  estres: 'estrés',
+  salud_fisica: 'salud física',
+  tension: 'tensión entre ellos',
+  deuda_de_sueno: 'deuda de sueño',
+  duracion_viaje: 'duración del viaje',
+  rng: 'azar',
+  clock: 'la hora del día',
+  tiempo: 'el paso del tiempo',
+  external_input: 'una orden externa',
+  deficit: 'déficit',
+  actividad: 'lo que estaba haciendo',
+  descuento: 'impaciencia',
+  funcion: 'lo que ha aprendido',
+  horario_de_sueno: 'su horario de sueño',
+};
+const SOURCE_ES: Record<string, string> = { reforzador: 'le gusta', fuerza: 'costumbre', coste: 'le cuesta', regla: 'una regla', relacion: 'lo que relaciona', valor: 'lo que valora', funcion: 'lo que ha aprendido' };
+const valueEs = (v: number | null) => (v === null ? '' : ` (${Number.isInteger(v) ? v : v.toFixed(2)})`);
+
+/** Una causa legible (019): una fuente de la decisión, un estado o un hecho anterior. */
 export function causeEs(c: Cause): string {
-  if ('event' in c) return `por un hecho anterior (${c.event})`;
+  if ('event' in c) return 'un hecho anterior';
   const [head, ref] = c.state.split(':');
-  const value = c.value === null ? '' : ` (${c.value})`;
-  if (head?.startsWith('fuente.')) return `${head.slice(7)}${ref ? `: ${stimulusEs(ref)}` : ''}${value}`;
-  return `${c.state.replace(/_/g, ' ')}${value}`;
+  if (head?.startsWith('fuente.')) {
+    const src = head.slice(7);
+    return `${SOURCE_ES[src] ?? src}${ref ? `: ${stimulusEs(ref)}` : ''}`;
+  }
+  // `gasto.arriendo` → «gasto en arriendo».
+  const text = STATE_ES[head ?? ''] ?? (head?.includes('.') ? head.replace(/^([a-z_]+)\.(.+)$/, (_, a: string, b: string) => `${a.replace(/_/g, ' ')} en ${b.replace(/_/g, ' ')}`) : c.state.replace(/_/g, ' '));
+  return `${text}${valueEs(c.value)}`;
 }
 
 /** Resumen de un evento en una línea. */

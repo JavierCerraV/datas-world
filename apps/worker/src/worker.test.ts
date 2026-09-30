@@ -65,11 +65,12 @@ describe('worker: avance y persistencia por lotes (027 R-002, R-004)', () => {
     w.shutdown('prueba');
   });
 
-  it('hace flush cada FLUSH_TICKS ticks: lo persistido nunca va más de un lote por detrás', () => {
-    const w = new WorldWorker(path, { speed: 10 });
-    w.pump(7 * TICK_MS_1X); // 70 ticks
-    const saved = inspect((r) => r.loadWorld().now);
-    expect(saved).toBe(Math.floor(70 / FLUSH_TICKS) * FLUSH_TICKS * config.tickMinutes);
+  it('hace flush cada FLUSH_TICKS ticks y, con ticks pendientes, cada FLUSH_MS de tiempo real (R-002, R-014)', () => {
+    const w = new WorldWorker(path, { speed: 100 });
+    w.pump(1000); // 20 ticks en 1 s real: solo el lote de 12
+    expect(inspect((r) => r.loadWorld().now)).toBe(FLUSH_TICKS * config.tickMinutes);
+    w.pump(1000); // 40 ticks y 2 s con ticks pendientes: se guarda todo
+    expect(inspect((r) => r.loadWorld().now)).toBe(40 * config.tickMinutes);
     w.shutdown('prueba');
   });
 

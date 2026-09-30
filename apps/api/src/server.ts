@@ -8,18 +8,19 @@ import type { EntityId, WhyNode, WorldEvent } from '@datas-world/engine';
 import { buildOntology, knowledgeCatalog, loadCatalogs } from '@datas-world/generators';
 import { DEFAULT_CONFIG, Gateway, anthropicAdapter, chatCatalogs, mockAdapter, openaiCompatibleAdapter, parseConfig } from '@datas-world/llm-gateway';
 import type { LlmRecord, ProviderAdapter, RecordStore } from '@datas-world/llm-gateway';
-import { CONTROL_COMMANDS, SqliteRecordStore, closeDb, enqueueCommand, eventsById, openWorldDb, queryEvents, trajectoryOf } from '@datas-world/persistence';
+import { ADVANCE_MINUTES, CONTROL_COMMANDS, SqliteRecordStore, closeDb, enqueueCommand, eventsById, openWorldDb, queryEvents, trajectoryOf } from '@datas-world/persistence';
 import type { ControlCommandName, Db } from '@datas-world/persistence';
 import { registerChatRoutes } from './chat.ts';
 import { placeDetail } from './places.ts';
 import { registerDayRoutes } from './days.ts';
 import { registerMetricsRoutes } from './metrics.ts';
+import { aboutMe, movesForTick, registerObserveRoutes, whereAndUntil } from './observe.ts';
 import Fastify from 'fastify';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { lifeView } from './life.ts';
 import { WorldReader } from './reader.ts';
-import { citizenDetail, dateOf, eventView, nameOf, positions, worldView } from './views.ts';
+import { citizenDetail, dateOf, eventView, nameOf, positions, setTopicNames, worldView } from './views.ts';
 
 export interface ApiOptions {
   db: string;
@@ -60,7 +61,9 @@ function sqliteRecords(rw: Db): RecordStore {
 
 const eventsQuery = z.object({ since: z.string().regex(/^EVT-\d+$/).optional(), limit: z.coerce.number().int().min(1).max(200).default(100) });
 const citizenParams = z.object({ id: z.string().regex(/^CIT-\d+$/) });
-const controlBody = z.object({ cmd: z.enum(['pause', 'resume', 'speed', 'step']), arg: z.union([z.string(), z.number()]).optional() });
+const controlBody = z
+  .object({ cmd: z.enum(['pause', 'resume', 'speed', 'step', 'advance']), arg: z.union([z.string(), z.number()]).optional() })
+  .refine((b) => b.cmd !== 'advance' || ADVANCE_MINUTES.includes(Number(b.arg)), { message: 'avance no admitido' }); // 022 R-013
 
 const MB = 1024 * 1024;
 
@@ -115,6 +118,7 @@ export function buildApi(opts: ApiOptions): Api {
 
   registerDayRoutes(app, reader); // 022 R-009: días pasados
   registerMetricsRoutes(app, reader); // 022 R-010, R-011: métricas y exportación
+  registerObserveRoutes(app, reader); // 022 R-012, R-013: movimientos e indicadores
 
   // 022 R-007: ficha de un lugar.
   app.get('/api/places/:id', async (req, reply) => {
@@ -125,20 +129,30 @@ export function buildApi(opts: ApiOptions): Api {
   });
 
   const knowledge = knowledgeCatalog(loadCatalogs());
+  setTopicNames((k) => topicOf(knowledge, k)?.name); // 024 R-016: temas de rumor en palabras
+  const TRUTH_TYPES = [...new Set(knowledge.topics.map((t) => t.event).filter(Boolean))] as WorldEvent['type'][];
   app.get('/api/citizens/:id', async (req, reply) => {
     const p = citizenParams.safeParse(req.params);
     if (!p.success) return reply.code(400).send({ error: 'id inválido' });
     const events = queryEvents(reader.db, { participant: p.data.id as EntityId, latest: true, limit: 20 });
     const detail = citizenDetail(reader.world, p.data.id as EntityId, events);
     if (!detail) return reply.code(404).send({ error: 'no existe' });
-    // 025 R-008: lo que cree de otros, con la verdad solo para quien observa.
+    // 025 R-008: lo que cree de otros, con la verdad solo para quien observa. Para la verdad basta con los eventos
+    // que pueden hacer verdad un tema (no los miles de rutina), una vez por persona.
     const w = reader.world;
+    const seen = new Map<string, WorldEvent[]>();
+    const truthEvents = (who: string) => {
+      if (!seen.has(who)) seen.set(who, queryEvents(reader.db, { participant: who as EntityId, types: TRUTH_TYPES, limit: 100_000 }));
+      return seen.get(who)!;
+    };
     const beliefs = (w.citizens.get(p.data.id as EntityId)?.beliefs ?? []).filter((b) => b.about.startsWith('CIT-')).map((b) => ({
       about: b.about, name: nameOf(w, b.about), predicate: b.predicate, topic: topicOf(knowledge, b.predicate)?.name ?? b.predicate.replace(/_/g, ' '),
       source: b.source, sourceName: b.source.startsWith('CIT-') ? nameOf(w, b.source) : null, credibility: b.credibility, hops: b.hops ?? 0,
-      truth: beliefTruth(b, queryEvents(reader.db, { participant: b.about as EntityId, limit: 100_000 }), knowledge),
+      truth: beliefTruth(b, truthEvents(b.about), knowledge),
     }));
-    return { ...detail, beliefs };
+    // 022 R-014: vivienda, barrio, hasta cuándo, y lo que otros creen de esta persona.
+    const about = aboutMe(w, p.data.id as EntityId, truthEvents(p.data.id), knowledge);
+    return { ...detail, ...whereAndUntil(w, p.data.id as EntityId), beliefs, aboutMe: about };
   });
 
   // 041 R-009: historia de vida (episodios del desarrollo por etapa) y familiograma extenso.
@@ -237,7 +251,8 @@ export function buildApi(opts: ApiOptions): Api {
   // R-004: controles con basic auth; la orden queda en `control_commands` para el worker.
   app.post('/api/control', async (req, reply) => {
     if (!opts.auth) return reply.code(503).send({ error: 'controles desactivados: define DATAS_WORLD_USER y DATAS_WORLD_PASSWORD' });
-    if (!authorized(req.headers.authorization, opts.auth)) return reply.code(401).header('www-authenticate', 'Basic realm="datas-world"').send({ error: 'credenciales' });
+    // Sin `WWW-Authenticate`, para que el navegador no abra su ventana de acceso: la pide el visor (auth.ts).
+    if (!authorized(req.headers.authorization, opts.auth)) return reply.code(401).send({ error: 'credenciales' });
     const b = controlBody.safeParse(req.body);
     if (!b.success) return reply.code(400).send({ error: 'orden inválida' });
     const cmd = b.data.cmd as ControlCommandName;
@@ -266,6 +281,7 @@ export function buildApi(opts: ApiOptions): Api {
 
   const poll = () => {
     // Un fallo al recargar (base ocupada, estado a medio escribir) no puede tumbar la API: se reintenta al segundo.
+    const before = reader.world.now;
     try {
       if (!reader.refresh()) return;
     } catch (e) {
@@ -273,8 +289,10 @@ export function buildApi(opts: ApiOptions): Api {
       return;
     }
     const w = reader.world;
+    // 022 R-012: los viajes que llegan después del tick anterior (el visor descarta los repetidos).
+    const moves = clients.size ? movesForTick(reader, before) : [];
     for (const c of clients) {
-      sse(c.reply, 'tick', { now: w.now, date: dateOf(w, w.now), status: w.status });
+      sse(c.reply, 'tick', { now: w.now, date: dateOf(w, w.now), status: w.status, moves });
       sendEvents(c);
     }
   };

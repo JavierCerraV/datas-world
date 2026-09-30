@@ -4,7 +4,7 @@ nombre: persistence
 estado: aprobada
 hito: M0 (base) · M4 (retención)
 depende_de: [001, 002, 014]
-version: 0.3
+version: 0.5
 ---
 
 # 027 — Persistencia
@@ -68,6 +68,18 @@ CREATE INDEX memory_archive_owner_at ON memory_archive(owner_id, at);
 
   Una base anterior a esta regla (sin `state_hash_at`) se verifica siempre. Decisión del usuario del 2026-09-24: con la población de M1, el hash de cada flush costaba ≈ 15 ms, y avanzar 30 días tardaba 12 s; con los puntos de control, 2,4 s.
 
+### Ampliación para la observación (v0.5, decisión del usuario del 2026-09-29, P1)
+- **R-013** [M] — **Movimientos para el visor.** El worker avanza tick a tick y, tras cada tick, anota cada viaje que acaba de empezar:
+  - persona, lugar de origen y de destino, minuto de salida y de llegada, y modo;
+  - en la tabla `movements` (migración 004), en la misma transacción del siguiente flush.
+
+  Es un dato de observación, no estado del mundo: no entra en el `stateHash` ni en las instantáneas, y el motor no lo lee (igual que la trayectoria, 020 INV-003). Se conservan solo los de los últimos `MOVES_KEEP_DAYS` días de mundo; los más antiguos se borran en el flush.
+- **R-014** [M] — **Flush por tiempo real.** Además de cada `FLUSH_TICKS` ticks, el worker hace flush si han pasado `FLUSH_MS` de tiempo real desde el último y hay ticks sin guardar. Así el visor ve el mundo con pocos segundos de retraso a cualquier velocidad.
+- **R-015** [M] — **Avance sin observar.** La orden de control `advance` con un número de minutos de mundo (1 día, 1 semana, 1 mes o 1 año) hace que el worker avance hasta ese minuto tan rápido como pueda:
+  - en tramos de como mucho `ADVANCE_SLICE_MS` de tiempo real, con flush tras cada tramo y atendiendo las órdenes entre tramos (una pausa lo interrumpe);
+  - al terminar, hace un punto de control (R-012) y sigue a la velocidad que tenía;
+  - `meta.advance` guarda el minuto de inicio y el de destino mientras dura, para mostrar el progreso. Durante el avance no se anotan movimientos.
+
 ## 6. Invariantes
 - **INV-001** — `events.seq` estrictamente creciente; nunca `UPDATE` ni `DELETE` sobre eventos salvo el proceso de compactación documentado.
 
@@ -80,11 +92,16 @@ CREATE INDEX memory_archive_owner_at ON memory_archive(owner_id, at);
 - **CA-006** — *Dado* un mundo con componentes, *cuando* se guarda y se carga, *entonces* cada columna es idéntica byte a byte y el hash coincide.
 - **CA-007** — *Dado* un mundo guardado del peldaño anterior, *cuando* se carga con el motor actual, *entonces* se migra sin errores y avanza 30 días de forma determinista.
 - **CA-008** — *Dado* un episodio que pasa a `consolidated`, *entonces* aparece en `memory_archive` tras el siguiente flush y sale de la RAM.
+- **CA-009** — *Dado* un mundo que avanza con el worker, *entonces* cada viaje iniciado aparece una vez en `movements` con su salida y su llegada, y el `stateHash` es el mismo que avanzando sin anotarlos.
+- **CA-010** — *Dado* la orden `advance` de 1 día, *entonces* el mundo llega exactamente a ese minuto, el progreso se ve en `meta.advance` mientras dura y al final vuelve a la velocidad anterior.
 
 ## 8. Parámetros
 | Parámetro | Defecto |
 |---|---|
 | `FLUSH_TICKS` | 12 (1 h de mundo) |
+| `FLUSH_MS` | 2000 (tiempo real) [M] |
+| `MOVES_KEEP_DAYS` | 2 [M] |
+| `ADVANCE_SLICE_MS` | 250 [M] |
 | `SNAPSHOT_EVERY_DAYS` | 1 |
 | `COMPACT_AFTER_DAYS` | 90 |
 
@@ -103,3 +120,5 @@ CREATE INDEX memory_archive_owner_at ON memory_archive(owner_id, at);
 | 2026-09-24 | 0.4 | R-012 (puntos de control), aprobada por el usuario: el `stateHash` se guarda solo en instantáneas, al final de un avance, al pausar y al cerrar; la carga verifica los puntos de control y marca como recuperado un estado posterior (cierre en seco). Avanzar 30 días con la población de M1 pasa de 12 s a 2,4 s con el mismo hash final. Sin cambios en CA |
 | 2026-09-25 | 0.3 | Bloque F de M2 (015): las cuentas del sistema se guardan en `meta.accounts` en cada guardado y se cargan si existen. Sin cambios en CA |
 | 2026-09-25 | 0.3 | Bloque H de M2 (R-011): mundo de ejemplo `docs/validaciones/mundos/m2-482917.db` (una semana de vida diaria, ≈ 4,8 MB); `apps/cli/src/m2.test.ts` lo carga con hash verificado y lo avanza, y comprueba que el de M1 sigue siendo estático. Sin cambios en CA |
+| 2026-09-29 | 0.5 | Ampliación para la observación, aprobada por el usuario (P1 de la paridad con el prototipo): movimientos para el visor en la tabla `movements` (R-013), flush también por tiempo real (R-014) y avance sin observar con la orden `advance` (R-015). CA-009 y CA-010 nuevos. `FLUSH_MS`, `MOVES_KEEP_DAYS` y `ADVANCE_SLICE_MS` |
+| 2026-09-29 | 0.5 | Implementación de la paridad (P1): migración 004 (`movements`) y migración 005, un índice de `event_participants` por evento. Leer los participantes de un evento recorría la tabla entera: 343 ms para los 234 eventos de una persona, y la ficha y el informe de vida del visor tardaban casi 2 s; con el índice, 1,8 ms. CA-009 y CA-010 verdes (`apps/worker/src/moves.test.ts`). Sin cambios en CA |

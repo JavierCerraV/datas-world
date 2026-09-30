@@ -16,7 +16,7 @@ Guarda y carga el mundo en SQLite: estado, registro de eventos append-only, inst
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 027 | CA-001, CA-003 (muerte abrupta aquí; cierre limpio con SIGTERM, R-007, en `apps/worker`), CA-004, CA-006 | CA-002 y CA-005 (compactación, M4), CA-007 (no hay peldaño anterior hasta M1), CA-008 (memoria, spec 013) |
+| 027 | CA-001, CA-003 (muerte abrupta aquí; cierre limpio con SIGTERM, R-007, en `apps/worker`), CA-004, CA-006; R-013 y R-015 (almacenamiento de los movimientos y del avance; sus CA-009 y CA-010 se prueban en `apps/worker`) | CA-002 y CA-005 (compactación, M4), CA-007 (no hay peldaño anterior hasta M1), CA-008 (memoria, spec 013) |
 
 
 ## 3. API pública
@@ -28,12 +28,13 @@ Desde `@datas-world/persistence` (`src/index.ts`):
 | `openReadonly(path)` | `src/db.ts` | Conexión de solo lectura para la API (R-001). No migra; falla si el esquema no está al día |
 | `closeDb(db)` | `src/db.ts` | Cierre limpio: `wal_checkpoint(TRUNCATE)` si es escritor |
 | `migrate`, `listMigrations`, `schemaVersion`, `MIGRATIONS_DIR`, tipo `Db` | `src/db.ts` | Migraciones numeradas `NNN-nombre.sql` en `migrations/` |
-| `WorldRepository` | `src/repository.ts` | `flush({ world, events?, inputs? })`, `loadWorld()`, `hasWorld()`, `saveSnapshot(world)`, `loadSnapshot(at?)`, `readEvents(afterSeq?, limit?)`, `readInputs()`, `lastInput()`, `countEvents(type?)`, `countSnapshots()`, `snapshotTimes()`, `lastSeq` |
-| `WorldSession` | `src/session.ts` | Une un `Runner` con el repositorio: `ticked(n)` (flush cada `FLUSH_TICKS`), `flush()` (entradas nuevas una sola vez, instantánea al cambiar de periodo), `advanceTicks(n, onProgress?)`. La usan el worker y `world:advance` |
+| `WorldRepository` | `src/repository.ts` | `flush({ world, events?, inputs?, checkpoint?, moves? })`, `loadWorld()`, `hasWorld()`, `saveSnapshot(world)`, `loadSnapshot(at?)`, `readEvents(afterSeq?, limit?)`, `readInputs()`, `lastInput()`, `countEvents(type?)`, `countSnapshots()`, `snapshotTimes()`, `setAdvance(a)`, `advance`, `lastSeq` |
+| `WorldSession` | `src/session.ts` | Une un `Runner` con el repositorio: `ticked(n, track?)` (flush cada `FLUSH_TICKS` y, con `trackMoves()`, anota los viajes nuevos), `pendingTicks`, `flush()` (entradas nuevas una sola vez, viajes, instantánea al cambiar de periodo), `advanceTicks(n, onProgress?)`. La usan el worker y `world:advance` |
+| `TripTracker`, `saveMoves`, `movesSince`, tipo `Movement` | `src/movements.ts` | Movimientos para el visor (R-013): detecta los viajes nuevos en las columnas `trip.*`, los guarda en `movements` (borra los de más de `MOVES_KEEP_DAYS` días) y los lee por minuto de llegada |
 | `enqueueCommand`, `pendingCommands`, `finishCommand`, `CONTROL_COMMANDS`, tipos `ControlCommand`/`ControlCommandName` | `src/control.ts` | Órdenes de control (`done`: 0 pendiente, 1 aplicada, -1 rechazada). En M0 solo las encola la CLI |
 | `acquireWriterLock`, `releaseWriterLock`, `writerLock` | `src/control.ts` | Cerrojo de escritor en `meta.writer_pid` (R-001); se recupera si su dueño ya no existe |
 | `encodeSnapshot`, `decodeSnapshot`, `columnToLE`, `columnFromLE` | `src/codec.ts` | Formato binario de instantáneas y columnas |
-| `FLUSH_TICKS`, `SNAPSHOT_EVERY_DAYS` | `src/params.ts` | Parámetros de la §8 que usa el M0 |
+| `FLUSH_TICKS`, `SNAPSHOT_EVERY_DAYS`, `FLUSH_MS`, `MOVES_KEEP_DAYS`, `ADVANCE_SLICE_MS`, `ADVANCE_MINUTES` | `src/params.ts` | Parámetros de la §8 |
 | `queryEvents(db, { from?, to?, types?, participant?, place?, limit? })`, `eventsById(db, ids)`, `rowsToEvents`, tipos `EventQuery`/`EventRow` | `src/queries.ts` | Consultas de solo lectura del registro, en orden (`at`, `seq`). `participant` usa `event_participants`; `place` busca en `place_id` y en `placeId`/`orgId` del payload (`json_extract`). Las usa la CLI (`world:history`, `citizen:report`, 030 R-008) |
 | `nextChatSessionId`, `insertChatSession`, `updateChatSession`, `getChatSession`, `chatSessionsOf`, `openInWorldSession`, `openChatSessions`, `insertChatTurn`, `chatTurns`, `appendChatLog`, `chatLog`, `SqliteRecordStore` | `src/chat.ts` | Datos del laboratorio de charla (043 R-001), fuera del estado del mundo. `openChatSessions` da las charlas abiertas; la API las cierra al arrancar |
 
@@ -54,6 +55,14 @@ Desde `@datas-world/persistence` (`src/index.ts`):
 - **Un solo escritor** (R-001): el worker y `world:advance` toman `meta.writer_pid` en una transacción `IMMEDIATE`. Si el dueño ya no existe (murió en seco), se recupera. Encolar una orden de control es una escritura mínima que no toma el cerrojo: SQLite la serializa con `busy_timeout`.
 - **Datos como JSON** en M0 (pregunta abierta de la spec: JSON o MessagePack; se medirá en M4).
 - Los participantes de un evento se leen ordenados por id (la clave primaria de `event_participants` no conserva el orden de inserción).
+- **Índice de participantes por evento** (migración 005). La clave primaria de `event_participants` empieza por la entidad, así que leer los participantes de un evento recorría la tabla entera:
+  - 343 ms para los 234 eventos de una persona, con 47 000 filas;
+  - con el índice, 1,8 ms;
+  - coste: una copia de `(event_seq, entity_id)` por fila.
+- **Movimientos** (R-013, migración 004).
+  - `movements` guarda persona, salida, llegada, origen, destino y modo, con clave `(citizen_id, depart_at)` e índice por llegada. Guardar dos veces el mismo viaje no duplica.
+  - `TripTracker` compara el minuto de salida de cada viaje en curso con el último visto por persona: como un viaje dura al menos hasta el tick siguiente, mirar tras cada tick no pierde ninguno.
+  - No es estado del mundo: no entra en el hash ni en las instantáneas, y se borra lo de más de 2 días.
 
 ## 5. Invariantes y guardarraíles
 Un solo escritor (R-001). Nunca UPDATE/DELETE sobre eventos salvo compactación documentada (triggers de la migración 001). Nunca dos mundos en la misma base.
@@ -86,7 +95,7 @@ No aplica (el prototipo no persiste).
 - [ ] ¿Quién encola órdenes cuando exista la API (M5)? Hoy solo la CLI (decisión del usuario, bloque E).
 - [ ] Retención de instantáneas (R-004) y compactación (R-005, CA-002, CA-005), M4.
 - [ ] `meta.scheduler` se reescribe entero en cada flush; revisar cuando el scheduler tenga miles de elementos.
-- [ ] `readEvents` lee participantes con una consulta por evento; para la API conviene un JOIN (E2 o M5).
+- [x] Leer los participantes evento a evento era lento porque no había índice por evento: resuelto con la migración 005 (sigue siendo una consulta por evento, ahora de 1,8 ms para 234 eventos).
 
 ## 9. Bitácora de cambios
 | Fecha | Tarea / commit | Specs | Cambio |
@@ -106,3 +115,4 @@ No aplica (el prototipo no persiste).
 | 2026-09-27 | claude/wonderful-carson-4c4i3k (arreglo de la charla) | 027, 043 | `loadWorld` lee en una transacción de lectura: con el worker escribiendo, la API cargaba un estado mezclado de dos flush y se caía con «El estado cargado no coincide con el guardado», dejando la charla colgada. `openChatSessions`. El proceso hijo de prueba admite `checkpoint`. 1 prueba nueva (`concurrent-read.test.ts`), que fallaba antes del arreglo |
 | 2026-09-29 | m3/historia (H1) | 020 | Migración 003: tabla `trajectory` (persona, día, ánimo, estrés, dinero y deuda de sueño; `WITHOUT ROWID`), fuera del estado del mundo (020 INV-003). `saveSnapshot` la escribe en la misma transacción que la instantánea diaria (020 R-001). `trajectoryOf` (vacía en una base anterior a la migración) y `trajectoryRows`. `db.test.ts` pasa a la versión 3; 1 prueba nueva |
 | 2026-09-29 | m4/observacion (O3) | 022 | `snapshotTimes()`: los minutos con instantánea, en orden, para la línea temporal de la API (022 R-009) |
+| 2026-09-29 | m4/observacion (paridad, P1) | 027, 022 | Migración 004 (`movements`) y `movements.ts` (`TripTracker`, `saveMoves`, `movesSince`): los viajes para el visor se guardan en la transacción del flush y se borran a los 2 días (R-013). `WorldSession.trackMoves`, `ticked(n, track)` y `pendingTicks`; `repo.setAdvance`/`advance` (`meta.advance`, R-015); `advance` en `CONTROL_COMMANDS`; parámetros `FLUSH_MS`, `MOVES_KEEP_DAYS`, `ADVANCE_SLICE_MS` y `ADVANCE_MINUTES`. Migración 005: índice de participantes por evento (343 ms → 1,8 ms para los eventos de una persona). `db.test.ts` incluye la tabla nueva |

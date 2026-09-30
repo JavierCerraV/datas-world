@@ -2,7 +2,8 @@
 // `pnpm dev` (spec 024 V2.4): arranca el mundo en local y lo muestra en el navegador.
 // 1. Si no existe data/world.db, crea un mundo (semilla 482917, perfil colombiano).
 // 2. Arranca el worker (que avanza el mundo), la API (022) y el visor (024, Vite).
-// Ctrl+C detiene los tres. Opciones: --db RUTA, --speed 0|1|10|100|1000 (por defecto 10), --seed N.
+// Ctrl+C detiene los tres. Opciones: --db RUTA, --speed 0|1|10|100|1000 (minutos de mundo por segundo; por defecto
+// 1), --seed N.
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -11,7 +12,7 @@ import { parseArgs } from 'node:util';
 const { values: v } = parseArgs({
   options: {
     db: { type: 'string', default: 'data/world.db' },
-    speed: { type: 'string', default: '10' },
+    speed: { type: 'string', default: '1' }, // 1 min de mundo por segundo: se ve caminar a la gente (024 R-013)
     seed: { type: 'string', default: '482917' },
   },
 });
@@ -63,6 +64,14 @@ function stop() {
 }
 process.on('SIGINT', stop);
 process.on('SIGTERM', stop);
+
+// Controles del visor (022 R-004): en local, si no hay credenciales, unas de uso local (la API solo escucha en
+// 127.0.0.1). En un servidor, defínelas siempre con DATAS_WORLD_USER y DATAS_WORLD_PASSWORD.
+if (!process.env.DATAS_WORLD_USER || !process.env.DATAS_WORLD_PASSWORD) {
+  process.env.DATAS_WORLD_USER = 'equipo';
+  process.env.DATAS_WORLD_PASSWORD = 'datasworld';
+  console.log('Controles del visor: usuario «equipo», contraseña «datasworld» (solo en este equipo).');
+}
 
 run('worker', ['apps/worker/src/main.ts', '--db', v.db, '--speed', v.speed]);
 run('api', ['apps/api/src/main.ts', '--db', v.db]);

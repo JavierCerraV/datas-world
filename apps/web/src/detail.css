@@ -1,0 +1,296 @@
+/* Estilos de las secciones de detalle de la ficha y del panel del mundo (specs 019, 020, 041, 043, 024 R-011). */
+
+/* «¿Por qué?» (019 R-007): el árbol de causas de un evento. */
+.why-box summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--accent);
+}
+ul.why {
+  list-style: none;
+  padding-left: 14px;
+  margin: 4px 0;
+  border-left: 1px dashed var(--muted);
+  font-size: 13px;
+}
+.why-state,
+.why-source {
+  font-style: italic;
+}
+
+/* Informe de vida (020 R-007): trayectoria y tablas. */
+.traj {
+  width: 100%;
+  max-width: 480px;
+}
+.traj-bg {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 0.5;
+}
+.traj-mood,
+.traj-stress {
+  fill: none;
+  stroke-width: 1.5;
+}
+.traj-mood {
+  stroke: #2e9a62;
+}
+.traj-stress {
+  stroke: #c0433c;
+}
+table.report {
+  border-collapse: collapse;
+  font-size: 13px;
+  width: 100%;
+}
+table.report td {
+  padding: 3px 6px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--soft);
+}
+table.report small {
+  display: block;
+  color: var(--muted);
+}
+h4 {
+  font-size: 13px;
+  margin: 14px 0 4px;
+}
+.pos {
+  color: var(--good);
+}
+.neg {
+  color: var(--bad);
+}
+
+/* Pestaña «Vida» (041 R-009): familiograma y episodios del desarrollo. */
+.genogram-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+}
+.genogram {
+  display: block;
+  max-width: none;
+}
+.genogram .g-person rect,
+.genogram .g-person circle {
+  fill: var(--panel);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.genogram .g-person.outside rect,
+.genogram .g-person.outside circle {
+  stroke-dasharray: 3 3;
+}
+.genogram .g-person.me rect,
+.genogram .g-person.me circle {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+}
+.genogram .g-person .inner {
+  fill: none;
+  stroke: var(--accent);
+}
+.genogram .g-dead {
+  stroke: var(--ink);
+  stroke-width: 1.2;
+}
+.genogram .g-couple,
+.genogram .g-child {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.2;
+}
+.genogram .g-q {
+  fill: none;
+  stroke-width: 2;
+  opacity: 0.55;
+}
+.genogram .g-q.cercana {
+  stroke: #2e8b57;
+}
+.genogram .g-q.conflictiva {
+  stroke: #c0392b;
+}
+.genogram .g-q.distante {
+  stroke: var(--muted);
+  stroke-dasharray: 5 4;
+}
+.genogram text {
+  text-anchor: middle;
+  fill: var(--ink);
+  font-size: 11px;
+}
+.genogram .g-rel,
+.genogram .g-years {
+  fill: var(--muted);
+  font-size: 10px;
+}
+.g-legend {
+  font-size: 12px;
+  color: var(--muted);
+}
+.g-legend .sw {
+  display: inline-block;
+  width: 18px;
+  height: 3px;
+  margin: 0 4px 2px 8px;
+  vertical-align: middle;
+}
+.g-legend .sw.cercana {
+  background: #2e8b57;
+}
+.g-legend .sw.conflictiva {
+  background: #c0392b;
+}
+.g-legend .sw.distante {
+  background: repeating-linear-gradient(90deg, var(--muted) 0 5px, transparent 5px 9px);
+}
+.life-stage summary {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 4px 0;
+}
+.life {
+  padding-left: 18px;
+  font-size: 13px;
+}
+.life li {
+  margin-bottom: 8px;
+}
+.life li.pos {
+  border-left: 3px solid var(--good);
+  padding-left: 6px;
+  color: inherit;
+}
+.life li.neg {
+  border-left: 3px solid var(--bad);
+  padding-left: 6px;
+  color: inherit;
+}
+.life small {
+  display: block;
+  color: var(--muted);
+}
+.life .up {
+  color: var(--good);
+}
+.life .down {
+  color: var(--bad);
+}
+
+/* Pestaña «Charlas» (043 R-017): charlas guardadas. */
+.chats {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+}
+.chats > li {
+  border-bottom: 1px solid var(--soft);
+  padding: 6px 0;
+}
+.chats summary {
+  cursor: pointer;
+}
+.chats .msg {
+  max-width: 92%;
+}
+
+/* Panel del mundo (024 R-011): gráficas de líneas finas, rejilla recesiva, texto con los tokens de texto. */
+#world {
+  width: min(760px, 96vw);
+  max-height: 92vh;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+}
+#world::backdrop {
+  background: rgb(0 0 0 / 0.35);
+}
+.world-body {
+  padding: 8px 16px 16px;
+  overflow-y: auto;
+}
+.world-body .alerts {
+  padding-left: 0;
+  list-style: none;
+}
+.chart {
+  position: relative;
+  margin: 16px 0;
+}
+.chart figcaption {
+  font-size: 14px;
+  font-weight: 700;
+}
+.chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.chart .grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.chart .tick,
+.chart .label {
+  font-size: 11px;
+  fill: var(--muted);
+}
+.chart .label {
+  fill: var(--ink);
+}
+.chart .series {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.chart .band {
+  opacity: 0.15;
+}
+.chart .cursor {
+  stroke: var(--muted);
+  stroke-dasharray: 3 3;
+}
+.chart .hit {
+  fill: transparent;
+}
+.legend,
+.chart .tip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 4px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.legend i,
+.chart .tip i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-radius: 2px;
+}
+.chart .tip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--ink);
+}
+.chart .tip[hidden] {
+  display: none;
+}
+.export {
+  font-size: 13px;
+}

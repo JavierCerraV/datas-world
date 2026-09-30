@@ -68,7 +68,9 @@ export function registerChatRoutes(app: FastifyInstance, d: ChatDeps): { sweep: 
   const guard = (header: string | undefined, reply: FastifyReply): boolean => {
     const ok = d.authorized(header);
     if (ok === null) void reply.code(503).send({ error: 'charla desactivada: define DATAS_WORLD_USER y DATAS_WORLD_PASSWORD' });
-    else if (!ok) void reply.code(401).header('www-authenticate', 'Basic realm="datas-world"').send({ error: 'credenciales' });
+    // Sin `WWW-Authenticate`: el navegador abriría su propia ventana de acceso (y en una página sin ventana la
+    // petición quedaría colgada); el visor pide las credenciales con su formulario (022 R-004).
+    else if (!ok) void reply.code(401).send({ error: 'credenciales' });
     return ok === true;
   };
 

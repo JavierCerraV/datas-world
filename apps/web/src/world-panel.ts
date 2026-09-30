@@ -1,6 +1,8 @@
 // Panel del mundo (spec 024 R-011): por día, el ánimo y el estrés medios con su franja de desviación, la mediana del
 // dinero y los eventos más frecuentes; las alertas de degeneración (022 R-010) y los enlaces de exportación CSV
 // (022 R-011). Gráficas de líneas en SVG con un solo eje, leyenda y etiqueta directa, cursor con tooltip y una tabla.
+import { EVENT_ES } from './format.ts';
+import { kindOf } from './log.ts';
 
 export interface DayMetrics { day: number; date: string; n: number; mood: number; moodSd: number; stress: number; stressSd: number; money: number; saturated: number }
 export interface Alert { metric: string; kind: string; note: string }
@@ -64,7 +66,7 @@ export function renderWorldPanel(m: Metrics): string {
     { name: 'Estrés', values: m.days.map((d) => d.stress), band: m.days.map((d) => d.stressSd) },
   ], [0, 1])
     + lineChart('Dinero de las personas (mediana)', dates, [{ name: 'Dinero', values: m.days.map((d) => d.money) }])
-    + lineChart('Eventos por día (los más frecuentes)', dates, topEvents(m.events).map(([t, v]) => ({ name: t, values: v })));
+    + lineChart('Eventos por día (los más frecuentes)', dates, topEvents(m.events).map(([t, v]) => ({ name: EVENT_ES[t] ?? kindOf(t)[0], values: v })));
   const table = `<details><summary>Ver como tabla (últimos 14 días)</summary><table class="report"><thead><tr><th>Día</th><th>Ánimo</th><th>Estrés</th><th>Dinero</th></tr></thead><tbody>${m.days.slice(-14).reverse().map((d) => `<tr><td class="mono">${esc(d.date)}</td><td>${d.mood.toFixed(2)} ± ${d.moodSd.toFixed(2)}</td><td>${d.stress.toFixed(2)} ± ${d.stressSd.toFixed(2)}</td><td>${short(d.money)}</td></tr>`).join('')}</tbody></table></details>`;
   return `${alerts}${charts}${table}${exportLinks()}`;
 }

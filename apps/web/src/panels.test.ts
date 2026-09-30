@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fold, moodColor, placeAt, placeHtml, populationHtml, populationRows } from './panels.ts';
+import { doingOf, fold, moodColor, placeAt, placeHtml, populationHtml, populationRows } from './panels.ts';
 import { alongPath, onTheWay, routeCache, streetPath } from './streets.ts';
 import type { CitizenPosition } from './types.ts';
 
@@ -14,9 +14,19 @@ describe('024 R-008: población y lugares', () => {
     const all = populationRows(list, '');
     expect(all.map((r) => r.name)).toEqual(['Ana Gómez', 'José Pérez', 'María Jose Díaz']);
     expect(all[0]!.doing).toBe('en camino');
-    expect(moodColor(0)).toBe('hsl(0 60% 45%)');
-    expect(moodColor(1)).toBe('hsl(120 60% 45%)');
-    expect(populationHtml(populationRows(list, 'zzz'), 3)).toContain('Nadie coincide');
+    // Los cuatro tramos del prototipo.
+    expect([0.2, 0.4, 0.5, 0.8].map(moodColor)).toEqual(['#C0433C', '#D97A34', '#C7A23A', '#2E9A62']);
+    expect(populationHtml(populationRows(list, 'zzz'))).toContain('Nadie coincide');
+  });
+
+  it('024 R-017: lo que hace cada persona, con el lugar, como el prototipo', () => {
+    const names = (id: string) => ({ 'PLC-0009': 'Restaurante La Mesa' })[id];
+    const ana = person('CIT-000001', 'Ana', { homeId: 'PLC-0001', placeId: 'PLC-0009' });
+    expect(doingOf(ana, { kind: 'at', place: 'PLC-0009' }, names)).toBe('trabajando en Restaurante La Mesa');
+    expect(doingOf({ ...ana, activity: 'sleep' }, { kind: 'at', place: 'PLC-0001' }, names)).toBe('durmiendo en casa');
+    const walk = { kind: 'walk' as const, f: 0.5, move: { citizenId: 'CIT-000001', departAt: 0, arriveAt: 10, from: 'PLC-0009', to: 'PLC-0001', mode: 'walk' } };
+    expect(doingOf(ana, walk, names)).toBe('camino a casa');
+    expect(doingOf({ ...ana, placeId: null }, { kind: 'at', place: null }, names)).toBe('fuera del pueblo');
   });
 
   it('CA-006: la ficha de un lugar dice su horario, quién está dentro y quién vive allí', () => {
@@ -28,7 +38,14 @@ describe('024 R-008: población y lugares', () => {
     expect(html).toContain('Aquí ahora (1)');
     expect(html).toContain('Viven aquí (2)');
     expect(html).toContain('data-person="CIT-000002"');
-    expect(placeHtml({ id: 'PLC-0004', name: 'Tienda', kind: 'comercio.tienda', district: null, open: '08:00-20:00', inside: [], residents: [] })).toContain('Abierto de 08:00 a 20:00');
+    const shop = placeHtml({
+      id: 'PLC-0004', name: 'Tienda', kind: 'comercio.tienda', district: null, open: '08:00-20:00', inside: [], residents: [],
+      staff: [{ id: 'CIT-000007', name: 'Rosa Díaz', title: 'Administradora', org: 'Tienda', boss: true }],
+    });
+    expect(shop).toContain('Abierto de 08:00 a 20:00');
+    expect(shop).toContain('Personal (1)');
+    expect(shop).toContain('Administradora, dirige');
+    expect(shop).toContain('No hay nadie');
   });
 
   it('el lugar bajo el cursor es el más pequeño que lo contiene', () => {

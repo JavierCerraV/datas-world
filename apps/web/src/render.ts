@@ -1,16 +1,25 @@
-// Dibujo en Canvas 2D (spec 024 R-001, R-006, R-007): el mapa se pinta una vez en un lienzo aparte y cada cuadro
-// lo copia escalado por un entero, con las personas y el velo nocturno encima.
-import { TILE_COLORS, TS, hash, lookOf, styleOf } from './logic.ts';
+// Dibujo del mapa en Canvas 2D (spec 024 R-001, R-012): se pinta una vez en un lienzo aparte, con los detalles del
+// prototipo, y cada cuadro lo copia con la cámara. Las ventanas de cada edificio se guardan para encenderlas de noche
+// (R-013); las figuras y el velo están en `figures.ts`.
+import { TILE_COLORS, TS, hash, styleOf } from './logic.ts';
 import { T, decorOf, parkTrees, treeSpots } from './scenery.ts';
 import type { WorldView } from './types.ts';
 
-/** Pinta el mapa (tiles y edificios) en un lienzo del tamaño del mundo a 1 px por px de tile. */
-export function drawMap(world: WorldView): HTMLCanvasElement {
+export interface MapLayer {
+  canvas: HTMLCanvasElement;
+  /** Ventanas de cada edificio (px del mapa), por su punto de entrada `x,y` (el de `WorldView.points`). */
+  windows: Map<string, [number, number, number, number][]>;
+}
+
+/** Pinta el mapa (tiles, calles, árboles y edificios) en un lienzo del tamaño del mundo a 1 px por px de tile. */
+export function drawMap(world: WorldView): MapLayer {
   const geo = world.geo!;
   const c = document.createElement('canvas');
   c.width = geo.width * TS;
   c.height = geo.height * TS;
   const g = c.getContext('2d')!;
+  const windows = new Map<string, [number, number, number, number][]>();
+  const at = (x: number, y: number) => (x < 0 || y < 0 || x >= geo.width || y >= geo.height ? -1 : geo.tiles[y * geo.width + x]!);
   for (let y = 0; y < geo.height; y++)
     for (let x = 0; x < geo.width; x++) {
       const t = geo.tiles[y * geo.width + x] ?? 0;
@@ -21,6 +30,12 @@ export function drawMap(world: WorldView): HTMLCanvasElement {
       if (t === T.road) {
         g.fillStyle = '#625D55';
         g.fillRect(px + (hash(`c${x}:${y}`) % 7), py + (hash(`c${y}:${x}`) % 7), 1, 1);
+        // Línea discontinua entre los dos carriles de una calle de dos tiles (no en los cruces), como el prototipo.
+        g.fillStyle = '#C8BFA4';
+        if (at(x, y + 1) === T.road && at(x, y - 1) !== T.road && at(x, y + 2) !== T.road && at(x - 1, y) === T.road && at(x + 1, y) === T.road && at(x - 1, y + 1) === T.road)
+          for (let k = 0; k < TS; k += 6) if ((px + k) % 6 < 3) g.fillRect(px + k, py + TS - 1, 3, 1);
+        if (at(x + 1, y) === T.road && at(x - 1, y) !== T.road && at(x + 2, y) !== T.road && at(x, y - 1) === T.road && at(x, y + 1) === T.road && at(x + 1, y - 1) === T.road)
+          for (let k = 0; k < TS; k += 6) if ((py + k) % 6 < 3) g.fillRect(px + TS - 1, py + k, 1, 3);
       } else if (t === T.grass) {
         // Motas de hierba y bordillo claro hacia la calle, como el prototipo.
         const hv = hash(`h${x}:${y}`);
@@ -43,9 +58,14 @@ export function drawMap(world: WorldView): HTMLCanvasElement {
     const r = p.rect!;
     if (p.kind === 'espacio_publico.parque') drawPark(g, p.id, r.x * TS, r.y * TS, r.w * TS, r.h * TS);
     else if (p.kind.startsWith('espacio_publico')) drawPlaza(g, r.x * TS, r.y * TS, r.w * TS, r.h * TS);
-    else drawBuilding(g, p, r.x * TS, r.y * TS, r.w * TS, r.h * TS);
+    else {
+      const list: [number, number, number, number][] = [];
+      drawBuilding(g, p, r.x * TS, r.y * TS, r.w * TS, r.h * TS, list);
+      const pt = world.points?.[p.id];
+      if (pt) windows.set(`${pt[0]},${pt[1]}`, [...(windows.get(`${pt[0]},${pt[1]}`) ?? []), ...list]);
+    }
   }
-  return c;
+  return { canvas: c, windows };
 }
 
 /** Árbol de 5 × 7 px del prototipo. */
@@ -98,8 +118,13 @@ function drawPlaza(g: CanvasRenderingContext2D, x: number, y: number, w: number,
 }
 
 /** Edificio: sombra, muro, tejado a franjas con alero, ventanas, puerta, toldo y el distintivo de su tipo. */
-function drawBuilding(g: CanvasRenderingContext2D, p: WorldView['places'][number], x: number, y: number, w: number, h: number): void {
+function drawBuilding(g: CanvasRenderingContext2D, p: WorldView['places'][number], x: number, y: number, w: number, h: number, windows: [number, number, number, number][]): void {
   const s = styleOf(p.kind, p.id);
+  // Sendero de la puerta a la calle, como el prototipo.
+  if (p.door && p.door.y * TS > y + h) {
+    g.fillStyle = '#B6AE98';
+    g.fillRect(p.door.x * TS + 2, y + h, 4, p.door.y * TS - (y + h));
+  }
   const d = decorOf(p.kind);
   const office = p.kind === 'servicios.oficina' || p.kind.startsWith('gobierno') || p.kind.startsWith('finanzas');
   const rh = Math.max(3, Math.round(h * 0.4));
@@ -116,7 +141,11 @@ function drawBuilding(g: CanvasRenderingContext2D, p: WorldView['places'][number
   const doorX = p.door ? p.door.x * TS + 2 : x + Math.floor(w / 2) - 2;
   g.fillStyle = s.win;
   for (let wy = y + rh + 3; wy < y + h - 8; wy += office ? 4 : 6)
-    for (let wx = x + 4; wx < x + w - 5; wx += 6) if (!(Math.abs(wx + 1 - (doorX + 2)) < 4 && wy > y + h - 12)) g.fillRect(wx, wy, 3, office ? 2 : 3);
+    for (let wx = x + 4; wx < x + w - 5; wx += 6)
+      if (!(Math.abs(wx + 1 - (doorX + 2)) < 4 && wy > y + h - 12)) {
+        g.fillRect(wx, wy, 3, office ? 2 : 3);
+        windows.push([wx, wy, 3, office ? 2 : 3]);
+      }
   g.fillStyle = s.door;
   g.fillRect(doorX, y + h - 6, 4, 6);
   if (d.awning) for (let i = 0; i < w - 2; i++) {
@@ -148,27 +177,4 @@ function drawBuilding(g: CanvasRenderingContext2D, p: WorldView['places'][number
     g.fillRect(cx - 6, y + 3, 2, 5);
     g.fillRect(cx + 5, y + 3, 2, 5);
   }
-}
-
-/** Figura de una persona (3 × 6 px) en coordenadas de lienzo; resaltada si está seleccionada. */
-export function drawPerson(g: CanvasRenderingContext2D, id: string, px: number, py: number, scale: number, selected: boolean): void {
-  const l = lookOf(id);
-  const s = scale;
-  const x = Math.round(px - 1.5 * s);
-  const y = Math.round(py - 6 * s);
-  if (selected) {
-    g.fillStyle = '#FFE14D';
-    g.fillRect(x - s, y - s, 5 * s, 8 * s);
-  }
-  g.fillStyle = 'rgba(0,0,0,.25)';
-  g.fillRect(x, y + 6 * s, 3 * s, s);
-  g.fillStyle = l.hair;
-  g.fillRect(x, y, 3 * s, s);
-  g.fillStyle = l.skin;
-  g.fillRect(x, y + s, 3 * s, s);
-  g.fillStyle = l.shirt;
-  g.fillRect(x, y + 2 * s, 3 * s, 2 * s);
-  g.fillStyle = l.pants;
-  g.fillRect(x, y + 4 * s, s, 2 * s);
-  g.fillRect(x + 2 * s, y + 4 * s, s, 2 * s);
 }

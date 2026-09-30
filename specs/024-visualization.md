@@ -4,7 +4,7 @@ nombre: visualization
 estado: aprobada
 hito: M4
 depende_de: [022, 003, 004]
-version: 0.3
+version: 0.4
 ---
 
 # 024 — Visualización pixel art
@@ -62,6 +62,56 @@ Ventana visual al mundo en pixel art 2D: mapa, personas moviéndose, día/noche,
   Muestra las alertas de degeneración de la 022 R-010 y los enlaces de exportación CSV.
 - **R-012** [M] — **Detalle del prototipo (P5).** Árboles, el dibujo de cada tipo de lugar y los detalles del mapa se portan del prototipo (su comportamiento visual, no su código), con un contador de fotogramas visible.
 
+### Paridad con el prototipo (v0.4, decisiones del usuario del 2026-09-29, P1 a P6)
+Tras la revisión del usuario («no se parece en nada al prototipo; las personas quedan en círculos frente a los edificios»), el visor se rehace sobre el prototipo. Estas reglas sustituyen a la R-002 y amplían la R-003, la R-008 y la R-009.
+
+- **R-013** [M] — **Reproducción del movimiento (P1).**
+  - El visor lleva su propio reloj de vista, que avanza a la velocidad del mundo y va unos segundos por detrás del último minuto guardado (como mucho `VIEW_LAG_MAX`; si se queda más atrás, salta).
+  - Con los viajes de la 022 R-012 y la posición de partida de cada persona, calcula dónde está cada una en el minuto de la vista:
+    - camina por las calles (R-009) entre su salida y su llegada;
+    - si no, está en su lugar.
+  - Como en el prototipo, solo se dibuja a quien va de camino o está en un lugar al aire libre (parques y plazas, en puntos repartidos dentro). Dentro de un edificio no se ve; de noche se encienden las ventanas de los edificios con gente dentro.
+  - Mientras hay un avance sin observar (022 R-013), el mapa muestra «Simulando sin observar» con el porcentaje, como el prototipo.
+- **R-014** [M] — **Disposición del prototipo (P2).**
+  - Barra superior:
+    - título en fuente pixel;
+    - reloj grande con la fecha y «Día N de simulación»;
+    - botón Pausar;
+    - velocidades del motor (002) rotuladas en minutos de mundo por segundo;
+    - «Avanzar» 1 día, 1 semana, 1 mes y 1 año;
+    - indicadores: personas, con empleo, ánimo medio y eventos de hoy;
+    - acceso al panel del mundo y a la línea temporal.
+  - Mapa que llena su espacio, ajustado y centrado, con zoom de 1 a 6 y los botones −, +, «Seguir» (la cámara sigue a la persona elegida) y «Ver todo».
+  - Registro de eventos bajo el mapa.
+  - Inspector a la derecha (410 px).
+  - Mismos colores y tipografías que el prototipo (Atkinson Hyperlegible y Pixelify Sans), en claro y en oscuro.
+- **R-015** [M] — **Interacción con el mapa (P2).**
+  - Al pasar el ratón, un tooltip con el nombre y lo que hace, o con el lugar y cuántas personas hay dentro.
+  - Un clic elige a la persona o el lugar:
+    - la persona elegida lleva encima una flecha amarilla que parpadea;
+    - si está dentro de un edificio, parpadea el borde del edificio;
+    - el lugar elegido queda enmarcado.
+- **R-016** [M] — **Registro de eventos (P2).**
+  - Filtros: Todos, Trabajo, Relaciones, Economía, Salud e Información, más «Incluir menores» (ocio, sueño y rutina).
+  - Cada evento lleva la hora, una etiqueta de su clase (buena, mala, aviso o información, siempre con texto), el texto con los nombres pulsables y su «Por qué».
+- **R-017** [M] — **Ficha de vida (P3).**
+  - Cabecera: nombre, id, edad, vivienda, barrio, la línea «Ahora: … hasta las …» y el botón Charlar.
+  - Pestañas: Estado, Relaciones, Memoria, Historia, Creencias, Vida, Funcional y Charlas.
+    - **Estado:** barras de necesidades, ánimo y estrés; recursos y situación; temperamento.
+    - **Relaciones:** cada vínculo desde las dos perspectivas.
+    - **Memoria:** recuerdos con su fuerza y los casi olvidados atenuados.
+    - **Historia:** informe de vida y trayectoria de eventos con su «¿por qué?».
+    - **Creencias:** lo que cree de otros y lo que otros creen de esta persona frente a la verdad.
+    - **Vida:** subpestañas Informe, Desarrollo y Familia.
+  - La ficha del lugar lista su personal (022 R-014).
+  - Sin nadie elegido, la población muestra por persona su nombre, edad y lo que hace con el nombre del lugar («trabajando en …», «camino a casa»). Aparece nada más abrir el visor.
+- **R-018** [M] — **Charla mejorada (P4, amplía la 043 R-017).**
+  - Panel junto al mapa (el mundo sigue a la vista), con la figura pixel de la persona y su ánimo y estrés.
+  - Mensajes en burbujas; indicador «escribiendo…» mientras llega la respuesta; Enter envía y Mayúsculas+Enter salta de línea.
+  - En cada respuesta, un desplegable con por qué respondió así.
+  - Al despedirse, un resumen de lo que cambió en la persona durante la charla (ánimo y estrés antes y después, y si la recordará).
+- **R-019** [M] — **Guía para el equipo (P6).** Una guía breve en `docs/` explica cómo arrancar el visor y qué muestra cada parte.
+
 ## 5. Eventos
 No define tipos propios (usa los de otras specs).
 
@@ -78,13 +128,19 @@ No define tipos propios (usa los de otras specs).
 - **CA-006** — El buscador de la población filtra por nombre sin distinguir mayúsculas ni tildes, y la ficha de un lugar muestra a quién hay dentro (pruebas del formateo).
 - **CA-007** — En la línea temporal, elegir un día pasado pide sus datos a la 022 R-009 y el aviso de «día pasado» se muestra; volver al presente reanuda el vivo (prueba de la lógica).
 - **CA-008** — El panel del mundo dibuja una serie por métrica y muestra cada alerta que da la API (prueba del formateo).
+- **CA-009** — *Dado* un viaje con su salida y su llegada, *entonces* la posición en el reloj de vista está en su lugar de origen antes de salir, sobre la ruta durante el viaje y en su destino después; quien está en un edificio no se dibuja y quien está en un parque sí (prueba de la lógica).
+- **CA-010** — El reloj de vista avanza a la velocidad del mundo, nunca pasa del último minuto guardado y salta si se queda más de `VIEW_LAG_MAX` atrás (prueba de la lógica).
+- **CA-011** — El filtro del registro clasifica cada tipo de evento en su categoría y oculta los menores salvo que se pidan (prueba del formateo).
+- **CA-012** — Cada pestaña de la ficha muestra los datos de una ficha de ejemplo, incluidas las perspectivas de un vínculo y lo que otros creen de la persona (prueba del formateo).
+- **CA-013** — Revisión visual: capturas del visor y del prototipo lado a lado (claro, oscuro y 375 px) en `docs/validaciones/`, y aceptación del usuario.
 
 ## 8. Parámetros y calibración
 | Parámetro | Valor | Estado |
 |---|---|---|
 | Tamaño de tile | 8 px | prototipo |
 | Escala inicial | 3 (entera, 1–6) | [M] |
-| Opacidad máxima de la noche | 0,45 | [M] |
+| Opacidad máxima de la noche | 0,5 (la del prototipo) | [M] |
+| `VIEW_LAG_MAX` (retraso máximo del reloj de vista) | 90 min de mundo, o 5 s reales a la velocidad del mundo si es más | [M] |
 
 ## 9. Métricas
 Fps del render (visible en el visor).
@@ -103,3 +159,5 @@ Fps del render (visible en el visor).
 | 2026-09-28 | — | 041 R-009 (decisión del usuario): pestaña **Vida** en la ficha, con el familiograma extenso y la historia de vida por etapas. Sin cambios en CA |
 | 2026-09-29 | 0.3 | Ampliación de M4, aprobada por el usuario (P1 a P5): población y lugares (R-008), recorridos por las calles (R-009), línea temporal (R-010), panel del mundo (R-011) y detalle del prototipo con contador de fotogramas (R-012). CA-005 a CA-008 nuevos; CA-001 (fps con 500 personas) se vuelve a revisar con el detalle portado |
 | 2026-09-29 | 0.3 | Implementación de M4 (O1–O5, `apps/web`). Precisiones: en R-011, etiqueta directa hasta 4 series (con 5 tipos de evento, solo leyenda); en R-012, el azar del prototipo (árboles y bancos) se sustituye por un hash de la posición, y la línea central de la carretera no se porta porque el mapa ya no es una rejilla fija. El generador llega hoy a 254 personas con el mapa actual, así que CA-001 se midió dibujando 500 figuras: 2,2 ms por cuadro. CA-005 a CA-008 verdes; CA-001 y CA-003 quedan para la revisión del usuario |
+| 2026-09-29 | 0.4 | Paridad con el prototipo, aprobada por el usuario (P1 a P6) tras su revisión («no se parece en nada al prototipo»): reproducción del movimiento con reloj de vista (R-013, sustituye a la R-002), disposición del prototipo (R-014), interacción con el mapa (R-015), registro con filtros (R-016), ficha de vida con pestañas y subpestañas (R-017), charla mejorada (R-018, amplía la 043 R-017) y guía para el equipo (R-019). Opacidad de la noche 0,5, como el prototipo. CA-009 a CA-013 nuevos |
+| 2026-09-29 | 0.4 | Implementación de la paridad (P1 a P6), probada de punta a punta con capturas (`docs/validaciones/M4-paridad-prototipo.md`). Precisiones:<br>- las pestañas de la ficha pasan a dos líneas cuando no caben;<br>- el lugar de «Ahora» es un enlace a su ficha;<br>- el acceso usa un formulario propio;<br>- `pnpm dev` arranca a 1 min/s y con credenciales locales si no hay otras.<br>Hallazgo: el visor dibuja cada trayecto simulado, pero hay mucha menos gente en la calle que en el prototipo (0,36 personas de media), por el modelo: 8 m por tile (≈ 45 m en el prototipo) y unos 0,7 viajes por persona y día. Queda para decisión del usuario. CA-009 a CA-012 verdes; CA-013 pendiente de su revisión |

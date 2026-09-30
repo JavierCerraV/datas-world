@@ -1,10 +1,10 @@
 // Visor (spec 024): CA-002 (el inspector muestra la ficha de la API) y CA-004 (lógica determinista y probada).
 import { describe, expect, it } from 'vitest';
 import { causeEs, eventEs, inspectorTabs, stimulusEs } from './format.ts';
-import { hash, interpolate, lookOf, nightAlpha, spread, styleOf, timeOf } from './logic.ts';
-import type { CitizenDetail, CitizenPosition } from './types.ts';
-
-const pos = (id: string, x: number | null, y: number | null): CitizenPosition => ({ id, name: id, x, y, activity: 'idle', placeId: null, moving: false, mood: 0.5 });
+import { clockOf, frameOf } from './camera.ts';
+import { darkness } from './figures.ts';
+import { hash, lookOf, styleOf } from './logic.ts';
+import type { CitizenDetail } from './types.ts';
 
 describe('024 CA-004: lógica pura del visor', () => {
   it('R-006: el aspecto sale del id, igual en cada llamada, con colores de las paletas del prototipo', () => {
@@ -15,31 +15,25 @@ describe('024 CA-004: lógica pura del visor', () => {
     expect(lookOf('CIT-000042').skin).toMatch(/^#[0-9A-F]{6}$/);
   });
 
-  it('R-007: el velo nocturno es 0 de día, máximo de noche y sube de forma continua al atardecer', () => {
-    expect(nightAlpha(12)).toBe(0);
-    expect(nightAlpha(23)).toBe(0.45);
-    expect(nightAlpha(3)).toBe(0.45);
-    expect(nightAlpha(18, 30)).toBeCloseTo(0.225, 10);
-    expect(nightAlpha(6)).toBeCloseTo(0.225, 10);
-    expect(timeOf('2027-01-04 07:35')).toEqual({ hour: 7, minute: 35 });
-  });
-
-  it('R-002: la interpolación va de la posición anterior a la nueva; fuera del mapa no se dibuja', () => {
-    const prev = new Map([['a', pos('a', 0, 0)]]);
-    expect(interpolate(prev, [pos('a', 10, 20), pos('b', 1, 1), pos('c', null, null)], 0.5)).toEqual([
-      { id: 'a', x: 5, y: 10 },
-      { id: 'b', x: 1, y: 1 },
-    ]);
-    expect(interpolate(prev, [pos('a', 10, 20)], 2)).toEqual([{ id: 'a', x: 10, y: 20 }]);
-  });
-
-  it('varias personas en la misma puerta se reparten para verse; una sola queda en su sitio', () => {
-    const one = spread([{ id: 'a', x: 3, y: 3 }]);
-    expect(one).toEqual([{ id: 'a', x: 3, y: 3 }]);
-    const many = spread(Array.from({ length: 4 }, (_, i) => ({ id: `p${i}`, x: 3, y: 3 })));
-    expect(new Set(many.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`)).size).toBe(4);
+  it('R-007: la noche del prototipo: 0 de día, 0,5 de noche y rampas continuas al amanecer y al atardecer', () => {
+    expect(darkness(12 * 60)).toBe(0);
+    expect(darkness(23 * 60)).toBe(0.5);
+    expect(darkness(3 * 60)).toBe(0.5);
+    expect(darkness(6 * 60)).toBeCloseTo(0.25, 10); // a mitad del amanecer (5:00 a 7:00)
+    expect(darkness(18 * 60 + 75)).toBeCloseTo(0.25, 10); // a mitad del atardecer (18:00 a 20:30)
+    expect(darkness(1440 + 23 * 60)).toBe(0.5); // cualquier día
     expect(styleOf('ocio.cafe', 'PLC-1').roof).toBe('#6E4630');
     expect(styleOf('vivienda.unidad', 'PLC-7')).toEqual(styleOf('vivienda.unidad', 'PLC-7'));
+  });
+
+  it('R-014: la cámara ajusta el mapa a su espacio, centrado, y escala entera desde ×3', () => {
+    const f = frameOf({ x: 0, y: 0, z: 1 }, 800, 400, 640, 400);
+    expect(f.s).toBe(1);
+    expect([f.cx, f.cy]).toEqual([320, 200]); // cabe entero: centrado
+    const z = frameOf({ x: 0, y: 0, z: 3.4 }, 800, 400, 640, 400);
+    expect(z.s).toBe(3);
+    expect(z.cx).toBeCloseTo(800 / 3 / 2, 5); // sin salirse del mapa
+    expect(clockOf('2026-01-01T00:00', 1440 + 7 * 60 + 35)).toEqual({ time: '07:35', date: 'viernes 2 ene 2026', day: 'Día 2 de simulación', iso: '2026-01-02' });
   });
 });
 
@@ -89,7 +83,7 @@ describe('024 CA-002: el inspector muestra la ficha de /api/citizens/:id', () =>
     expect(all).toContain('Ocupación: desempleado/a');
     expect(all).toContain('Alimentación: 80 %');
     expect(all).toContain('Miedo: 20 %');
-    expect(t.historia).toEqual([{ id: expect.stringMatching(/^EVT-/) as unknown as string, line: '2027-01-04 19:00 · Tiempo libre: Ver series — Ana Rojas Gómez', causes: ['reforzador: diversión (0.6)', 'por un hecho anterior (EVT-00000000002)'] }]);
+    expect(t.historia).toEqual([{ id: expect.stringMatching(/^EVT-/) as unknown as string, line: '2027-01-04 19:00 · Tiempo libre: Ver series — Ana Rojas Gómez', causes: ['le gusta: diversión', 'un hecho anterior'] }]);
     const f = t.funcional.flatMap((s) => s.rows.map((r) => `${r.label}: ${r.value}`));
     expect(f).toContain('despido: desagradable 62 % · 2 veces');
     expect(f).toContain('buscando empleo (rutina) → trabajo: le funciona (tracking) · peso 0.31');
@@ -133,7 +127,9 @@ describe('024 CA-002: el inspector muestra la ficha de /api/citizens/:id', () =>
   it('estímulos, causas y eventos legibles', () => {
     expect(stimulusEs('actividad.deporte.futbol')).toBe('futbol (actividad)');
     expect(stimulusEs('dominio.amistad')).toBe('amistad (valor)');
-    expect(causeEs({ state: 'deuda_de_sueno', value: 120, weight: 0.5 })).toBe('deuda de sueno (120)');
+    expect(causeEs({ state: 'deuda_de_sueno', value: 120, weight: 0.5 })).toBe('deuda de sueño (120)');
+    expect(causeEs({ event: 'EVT-000000029294', weight: 1 })).toBe('un hecho anterior');
+    expect(causeEs({ state: 'mismo_lugar', value: null, weight: 1 })).toBe('estaban en el mismo lugar');
     expect(eventEs({ ...detail.events[0]!, type: 'NUEVO_TIPO', payload: {} })).toBe('2027-01-04 19:00 · NUEVO_TIPO — Ana Rojas Gómez');
   });
 });

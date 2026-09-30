@@ -3,7 +3,9 @@
 import type { Runner, Speed, World } from '@datas-world/engine';
 import { lifeRunner } from '@datas-world/generators';
 import {
-  FLUSH_TICKS,
+  ADVANCE_MINUTES,
+  ADVANCE_SLICE_MS,
+  FLUSH_MS,
   WorldRepository,
   WorldSession,
   acquireWriterLock,
@@ -18,6 +20,8 @@ import type { ControlCommand, Db } from '@datas-world/persistence';
 export interface WorkerOptions {
   /** Velocidad con que arranca. Si difiere de la del Runner (1x), se aplica como entrada externa. */
   speed?: Speed;
+  /** Reloj en ms para medir los tramos de un avance sin observar (027 R-015); main.ts pasa `performance.now`. */
+  clock?: () => number;
 }
 
 export class WorldWorker {
@@ -46,6 +50,9 @@ export class WorldWorker {
     // spec 001 R-006: un mundo recién creado empieza a vivir; uno en pausa sigue en pausa.
     if (this.world.status === 'created') this.runner.resume('arranque del worker');
     if (opts.speed !== undefined && opts.speed !== this.runner.speed) this.runner.setSpeed(opts.speed);
+    this.#clock = opts.clock ?? (() => 0);
+    this.session.trackMoves(); // 027 R-013
+    this.repo.setAdvance(null); // un avance interrumpido por un cierre no se reanuda
     this.session.flush();
     if (this.repo.countSnapshots() === 0) this.repo.saveSnapshot(this.world);
   }
@@ -55,8 +62,16 @@ export class WorldWorker {
     try {
       switch (c.cmd) {
         case 'pause':
+          this.#endAdvance(); // 027 R-015: una pausa interrumpe el avance
           this.runner.pause('orden de control');
           return true;
+        case 'advance': {
+          const minutes = Number(c.arg);
+          if (!ADVANCE_MINUTES.includes(minutes) || this.#advance) return false;
+          this.#advance = { from: this.world.now, to: this.world.now + minutes };
+          this.repo.setAdvance(this.#advance);
+          return true;
+        }
         case 'resume':
           this.runner.resume('orden de control');
           return true;
@@ -82,8 +97,9 @@ export class WorldWorker {
   }
 
   /**
-   * Una vuelta del bucle: órdenes pendientes y luego el tiempo real transcurrido, en trozos de como mucho
-   * FLUSH_TICKS ticks para hacer flush cada FLUSH_TICKS (R-002). Devuelve los ticks y si hay que parar.
+   * Una vuelta del bucle: órdenes pendientes y luego el tiempo real transcurrido, tick a tick, con flush cada
+   * FLUSH_TICKS ticks (R-002) o cada FLUSH_MS de tiempo real (R-014); durante un avance sin observar, un tramo de él
+   * (R-015). Devuelve los ticks y si hay que parar.
    */
   pump(elapsedMs: number): { ticks: number; stop: boolean } {
     if (this.#closed) throw new Error('El worker ya está cerrado');
@@ -97,9 +113,13 @@ export class WorldWorker {
     // "o al pausar": cualquier cambio de control se persiste enseguida, como punto de control (027 R-012)
     if (changed) this.session.flush(true);
 
+    if (this.#advance) return { ticks: this.#advanceSlice(), stop: false };
+
     let ticks = 0;
     if (this.world.status === 'running' && this.runner.speed > 0) {
-      const chunk = Math.max(1, Math.floor((FLUSH_TICKS * this.world.config.tickMinutes * 1000) / this.runner.speed));
+      // Trozos del tiempo real de un tick: cada uno da como mucho un tick, y tras cada tick se anotan los viajes
+      // que empiezan (027 R-013). El resultado es el mismo que con trozos mayores (el Runner acumula el resto).
+      const chunk = Math.max(1, Math.floor((this.world.config.tickMinutes * 1000) / this.runner.speed));
       for (let left = elapsedMs; left > 0; left -= chunk) {
         const n = this.runner.onRealTime(Math.min(left, chunk));
         ticks += n;
@@ -108,7 +128,45 @@ export class WorldWorker {
     } else {
       this.runner.onRealTime(elapsedMs); // descarta el acumulado en pausa
     }
+    // R-014: flush también por tiempo real, para que el visor vea el mundo con pocos segundos de retraso.
+    this.#sinceFlush = this.session.pendingTicks === 0 ? 0 : this.#sinceFlush + elapsedMs;
+    if (this.#sinceFlush >= FLUSH_MS) {
+      this.session.flush();
+      this.#sinceFlush = 0;
+    }
     return { ticks, stop: false };
+  }
+
+  #clock: () => number;
+  #sinceFlush = 0;
+  #advance: { from: number; to: number } | null = null;
+
+  /** 027 R-015: un tramo del avance sin observar, tan rápido como se pueda, y flush; al llegar, punto de control. */
+  #advanceSlice(): number {
+    const start = this.#clock();
+    const to = this.#advance!.to;
+    let ticks = 0;
+    while (this.world.now < to && (ticks === 0 || this.#clock() - start < ADVANCE_SLICE_MS)) {
+      this.runner.advanceTicks(1);
+      this.session.ticked(1, false);
+      ticks++;
+    }
+    if (this.world.now >= to) {
+      this.#endAdvance();
+      this.session.flush(true);
+    } else this.session.flush();
+    return ticks;
+  }
+
+  #endAdvance(): void {
+    if (!this.#advance) return;
+    this.#advance = null;
+    this.repo.setAdvance(null);
+  }
+
+  /** El avance sin observar en curso, o ninguno. */
+  get advance(): { from: number; to: number } | null {
+    return this.#advance;
   }
 
   /** R-007: registra WORLD_CLOSED, vuelca todo, deja instantánea, libera el cerrojo y cierra la base. */

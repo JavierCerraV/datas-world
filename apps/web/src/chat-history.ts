@@ -60,10 +60,10 @@ export async function fetchTurns(auth: Auth, id: string): Promise<ChatTurn[] | n
 }
 
 /** Rellena la pestaña: pide credenciales si hacen falta y carga cada transcripción al desplegarla. */
-export async function showChatHistory(el: HTMLElement, citizenId: string, auth: Auth, askAuth: () => boolean): Promise<void> {
+export async function showChatHistory(el: HTMLElement, citizenId: string, auth: Auth, askAuth: () => Promise<boolean>): Promise<void> {
   el.innerHTML = '<p>Cargando charlas…</p>';
   let r = await fetchChats(auth, citizenId);
-  if (r.status === 401 && askAuth()) r = await fetchChats(auth, citizenId);
+  if (r.status === 401 && (await askAuth())) r = await fetchChats(auth, citizenId);
   if (r.status === 401) return void (el.innerHTML = '<p>Las charlas necesitan usuario y contraseña.</p>');
   if (r.status === 503) return void (el.innerHTML = '<p>La charla está desactivada (define DATAS_WORLD_USER y DATAS_WORLD_PASSWORD).</p>');
   el.innerHTML = renderChatList(r.rows);

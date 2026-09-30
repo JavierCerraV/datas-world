@@ -1,6 +1,5 @@
-// Lógica pura del visor (spec 024 CA-004): colores del prototipo, aspecto estable por persona (R-006), velo de
-// día y noche (R-007) e interpolación de posiciones (R-002). Sin DOM, para poder probarla.
-import type { CitizenPosition } from './types.ts';
+// Lógica pura del visor (spec 024 CA-004): colores del prototipo y aspecto estable por persona (R-006). El velo de la
+// noche está en `figures.ts` y la reproducción del movimiento (que sustituye a la interpolación, R-013) en `replay.ts`.
 
 export const TS = 8; // tile de 8 px (R-001)
 
@@ -74,57 +73,4 @@ export function lookOf(id: string): Look {
   };
 }
 
-/** R-007: opacidad del velo nocturno según la hora (0 de 7:00 a 17:00; 0,45 de 20:00 a 5:00; rampas entre medias). */
-export function nightAlpha(hour: number, minute = 0, max = 0.45): number {
-  const t = hour + minute / 60;
-  if (t >= 7 && t <= 17) return 0;
-  if (t > 17 && t < 20) return (max * (t - 17)) / 3;
-  if (t > 5 && t < 7) return (max * (7 - t)) / 2;
-  return max;
-}
 
-/** Hora y minuto de una fecha de la API (`2027-01-04 07:35`). */
-export function timeOf(date: string): { hour: number; minute: number } {
-  const m = /(\d\d):(\d\d)$/.exec(date);
-  return m ? { hour: Number(m[1]), minute: Number(m[2]) } : { hour: 12, minute: 0 };
-}
-
-/**
- * R-002: posición interpolada entre dos actualizaciones (`t` ∈ [0,1]). Quien no estaba antes aparece en su sitio;
- * quien está fuera del mapa (`x = null`) no se dibuja.
- */
-export function interpolate(prev: ReadonlyMap<string, CitizenPosition>, next: readonly CitizenPosition[], t: number): { id: string; x: number; y: number }[] {
-  const k = Math.min(1, Math.max(0, t));
-  const out: { id: string; x: number; y: number }[] = [];
-  for (const c of next) {
-    if (c.x === null || c.y === null) continue;
-    const p = prev.get(c.id);
-    if (!p || p.x === null || p.y === null) out.push({ id: c.id, x: c.x, y: c.y });
-    else out.push({ id: c.id, x: p.x + (c.x - p.x) * k, y: p.y + (c.y - p.y) * k });
-  }
-  return out;
-}
-
-/** Varias personas en el mismo punto (una puerta) se reparten en un pequeño círculo para verse. */
-export function spread(points: readonly { id: string; x: number; y: number }[]): { id: string; x: number; y: number }[] {
-  const groups = new Map<string, { id: string; x: number; y: number }[]>();
-  for (const p of points) {
-    const key = `${Math.round(p.x * 4)}|${Math.round(p.y * 4)}`;
-    const g = groups.get(key);
-    if (g) g.push(p);
-    else groups.set(key, [p]);
-  }
-  const out: { id: string; x: number; y: number }[] = [];
-  for (const g of groups.values()) {
-    if (g.length === 1) {
-      out.push(g[0]!);
-      continue;
-    }
-    const r = Math.min(1.2, 0.25 + 0.05 * g.length);
-    g.forEach((p, i) => {
-      const a = (2 * Math.PI * i) / g.length;
-      out.push({ id: p.id, x: p.x + r * Math.cos(a), y: p.y + r * Math.sin(a) });
-    });
-  }
-  return out;
-}
