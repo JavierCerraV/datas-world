@@ -17,7 +17,7 @@
   gap: 6px 24px;
   padding: 10px 24px;
   background: var(--panel-2);
-  border-bottom: 1px solid var(--line);
+  border-bottom: var(--dw-border) solid var(--dw-edge);
   font-size: 13px;
 }
 .dotlbl {
@@ -62,19 +62,19 @@
   max-width: 560px;
   margin: 16px 40px;
   padding: 18px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
+  border-radius: var(--dw-radius);
+  border: var(--dw-border) solid var(--dw-edge);
+  box-shadow: 0 var(--dw-lift) 0 var(--dw-shadow);
   background: var(--panel);
   display: grid;
   gap: 8px;
 }
 .chat-start h2 {
-  font-size: 15px;
-  font-weight: 600;
+  font: 400 18px var(--font-display);
 }
 .chat-start .choice {
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  border: 3px solid var(--dw-edge);
+  border-radius: 10px;
   padding: 10px 12px;
   cursor: pointer;
 }
@@ -125,18 +125,20 @@
 }
 .msg .bubble {
   padding: 11px 14px;
-  border-radius: 10px;
+  border: var(--dw-border) solid var(--dw-edge);
+  border-radius: var(--dw-radius);
+  box-shadow: 0 3px 0 var(--dw-shadow);
   font-size: 14px;
   line-height: 1.5;
   white-space: pre-wrap;
 }
 .msg.visitor .bubble {
-  background: var(--ink);
-  color: var(--panel);
+  background: linear-gradient(var(--dw-blue-hi), var(--dw-blue));
+  color: var(--dw-white);
+  text-shadow: 0 1px 0 var(--dw-edge);
 }
 .msg.citizen .bubble {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--panel-2);
 }
 .msg .marks {
   font-size: 12px;
@@ -214,7 +216,7 @@
   gap: 10px;
   padding: 12px 40px 16px;
   background: var(--panel);
-  border-top: 1px solid var(--line);
+  border-top: var(--dw-border) solid var(--dw-edge);
 }
 .chat-form label {
   display: flex;
@@ -229,10 +231,10 @@
 .chat-form select,
 .chat-form textarea {
   height: 40px;
-  border-radius: 8px;
-  border: 1px solid var(--line-2);
-  background: var(--panel);
-  padding: 9px 12px;
+  border-radius: 10px;
+  border: var(--dw-border) solid var(--dw-edge);
+  background: var(--panel-2);
+  padding: 7px 12px;
   font-size: 14px;
   resize: vertical;
 }
@@ -247,7 +249,7 @@
   overflow: auto;
   padding: 18px 20px;
   background: var(--panel);
-  border-left: 1px solid var(--line);
+  border-left: var(--dw-border) solid var(--dw-edge);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -257,8 +259,7 @@
   border-top: 1px solid var(--soft);
 }
 .chat-side h2 {
-  font-size: 13px;
-  font-weight: 600;
+  font: 400 16px var(--font-display);
   margin-bottom: 4px;
 }
 .chat-side ul {

@@ -90,6 +90,7 @@ async function loadStats(): Promise<void> {
     renderNow(g.now);
   }
   topbar.setStats(stats, latest, orgs);
+  dashboard.refreshLive();
 }
 
 const topbar = setupTopbar({ message, status: () => status });
@@ -103,6 +104,7 @@ const cohort = setupCohort({
     tag.hidden = !on;
     tag.textContent = on ? `${r.count} resaltadas` : '';
     tag.title = describe(f, r);
+    dashboard.refreshCohort();
   },
 });
 const log = setupLog({ openPerson: (id) => router.go({ view: 'mundo', person: id }) });
@@ -158,7 +160,13 @@ const chat = setupChat({
   clock: (m) => (world ? clockOf(world.epoch, m).time : ''),
 });
 
-const dashboard = setupDashboard({ fetch: api.demographics, metrics: api.metrics });
+const dashboard = setupDashboard({
+  fetch: api.demographics,
+  metrics: api.metrics,
+  live: () => (stats ? { employedPct: Math.round(stats.employedPct * 100) / 100, mood: Math.round(stats.moodMean * 100) / 100 } : null),
+  cohort: () => (cohort.ids() ? describe(cohort.filter(), cohort.result()) : null),
+  clearCohort: cohort.reset,
+});
 
 const router = setupRouter((r: Route, prev) => {
   if (r.view !== 'datos' && r.person) tabPerson = r.person;

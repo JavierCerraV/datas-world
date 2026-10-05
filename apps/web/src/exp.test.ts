@@ -152,6 +152,18 @@ describe('024 R-023: dashboard', () => {
     expect(d).toContain('Ver como gráfica');
     expect(renderDashboard({ ...g, period: 'all' }, { pyramid: false, occ: false })).toContain('Nacidos · desde la fundación');
   });
+
+  it('R-028: empleo, ánimo y estrés aparecen con las cifras vivas y no se inventan sin ellas', () => {
+    const sin = renderDashboard(g, { pyramid: false, occ: false });
+    expect(sin).not.toContain('Con empleo');
+    const con = renderDashboard(g, { pyramid: false, occ: false }, { employedPct: 0.793, mood: 0.54, stress: 0.31 });
+    expect(con).toContain('79 %');
+    expect(con).toContain('Ánimo medio');
+    expect(con).toContain('0,54');
+    expect(con).toContain('Estrés medio');
+    expect(con).toContain('0,31');
+    expect(renderDashboard(g, { pyramid: false, occ: false }, { employedPct: 0.79, mood: 0.54, stress: null })).not.toContain('Estrés medio');
+  });
 });
 
 describe('024 R-021: capas, panel «Ahora» y escala', () => {

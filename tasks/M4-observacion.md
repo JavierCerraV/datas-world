@@ -37,5 +37,5 @@ Referencia: el lienzo de 10 arenas, tablero T10 (https://claude.ai/artifact/5FCJ
 - [x] T1 Estilos y marco: `dw-tokens.css` (CA-018), barra superior con pestañas, controles de tiempo globales y `tabHref`.
 - [x] T2 Mundo (R-026, CA-019): cohorte con su lógica pura, capas, ficha compacta, «Ahora» y mapa recoloreado. Añade 022 R-017 (ocupación y estrato en `/api/citizens`).
 - [x] T3 Expediente (R-027, CA-020): cabecera, seis pestañas, mazo de conducta, camino de vida y fuentes de control.
-- [ ] T4 Dashboard y Charla (R-028, R-029).
+- [x] T4 Dashboard y Charla (R-028, R-029).
 - [ ] T5 Capturas junto al lienzo en `docs/validaciones/M4-visor-datas-world.md` y aceptación del usuario (CA-021).

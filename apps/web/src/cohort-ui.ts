@@ -10,6 +10,8 @@ const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x
 export interface CohortPanel {
   /** Recalcula con la población de ahora (cada segundo). */
   refresh: () => void;
+  /** Quita el filtro (el «✕» de la cohorte activa en el dashboard). */
+  reset: () => void;
   /** Los ids de la cohorte, o null si no hay filtro. */
   ids: () => ReadonlySet<string> | null;
   filter: () => CohortFilter;
@@ -97,6 +99,7 @@ export function setupCohort(o: { people: () => readonly CohortPerson[]; onChange
       update();
       if (res.count !== before) o.onChange(res, f);
     },
+    reset: () => set(ALL_COHORT),
     ids: () => res.ids,
     filter: () => f,
     result: () => res,

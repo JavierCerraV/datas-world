@@ -2,7 +2,10 @@
 // nacidos y fallecidos del periodo con su tasa por mil, hogares y organizaciones); la pirámide por edad y sexo y las
 // personas por ocupación, cada una con «Ver como tabla» y su valor al pasar el cursor; y debajo las series por día y
 // las alertas del panel del mundo (R-011). Las gráficas son SVG puro y se prueban (CA-015).
+import { dec } from './card-compact.ts';
 import type { Demographics } from './dossier-types.ts';
+import { icon } from './icons.ts';
+import type { IconName } from './icons.ts';
 import { bindChartHover, renderWorldPanel } from './world-panel.ts';
 import type { Metrics } from './world-panel.ts';
 
@@ -11,6 +14,13 @@ const num = (x: number) => x.toLocaleString('es-CO');
 const perMil = (x: number) => `${String(x).replace('.', ',')} ‰`;
 export const PERIODS: readonly ['month' | 'year' | 'all', string][] = [['month', 'Último mes'], ['year', 'Último año'], ['all', 'Desde la fundación']];
 const PERIOD_OF: Record<string, string> = { month: 'último mes', year: 'último año', all: 'desde la fundación' };
+
+/** Cifras vivas del mundo para los indicadores de empleo, ánimo y estrés (`stress` es null si aún no hay métricas). */
+export interface LiveFigures {
+  employedPct: number;
+  mood: number;
+  stress: number | null;
+}
 
 /** Tope redondo del eje: el siguiente múltiplo de 10 (así la marca del medio es entera). */
 export const niceMax = (m: number) => Math.max(10, Math.ceil(m / 10) * 10);
@@ -66,10 +76,14 @@ const pyramidTable = (p: Demographics['pyramid']) => `<table class="dtable"><the
 const occTable = (o: Demographics['occupations'], total: number) => `<table class="dtable"><thead><tr><th>Ocupación</th><th>Personas</th><th>%</th></tr></thead><tbody>${o.map((r) => `<tr><td>${esc(r.name)}</td><td class="mono">${r.count}</td><td class="mono">${total ? Math.round((r.count / total) * 100) : 0}</td></tr>`).join('')}</tbody></table>`;
 
 /** CA-015: el dashboard completo (sin las series, que se añaden al llegar las métricas). */
-export function renderDashboard(g: Demographics, tables: { pyramid: boolean; occ: boolean }): string {
-  const kpi = (label: string, value: string, note: string) => `<div class="kpi"><span>${esc(label)}</span><b class="mono">${value}</b><small>${esc(note)}</small></div>`;
+export function renderDashboard(g: Demographics, tables: { pyramid: boolean; occ: boolean }, extra?: LiveFigures): string {
+  const kpi = (ic: IconName, label: string, value: string, note: string) => `<div class="kpi"><span class="ki">${icon(ic, 22, 'var(--dw-white)')}</span><span>${esc(label)}</span><b class="mono">${value}</b><small>${esc(note)}</small></div>`;
   const per = PERIOD_OF[g.period] ?? '';
-  const kpis = `<div class="kpis">${kpi('Personas', num(g.population), 'vivas en el mundo')}${kpi(`Nacidos · ${per}`, num(g.births.count), `tasa bruta ${perMil(g.births.perThousand)}`)}${kpi(`Fallecidos · ${per}`, num(g.deaths.count), `tasa bruta ${perMil(g.deaths.perThousand)}`)}${kpi('Hogares', num(g.households.count), `${String(g.households.meanSize).replace('.', ',')} personas por hogar`)}${kpi('Organizaciones', num(g.organizations), 'empresas, comercios y entidades')}</div>`;
+  // R-028: empleo, ánimo y estrés salen de las cifras vivas del mundo (022 R-010 y R-013); sin ellas no se muestran.
+  const live = extra
+    ? kpi('briefcase', 'Con empleo', `${Math.round(extra.employedPct * 100)} %`, 'de las personas en edad de trabajar') + kpi('star', 'Ánimo medio', dec(extra.mood), 'de 0 a 1') + (extra.stress === null ? '' : kpi('bolt', 'Estrés medio', dec(extra.stress), 'de 0 a 1'))
+    : '';
+  const kpis = `<div class="kpis">${kpi('users', 'Personas', num(g.population), 'vivas en el mundo')}${live}${kpi('heart', `Nacidos · ${per}`, num(g.births.count), `tasa bruta ${perMil(g.births.perThousand)}`)}${kpi('moon', `Fallecidos · ${per}`, num(g.deaths.count), `tasa bruta ${perMil(g.deaths.perThousand)}`)}${kpi('home', 'Hogares', num(g.households.count), `${String(g.households.meanSize).replace('.', ',')} personas por hogar`)}${kpi('shield', 'Organizaciones', num(g.organizations), 'empresas, comercios y entidades')}</div>`;
   const toggle = (k: string, on: boolean) => `<button class="link" type="button" data-table="${k}" aria-pressed="${on}">${on ? 'Ver como gráfica' : 'Ver como tabla'}</button>`;
   const pyr = `<section class="card"><div class="card-head"><h2>Personas por edad y sexo</h2>${toggle('pyramid', tables.pyramid)}</div>`
     + `<p class="legend"><span><i class="sw-f"></i>Mujeres · ${g.women}</span><span><i class="sw-m"></i>Hombres · ${g.men}</span></p>`
@@ -81,33 +95,60 @@ export function renderDashboard(g: Demographics, tables: { pyramid: boolean; occ
 }
 
 /** Cablea la pantalla Datos: se piden los datos al abrirla y al cambiar de periodo. */
-export function setupDashboard(o: { fetch: (p: 'month' | 'year' | 'all') => Promise<Demographics>; metrics: () => Promise<Metrics> }): { show: () => void } {
+export interface DashboardDeps {
+  fetch: (p: 'month' | 'year' | 'all') => Promise<Demographics>;
+  metrics: () => Promise<Metrics>;
+  /** Empleo y ánimo de ahora (022 R-013), si ya se conocen. */
+  live: () => { employedPct: number; mood: number } | null;
+  /** Resumen de la cohorte activa de la pantalla Mundo (024 R-026), o null si no hay filtro. */
+  cohort: () => string | null;
+  clearCohort: () => void;
+}
+
+export function setupDashboard(o: DashboardDeps): { show: () => void; refreshCohort: () => void; refreshLive: () => void } {
   const root = document.querySelector<HTMLElement>('#view-datos')!;
   let period: 'month' | 'year' | 'all' = 'year';
   const tables = { pyramid: false, occ: false };
   let data: Demographics | null = null;
+  let metrics: Metrics | null = null;
   let series = '';
-  root.innerHTML = `<header class="bar"><div class="titles"><h1>Información del mundo</h1><span class="crumb" id="dash-date">Data's World</span></div><span class="grow"></span>`
-    + `<div class="seg" role="group" aria-label="Periodo" id="dash-period">${PERIODS.map(([k, l]) => `<button type="button" data-period="${k}" aria-pressed="${k === period}">${l}</button>`).join('')}</div>`
-    + `<a class="btn" href="/api/export/events.csv" download>Exportar CSV</a></header><div class="dash-scroll" id="dash-body"><p class="empty">Cargando…</p></div>`;
+  root.innerHTML = `<div class="dash-scroll"><div class="dash-bar"><span class="tag gold" id="dash-cohort" hidden></span><span class="grow"></span><span class="tag" id="dash-date">Data's World</span>`
+    + `<b>Periodo</b><div class="seg" role="group" aria-label="Periodo" id="dash-period">${PERIODS.map(([k, l]) => `<button type="button" data-period="${k}" aria-pressed="${k === period}">${l}</button>`).join('')}</div>`
+    + `<a class="btn accent" href="/api/export/events.csv" download>Exportar CSV</a></div><div id="dash-body"><p class="empty">Cargando…</p></div></div>`;
   const body = root.querySelector<HTMLElement>('#dash-body')!;
   bindChartHover(body);
+  const refreshCohort = () => {
+    const tag = root.querySelector<HTMLElement>('#dash-cohort')!;
+    const text = o.cohort();
+    tag.hidden = text === null;
+    tag.innerHTML = text === null ? '' : `Cohorte activa: ${esc(text)} <button type="button" data-clear-cohort aria-label="Quitar la cohorte">✕</button>`;
+    tag.title = 'La cohorte resalta a esas personas en el mapa; las cifras de esta pantalla son de toda la población.';
+  };
+  let painted = '';
   const paint = () => {
     if (!data) return;
     root.querySelector('#dash-date')!.textContent = `Data's World · datos al ${data.date}`;
-    body.innerHTML = renderDashboard(data, tables);
+    const live = o.live();
+    painted = JSON.stringify(live);
+    const last = metrics?.days.at(-1);
+    body.innerHTML = renderDashboard(data, tables, live ? { employedPct: live.employedPct, mood: live.mood, stress: last ? last.stress : null } : undefined);
     body.querySelector('#dash-series')!.innerHTML = series;
+    refreshCohort();
   };
   const load = async () => {
     data = await o.fetch(period);
     paint();
-    const m = await o.metrics().catch(() => null);
-    series = m ? `<section class="card"><h2>El mundo en el tiempo <span class="h-note">por día, con las alertas de degeneración (022 R-010)</span></h2><div class="world-body">${renderWorldPanel(m)}</div></section>` : '';
-    const el = body.querySelector('#dash-series');
-    if (el) el.innerHTML = series;
+    metrics = await o.metrics().catch(() => null);
+    series = metrics ? `<section class="card"><h2>El mundo en el tiempo <span class="h-note">por día, con las alertas de degeneración (022 R-010)</span></h2><div class="world-body">${renderWorldPanel(metrics)}</div></section>` : '';
+    paint();
   };
   root.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
+    if (t.closest('[data-clear-cohort]')) {
+      o.clearCohort();
+      refreshCohort();
+      return;
+    }
     const p = t.closest<HTMLElement>('[data-period]');
     if (p) {
       period = p.dataset.period as typeof period;
@@ -122,5 +163,9 @@ export function setupDashboard(o: { fetch: (p: 'month' | 'year' | 'all') => Prom
       paint();
     }
   });
-  return { show: () => void load() };
+  // Las cifras vivas llegan después de abrir la pantalla: se repinta solo si cambiaron.
+  const refreshLive = () => {
+    if (data && JSON.stringify(o.live()) !== painted) paint();
+  };
+  return { show: () => void load(), refreshCohort, refreshLive };
 }

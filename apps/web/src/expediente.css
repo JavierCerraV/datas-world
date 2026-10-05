@@ -384,24 +384,58 @@ details.card[open] > summary::before {
 }
 
 /* Dashboard */
+.dash-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 14px;
+}
+.dash-bar .tag {
+  min-height: 30px;
+  font-size: 13px;
+}
+.dash-bar .tag button {
+  border: 0;
+  background: none;
+  padding: 0 0 0 4px;
+  font: 400 14px var(--font-display);
+  cursor: pointer;
+}
 .kpis {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--panel);
-  overflow: hidden;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
   margin-bottom: 16px;
 }
 .kpi {
-  padding: 14px 18px;
-  border-right: 1px solid var(--line);
+  position: relative;
+  padding: 10px 14px 10px 62px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  min-height: 78px;
+  justify-content: center;
+  border: var(--dw-border) solid var(--dw-edge);
+  border-radius: calc(var(--dw-radius) - 2px);
+  background: var(--panel-2);
+  box-shadow: 0 3px 0 var(--dw-shadow);
 }
-.kpi:last-child {
-  border-right: 0;
+.kpi .ki {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  margin-top: -20px;
+  display: grid;
+  place-items: center;
+  border: var(--dw-border) solid var(--dw-edge);
+  border-radius: 50%;
+  background: var(--dw-blue);
+}
+.kpi.locked {
+  opacity: 0.65;
 }
 .kpi span,
 .kpi small {
@@ -409,9 +443,7 @@ details.card[open] > summary::before {
   color: var(--muted);
 }
 .kpi b {
-  font-size: 28px;
-  font-weight: 500;
-  line-height: 1.1;
+  font: 400 28px/1.1 var(--font-display);
 }
 .dash {
   margin-bottom: 16px;
@@ -443,23 +475,27 @@ details.card[open] > summary::before {
   font: 400 12px var(--font-mono);
   fill: var(--ink);
 }
+.dchart .bar {
+  stroke: var(--dw-edge);
+  stroke-width: 2.5px;
+}
 .pyramid .f .bar {
-  fill: var(--female);
+  fill: var(--dw-gold);
 }
 .pyramid .m .bar {
-  fill: var(--male);
+  fill: var(--dw-blue);
 }
 .occ .bar {
-  fill: var(--ink-2);
+  fill: var(--dw-green);
 }
 .dchart .bar:hover {
   opacity: 0.8;
 }
 .sw-f {
-  background: var(--female);
+  background: var(--dw-gold);
 }
 .sw-m {
-  background: var(--male);
+  background: var(--dw-blue);
 }
 .lockline {
   display: flex;

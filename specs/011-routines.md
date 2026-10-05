@@ -80,6 +80,12 @@ Tiempo en cada actividad por situación (comparable con la ENUT del DANE: trabaj
 - [x] ¿Búsqueda de empleo? → Sí, en bloques (usuario, 2026-09-25).
 - [x] ¿Hábitos? → M5 (usuario, 2026-09-25).
 - [ ] ¿Jornada única escolar? Propuesta: jornada de mañana en M2; la jornada única se añade como opción del catálogo del colegio.
+- [ ] **Propuesta v0.3 — Menores acompañados (pendiente de aprobación; no cambia las reglas ni los CA vigentes).** Hallazgo del usuario (2026-10-05): Tomás Quintero, de 8 años, juega fútbol solo en un parque durante horas. Hoy el motor trata a cada niño como un agente independiente: su tiempo libre elige cualquier lugar, aunque nadie lo acompañe (los eventos `LEISURE_DONE` salen con `with: []`).
+  - **R-0xx** [M] — **Supervisión de menores.** Un menor de `MINOR_SUPERVISED_AGE` años (12) solo puede elegir como tiempo libre actividades en su vivienda, o en otro lugar donde ya esté un adulto de su hogar (cuidador presente). Un menor de 12 a 17 años puede salir solo de día, hasta `MINOR_CURFEW` (20:00) y como mucho `MINOR_OUTING_MAX_H` (2 h) seguidas fuera de casa; pasado ese plazo, la rutina lo lleva a casa. Los desplazamientos al colegio y de vuelta siguen como están (011 §3).
+  - **R-0xx** [M] — **Sin cambiar a otros.** El menor no «arrastra» al adulto (regla de oro 4): solo elige donde el adulto ya está. Si ningún adulto del hogar está libre, el menor se queda en casa (juegos, televisión, tareas).
+  - **CA propuesto** — *Dado* 20 mundos y 30 días, *entonces* ningún menor de 12 años pasa más de `LEISURE_SOLO_OUT_MAX` (0) minutos fuera de su vivienda y de su colegio sin un adulto de su hogar en el mismo lugar, y ningún menor de 18 está fuera después del toque de queda (prueba sobre el mundo generado).
+  - **Estatus.** [M] con parámetros explícitos; los umbrales de edad y de hora se revisan con expertos (pregunta abierta nueva en `docs/investigacion/preguntas-abiertas.md`).
+  - **Afecta a:** 011 (rutina), 032 (las actividades de ocio solo se ofrecen según la supervisión), 040 (el filtro de candidatas es previo a la selección) y 010 (el menor puede no satisfacer ‹diversión› fuera de casa).
 
 
 ## Adaptación al motor funcional (MF8.1, 2026-09-28)
@@ -99,3 +105,4 @@ Según la 035 §8:
 | 2026-09-26 | 0.2 | Estado → implementada |
 | 2026-09-28 | — | MF7.3 (041): las horas de sueño sin ficha de salud (mundos de prueba y perfil prototipo) son 6,95 h ± 0,4, sin rasgos. Sin cambios en CA |
 | 2026-09-28 | — | MF8.1: sección «Adaptación al motor funcional» con lo que cambió en los bloques MF1 a MF7 (o debe cambiar, si la spec sigue en borrador), según la 035 §8. Sin cambios en CA |
+| 2026-10-05 | — | Propuesta v0.3 en *Preguntas abiertas*: menores acompañados (supervisión de menores de 12 años y toque de queda de 12 a 17), a partir del caso de un niño de 8 años solo en un parque. Pendiente de aprobación; sin cambios en reglas ni CA vigentes |

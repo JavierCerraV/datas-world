@@ -48,7 +48,7 @@ Aplicación: `pnpm dev` (worker + API + visor; `scripts/dev.mjs`) y abrir `http:
 | `src/exp-cards.ts`, `src/icons.ts` | Resumen (R-027, CA-020), puro: `deckOf` (las ocho conductas más fuertes, fuerza 0 a 9), `sourceShares`, `lastDecision` y `chainOf` (fuentes de control de la última decisión, suman 100 %), `lifeRoad` (cinco etapas) y sus HTML; iconos SVG, retrato por id y `responseIcon` |
 | `src/lifecourse.ts` | Curso de vida del Resumen: `milestones`, `placeLabels`, `lifeCourseSvg` |
 | `src/card.ts`, `src/card-life.ts` | Piezas reutilizadas: `tabRelaciones`, `tabCreencias`, `occupationEs`, `mini`; `renderMemories` y `LifeData` |
-| `src/dashboard.ts` | Dashboard (R-023): `pyramidSvg`, `occupationSvg`, `niceMax`, `renderDashboard`, `setupDashboard` |
+| `src/dashboard.ts` | Dashboard (R-028): `pyramidSvg`, `occupationSvg`, `niceMax`, `renderDashboard` (indicadores con iconos; empleo, ánimo y estrés con las cifras vivas, `LiveFigures`), `setupDashboard` (cohorte activa con «✕», periodo, Exportar CSV; repinta si cambian las cifras vivas) |
 | `src/life.ts`, `src/report.ts`, `src/why.ts` | Familiograma y desarrollo (`renderFamily`, `renderDevelopment`), informe de vida (`renderReport`) y árbol «¿por qué?» |
 | `src/chat.ts`, `src/chat-ui.ts`, `src/chat-history.ts` | Charla (043 R-017, 024 R-024): cliente de `/api/chat/*`; pantalla completa con mensajes numerados, panel del porqué (`whyPanel`), estado y lo que sabe, y resumen (`summaryHtml`); charlas guardadas |
 | `src/timeline.ts`, `src/world-panel.ts` | Línea temporal (R-010) y series del mundo (R-011), que ahora van en el dashboard |
@@ -111,7 +111,9 @@ Desde la 024 v0.5 la referencia de la interfaz es el lienzo «Visor A+»; `proto
 ## 8. Pendientes y deuda
 - [x] CA-001 y CA-003: aceptados en la revisión del usuario (2026-09-27).
 - [x] Recorridos por las calles, línea temporal navegable y pestañas de M3 (M4).
-- [ ] CA-021: revisión del usuario frente al lienzo (sustituye a la CA-017). Bloques: T4 Dashboard y Charla, T5 capturas.
+- [ ] CA-021: revisión del usuario frente al lienzo (sustituye a la CA-017). Queda el bloque T5 (capturas).
+- [ ] Indicadores «enfermos hoy» y «patrimonio mediano» del dashboard (R-028): la API aún no los expone; no se muestran.
+- [ ] Periodos «Hoy» y «7 días» del dashboard (R-028): la API de demografía solo da último mes, último año y desde la fundación (022 R-016).
 - [ ] Modo oscuro afinado, tras la CA-021.
 - [ ] Valor del visitante y malestar acumulado en el panel de la charla (necesita la API de la 043).
 - [ ] Decisión del usuario sobre la escala del mapa y los viajes por persona (specs 003, 016 y de rutinas), para que haya tanta gente en la calle como en el prototipo.
@@ -142,3 +144,4 @@ Desde la 024 v0.5 la referencia de la interfaz es el lienzo «Visor A+»; `proto
 | 2026-10-05 | m4/visor-datas-world (T2) | 024, 022 | Pantalla Mundo (R-026): columna izquierda con Cohorte (`cohort.ts`, `cohort-ui.ts`) y Capas; mapa en su panel con leyenda, aro dorado para la cohorte, atenuado del resto y barra de línea temporal siempre visible; a la derecha, panel Ahora con las pestañas Ahora (conteos y últimos eventos) y Registro (la tabla, en filas de dos líneas) sobre la ficha o la población. Mapa recoloreado con la paleta del estilo (`render.ts`, `logic.ts`). Prueba nueva `cohort.test.ts` |
 | 2026-10-05 | m4/visor-datas-world (acceso a la charla) | 022 | Arreglo del acceso a la charla: en el formulario de acceso, Enter en la contraseña enviaba «Cancelar» (el primer botón del formulario) y cerraba sin entrar. «Cancelar» pasa a ser de tipo `button`. Si la API rechaza las credenciales, `withAuth` las olvida y vuelve a pedirlas diciendo que son incorrectas, hasta tres veces (charla, charlas guardadas y controles). Pruebas en `dw-style.test.ts` |
 | 2026-10-05 | m4/visor-datas-world (T3) | 024 | Expediente (R-027, CA-020): encabezado con retrato, patrimonio y salario bloqueado («Pronto»), y acciones; seis pestañas (las cinco de antes con estado, emociones, aprendizaje, salud y economía repartidos entre Resumen e Historia de vida; las direcciones antiguas siguen funcionando); en el Resumen, estado de hoy, mazo de conducta, «Por qué decidió esto» (fuentes de control de la última decisión y su cadena) y camino de vida de cinco etapas. Tarjetas, pestañas y barras con la forma del estilo. Pruebas nuevas en `exp-cards.test.ts` y ajustadas en `exp.test.ts` |
+| 2026-10-05 | m4/visor-datas-world (T4) | 024 | Dashboard y Charla con el estilo (R-028, R-029): indicadores con iconos y, con las cifras vivas, empleo, ánimo y estrés; pirámide y ocupación con barras de contorno grueso; barra con la cohorte activa (con «✕»), el periodo y Exportar CSV; la charla con burbujas, formulario y panel lateral con la forma del estilo. Prueba nueva en `exp.test.ts` (R-028)
