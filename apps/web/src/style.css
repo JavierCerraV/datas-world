@@ -1335,6 +1335,15 @@ label.inline select {
   border: 1px solid var(--line-2);
   background: var(--panel);
 }
+#login .login-error {
+  margin: 0;
+  padding: 6px 10px;
+  border: 2px solid var(--dw-edge);
+  border-radius: 8px;
+  background: var(--bad);
+  color: var(--dw-white);
+  font-weight: 800;
+}
 #login .actions {
   display: flex;
   justify-content: flex-end;

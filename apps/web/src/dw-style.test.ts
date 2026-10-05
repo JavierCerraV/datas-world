@@ -40,3 +40,19 @@ describe('024 R-025: pestañas', () => {
     expect(tabHref('charla', 'CIT-000019')).toBe('#/charla/CIT-000019');
   });
 });
+
+describe('022 R-004: formulario de acceso', () => {
+  const html = readFileSync(join(dir, '..', 'index.html'), 'utf8');
+  const dialog = html.slice(html.indexOf('<dialog id="login"'), html.indexOf('</dialog>'));
+
+  it('Enter en la contraseña entra: el primer botón que envía el formulario es «Entrar», no «Cancelar»', () => {
+    const botones = [...dialog.matchAll(/<button\b([^>]*)>([^<]*)<\/button>/g)].map((m) => ({ attrs: m[1]!, texto: m[2]! }));
+    const envian = botones.filter((b) => !/type="button"/.test(b.attrs));
+    expect(envian[0]?.texto).toBe('Entrar');
+    expect(botones.find((b) => b.texto === 'Cancelar')?.attrs).toContain('type="button"');
+  });
+
+  it('tiene dónde avisar de que el usuario o la contraseña son incorrectos', () => {
+    expect(dialog).toContain('id="login-error"');
+  });
+});

@@ -34,7 +34,6 @@ export interface ExpDeps {
   /** Lo que hace ahora, con el lugar. */
   doing: (id: string) => string;
   auth: () => string | null;
-  askAuth: () => Promise<boolean>;
   onStartChat: (id: string, mode: 'in_world' | 'sandbox', test: boolean) => void;
   setTab: (id: string, tab: string) => void;
 }
@@ -104,7 +103,7 @@ export function setupExpediente(dp: ExpDeps): { show: (id: string, tab?: string)
     if (!full && lastBody && el.querySelector('details[open]:not([data-why])')) return;
     el.innerHTML = html;
     lastBody = html;
-    if (tab === 'charlas' && x) void showChatHistory(el.querySelector('#exp-chats')!, x.d.id, dp.auth, dp.askAuth);
+    if (tab === 'charlas' && x) void showChatHistory(el.querySelector('#exp-chats')!, x.d.id, dp.auth);
   };
 
   const load = async (full: boolean) => {

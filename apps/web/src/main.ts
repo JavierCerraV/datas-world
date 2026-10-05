@@ -1,7 +1,7 @@
 // Visor de Data's World (spec 024 v0.6): barra superior con pestañas para Mundo, Expediente, Dashboard y Charla. Une los módulos; solo lee de la API (022) y envía órdenes de control. No tiene lógica de simulación
 // (INV-002).
 import { api, stream } from './api.ts';
-import { askAuth, auth, send } from './auth.ts';
+import { auth, send } from './auth.ts';
 import { clockOf } from './camera.ts';
 import { setupChat } from './chat-ui.ts';
 import { describe } from './cohort.ts';
@@ -142,7 +142,6 @@ const expediente = setupExpediente({
   today: worldDate,
   doing: doingId,
   auth,
-  askAuth,
   onStartChat: (id, mode, test) => {
     chatPrefs = { mode, test };
     router.go({ view: 'charla', person: id });
@@ -153,7 +152,6 @@ const expediente = setupExpediente({
 let chatPrefs: { mode: 'in_world' | 'sandbox'; test: boolean } | undefined;
 const chat = setupChat({
   auth,
-  askAuth,
   fetchPerson,
   fetchDossier: api.dossier,
   worldMinute: minuteNow,

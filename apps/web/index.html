@@ -114,9 +114,10 @@
       <form method="dialog" id="login-form">
         <h2 id="login-title">Acceso a los controles</h2>
         <p class="sub">Pausar, cambiar la velocidad, avanzar y charlar necesitan el usuario y la contraseña del laboratorio. Con <code>pnpm dev</code> en este equipo se muestran al arrancar.</p>
+        <p class="login-error" id="login-error" role="alert" hidden></p>
         <label>Usuario <input id="login-user" autocomplete="username" required /></label>
         <label>Contraseña <input id="login-pass" type="password" autocomplete="current-password" required /></label>
-        <div class="actions"><button class="btn" value="cancel" formnovalidate>Cancelar</button><button class="btn primary" value="ok">Entrar</button></div>
+        <div class="actions"><button class="btn" id="login-cancel" type="button">Cancelar</button><button class="btn primary" type="submit" value="ok">Entrar</button></div>
       </form>
     </dialog>
     <script type="module" src="/src/main.ts"></script>

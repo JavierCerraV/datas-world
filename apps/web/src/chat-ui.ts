@@ -5,6 +5,7 @@
 // persona. Al despedirse, un resumen de lo que cambió. Solo muestra lo que devuelve la API.
 import { TONES, claimLine, endChat, openChat, sendTurn, sourceLabel, stanceLabel, toneLabel, topProbabilities, verdictMark, verification } from './chat.ts';
 import type { DoneMsg, OpenResult, StanceMsg } from './chat.ts';
+import { withAuth } from './auth.ts';
 import { dec } from './card-compact.ts';
 import type { Dossier } from './dossier-types.ts';
 import { ACTIVITY_ES } from './format.ts';
@@ -15,7 +16,6 @@ const pct = (x: number) => Math.round(x * 100);
 
 export interface ChatUiDeps {
   auth: () => string | null;
-  askAuth: () => Promise<boolean>;
   fetchPerson: (id: string) => Promise<CitizenDetail>;
   fetchDossier: (id: string) => Promise<Dossier>;
   /** Minuto del mundo que se ve y su hora (`17:10`). */
@@ -179,8 +179,7 @@ export function setupChat(d: ChatUiDeps): ChatPage {
   const start = async () => {
     if (!person) return;
     status('Abriendo la charla…');
-    let r = await openChat(d.auth, person.id, mode, test);
-    if (r.status === 401 && (await d.askAuth())) r = await openChat(d.auth, person.id, mode, test);
+    const r = await withAuth(() => openChat(d.auth, person!.id, mode, test));
     if (r.status === 401) return status('La charla necesita el usuario y la contraseña del laboratorio.');
     if (r.status === 409) return status('La charla anterior está terminando un turno. Espera unos segundos y vuelve a intentarlo.');
     if (r.status === 503) return status(r.error ?? 'No se pudo abrir la charla (¿está corriendo el worker?).');
