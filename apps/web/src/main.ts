@@ -1,5 +1,4 @@
-// Visor de Data's World (spec 024 v0.5, Visor A+): menú lateral con las pantallas Mundo, Datos, el expediente de vida
-// y la charla. Une los módulos; solo lee de la API (022) y envía órdenes de control. No tiene lógica de simulación
+// Visor de Data's World (spec 024 v0.6): barra superior con pestañas para Mundo, Expediente, Dashboard y Charla. Une los módulos; solo lee de la API (022) y envía órdenes de control. No tiene lógica de simulación
 // (INV-002).
 import { api, stream } from './api.ts';
 import { askAuth, auth, send } from './auth.ts';
@@ -14,7 +13,7 @@ import { renderNow, setupLayers } from './overlays.ts';
 import { doingOf, populationIntro } from './panels.ts';
 import { drawMap } from './render.ts';
 import { MoveBook, stepView } from './replay.ts';
-import { setupRouter } from './router.ts';
+import { setupRouter, tabHref } from './router.ts';
 import type { Route } from './router.ts';
 import { routeCache } from './streets.ts';
 import { setupTimeline, urlsFor } from './timeline.ts';
@@ -59,6 +58,17 @@ let stats: Stats | null = null;
 let orgs: number | undefined;
 let moment: Moment = { mode: 'live' };
 const selected = { person: null as string | null, place: null as string | null };
+let tabPerson: string | null = null; // la última persona abierta: a ella llevan las pestañas Expediente y Charla
+
+/** Las pestañas Expediente y Charla abren a la última persona elegida; sin ninguna, se muestran desactivadas. */
+function refreshTabs(): void {
+  for (const a of document.querySelectorAll<HTMLAnchorElement>('[data-nav="expediente"], [data-nav="charla"]')) {
+    const href = tabHref(a.dataset.nav as 'expediente' | 'charla', tabPerson);
+    a.href = href ?? '#/mundo';
+    if (href) a.removeAttribute('aria-disabled');
+    else a.setAttribute('aria-disabled', 'true');
+  }
+}
 
 const names = (id: string) => world?.names?.[id] ?? world?.places.find((p) => p.id === id)?.name;
 const minuteNow = () => (moment.mode === 'past' ? moment.day * 1440 : view ?? latest);
@@ -102,6 +112,8 @@ const inspector = setupInspector({
   onSelect: (person, place) => {
     selected.person = person;
     selected.place = place;
+    if (person) tabPerson = person;
+    refreshTabs();
     if (!person) map?.setFollow(false);
     const want = person ? `#/mundo/${person}` : '#/mundo';
     if (router.current().view === 'mundo' && location.hash !== want) history.replaceState(null, '', want);
@@ -137,6 +149,8 @@ const chat = setupChat({
 const dashboard = setupDashboard({ fetch: api.demographics, metrics: api.metrics });
 
 const router = setupRouter((r: Route, prev) => {
+  if (r.view !== 'datos' && r.person) tabPerson = r.person;
+  refreshTabs();
   if (prev?.view === 'charla' && r.view !== 'charla') chat.leave();
   if (prev?.view === 'expediente' && r.view !== 'expediente') expediente.hide();
   if (r.view === 'mundo') {

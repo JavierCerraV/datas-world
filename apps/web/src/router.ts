@@ -1,4 +1,4 @@
-// Pantallas del Visor A+ (spec 024 R-020): Mundo, Datos, el expediente de una persona y la charla, cada una en su
+// Pantallas del visor (spec 024 R-025): Mundo, Datos, el expediente de una persona y la charla, cada una en su
 // dirección (`#/mundo`, `#/datos`, `#/expediente/CIT-000019`, `#/charla/CIT-000019`), para que el navegador pueda
 // volver atrás y enlazar. La lectura de la dirección es pura y se prueba; el cambio de pantalla, al final.
 
@@ -28,6 +28,13 @@ export function hrefOf(r: Route): string {
   return r.person ? `#/mundo/${r.person}` : '#/mundo';
 }
 
+/** Dirección de una pestaña. Expediente y Charla necesitan una persona; sin ella no hay dirección (null). */
+export function tabHref(view: Route['view'], person: string | null): string | null {
+  if (view === 'mundo') return '#/mundo';
+  if (view === 'datos') return '#/datos';
+  return person ? hrefOf({ view, person }) : null;
+}
+
 const VIEWS: Record<Route['view'], string> = { mundo: '#view-mundo', datos: '#view-datos', expediente: '#view-exp', charla: '#view-charla' };
 
 /** Muestra la pantalla de la dirección actual y avisa con cada cambio. */
@@ -36,9 +43,8 @@ export function setupRouter(onRoute: (r: Route, prev: Route | null) => void): { 
   const apply = () => {
     const r = parseRoute(location.hash);
     for (const [v, sel] of Object.entries(VIEWS)) document.querySelector<HTMLElement>(sel)!.hidden = v !== r.view;
-    const nav = r.view === 'datos' ? 'datos' : 'mundo';
     for (const a of document.querySelectorAll<HTMLElement>('[data-nav]')) {
-      if (a.dataset.nav === nav) a.setAttribute('aria-current', 'page');
+      if (a.dataset.nav === r.view) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     }
     onRoute(r, prev);

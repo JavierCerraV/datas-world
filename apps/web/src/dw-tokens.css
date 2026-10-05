@@ -1,0 +1,123 @@
+/* Tokens visuales del visor de Data's World (spec 024 v0.6, R-025). Es el ÚNICO archivo de estilos con colores
+   (CA-018): el resto usa estas variables. Fuentes: Lilita One para títulos y números, Nunito para el texto.
+   Forma: radio de 12 px, borde de 3 px y una sombra inferior de 5 px que da relieve. */
+@import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap');
+
+:root {
+  box-sizing: border-box;
+  color-scheme: light;
+
+  /* Forma */
+  --dw-radius: 12px;
+  --dw-border: 3px;
+  --dw-lift: 5px;
+
+  /* Marca y juego de colores */
+  --dw-blue: #2d6fe0;
+  --dw-blue-hi: #6aa2ff;
+  --dw-red: #e0413a;
+  --dw-gold: #ffd23e;
+  --dw-green: #3fae14;
+  --dw-elixir: #d946ef;
+  --dw-edge: #10163a;
+  --dw-track: #1b2352;
+  --dw-chrome: #1b2352;
+  --dw-chrome-hi: #2a3470;
+  --dw-white: #ffffff;
+  --dw-shadow: rgb(16 22 58 / 0.55);
+  --dw-scrim: rgb(16 22 58 / 0.6);
+  --dw-glass: rgb(244 241 234 / 0.94);
+  --dw-gloss: rgb(255 255 255 / 0.45);
+  --dw-bg: #22346b;
+  --dw-bg-pattern: linear-gradient(115deg, rgb(45 111 224 / 0.55) 0 50%, rgb(224 65 58 / 0.5) 50% 100%);
+
+  /* Mapa y curso de vida (el mapa se recolorea en el bloque de la pantalla Mundo) */
+  --dw-map-ground: #5b8440;
+  --dw-lc-before: #b7c9a2;
+  --dw-lc-here: #f0a29a;
+  --dw-ag-sleep: #3c4268;
+  --dw-ag-move: #ffd23e;
+  --dw-ag-work: #2d6fe0;
+  --dw-ag-duty: #e0413a;
+  --dw-ag-care: #9aa7d4;
+  --dw-ag-free: #3fae14;
+
+  /* Superficies y texto (los nombres de siempre, que usan todas las pantallas) */
+  --paper: #e9e5da;
+  --panel: #f4f1ea;
+  --panel-2: #ffffff;
+  --ink: #1d2240;
+  --ink-2: #3c4268;
+  --muted: #575d80;
+  --line: #d3cdbd;
+  --line-2: #b9b2a0;
+  --soft: #e6e1d3;
+  --accent: #2d6fe0;
+  --accent-ink: #ffffff;
+  --accent-soft: #dde8fb;
+  --good: #2f8a10;
+  --bad: #d12f28;
+  --warn: #8a5a12;
+  --info: #2a679a;
+  --female: #d14a8a;
+  --male: #2d6fe0;
+
+  /* Series categóricas de las gráficas (024 R-011) */
+  --series-1: #2d6fe0;
+  --series-2: #e0413a;
+  --series-3: #3fae14;
+  --series-4: #f2a31e;
+  --series-5: #b44cff;
+
+  --font-display: 'Lilita One', 'Nunito', system-ui, sans-serif;
+  --font-ui: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Lilita One', 'Nunito', ui-monospace, monospace;
+}
+
+/* Modo oscuro: variante derivada de la misma paleta. Su ajuste fino llega tras aceptar la CA-021. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --paper: #141a3a;
+    --panel: #1b2352;
+    --panel-2: #232c63;
+    --ink: #f4f1ea;
+    --ink-2: #d8d4e8;
+    --muted: #aeb4d6;
+    --line: #34407f;
+    --line-2: #46539a;
+    --soft: #2a3470;
+    --accent: #6aa2ff;
+    --accent-ink: #10163a;
+    --accent-soft: #263a78;
+    --good: #7be04a;
+    --bad: #ff7a72;
+    --warn: #ffc65a;
+    --info: #8ec4f2;
+    --female: #ff8fc0;
+    --male: #6aa2ff;
+    --dw-glass: rgb(27 35 82 / 0.94);
+  }
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #141a3a;
+  --panel: #1b2352;
+  --panel-2: #232c63;
+  --ink: #f4f1ea;
+  --ink-2: #d8d4e8;
+  --muted: #aeb4d6;
+  --line: #34407f;
+  --line-2: #46539a;
+  --soft: #2a3470;
+  --accent: #6aa2ff;
+  --accent-ink: #10163a;
+  --accent-soft: #263a78;
+  --good: #7be04a;
+  --bad: #ff7a72;
+  --warn: #ffc65a;
+  --info: #8ec4f2;
+  --female: #ff8fc0;
+  --male: #6aa2ff;
+  --dw-glass: rgb(27 35 82 / 0.94);
+}

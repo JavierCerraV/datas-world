@@ -10,33 +10,40 @@
   </head>
   <body>
     <div class="shell">
-      <nav class="rail" aria-label="Secciones">
-        <span class="logo" aria-hidden="true">dw</span>
-        <a href="#/mundo" data-nav="mundo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"></path><path d="M9 3v15M15 6v15"></path></svg>Mundo</a>
-        <a href="#/datos" data-nav="datos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"></path></svg>Datos</a>
-        <span class="rail-sep" aria-hidden="true"></span>
-        <span class="rail-lbl">Investig.</span>
-        <span class="rail-off" aria-disabled="true" title="Estudio y participantes: llega con la capa de investigación y clínica (specs 028 y 034)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg>Estudio</span>
-        <span class="rail-off" aria-disabled="true" title="Seleccionar muestra: llega con la capa de investigación y clínica (specs 028 y 034)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"></circle><circle cx="17" cy="10" r="2.5"></circle><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M14 20c0-2.5 1.5-4.5 3.5-4.5S21 17.5 21 20"></path></svg>Muestra</span>
+      <header class="dw-top">
+        <div class="dw-brand">
+          <svg viewBox="0 0 40 40" aria-hidden="true"><path class="gold edge" d="M20 2.5 35 8v12c0 9-6.500 15-15 18C11.500 35 5 29 5 20V8z"></path><path class="blue edge" style="stroke-width: 2" d="M20 7 31 11v9c0 6.500-4.500 11-11 13.500C13.500 31 9 26.500 9 20v-9z"></path><text x="20" y="25" text-anchor="middle">DW</text></svg>
+          <div><b class="dw-st">Data's World</b><small id="crumb">Visor</small></div>
+        </div>
+        <span class="chip" title="Personas, hogares y organizaciones"><span class="pop-stack"><span><span id="st-pop">0</span> personas</span><small id="st-sub">—</small></span></span>
+        <span class="chip" aria-live="off" title="Fecha y hora del mundo"><span class="clock-stack"><span id="clk-time">--</span><small id="clk-day">—</small></span></span>
         <span class="grow"></span>
-        <button class="rail-theme" id="theme" type="button" aria-label="Cambiar entre tema claro y oscuro" title="Tema claro u oscuro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"></path></svg></button>
+        <button class="pill" id="play" type="button" aria-label="Pausar la simulación"><i></i><span>Simulando</span></button>
+        <div class="seg" role="group" aria-label="Velocidad" id="speeds"></div>
+        <button class="btn" id="adv-day" type="button" title="Avanzar un día sin mirar, tan rápido como se pueda">+1 día</button>
+        <label class="sr-only" for="adv-more">Avanzar más</label>
+        <select class="btn" id="adv-more" title="Avanzar sin mirar"><option value="">Avanzar…</option></select>
+      </header>
+      <nav class="dw-tabs" aria-label="Pantallas">
+        <a href="#/mundo" data-nav="mundo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22C6 15 5 12 5 9a7 7 0 0 1 14 0c0 3-1 6-7 13z"></path><circle cx="12" cy="9" r="2.500"></circle></svg><span>Mundo</span></a>
+        <a href="#/mundo" data-nav="expediente" aria-disabled="true" title="Elige una persona en el mapa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.500 5.500c3-1 6-1 8.500 1v13c-2.500-2-5.500-2-8.500-1zM20.500 5.500c-3-1-6-1-8.500 1v13c2.500-2 5.500-2 8.500-1z"></path></svg><span>Expediente</span></a>
+        <a href="#/datos" data-nav="datos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"></path></svg><span>Dashboard</span></a>
+        <a href="#/mundo" data-nav="charla" aria-disabled="true" title="Elige una persona en el mapa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.500h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-8.500l-5 4v-4H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"></path></svg><span>Charla</span></a>
+        <details class="dw-more">
+          <summary>Más</summary>
+          <div>
+            <span class="dw-off" aria-disabled="true" title="Estudio y participantes: llega con la capa de investigación y clínica (specs 028 y 034)">Estudio · pronto</span>
+            <span class="dw-off" aria-disabled="true" title="Seleccionar muestra: llega con la capa de investigación y clínica (specs 028 y 034)">Muestra · pronto</span>
+          </div>
+        </details>
+        <span class="grow"></span>
+        <span class="live chip" id="live">○ conectando…</span>
+        <button class="dw-theme" id="theme" type="button" aria-label="Cambiar entre tema claro y oscuro" title="Tema claro u oscuro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"></path></svg></button>
       </nav>
 
       <div class="views">
-        <!-- Pantalla Mundo (024 R-021) -->
+        <!-- Pantalla Mundo (024 R-021, R-026) -->
         <section class="view" id="view-mundo" aria-label="Mundo">
-          <header class="bar">
-            <div class="titles"><h1>Mundo</h1><span class="crumb" id="crumb">Data's World</span></div>
-            <div class="clock" aria-live="off"><span class="mono big" id="clk-time">--</span><span class="sub" id="clk-day">—</span></div>
-            <button class="pill" id="play" type="button" aria-label="Pausar la simulación"><i></i><span>Simulando</span></button>
-            <div class="seg" role="group" aria-label="Velocidad" id="speeds"></div>
-            <button class="btn" id="adv-day" type="button" title="Avanzar un día sin mirar, tan rápido como se pueda">+1 día</button>
-            <label class="sr-only" for="adv-more">Avanzar más</label>
-            <select class="btn" id="adv-more" title="Avanzar sin mirar"><option value="">Avanzar…</option></select>
-            <span class="grow"></span>
-            <div class="counts"><b><span class="mono" id="st-pop">0</span> personas</b><span id="st-sub">—</span></div>
-            <span class="live" id="live">○ conectando…</span>
-          </header>
           <div class="world">
             <section class="stage" aria-label="Mapa y registro">
               <div class="mapwrap" id="mapwrap">

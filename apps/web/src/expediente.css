@@ -218,10 +218,10 @@ details.card[open] > summary::before {
   display: block;
 }
 .lc-before {
-  fill: #b7c9a2;
+  fill: var(--dw-lc-before);
 }
 .lc-here {
-  fill: #c99a8a;
+  fill: var(--dw-lc-here);
 }
 .lc-place {
   font: 500 10px var(--font-ui);
@@ -274,29 +274,29 @@ details.card[open] > summary::before {
   stroke-width: 2;
 }
 .ag-dormir {
-  fill: #3d4a5c;
-  background: #3d4a5c;
+  fill: var(--dw-ag-sleep);
+  background: var(--dw-ag-sleep);
 }
 .ag-desplazamiento {
-  fill: #d9a441;
-  background: #d9a441;
+  fill: var(--dw-ag-move);
+  background: var(--dw-ag-move);
 }
 .ag-trabajo,
 .ag-estudio {
-  fill: #a84a32;
-  background: #a84a32;
+  fill: var(--dw-ag-work);
+  background: var(--dw-ag-work);
 }
 .ag-obligacion {
-  fill: #c98a6e;
-  background: #c98a6e;
+  fill: var(--dw-ag-duty);
+  background: var(--dw-ag-duty);
 }
 .ag-cuidado {
-  fill: #9aa7b4;
-  background: #9aa7b4;
+  fill: var(--dw-ag-care);
+  background: var(--dw-ag-care);
 }
 .ag-libre {
-  fill: #7fb3a6;
-  background: #7fb3a6;
+  fill: var(--dw-ag-free);
+  background: var(--dw-ag-free);
 }
 .legend {
   display: flex;
