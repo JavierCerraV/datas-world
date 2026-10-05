@@ -146,7 +146,7 @@ const STATE_ES: Record<string, string> = {
   funcion: 'lo que ha aprendido',
   horario_de_sueno: 'su horario de sueño',
 };
-const SOURCE_ES: Record<string, string> = { reforzador: 'le gusta', fuerza: 'costumbre', coste: 'le cuesta', regla: 'una regla', relacion: 'lo que relaciona', valor: 'lo que valora', funcion: 'lo que ha aprendido' };
+export const SOURCE_ES: Record<string, string> = { reforzador: 'le gusta', fuerza: 'costumbre', coste: 'le cuesta', regla: 'una regla', relacion: 'lo que relaciona', valor: 'lo que valora', funcion: 'lo que ha aprendido', demorado: 'lo demorado', aversion: 'lo que evita', alivio: 'el alivio', postura: 'su postura', red: 'lo que relaciona' };
 const valueEs = (v: number | null) => (v === null ? '' : ` (${Number.isInteger(v) ? v : v.toFixed(2)})`);
 
 /** Una causa legible (019): una fuente de la decisión, un estado o un hecho anterior. */

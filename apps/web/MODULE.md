@@ -16,7 +16,7 @@ Visor pixel art y paneles de observación, con el estilo del lienzo aprobado «V
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 024 | CA-002, CA-004 a CA-012, CA-014 a CA-016, CA-018 y CA-019 con pruebas; CA-001 y CA-003 aceptados por el usuario (2026-09-27); R-001, R-003 a R-013, R-015, R-016 y R-018 a R-024 (la R-002 la sustituye la R-013; la R-014 y la R-017, la R-021 y la R-022) | CA-020 (mazo y fuentes) y CA-021 (revisión visual del usuario frente al lienzo; sustituye a la CA-017); R-027 a R-029 en curso (bloques 3 y 4) |
+| 024 | CA-002, CA-004 a CA-012, CA-014 a CA-016, CA-018, CA-019 y CA-020 con pruebas; CA-001 y CA-003 aceptados por el usuario (2026-09-27); R-001, R-003 a R-013, R-015, R-016 y R-018 a R-024 (la R-002 la sustituye la R-013; la R-014 y la R-017, la R-021 y la R-022) | CA-021 (revisión visual del usuario frente al lienzo; sustituye a la CA-017); R-028 y R-029 en curso (bloque 4) |
 
 ## 3. API pública
 Aplicación: `pnpm dev` (worker + API + visor; `scripts/dev.mjs`) y abrir `http://127.0.0.1:5180` (puerto propio, `DATAS_WORLD_WEB_PORT` para cambiarlo). Solo el visor: `pnpm --filter @datas-world/web dev` (necesita la API en el puerto 8787).
@@ -44,7 +44,8 @@ Aplicación: `pnpm dev` (worker + API + visor; `scripts/dev.mjs`) y abrir `http:
 | `src/log.ts`, `src/logview.ts` | Registro (R-016): `CATEGORIES`, `kindOf`, `isMinor`, `passes`, `linkNames`, `eventText`, `logRow`, `logTableRow`; su vista en tabla con filtro |
 | `src/inspector.ts`, `src/card-compact.ts` | Panel de la derecha (R-021): población, ficha del lugar y ficha compacta (`compactCard`, `criticalNeeds`, `meter`, `whyHere`) |
 | `src/panels.ts` | Formato de la población y del lugar: `populationRows`, `populationHtml`, `populationIntro`, `doingOf`, `placeHtml`, `kindEs`, `moodColor`, `placeAt` |
-| `src/expediente.ts`, `src/exp-tabs.ts`, `src/exp-tabs2.ts` | Expediente de vida (R-022): cabecera, `identityStrip`, `EXP_TABS` y una función por pestaña (Resumen, Estado, Emociones, Historia, Vínculos, Memoria, Creencias, Aprendizaje, Salud, Economía, Charlas) |
+| `src/expediente.ts`, `src/exp-tabs.ts`, `src/exp-tabs2.ts` | Expediente de vida (R-027): encabezado (`identityStrip`), las seis pestañas `EXP_TABS` (Resumen, Historia de vida, Memoria, Creencias, Charlas y Red), `tabId` (las direcciones de antes llevan a la pestaña que las reúne), `resumenBody` e `historiaBody`; y una función por sección (Identidad, Estado, Emociones, Historia, Vínculos, Memoria, Creencias, Aprendizaje, Salud, Economía, Charlas) |
+| `src/exp-cards.ts`, `src/icons.ts` | Resumen (R-027, CA-020), puro: `deckOf` (las ocho conductas más fuertes, fuerza 0 a 9), `sourceShares`, `lastDecision` y `chainOf` (fuentes de control de la última decisión, suman 100 %), `lifeRoad` (cinco etapas) y sus HTML; iconos SVG, retrato por id y `responseIcon` |
 | `src/lifecourse.ts` | Curso de vida del Resumen: `milestones`, `placeLabels`, `lifeCourseSvg` |
 | `src/card.ts`, `src/card-life.ts` | Piezas reutilizadas: `tabRelaciones`, `tabCreencias`, `occupationEs`, `mini`; `renderMemories` y `LifeData` |
 | `src/dashboard.ts` | Dashboard (R-023): `pyramidSvg`, `occupationSvg`, `niceMax`, `renderDashboard`, `setupDashboard` |
@@ -110,7 +111,7 @@ Desde la 024 v0.5 la referencia de la interfaz es el lienzo «Visor A+»; `proto
 ## 8. Pendientes y deuda
 - [x] CA-001 y CA-003: aceptados en la revisión del usuario (2026-09-27).
 - [x] Recorridos por las calles, línea temporal navegable y pestañas de M3 (M4).
-- [ ] CA-021: revisión del usuario frente al lienzo (sustituye a la CA-017). Bloques: T3 Expediente, T4 Dashboard y Charla, T5 capturas.
+- [ ] CA-021: revisión del usuario frente al lienzo (sustituye a la CA-017). Bloques: T4 Dashboard y Charla, T5 capturas.
 - [ ] Modo oscuro afinado, tras la CA-021.
 - [ ] Valor del visitante y malestar acumulado en el panel de la charla (necesita la API de la 043).
 - [ ] Decisión del usuario sobre la escala del mapa y los viajes por persona (specs 003, 016 y de rutinas), para que haya tanta gente en la calle como en el prototipo.
@@ -140,3 +141,4 @@ Desde la 024 v0.5 la referencia de la interfaz es el lienzo «Visor A+»; `proto
 | 2026-10-05 | m4/visor-datas-world (T1) | 024 | Bloque 1 de la 024 v0.6: `dw-tokens.css` (CA-018), barra superior con pestañas en lugar del menú lateral, controles de tiempo y hora en la barra de todas las pantallas, `tabHref` en el router y pestañas Expediente y Charla hacia la última persona. Las pantallas existentes se recolorean con los tokens; su disposición cambia en los bloques siguientes. Prueba nueva `dw-style.test.ts` |
 | 2026-10-05 | m4/visor-datas-world (T2) | 024, 022 | Pantalla Mundo (R-026): columna izquierda con Cohorte (`cohort.ts`, `cohort-ui.ts`) y Capas; mapa en su panel con leyenda, aro dorado para la cohorte, atenuado del resto y barra de línea temporal siempre visible; a la derecha, panel Ahora con las pestañas Ahora (conteos y últimos eventos) y Registro (la tabla, en filas de dos líneas) sobre la ficha o la población. Mapa recoloreado con la paleta del estilo (`render.ts`, `logic.ts`). Prueba nueva `cohort.test.ts` |
 | 2026-10-05 | m4/visor-datas-world (acceso a la charla) | 022 | Arreglo del acceso a la charla: en el formulario de acceso, Enter en la contraseña enviaba «Cancelar» (el primer botón del formulario) y cerraba sin entrar. «Cancelar» pasa a ser de tipo `button`. Si la API rechaza las credenciales, `withAuth` las olvida y vuelve a pedirlas diciendo que son incorrectas, hasta tres veces (charla, charlas guardadas y controles). Pruebas en `dw-style.test.ts` |
+| 2026-10-05 | m4/visor-datas-world (T3) | 024 | Expediente (R-027, CA-020): encabezado con retrato, patrimonio y salario bloqueado («Pronto»), y acciones; seis pestañas (las cinco de antes con estado, emociones, aprendizaje, salud y economía repartidos entre Resumen e Historia de vida; las direcciones antiguas siguen funcionando); en el Resumen, estado de hoy, mazo de conducta, «Por qué decidió esto» (fuentes de control de la última decisión y su cadena) y camino de vida de cinco etapas. Tarjetas, pestañas y barras con la forma del estilo. Pruebas nuevas en `exp-cards.test.ts` y ajustadas en `exp.test.ts` |

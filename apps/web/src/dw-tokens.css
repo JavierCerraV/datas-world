@@ -42,6 +42,25 @@
   --dw-ag-care: #9aa7d4;
   --dw-ag-free: #3fae14;
 
+  /* Fuentes de control de una decisión (040) y rareza de las cartas del mazo (R-027) */
+  --dw-src-reforzador: #3fae14;
+  --dw-src-fuerza: #ff8a2a;
+  --dw-src-demorado: #9a45e0;
+  --dw-src-regla: #ffd23e;
+  --dw-src-valor: #2d6fe0;
+  --dw-src-aversion: #e0413a;
+  --dw-src-coste: #8e96b8;
+  --dw-src-alivio: #2fb6e6;
+  --dw-src-otra: #d946ef;
+  --dw-rar-c-1: #d4dcea;
+  --dw-rar-c-2: #9fb0c8;
+  --dw-rar-r-1: #ffcf6a;
+  --dw-rar-r-2: #ea8a2a;
+  --dw-rar-e-1: #dcaaff;
+  --dw-rar-e-2: #9a45e0;
+  --dw-rar-l-1: #93f3ff;
+  --dw-rar-l-2: #ff9ff3;
+
   /* Superficies y texto (los nombres de siempre, que usan todas las pantallas) */
   --paper: #e9e5da;
   --panel: #f4f1ea;

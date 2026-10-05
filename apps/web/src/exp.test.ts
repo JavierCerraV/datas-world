@@ -7,7 +7,7 @@ import type { Demographics, Dossier } from './dossier-types.ts';
 import { tabEmociones, tabEstado, tabHistoria, tabResumen } from './exp-tabs.ts';
 import type { ExpData } from './exp-tabs.ts';
 import { tabAprendizaje, tabCharlas, tabEconomia, tabSalud, tabVinculos } from './exp-tabs2.ts';
-import { EXP_TABS, identityStrip } from './expediente.ts';
+import { EXP_TABS, identityStrip, tabId } from './expediente.ts';
 import { milestones, placeLabels } from './lifecourse.ts';
 import { DEFAULT_LAYERS, drawPlan, nowRows, scaleBar } from './overlays.ts';
 import { hrefOf, parseRoute } from './router.ts';
@@ -51,9 +51,13 @@ const dossier: Dossier = {
 const x: ExpData = { d: detail, dos: dossier, report: null, today: '2026-01-07 10:15', doing: 'trabajando en Oficinas Andina' };
 
 describe('024 R-022: expediente de vida', () => {
-  it('CA-014: franja de identidad y las once pestañas', () => {
-    expect(EXP_TABS.map(([k]) => k)).toEqual(['resumen', 'estado', 'emociones', 'historia', 'vinculos', 'memoria', 'creencias', 'aprendizaje', 'salud', 'economia', 'charlas']);
-    const strip = identityStrip(detail, dossier);
+  it('CA-014: encabezado y las seis pestañas (las direcciones de antes llevan a la que las reúne)', () => {
+    expect(EXP_TABS.map(([k]) => k)).toEqual(['resumen', 'historia', 'memoria', 'creencias', 'charlas', 'vinculos']);
+    expect(EXP_TABS.map(([, l]) => l)).toEqual(['Resumen', 'Historia de vida', 'Memoria', 'Creencias', 'Charlas', 'Red']);
+    expect(['estado', 'aprendizaje', 'emociones', 'salud', 'economia', 'inexistente', undefined].map(tabId)).toEqual(['resumen', 'resumen', 'historia', 'historia', 'historia', 'resumen', 'resumen']);
+    const strip = identityStrip(detail, dossier, 'datos al 2026-01-07 10:15 · en vivo');
+    expect(strip).toContain('datos al 2026-01-07 10:15 · en vivo');
+    expect(strip).toContain('Salario <small>Pronto</small>');
     expect(strip).toContain('Hombre · 40 años (n. 1985-10-20, el campo) · Tecnológica · Oficinas Andina · Hogar HOU-0007');
     expect(strip).toContain('1 · alimentación'); // alerta por necesidad crítica
   });

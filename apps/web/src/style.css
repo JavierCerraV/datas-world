@@ -1174,14 +1174,26 @@ label.inline select {
   font-size: 13px;
   margin: 7px 0;
 }
-.meter .track,
+.meter .track {
+  height: 14px;
+  overflow: hidden;
+  border: 3px solid var(--dw-edge);
+  border-radius: 999px;
+  background: var(--dw-track);
+  box-shadow: inset 0 2px 0 var(--dw-shadow);
+}
 .mini .track,
 .bar .track {
   height: 7px;
   border-radius: 4px;
   background: var(--soft);
 }
-.meter i,
+.meter i {
+  display: block;
+  height: 100%;
+  background: var(--dw-blue-hi);
+  box-shadow: inset 0 2px 0 var(--dw-gloss);
+}
 .mini i,
 .bar i {
   display: block;
@@ -1190,9 +1202,11 @@ label.inline select {
   background: var(--ink-2);
 }
 .meter i.ok {
-  background: var(--good);
+  background: var(--dw-green);
 }
-.meter i.bad,
+.meter i.bad {
+  background: var(--dw-red);
+}
 .mini i.hot,
 .bar i.hot {
   background: var(--bad);
