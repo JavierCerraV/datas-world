@@ -32,7 +32,7 @@
   --dw-bg-pattern: linear-gradient(115deg, rgb(45 111 224 / 0.55) 0 50%, rgb(224 65 58 / 0.5) 50% 100%);
 
   /* Mapa y curso de vida (el mapa se recolorea en el bloque de la pantalla Mundo) */
-  --dw-map-ground: #5b8440;
+  --dw-map-ground: #6dbb3f;
   --dw-lc-before: #b7c9a2;
   --dw-lc-here: #f0a29a;
   --dw-ag-sleep: #3c4268;

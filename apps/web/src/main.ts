@@ -4,6 +4,8 @@ import { api, stream } from './api.ts';
 import { askAuth, auth, send } from './auth.ts';
 import { clockOf } from './camera.ts';
 import { setupChat } from './chat-ui.ts';
+import { describe } from './cohort.ts';
+import { setupCohort } from './cohort-ui.ts';
 import { setupDashboard } from './dashboard.ts';
 import { setupExpediente } from './expediente.ts';
 import { setupInspector } from './inspector.ts';
@@ -76,6 +78,7 @@ const worldDate = () => (world ? (({ iso, time }) => `${iso} ${time}`)(clockOf(w
 
 async function loadPeople(): Promise<void> {
   people = await api.at<CitizenPosition[]>(urlsFor(moment).citizens);
+  cohort?.refresh();
 }
 
 async function loadStats(): Promise<void> {
@@ -91,6 +94,17 @@ async function loadStats(): Promise<void> {
 
 const topbar = setupTopbar({ message, status: () => status });
 const layers = setupLayers();
+const cohort = setupCohort({
+  people: () => people,
+  onChange: (r, f) => {
+    const on = r.ids !== null;
+    $('#legend').hidden = !on;
+    const tag = $('#map-tag');
+    tag.hidden = !on;
+    tag.textContent = on ? `${r.count} resaltadas` : '';
+    tag.title = describe(f, r);
+  },
+});
 const log = setupLog({ openPerson: (id) => router.go({ view: 'mundo', person: id }) });
 
 // Se crea en `start`, cuando ya se conoce el mapa.
@@ -171,12 +185,17 @@ const timeline = setupTimeline({
     if (selected.person) inspector.select(selected.person);
   },
 });
-$('#tl-open').addEventListener('click', () => {
-  const row = $('#tlrow');
-  row.hidden = !row.hidden;
-  $('#tl-open').setAttribute('aria-expanded', String(!row.hidden));
-  $('#tl-open').textContent = row.hidden ? 'Abrir línea de tiempo' : 'Cerrar línea de tiempo';
-});
+// Panel Ahora: sus dos pestañas (024 R-026).
+for (const [tab, pane, other, otherPane] of [['#nt-now', '#pane-now', '#nt-log', '#pane-log'], ['#nt-log', '#pane-log', '#nt-now', '#pane-now']] as const) {
+  $(tab).addEventListener('click', () => {
+    $(pane).hidden = false;
+    $(otherPane).hidden = true;
+    for (const [t, on] of [[tab, true], [other, false]] as const) {
+      $(t).setAttribute('aria-selected', String(on));
+      $(t).setAttribute('aria-pressed', String(on));
+    }
+  });
+}
 
 let shownMinute = -1;
 async function start(): Promise<void> {
@@ -215,6 +234,7 @@ async function start(): Promise<void> {
     onPlace: (id) => inspector.showPlace(id),
     layers: layers.get,
     bonds: () => (inspector.detail()?.bonds ?? []).map((b) => b.id),
+    cohort: cohort.ids,
   });
   stream({
     tick: (t) => {
@@ -238,7 +258,10 @@ async function start(): Promise<void> {
     status: (ok) => ($('#live').textContent = ok ? '● en vivo' : '○ reconectando…'),
   });
   // La población y la ficha se repintan cada segundo aunque no llegue un tick (el reloj de la vista avanza).
-  setInterval(() => inspector.refresh(), 1000);
+  setInterval(() => {
+    inspector.refresh();
+    cohort.refresh();
+  }, 1000);
 }
 
 // Teclado (024 R-005), solo en la pantalla Mundo: espacio pausa, + y − velocidad, flechas mueven la cámara, Esc

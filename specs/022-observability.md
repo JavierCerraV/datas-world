@@ -82,6 +82,7 @@ Ver el mundo sin alterarlo: API de consulta, flujo en vivo, controles de tiempo,
   - objetos con dueño, fecha de adquisición y precio (005);
   - todos sus eventos en orden cronológico, marcados como historia de origen (030) o simulación, y los recuentos de eventos, estímulos con función, reglas y charlas.
 - **R-016** [M] — **Demografía.** `GET /api/demographics?period=month|year|all` da, sobre el estado guardado: personas vivas, nacidos y fallecidos del periodo con su tasa bruta por mil, hogares con su tamaño medio, organizaciones, la pirámide por edad (grupos de 10 años, 80 o más) y sexo, y las personas por ocupación; también el recuento «Ahora» (trabajando, en clase, en casa, en la calle) de la 024 R-021.
+- **R-017** [M] — **Ocupación y estrato en la población.** Cada elemento de `GET /api/citizens` (y de `/api/days/:day/citizens`) añade `occupation` (una de las ocupaciones de la R-016) y `stratum` (el de su vivienda, 1 a 6, o `null` si no se conoce). Es lo que necesita el filtro de cohorte de la 024 R-026; no hay lógica nueva, solo se leen datos que ya están en el estado.
 
 ## 5. Eventos
 No define tipos propios (usa los de otras specs).
@@ -104,6 +105,7 @@ No define tipos propios (usa los de otras specs).
 - **CA-004** — La ficha de `/api/citizens/:id` coincide con el estado guardado (mismos valores que la base) y la posición de `/api/citizens` sigue la R-005.
 - **CA-012** — *Dado* un mundo de ejemplo, *entonces* el expediente de una persona coincide con el estado guardado y sus eventos (incluida la historia de origen marcada como tal) y su agenda cubre las 24 horas.
 - **CA-013** — *Dado* un mundo de ejemplo, *entonces* `/api/demographics` suma en la pirámide y en la ocupación el total de personas vivas, y cambiar el periodo cambia los nacidos y los fallecidos contados.
+- **CA-014** — *Dado* el mundo de ejemplo, *entonces* cada persona de `/api/citizens` trae una ocupación de la lista de la R-016 y un estrato de 1 a 6 o `null`, y alguna tiene estrato (prueba de la API).
 
 ## 8. Parámetros y calibración
 | Parámetro | Valor | Estado |
@@ -133,3 +135,4 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 | 2026-09-29 | 0.4 | Paridad con el prototipo, aprobada por el usuario (P1 a P4): movimientos para reproducir los trayectos (R-012), indicadores de la barra superior y avance sin observar (R-013), ficha completa con lo que otros creen de la persona y personal del lugar (R-014). CA-009 a CA-011 nuevos |
 | 2026-09-29 | 0.4 | Implementación de la paridad (P1 a P4). Precisiones, sin cambios en CA: `/api/world` añade `points` (por dónde se entra a cada lugar, también a las viviendas de un edificio) y `names`; las posiciones, `homeId`; cada evento, `text` legible (lugares, organizaciones y temas de rumor en palabras) y `names`. R-004: los 401 no llevan `WWW-Authenticate`, porque el navegador abría su propia ventana de acceso y la petición del visor quedaba colgada; las credenciales las pide el visor. La verdad de las creencias lee solo los tipos de evento que la deciden. CA-009 a CA-011 verdes |
 | 2026-09-30 | 0.5 | Visor A+ (derivada de la 024 v0.5, aprobada por el usuario): expediente (R-015) y demografía (R-016). CA-012 y CA-013 nuevos |
+| 2026-10-05 | 0.5 | Precisión derivada de la 024 v0.6 (R-026, filtro de cohorte), sin cambiar reglas anteriores: `/api/citizens` añade `occupation` y `stratum` (R-017). CA-014 nuevo |

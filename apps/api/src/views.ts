@@ -1,6 +1,6 @@
 // Vistas de solo lectura del mundo para la API (spec 022): funciones puras sobre un `World` cargado de la base.
 // No cambian el estado (R-001) y no leen el reloj.
-import { ACTIVITY, ACTIVITY_COLUMN, affectionFor, attachmentOf, eventText, formatId, idNumber, kindOf, ruleContribution, toCalendar } from '@datas-world/engine';
+import { ACTIVITY, ACTIVITY_COLUMN, affectionFor, attachmentOf, eventText, formatId, idNumber, kindOf, ruleContribution, stratumOf, toCalendar } from '@datas-world/engine';
 import type { EntityId, Place, World, WorldEvent } from '@datas-world/engine';
 
 const YEAR = 365.25 * 1440;
@@ -38,8 +38,26 @@ export interface CitizenPosition {
   age: number;
   /** 024 R-017: su vivienda, para decir «en casa» o «camino a casa». */
   homeId: EntityId | null;
+  /** 022 R-017: su ocupación (una de `OCCUPATIONS`) y el estrato de su vivienda, para el filtro de cohorte de la 024 R-026. */
+  occupation: string;
+  stratum: number | null;
   /** 022 R-008: el viaje en curso con sus dos puertas en el mapa, para dibujar el recorrido por las calles. */
   trip?: { from: { x: number; y: number }; to: { x: number; y: number }; departAt: number; arriveAt: number };
+}
+
+/** Ocupaciones del lienzo, en su orden de lectura. */
+export const OCCUPATIONS = ['Empleo formal', 'Empleo informal', 'Independiente', 'Estudiante', 'Menor de edad', 'Labores del hogar', 'Pensionado', 'Desempleado', 'Otra inactividad'] as const;
+const REASON: Record<string, (typeof OCCUPATIONS)[number]> = {
+  student: 'Estudiante', minor: 'Menor de edad', home_duties: 'Labores del hogar', pensioned: 'Pensionado', unemployed: 'Desempleado', other_inactive: 'Otra inactividad',
+};
+
+export function occupationOf(w: World, id: EntityId): (typeof OCCUPATIONS)[number] {
+  const o = w.citizens.get(id)?.occupation;
+  if (!o) return 'Otra inactividad';
+  if (o.kind === 'formal') return 'Empleo formal';
+  if (o.kind === 'informal') return 'Empleo informal';
+  if (o.kind === 'independent') return 'Independiente';
+  return o.kind === 'none' ? REASON[o.reason] ?? 'Otra inactividad' : 'Otra inactividad';
 }
 
 export const living = (world: World) => [...world.citizens.values()].filter((c) => !c.ancestor && world.components.u8.active?.[idNumber(c.id)] === 1);
@@ -83,6 +101,8 @@ export function positions(world: World): CitizenPosition[] {
       mood: round(world.components.f32['state.mood']?.[row] ?? 0.5),
       age: Math.floor((world.now - (i['demo.birthMinute']?.[row] ?? 0)) / YEAR),
       homeId: (c.householdId ? world.households.get(c.householdId)?.dwellingId : undefined) ?? null,
+      occupation: occupationOf(world, c.id),
+      stratum: stratumOf(world, c.id) ?? null,
       ...(trip ? { trip } : {}),
     });
   }

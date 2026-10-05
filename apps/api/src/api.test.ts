@@ -8,7 +8,7 @@ import { WorldRepository, closeDb, openReadonly, pendingCommands } from '@datas-
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApi } from './server.ts';
 import type { Api } from './server.ts';
-import { placePoint, positions } from './views.ts';
+import { OCCUPATIONS, placePoint, positions } from './views.ts';
 
 const M2 = join(import.meta.dirname, '..', '..', '..', 'docs', 'validaciones', 'mundos', 'm2-482917.db');
 let dir: string;
@@ -46,6 +46,16 @@ describe('022: API de solo lectura', () => {
     expect(w.geo.tiles.length).toBe(w.geo.width * w.geo.height);
     expect(w.places.length).toBeGreaterThan(10);
     for (const p of w.places) expect(p.door ?? p.rect).toBeDefined();
+  });
+
+  it('R-017: cada persona lleva su ocupación y el estrato de su vivienda', async () => {
+    const list = (await api.app.inject({ url: '/api/citizens' })).json() as { occupation: string; stratum: number | null }[];
+    const ocupaciones = new Set(OCCUPATIONS as readonly string[]);
+    for (const c of list) {
+      expect(ocupaciones.has(c.occupation)).toBe(true);
+      expect(c.stratum === null || (Number.isInteger(c.stratum) && c.stratum >= 1 && c.stratum <= 6)).toBe(true);
+    }
+    expect(list.some((c) => c.stratum !== null)).toBe(true);
   });
 
   it('CA-004: la ficha coincide con el estado guardado y la posición sigue la R-005', async () => {

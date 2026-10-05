@@ -35,7 +35,7 @@ Specs: 024 v0.4, 022 v0.4 y 027 v0.5.
 ## Bloque T — Estilo Visor Data's World (024 v0.6, aprobada el 2026-10-05; rama `m4/visor-datas-world`)
 Referencia: el lienzo de 10 arenas, tablero T10 (https://claude.ai/artifact/5FCJEBnX28Ky4CHsPdP39t). El modo oscuro afinado queda para después de la CA-021.
 - [x] T1 Estilos y marco: `dw-tokens.css` (CA-018), barra superior con pestañas, controles de tiempo globales y `tabHref`.
-- [ ] T2 Mundo (R-026, CA-019): cohorte con su lógica pura, capas, ficha compacta, «Ahora» y mapa recoloreado.
+- [x] T2 Mundo (R-026, CA-019): cohorte con su lógica pura, capas, ficha compacta, «Ahora» y mapa recoloreado. Añade 022 R-017 (ocupación y estrato en `/api/citizens`).
 - [ ] T3 Expediente (R-027, CA-020): cabecera, seis pestañas, mazo de conducta, camino de vida y fuentes de control.
 - [ ] T4 Dashboard y Charla (R-028, R-029).
 - [ ] T5 Capturas junto al lienzo en `docs/validaciones/M4-visor-datas-world.md` y aceptación del usuario (CA-021).

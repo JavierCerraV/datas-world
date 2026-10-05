@@ -5,6 +5,9 @@ import type { Figure } from './scene.ts';
 import type { Rect } from './types.ts';
 import { TS } from './logic.ts';
 
+/** R-026: el aro dorado de quien está en la cohorte (el oro de dw-tokens.css). */
+export const COHORT_RING = '#FFD23E';
+
 /** R-007: oscuridad según el minuto del día (la del prototipo): 0,5 de noche, amanecer de 5:00 a 7:00, atardecer de 18:00 a 20:30. */
 export function darkness(minuteOfDay: number): number {
   const m = ((minuteOfDay % 1440) + 1440) % 1440;

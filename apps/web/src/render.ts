@@ -23,15 +23,15 @@ export function drawMap(world: WorldView): MapLayer {
   for (let y = 0; y < geo.height; y++)
     for (let x = 0; x < geo.width; x++) {
       const t = geo.tiles[y * geo.width + x] ?? 0;
-      g.fillStyle = t === 0 ? ((x + y) % 2 ? '#739C50' : '#76A053') : (TILE_COLORS[t] ?? '#76A053');
+      g.fillStyle = t === 0 ? ((x + y) % 2 ? '#6DBB3F' : '#79C84A') : (TILE_COLORS[t] ?? '#79C84A');
       g.fillRect(x * TS, y * TS, TS, TS);
       const px = x * TS;
       const py = y * TS;
       if (t === T.road) {
-        g.fillStyle = '#625D55';
+        g.fillStyle = '#505672';
         g.fillRect(px + (hash(`c${x}:${y}`) % 7), py + (hash(`c${y}:${x}`) % 7), 1, 1);
         // Línea discontinua entre los dos carriles de una calle de dos tiles (no en los cruces), como el prototipo.
-        g.fillStyle = '#C8BFA4';
+        g.fillStyle = '#F4EBC8';
         if (at(x, y + 1) === T.road && at(x, y - 1) !== T.road && at(x, y + 2) !== T.road && at(x - 1, y) === T.road && at(x + 1, y) === T.road && at(x - 1, y + 1) === T.road)
           for (let k = 0; k < TS; k += 6) if ((px + k) % 6 < 3) g.fillRect(px + k, py + TS - 1, 3, 1);
         if (at(x + 1, y) === T.road && at(x - 1, y) !== T.road && at(x + 2, y) !== T.road && at(x, y - 1) === T.road && at(x, y + 1) === T.road && at(x + 1, y - 1) === T.road)
@@ -40,11 +40,11 @@ export function drawMap(world: WorldView): MapLayer {
         // Motas de hierba y bordillo claro hacia la calle, como el prototipo.
         const hv = hash(`h${x}:${y}`);
         for (let i = 0; i < 3; i++) {
-          g.fillStyle = (hv >>> (i * 7)) & 1 ? '#86AE60' : '#658D46';
+          g.fillStyle = (hv >>> (i * 7)) & 1 ? '#8AD65C' : '#5CAA33';
           g.fillRect(px + ((hv >>> (i * 7 + 1)) % 7), py + ((hv >>> (i * 7 + 4)) % 7), 1, 1);
         }
         const road = (dx: number, dy: number) => geo.tiles[(y + dy) * geo.width + x + dx] === T.road && x + dx >= 0 && x + dx < geo.width;
-        g.fillStyle = '#A9A290';
+        g.fillStyle = '#C9B77F';
         if (road(0, 1)) g.fillRect(px, py + TS - 1, TS, 1);
         if (road(0, -1)) g.fillRect(px, py, TS, 1);
         if (road(1, 0)) g.fillRect(px + TS - 1, py, 1, TS);
@@ -82,21 +82,21 @@ function tree(g: CanvasRenderingContext2D, x: number, y: number): void {
 
 /** Parque: césped con borde, senderos en cruz, estanque en la esquina, árboles y dos bancos. */
 function drawPark(g: CanvasRenderingContext2D, id: string, x: number, y: number, w: number, h: number): void {
-  g.fillStyle = '#5F9146';
+  g.fillStyle = '#62C03F';
   g.fillRect(x, y, w, h);
-  g.fillStyle = '#4C7A38';
+  g.fillStyle = '#3F9A28';
   g.fillRect(x, y, w, 1);
   g.fillRect(x, y + h - 1, w, 1);
   g.fillRect(x, y, 1, h);
   g.fillRect(x + w - 1, y, 1, h);
-  g.fillStyle = '#CDBF98';
+  g.fillStyle = '#EBDDB0';
   g.fillRect(x + 2, y + Math.floor(h / 2) - 1, w - 4, 3);
   g.fillRect(x + Math.floor(w / 2) - 1, y + 2, 3, h - 4);
   if (w >= 24 && h >= 18) {
-    g.fillStyle = '#3F7FB5';
+    g.fillStyle = '#2F9BF0';
     g.fillRect(x + 6, y + 6, 14, 8);
     g.fillRect(x + 8, y + 5, 10, 10);
-    g.fillStyle = '#6FA8D6';
+    g.fillStyle = '#7FC8FF';
     g.fillRect(x + 9, y + 7, 4, 1);
   }
   for (const t of parkTrees(id, x, y, w, h)) tree(g, t.x, t.y);
@@ -109,9 +109,9 @@ function drawPark(g: CanvasRenderingContext2D, id: string, x: number, y: number,
 
 /** Plaza: adoquín claro con borde y juntas. */
 function drawPlaza(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number): void {
-  g.fillStyle = '#CDBF98';
+  g.fillStyle = '#EBDDB0';
   g.fillRect(x, y, w, h);
-  g.fillStyle = '#B6AE98';
+  g.fillStyle = '#CDBF8A';
   for (let yy = y + 3; yy < y + h; yy += 4) g.fillRect(x, yy, w, 1);
   g.fillRect(x, y, w, 1);
   g.fillRect(x, y + h - 1, w, 1);
@@ -122,7 +122,7 @@ function drawBuilding(g: CanvasRenderingContext2D, p: WorldView['places'][number
   const s = styleOf(p.kind, p.id);
   // Sendero de la puerta a la calle, como el prototipo.
   if (p.door && p.door.y * TS > y + h) {
-    g.fillStyle = '#B6AE98';
+    g.fillStyle = '#CDBF8A';
     g.fillRect(p.door.x * TS + 2, y + h, 4, p.door.y * TS - (y + h));
   }
   const d = decorOf(p.kind);

@@ -4,7 +4,7 @@
 // el tooltip y los clics. Solo dibuja lo que ya pasó en el mundo.
 import { clampZoom, frameOf, toMap } from './camera.ts';
 import type { Cam } from './camera.ts';
-import { darkness, drawArrow, drawFigure, drawFrame, drawNight } from './figures.ts';
+import { COHORT_RING, darkness, drawArrow, drawFigure, drawFrame, drawNight } from './figures.ts';
 import { TS } from './logic.ts';
 import { drawPlan, renderScale } from './overlays.ts';
 import type { Layers } from './overlays.ts';
@@ -34,6 +34,8 @@ export interface MapDeps {
   layers: () => Layers;
   /** Con quién tiene vínculo la persona elegida (para la capa Vínculos). */
   bonds: () => readonly string[];
+  /** La cohorte (024 R-026): sus ids, o null si no hay filtro. Quien no está se atenúa y quien está lleva un aro dorado. */
+  cohort: () => ReadonlySet<string> | null;
 }
 
 export interface MapView {
@@ -98,7 +100,7 @@ export function setupMap(d: MapDeps): MapView {
     }
     frame = frameOf(cam, r.width, r.height, mapW, mapH, dpr);
     g.setTransform(1, 0, 0, 1, 0, 0);
-    g.fillStyle = '#5B8440';
+    g.fillStyle = '#6DBB3F';
     g.fillRect(0, 0, w, h);
     g.setTransform(dpr * frame.s, 0, 0, dpr * frame.s, dpr * (r.width / 2 - frame.cx * frame.s), dpr * (r.height / 2 - frame.cy * frame.s));
     g.imageSmoothingEnabled = false;
@@ -129,7 +131,22 @@ export function setupMap(d: MapDeps): MapView {
       }
       g.setLineDash([]);
     }
-    for (const f of figures) drawFigure(g, f);
+    const cohort = d.cohort();
+    for (const f of figures) {
+      g.globalAlpha = cohort && !cohort.has(f.id) ? 0.3 : 1;
+      drawFigure(g, f);
+    }
+    g.globalAlpha = 1;
+    if (cohort) {
+      g.strokeStyle = COHORT_RING;
+      g.lineWidth = 1;
+      for (const f of figures) {
+        if (!cohort.has(f.id)) continue;
+        g.beginPath();
+        g.arc(f.x, f.y - (f.small ? 2 : 3), 5, 0, Math.PI * 2);
+        g.stroke();
+      }
+    }
     if (plan.mood) {
       const mood = new Map(people.map((c) => [c.id, c.mood]));
       for (const f of figures) {

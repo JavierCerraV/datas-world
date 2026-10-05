@@ -42,52 +42,62 @@
       </nav>
 
       <div class="views">
-        <!-- Pantalla Mundo (024 R-021, R-026) -->
+        <!-- Pantalla Mundo (024 R-026): cohorte y capas, mapa con línea temporal, y Ahora con el registro -->
         <section class="view" id="view-mundo" aria-label="Mundo">
           <div class="world">
-            <section class="stage" aria-label="Mapa y registro">
+            <aside class="wcol wleft" aria-label="Cohorte y capas">
+              <section class="dw-panel" aria-label="Cohorte"><header class="dw-ph"><h2 class="dw-st">Cohorte</h2></header><div class="dw-pb" id="cohort"></div></section>
+              <section class="dw-panel" aria-label="Capas del mapa"><header class="dw-ph"><h2 class="dw-st">Capas</h2></header><div class="dw-pb layers" id="layers" role="group" aria-label="Capas del mapa"></div></section>
+            </aside>
+            <section class="stage dw-panel" aria-label="Mapa del mundo">
+              <header class="dw-ph"><h2 class="dw-st">Mapa del mundo</h2><span class="grow"></span><span class="tag gold" id="map-tag" hidden></span></header>
               <div class="mapwrap" id="mapwrap">
                 <canvas id="map" aria-label="Mapa del pueblo. Haz clic en una persona o edificio para verlo. Arrastra para moverte."></canvas>
                 <div class="tip" id="tip"></div>
-                <div class="overlay layers" id="layers" role="group" aria-label="Capas del mapa"></div>
-                <div class="overlay nowbox" id="nowbox" aria-label="Qué hace la gente ahora"></div>
-                <div class="overlay scale" aria-hidden="true"><i id="scale-bar"></i><span class="mono" id="scale-txt">50 m</span></div>
+                <div class="overlay maplegend" id="legend" hidden><span><i class="ring"></i> En la cohorte</span></div>
                 <div class="seltag" id="seltag" hidden></div>
                 <p id="tl-banner" class="banner" role="status" hidden></p>
                 <p id="msg" class="msg-line" role="status" aria-live="polite"></p>
                 <span class="fps mono" id="fps"></span>
+                <div class="overlay scale" aria-hidden="true"><i id="scale-bar"></i><span class="mono" id="scale-txt">50 m</span></div>
                 <div class="mapctl">
                   <button class="btn sq" id="zoom-in" type="button" aria-label="Acercar">+</button>
                   <button class="btn sq" id="zoom-out" type="button" aria-label="Alejar">−</button>
                   <button class="btn" id="follow" type="button" aria-pressed="false">Seguir</button>
                   <button class="btn" id="center" type="button">Ver todo</button>
                 </div>
+                <div class="overlay tlbar" id="tlrow">
+                  <b class="fd">Línea temporal</b>
+                  <label class="timeline"><span class="sr-only">Ver un día pasado</span><input id="tl" type="range" min="0" max="0" value="0" aria-label="Línea temporal: elige un día pasado" /></label>
+                  <button class="btn accent" id="tl-live" type="button" disabled>Volver al presente</button>
+                </div>
                 <div class="progress" id="progress" role="status">
                   <div class="box"><div>Simulando sin observar</div><div class="pct mono" id="prog-pct">0 %</div><div class="track"><i id="prog-bar"></i></div></div>
                 </div>
               </div>
-              <section class="log" aria-label="Registro de eventos">
-                <div class="loghead">
-                  <h2>Registro de eventos</h2>
-                  <span class="sub" id="log-sub">en vivo</span>
-                  <span class="grow"></span>
-                  <label class="inline">Filtro <select id="log-filter"></select></label>
-                  <label class="inline"><input type="checkbox" id="show-minor" /> Incluir menores</label>
-                  <button class="btn" id="tl-open" type="button" aria-expanded="false">Abrir línea de tiempo</button>
-                </div>
-                <div class="tlrow" id="tlrow" hidden>
-                  <label class="timeline"><span class="sub">Ver un día pasado</span><input id="tl" type="range" min="0" max="0" value="0" aria-label="Línea temporal: elige un día pasado" /></label>
-                  <button class="btn" id="tl-live" type="button" disabled>Volver al presente</button>
-                </div>
-                <div class="logscroll">
-                  <table class="logtable">
-                    <thead><tr><th scope="col">Hora</th><th scope="col">Tipo</th><th scope="col">Qué pasó</th><th scope="col">Causas</th></tr></thead>
-                    <tbody id="events"></tbody>
-                  </table>
+            </section>
+            <aside class="wcol wright" aria-label="Ahora y ficha">
+              <section class="dw-panel nowpanel" aria-label="Ahora y registro">
+                <header class="dw-ph"><h2 class="dw-st">Ahora</h2><span class="grow"></span>
+                  <div class="seg sm" role="tablist" aria-label="Ahora o registro completo"><button type="button" role="tab" id="nt-now" aria-selected="true" aria-pressed="true">Ahora</button><button type="button" role="tab" id="nt-log" aria-selected="false" aria-pressed="false">Registro</button></div></header>
+                <div class="dw-pb" id="pane-now"><div class="nowbox" id="nowbox" aria-label="Qué hace la gente ahora"></div><ul class="recent" id="recent" aria-label="Últimos eventos"></ul></div>
+                <div class="dw-pb log" id="pane-log" hidden aria-label="Registro de eventos">
+                  <div class="loghead">
+                    <span class="sub" id="log-sub">en vivo</span>
+                    <span class="grow"></span>
+                    <label class="inline">Filtro <select id="log-filter"></select></label>
+                    <label class="inline"><input type="checkbox" id="show-minor" /> Incluir menores</label>
+                  </div>
+                  <div class="logscroll">
+                    <table class="logtable">
+                      <thead><tr><th scope="col">Hora</th><th scope="col">Tipo</th><th scope="col">Qué pasó</th><th scope="col">Causas</th></tr></thead>
+                      <tbody id="events"></tbody>
+                    </table>
+                  </div>
                 </div>
               </section>
-            </section>
-            <aside class="inspector" id="inspector" aria-live="polite"></aside>
+              <aside class="inspector dw-panel" id="inspector" aria-live="polite"></aside>
+            </aside>
           </div>
         </section>
 

@@ -4,7 +4,9 @@
 import { ACTIVITY_COLUMN, MINUTES_PER_DAY, formatId, idNumber } from '@datas-world/engine';
 import type { EntityId, World } from '@datas-world/engine';
 import type { Db } from '@datas-world/persistence';
-import { ACTIVITY_NAME, dateOf, living } from './views.ts';
+import { ACTIVITY_NAME, OCCUPATIONS, dateOf, living, occupationOf } from './views.ts';
+
+export { OCCUPATIONS, occupationOf };
 
 const YEAR = 365.25 * MINUTES_PER_DAY;
 export type Period = 'month' | 'year' | 'all';
@@ -12,12 +14,6 @@ export const PERIOD_MINUTES: Record<Period, number | null> = { month: 30 * MINUT
 
 /** Grupos de edad de la pirámide, de 10 en 10 años hasta «80 o más». */
 export const AGE_GROUPS = ['0–9', '10–19', '20–29', '30–39', '40–49', '50–59', '60–69', '70–79', '80+'] as const;
-
-/** Ocupaciones del lienzo, en su orden de lectura. */
-export const OCCUPATIONS = ['Empleo formal', 'Empleo informal', 'Independiente', 'Estudiante', 'Menor de edad', 'Labores del hogar', 'Pensionado', 'Desempleado', 'Otra inactividad'] as const;
-const REASON: Record<string, (typeof OCCUPATIONS)[number]> = {
-  student: 'Estudiante', minor: 'Menor de edad', home_duties: 'Labores del hogar', pensioned: 'Pensionado', unemployed: 'Desempleado', other_inactive: 'Otra inactividad',
-};
 
 /** Categorías del panel «Ahora»: cada persona cae en una sola (CA-016). */
 export const NOW_KINDS = ['trabajando', 'en clase', 'en casa', 'en la calle', 'en otro lugar'] as const;
@@ -38,15 +34,6 @@ export function nowKindOf(w: World, id: EntityId): NowKind {
   if (p && home && p.id === home) return 'en casa';
   if (p?.kind.startsWith('espacio_publico')) return 'en la calle';
   return 'en otro lugar';
-}
-
-export function occupationOf(w: World, id: EntityId): (typeof OCCUPATIONS)[number] {
-  const o = w.citizens.get(id)?.occupation;
-  if (!o) return 'Otra inactividad';
-  if (o.kind === 'formal') return 'Empleo formal';
-  if (o.kind === 'informal') return 'Empleo informal';
-  if (o.kind === 'independent') return 'Independiente';
-  return o.kind === 'none' ? REASON[o.reason] ?? 'Otra inactividad' : 'Otra inactividad';
 }
 
 const count = (db: Db, type: string, from: number | null, to: number) =>
