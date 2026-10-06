@@ -8,7 +8,7 @@ import { Gateway } from './gateway.ts';
 import { mockAdapter } from './providers/mock.ts';
 import type { MockResponder } from './providers/mock.ts';
 import { buildPersonView } from './chat/view.ts';
-import { administerInstrument, itemsText } from './psychometrics.ts';
+import { administerBattery, administerInstrument, itemsText } from './psychometrics.ts';
 import type { ItemPlan } from './psychometrics.ts';
 import type { GatewayConfig, ModelConfig } from './types.ts';
 
@@ -46,6 +46,28 @@ describe('045 R-012: la charla con el LLM la valida el motor (CA-009)', () => {
     const some = JSON.stringify({ answers: [{ n: 1, reply: 'ok', option: 3 }] });
     const out = await administerInstrument(gw(() => some), pv, ins, plan);
     expect(out.map((a) => a.source)).toEqual(['llm', 'plantilla', 'plantilla', 'plantilla', 'plantilla']);
+  });
+});
+
+describe('045 R-012: varias pruebas en una llamada', () => {
+  const parts = [{ ins: INSTRUMENTS.SWLS, plan }, { ins: INSTRUMENTS['DASS-21'], plan: [{ n: 1, target: 0, disposition: 'fiel' as const }, { n: 2, target: 3, disposition: 'miente' as const }] }];
+
+  it('cada respuesta se asigna a su prueba y se valida con el rango de su escala', async () => {
+    const reply = JSON.stringify({ answers: [
+      ...[3, 5, 2, 6, 4].map((option, i) => ({ q: 'SWLS', n: i + 1, reply: 'ok', option })),
+      { q: 'DASS-21', n: 1, reply: 'nada', option: 1 }, { q: 'DASS-21', n: 2, reply: 'harto', option: 0 },
+    ] });
+    const out = await administerBattery(gw(() => reply), pv, parts);
+    expect(out.SWLS!.map((a) => a.source)).toEqual(['llm', 'llm', 'llm', 'llm', 'llm']);
+    expect(out['DASS-21']!.map((a) => [a.option, a.source])).toEqual([[1, 'llm'], [3, 'corregida']]);
+  });
+
+  it('un ítem que falta cae a plantilla con su causa; sin proveedor, todos', async () => {
+    const some = JSON.stringify({ answers: [{ q: 'SWLS', n: 1, reply: 'ok', option: 3 }] });
+    const out = await administerBattery(gw(() => some), pv, parts);
+    expect(out.SWLS![1]!.source).toBe('plantilla');
+    const off = await administerBattery(gw(() => 'no es json', {}), pv, parts);
+    expect(Object.values(off).flat().every((a) => a.source === 'plantilla' && a.why)).toBe(true);
   });
 });
 

@@ -26,6 +26,8 @@ export interface ItemAnswer {
   reply: string;
   option: number;
   source: ItemSource;
+  /** Si fue plantilla: por qué no respondió el LLM (`budget`, `timeout`, `invalid`, `disabled`, `network_error`). */
+  why?: string;
 }
 
 const HINT: Record<Disposition, string> = {
@@ -36,14 +38,15 @@ const HINT: Record<Disposition, string> = {
   impreciso: 'No tienes muy claro cómo te sientes en esto; respondes sin mucha precisión.',
 };
 
-const AnswersSchema = z.object({ answers: z.array(z.object({ n: z.number().int(), reply: z.string(), option: z.number().int() })) });
+// Sin `.int()`: el esquema JSON de Anthropic no admite `minimum`/`maximum` en enteros; el entero se valida abajo.
+const AnswersSchema = z.object({ answers: z.array(z.object({ n: z.number(), reply: z.string(), option: z.number() })) });
 
 const TEMPLATE_REPLY = (option: string) => `Mmm… yo diría que ${option.toLowerCase()}.`;
 
 const instructionsFor = (pv: PersonView, ins: Instrument): string =>
   [
     `Eres ${pv.name}, una persona que vive en Data's World, un pueblo de Colombia.`,
-    `Una persona que no conoces, que se presenta como evaluadora, te pidió contestar un cuestionario (${ins.name}). Aceptaste. Te va a leer las afirmaciones una por una y tú respondes como en una conversación.`,
+    `Una persona que no conoces, que se presenta como evaluadora, te pidió contestar ${ins.name.startsWith('varios: ') ? `unos cuestionarios (${ins.name.slice(8)})` : `un cuestionario (${ins.name})`}. Aceptaste. Te va a leer las afirmaciones una por una y tú respondes como en una conversación.`,
     'Cómo responder:',
     '- Para cada ítem escribe primero lo que dirías de viva voz, en primera persona y en español colombiano coloquial, en una o dos frases cortas, y después elige el número de la opción que corresponde a lo que dijiste.',
     '- Lo que cuentes de tu vida tiene que estar en «Lo que sabes». No inventes hechos, nombres ni fechas.',
@@ -82,12 +85,51 @@ export async function administerInstrument(gateway: Gateway, pv: PersonView, ins
     messages: [{ role: 'user', text: itemsText(ins, plan) }],
   });
   const byN = new Map((res.data?.answers ?? []).map((a) => [a.n, a]));
+  const why = res.source === 'fallback' ? `${res.fallbackReason ?? 'fallback'}${res.errorDetail ? `: ${res.errorDetail.trim()}` : ''}` : byN.size === 0 ? 'invalid' : undefined;
   return plan.map((p): ItemAnswer => {
     const item = ins.items.find((x) => x.n === p.n)!;
     const optionText = optionsOf(ins, item)[p.target - ins.min] ?? String(p.target);
     const a = byN.get(p.n);
-    if (!a || res.source === 'fallback') return { n: p.n, reply: TEMPLATE_REPLY(optionText), option: p.target, source: 'plantilla' };
-    const inRange = a.option >= Math.max(ins.min, p.target - LLM_RANGE) && a.option <= Math.min(ins.max, p.target + LLM_RANGE);
+    if (!a || res.source === 'fallback') return { n: p.n, reply: TEMPLATE_REPLY(optionText), option: p.target, source: 'plantilla', ...(why ? { why } : {}) };
+    const inRange = Number.isInteger(a.option) && a.option >=Math.max(ins.min, p.target - LLM_RANGE) && a.option <= Math.min(ins.max, p.target + LLM_RANGE);
     return inRange ? { n: p.n, reply: a.reply, option: a.option, source: 'llm' } : { n: p.n, reply: a.reply, option: p.target, source: 'corregida' };
   });
+}
+
+// Varias pruebas en una sola llamada: `q` dice a qué prueba pertenece cada respuesta.
+const BatterySchema = z.object({ answers: z.array(z.object({ q: z.string(), n: z.number(), reply: z.string(), option: z.number() })) });
+
+export interface PartPlan {
+  ins: Instrument;
+  plan: readonly ItemPlan[];
+}
+
+/**
+ * Aplica varias pruebas a una persona en UNA llamada (menos peticiones: útil con proveedores de cuota diaria baja). Mismas
+ * reglas que `administerInstrument`: el LLM elige dentro del rango, el motor valida, y sin LLM queda la plantilla.
+ */
+export async function administerBattery(gateway: Gateway, pv: PersonView, parts: readonly PartPlan[]): Promise<Record<string, ItemAnswer[]>> {
+  const names = parts.map((p) => p.ins.name).join('; ');
+  const system: PromptPart[] = [
+    { text: instructionsFor(pv, { name: `varios: ${names}` } as Instrument).replace('{"answers": [{"n": <número del ítem>,', '{"answers": [{"q": "<id de la prueba>", "n": <número del ítem>,'), cacheable: true },
+    { text: renderView(pv), cacheable: true },
+    { text: stateText(pv), cacheable: false },
+  ];
+  const text = parts.map((p) => `=== PRUEBA ${p.ins.id} ===\n${itemsText(p.ins, p.plan)}`).join('\n\n');
+  const res = await gateway.run({ purpose: 'dialogue', citizenId: pv.citizenId, system, schema: BatterySchema, messages: [{ role: 'user', text }] });
+  const given = new Map((res.data?.answers ?? []).map((a) => [`${a.q}#${a.n}`, a]));
+  const why = res.source === 'fallback' ? `${res.fallbackReason ?? 'fallback'}${res.errorDetail ? `: ${res.errorDetail.trim()}` : ''}` : given.size === 0 ? 'invalid' : undefined;
+  const out: Record<string, ItemAnswer[]> = {};
+  for (const { ins, plan } of parts) {
+    out[ins.id] = plan.map((p): ItemAnswer => {
+      const item = ins.items.find((x) => x.n === p.n)!;
+      const optionText = optionsOf(ins, item)[p.target - ins.min] ?? String(p.target);
+      const a = given.get(`${ins.id}#${p.n}`);
+      // Un ítem que falta cuando el resto sí llegó se cuenta como inválido, no como fallo del proveedor.
+      if (!a) return { n: p.n, reply: TEMPLATE_REPLY(optionText), option: p.target, source: 'plantilla', why: why ?? 'missing' };
+      const inRange = Number.isInteger(a.option) && a.option >= Math.max(ins.min, p.target - LLM_RANGE) && a.option <= Math.min(ins.max, p.target + LLM_RANGE);
+      return inRange ? { n: p.n, reply: a.reply, option: a.option, source: 'llm' } : { n: p.n, reply: a.reply, option: p.target, source: 'corregida' };
+    });
+  }
+  return out;
 }

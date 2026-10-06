@@ -5,10 +5,10 @@ import { existsSync, mkdirSync, rmSync, readFileSync, writeFileSync } from 'node
 import { dirname } from 'node:path';
 import { parseArgs } from 'node:util';
 import { INSTRUMENTS, INSTRUMENT_IDS, MINUTES_PER_DAY, N_SAMPLE, adults, createRng, dispose, indicatorsOf, scoreInstrument, selectSample, stateHash, truthfulResponses } from '@datas-world/engine';
-import type { EntityId, Participant, World, WorldEvent } from '@datas-world/engine';
+import type { EntityId, InstrumentId, Participant, World, WorldEvent } from '@datas-world/engine';
 import { lifeRunner, loadCatalogs } from '@datas-world/generators';
-import { DEFAULT_CONFIG, Gateway, MemoryRecordStore, administerInstrument, anthropicAdapter, buildPersonView, chatCatalogs, mockAdapter, parseConfig } from '@datas-world/llm-gateway';
-import type { GatewayConfig, MockResponder, ModelConfig, ProviderAdapter } from '@datas-world/llm-gateway';
+import { DEFAULT_CONFIG, Gateway, MemoryRecordStore, administerBattery, administerInstrument, anthropicAdapter, buildPersonView, chatCatalogs, mockAdapter, openaiCompatibleAdapter, parseConfig } from '@datas-world/llm-gateway';
+import type { GatewayConfig, ItemAnswer, ItemPlan, MockResponder, ModelConfig, PersonView, ProviderAdapter } from '@datas-world/llm-gateway';
 import { WorldRepository, WorldSession, acquireWriterLock, openReadonly, openWorldDb, queryEvents, releaseWriterLock, trajectoryOf } from '@datas-world/persistence';
 import { DEFAULT_DB, UsageError, dateOf, toInt, withDb } from './common.ts';
 import type { Io } from './common.ts';
@@ -28,18 +28,21 @@ const BATTERY_TOKENS = 6_000_000;
 /** Proveedor determinista: elige el centro del rango permitido de cada ítem (si no hay centro, un extremo según el ítem, para no sesgar). */
 const mockResponder: MockResponder = (c) => {
   const text = c.messages.at(-1)?.text ?? '';
-  const answers = [...text.matchAll(/ÍTEM (\d+):[\s\S]*?Opciones: (\d+) = [\s\S]*?(\d+) = [^;\n]*\.\n\s*RANGO (\d+)-(\d+)/g)].map((m) => {
+  const parse = (body: string, q?: string) => [...body.matchAll(/ÍTEM (\d+):[\s\S]*?Opciones: (\d+) = [\s\S]*?(\d+) = [^;\n]*\.\n\s*RANGO (\d+)-(\d+)/g)].map((m) => {
     const [n, min, max, lo, hi] = m.slice(1).map(Number) as [number, number, number, number, number];
     // Con rango par es que el objetivo está en un extremo de la escala: se queda en él.
     const option = (lo + hi) % 2 === 0 ? (lo + hi) / 2 : lo === min ? lo : hi === max ? hi : lo;
-    return { n, reply: `Pues más o menos, ${option}.`, option };
+    return { ...(q ? { q } : {}), n, reply: `Pues más o menos, ${option}.`, option };
   });
+  // Varias pruebas en una llamada: `=== PRUEBA <id> ===` separa las secciones.
+  const parts = text.split(/=== PRUEBA (\S+) ===\n/);
+  const answers = parts.length === 1 ? parse(text) : Array.from({ length: (parts.length - 1) / 2 }, (_, i) => parse(parts[2 + 2 * i]!, parts[1 + 2 * i]!)).flat();
   return JSON.stringify({ answers });
 };
 
 function gatewayFor(provider: string): Gateway {
   // Cada instrumento va en una llamada: más salida y más tiempo que una réplica de charla.
-  const big = (m: ModelConfig): ModelConfig => ({ ...m, maxOutputTokens: 6_000, timeoutMs: 120_000, temperature: 0.7 });
+  const big = (m: ModelConfig): ModelConfig => ({ ...m, maxOutputTokens: 16_000, timeoutMs: 300_000, temperature: 0.7 });
   if (provider === 'mock') {
     const m: ModelConfig = { provider: 'mock', model: 'mock', temperature: 0, maxOutputTokens: 6_000, timeoutMs: 5_000 };
     const config: GatewayConfig = { ...DEFAULT_CONFIG, purposes: { ...DEFAULT_CONFIG.purposes, dialogue: m }, budget: { ...DEFAULT_CONFIG.budget, dailyTokens: BATTERY_TOKENS } };
@@ -50,8 +53,41 @@ function gatewayFor(provider: string): Gateway {
   const dialogue = base.purposes.dialogue;
   if (!dialogue) throw new UsageError('config/llm.json tiene desactivado el propósito dialogue');
   const config: GatewayConfig = { ...base, purposes: { ...base.purposes, dialogue: big(dialogue) }, budget: { ...base.budget, dailyTokens: Math.max(base.budget.dailyTokens, BATTERY_TOKENS) } };
+  // Los dos proveedores reales; se usa el que diga `config/llm.json` (`openai_compatible` lee LLM_BASE_URL y LLM_API_KEY, o `baseUrl`).
   let a: ProviderAdapter | undefined;
-  return new Gateway({ config, adapters: { anthropic: { call: (c) => (a ??= anthropicAdapter()).call(c) } }, records: new MemoryRecordStore(100_000) });
+  let o: ProviderAdapter | undefined;
+  const adapters = {
+    anthropic: { call: (c: Parameters<ProviderAdapter['call']>[0]) => (a ??= anthropicAdapter()).call(c) },
+    openai_compatible: { call: (c: Parameters<ProviderAdapter['call']>[0]) => (o ??= openaiCompatibleAdapter(dialogue.baseUrl ? { baseUrl: dialogue.baseUrl } : {})).call(c) },
+  };
+  return new Gateway({ config, adapters, records: new MemoryRecordStore(100_000) });
+}
+
+const TRANSIENT = /429|rate.?limit|overloaded|\b50[234]\b|\b529\b|timeout|ETIMEDOUT|ECONNRESET/i;
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/**
+ * Aplica las pruebas de una persona, con reintentos ante límites de tasa o sobrecarga (proveedores gratuitos); otros fallos
+ * no se reintentan. `perCall = 'person'`: todas en una llamada; `'instrument'`: una llamada por prueba.
+ */
+async function administer(gateway: Gateway, pv: PersonView, plans: Record<InstrumentId, ItemPlan[]>, perCall: string, delayMs: number): Promise<Record<InstrumentId, ItemAnswer[]>> {
+  const ids = Object.keys(plans) as InstrumentId[];
+  for (let attempt = 1; ; attempt++) {
+    const out = (perCall === 'person'
+      ? await administerBattery(gateway, pv, ids.map((id) => ({ ins: INSTRUMENTS[id], plan: plans[id] })))
+      : Object.fromEntries(await Promise.all(ids.map(async (id) => [id, await administerInstrument(gateway, pv, INSTRUMENTS[id], plans[id])])))) as Record<InstrumentId, ItemAnswer[]>;
+    if (delayMs > 0) await sleep(delayMs);
+    const why = ids.map((id) => out[id][0]!).find((a) => a.source === 'plantilla')?.why ?? '';
+    if (!why || attempt >= 8 || !TRANSIENT.test(why)) return out;
+    await sleep(Math.min(120_000, 8_000 * attempt));
+  }
+}
+
+interface Checkpoint {
+  battery: Battery;
+  sample: Participant[];
+  /** Toma a cuya fecha está ya la copia del mundo. */
+  reached: 0 | 1 | 2;
 }
 
 /** Copia consistente de la base (`VACUUM INTO`) sin el cerrojo del worker, para poder avanzarla sin tocar el mundo en marcha. */
@@ -99,29 +135,44 @@ export async function psychometrics(args: string[], io: Io): Promise<void> {
     options: {
       db: { type: 'string', default: DEFAULT_DB }, work: { type: 'string', default: 'data/psicometria/mundo.db' }, out: { type: 'string', default: 'data/psicometria/bateria' },
       provider: { type: 'string', default: 'mock' }, n: { type: 'string', default: String(N_SAMPLE) }, 'month-days': { type: 'string', default: '30' }, 'year-days': { type: 'string', default: '365' },
-      concurrency: { type: 'string', default: '4' },
+      concurrency: { type: 'string', default: '4' }, 'delay-ms': { type: 'string', default: '0' }, 'per-call': { type: 'string', default: 'person' }, resume: { type: 'boolean', default: false },
     },
   });
   if (v.provider !== 'mock' && v.provider !== 'config') throw new UsageError('--provider debe ser mock o config');
+  if (v['per-call'] !== 'person' && v['per-call'] !== 'instrument') throw new UsageError('--per-call debe ser person o instrument');
   const n = toInt('n', v.n, 8);
   const monthDays = toInt('month-days', v['month-days'], 1), yearDays = toInt('year-days', v['year-days'], 1);
   const gateway = gatewayFor(v.provider!);
   const cats = chatCatalogs(loadCatalogs());
 
-  io.err(`Copiando ${v.db} → ${v.work}`);
-  copyWorld(v.db!, v.work!);
-
-  const battery: Battery = { meta: { world: '', seed: 0, provider: v.provider!, nSample: n, generatedFor: 'spec 045' }, participants: [], tomas: [], takes: [], events: [] };
+  // Punto de control: lo hecho se guarda en disco para reanudar con `--resume` sin repetir llamadas (y sin volver a pagarlas).
+  const ckptPath = `${v.out}.ckpt.json`;
+  let battery: Battery = { meta: { world: '', seed: 0, provider: v.provider!, nSample: n, generatedFor: 'spec 045' }, participants: [], tomas: [], takes: [], events: [] };
   let sample: Participant[] = [];
+  let reached: 0 | 1 | 2 = 0;
+  const save = () => { mkdirSync(dirname(ckptPath), { recursive: true }); writeFileSync(ckptPath, JSON.stringify({ battery, sample, reached } satisfies Checkpoint)); };
+  if (v.resume && existsSync(ckptPath)) {
+    ({ battery, sample, reached } = JSON.parse(readFileSync(ckptPath, 'utf8')) as Checkpoint);
+    io.err(`Reanudando: copia en la toma ${reached}, ${battery.takes.filter((t) => t.instruments).length} mediciones hechas`);
+  } else {
+    io.err(`Copiando ${v.db} → ${v.work}`);
+    copyWorld(v.db!, v.work!);
+  }
+  const delayMs = toInt('delay-ms', v['delay-ms'], 0);
+  battery.events = [];
 
   for (const toma of [0, 1, 2] as const) {
-    if (toma === 1) { io.err(`Avanzando ${monthDays} días…`); advanceCopy(v.work!, monthDays, io); }
-    if (toma === 2) { io.err(`Avanzando ${yearDays} días…`); advanceCopy(v.work!, yearDays, io); }
+    if (toma > reached) {
+      io.err(`Avanzando ${toma === 1 ? monthDays : yearDays} días…`);
+      advanceCopy(v.work!, toma === 1 ? monthDays : yearDays, io);
+      reached = toma;
+      save();
+    }
     const { world, events, byCitizen } = withDb(openReadonly(v.work!), (db) => {
       const w = new WorldRepository(db).loadWorld();
       const all = queryEvents(db, { limit: 5_000_000 });
       const root = createRng(w.config.seed);
-      if (toma === 0) sample = selectSample(adults(w), n, root.fork('measure:sample'));
+      if (toma === 0 && sample.length === 0) sample = selectSample(adults(w), n, root.fork('measure:sample'));
       const per = new Map<string, { events: WorldEvent[]; trajectory: ReturnType<typeof trajectoryOf>; profile: ReturnType<typeof reportFor>['profile'] }>();
       for (const p of sample) {
         if (w.components.u8.active?.[Number(p.id.slice(4))] !== 1) continue;
@@ -132,28 +183,37 @@ export async function psychometrics(args: string[], io: Io): Promise<void> {
     const root = createRng(world.config.seed);
     battery.meta.world = world.id;
     battery.meta.seed = world.config.seed;
-    battery.tomas.push({ toma, minute: world.now, date: dateOf(world.now, world.config.epoch), hash: stateHash(world) });
+    if (!battery.tomas.some((t) => t.toma === toma)) battery.tomas.push({ toma, minute: world.now, date: dateOf(world.now, world.config.epoch), hash: stateHash(world) });
     io.err(`Toma ${toma}: ${dateOf(world.now, world.config.epoch)} · ${byCitizen.size}/${sample.length} personas vivas`);
-    if (toma === 0) battery.participants = sample.map((p) => ({ id: p.id, name: nameOf(world, p.id), sex: p.sex, age: p.age, stratum: p.stratum, occupation: occupationOf(world, p.id) }));
+    if (toma === 0 && battery.participants.length === 0) battery.participants = sample.map((p) => ({ id: p.id, name: nameOf(world, p.id), sex: p.sex, age: p.age, stratum: p.stratum, occupation: occupationOf(world, p.id) }));
 
     const jobs: { p: Participant; take: TakeRecord }[] = [];
     for (const p of sample) {
       const info = byCitizen.get(p.id);
-      const take: TakeRecord = { citizenId: p.id, toma, alive: !!info };
-      battery.takes.push(take);
+      let take = battery.takes.find((t) => t.citizenId === p.id && t.toma === toma);
+      if (!take) battery.takes.push((take = { citizenId: p.id, toma, alive: !!info }));
       if (!info) continue;
       take.indicators = indicatorsOf({ world, id: p.id, profile: info.profile, trajectory: info.trajectory, events: info.events });
-      jobs.push({ p, take });
+      if (!take.instruments) jobs.push({ p, take });
     }
     let done = 0;
     await pool(jobs, toInt('concurrency', v.concurrency, 1), async ({ p, take }) => {
       const ind = take.indicators!;
       const pv = buildPersonView({ view: world, citizenId: p.id, now: world.now, events, memoryText: (k) => cats.memories?.[k], topicText: (k) => cats.topics?.[k] });
       const record = {} as Record<(typeof INSTRUMENT_IDS)[number], InstrumentRecord>;
+      // Lo verdadero y la disposición salen del motor para todas las pruebas; el LLM solo las expresa (R-011, R-012).
+      const truth = Object.fromEntries(INSTRUMENT_IDS.map((id) => [id, truthfulResponses(id, ind, root.fork(`measure:${id}:${p.id}:${toma}`))])) as Record<InstrumentId, ReturnType<typeof truthfulResponses>>;
+      const said = Object.fromEntries(INSTRUMENT_IDS.map((id) => [id, dispose(id, truth[id].t, ind, root.fork(`measure:candor:${p.id}:${toma}:${id}`), 0)])) as Record<InstrumentId, ReturnType<typeof dispose>>;
+      const plans = Object.fromEntries(INSTRUMENT_IDS.map((id) => [id, truth[id].t.map((_, k) => ({ n: k + 1, target: said[id].r[k]!, disposition: said[id].disposition[k]! }))])) as Record<InstrumentId, ItemPlan[]>;
+      const all = await administer(gateway, pv, plans, v['per-call']!, delayMs);
+      // Con un proveedor real, caer a plantilla es un fallo (clave, saldo, red), no un dato: se detiene y lo hecho queda guardado.
+      const flat = INSTRUMENT_IDS.flatMap((id) => all[id]);
+      const bad = flat.filter((a) => a.source === 'plantilla');
+      if (v.provider === 'config' && bad.length > 0.15 * flat.length) {
+        throw new UsageError(`el LLM no respondió (${bad[0]!.why ?? 'sin motivo'}). Lo hecho quedó guardado: corrija la causa y repita el mismo comando con --resume`);
+      }
       for (const id of INSTRUMENT_IDS) {
-        const tr = truthfulResponses(id, ind, root.fork(`measure:${id}:${p.id}:${toma}`));
-        const d = dispose(id, tr.t, ind, root.fork(`measure:candor:${p.id}:${toma}:${id}`), 0);
-        const answers = await administerInstrument(gateway, pv, INSTRUMENTS[id], tr.t.map((_, k) => ({ n: k + 1, target: d.r[k]!, disposition: d.disposition[k]! })));
+        const tr = truth[id], d = said[id], answers = all[id];
         const reported = answers.map((a) => a.option);
         record[id] = {
           items: answers.map((a, k) => ({ n: a.n, truthful: tr.t[k]!, p: tr.p[k]!, disposition: d.disposition[k]!, target: d.r[k]!, reported: a.option, reply: a.reply, source: a.source })),
@@ -161,6 +221,7 @@ export async function psychometrics(args: string[], io: Io): Promise<void> {
         };
       }
       take.instruments = record;
+      save();
       io.err(`  ${++done}/${jobs.length} ${p.id}`);
     });
 
