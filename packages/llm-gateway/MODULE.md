@@ -3,7 +3,7 @@ modulo: llm-gateway
 ruta: packages/llm-gateway
 estado: en-desarrollo
 specs: [026, 043, 044, 013]
-actualizado: 2026-09-29
+actualizado: 2026-10-05
 ---
 
 # Módulo: llm-gateway
@@ -66,6 +66,7 @@ Desde `@datas-world/llm-gateway`:
 
 ## 6. Cómo se prueba
 - `src/gateway.test.ts` (9 pruebas): 026 CA-003 a CA-011. El adaptador compatible con OpenAI se prueba contra un servidor HTTP local.
+- `src/chat/stranger.test.ts` (10 pruebas): 043 CA-021 a CA-024 (el prompt de un desconocido no lleva su intimidad, la confianza se gana con turnos cálidos, la cautela cambia la postura y la primera respuesta dice que no lo conoce).
 - `src/chat/chat.test.ts` (9 pruebas), con el mundo de la semilla 482917 y Santiago Osorio (CIT-000019): 043 CA-002, CA-003, CA-009 a CA-012, CA-018, el tono y el cierre de una charla terminada.
 
 ## 7. Paridad con el prototipo
@@ -87,3 +88,4 @@ No aplica: el prototipo no usa LLM.
 | 2026-09-27 | charla/l5 (L5.4) | 044 | Prueba de 044 CA-007: el turno evalúa la afirmación (lo que muestra el panel) sin cambiar el hash del mundo |
 | 2026-09-29 | m3/memoria (M4) | 013 | La vista de la charla lleva lo que la persona recuerda en lugar de los eventos recientes (013 P5 a), con la valencia reconstruida en palabras; `ViewInput.memoryText` y `ChatCatalogs.memories` para contar los recuerdos de infancia. 1 prueba |
 | 2026-09-29 | m3/creencias (K3) | 025 | La vista de la charla lleva lo que la persona cree de otros y de quién lo sabe («Cree que Luis: perdió el empleo. Se lo contó Marta; lo cree»), nunca si es verdad (025 R-009, P5). `ViewInput.topicText` y `ChatCatalogs.topics` (de `chat_claims` y `rumor_topics`). 1 prueba |
+| 2026-10-05 | claude/busy-mayer-fj6x13 (043 v0.7) | 043 | Revelación gradual (`disclosure.ts`): cada hecho de la vista lleva su nivel (`ViewFact.level`: 1 personal, 2 íntimo, también si no se sabe) y `discloseView` filtra la vista según el nivel que abre la familiaridad del visitante, ANTES del prompt; el verificador recibe esa misma vista abierta. El prompt dice con quién habla (`TRUST_TEXT`) y, sin LLM, la primera respuesta a un desconocido es «¿Y usted quién es? No lo conozco.» (`STRANGER_TEMPLATE`). `TurnOutcome.level` y `StanceInfo.exposure` nuevos. Prueba nueva `stranger.test.ts` |

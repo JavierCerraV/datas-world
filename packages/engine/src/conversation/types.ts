@@ -21,6 +21,8 @@ export interface StanceDef {
   escape: number;
   /** Fuerza inicial mientras la persona no la haya usado, en [0,1] (PA-134). */
   w0: number;
+  /** R-025 [M]: cuánto se expone la persona con esta postura, en [0,1]; sin dato, 0,5 (neutra ante un desconocido). */
+  exposure?: number;
 }
 
 /** Afirmación sobre un tercero (`chat_claims`, 044 R-001, R-003). */
@@ -87,7 +89,7 @@ export interface ClaimAssessment {
 }
 
 /** Fuentes de la postura: las de la 040 más el escape de la carga y la operación motivadora (R-007, R-008). */
-export type ChatSource = SourceContribution['source'] | 'negativo' | 'motivadora';
+export type ChatSource = SourceContribution['source'] | 'negativo' | 'motivadora' | 'cautela';
 
 export interface ChatContribution {
   source: ChatSource;
@@ -117,6 +119,8 @@ export interface ConversationState {
   /** Estímulo del visitante en el almacén: `ext.<EXT-…>` (R-018). */
   visitorStim: string;
   store: FunctionStore;
+  /** R-024: turnos que la persona ya había vivido con el visitante al empezar (ensayos de su función). */
+  baseTrials?: number;
   aversiveLoad: number;
   maxLoad: number;
   turns: TurnRecord[];

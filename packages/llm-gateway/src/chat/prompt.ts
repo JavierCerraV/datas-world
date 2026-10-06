@@ -1,6 +1,6 @@
 // Prompt de la expresión (spec 043 R-010): instrucciones y vista van primero y se cachean (026 R-008); la postura
 // del turno y el estado vivo van después, sin caché. El LLM expresa la postura; no la elige ni cambia el mundo.
-import type { ChatContribution, StanceChoice } from '@datas-world/engine';
+import type { ChatContribution, DisclosureLevel, StanceChoice } from '@datas-world/engine';
 import type { ChatMessage, LlmRequest, PromptPart } from '../types.ts';
 import type { StanceInfo } from './catalog.ts';
 import type { PersonView } from './view.ts';
@@ -48,16 +48,25 @@ const SOURCE_TEXT: Record<string, (c: ChatContribution) => string> = {
   motivadora: () => 'estás cansado o estresado',
   regla: (c) => `tienes una regla aprendida (${c.ref ?? ''})`,
   valor: () => 'toca algo que te importa',
+  cautela: () => 'no conoces a quien te habla y prefieres no exponerte',
+};
+
+/** 043 R-026, R-027: quién es el visitante para la persona, según el nivel de intimidad que se abre. */
+export const TRUST_TEXT: Record<DisclosureLevel, string> = {
+  0: 'CON QUIÉN HABLAS: con un desconocido. No sabes quién es ni qué quiere. Sé prudente y reservado: no cuentes nada personal (ni de tu familia, ni de tu trabajo en concreto, ni de tu dinero ni de tus problemas). Si es natural, pregúntale quién es.',
+  1: 'CON QUIÉN HABLAS: con alguien que apenas conoces. Puedes contar lo cotidiano (tu familia, tus gustos, tu trabajo), pero no tus problemas, tus miedos ni tu intimidad.',
+  2: 'CON QUIÉN HABLAS: con alguien de confianza. Puedes contarle lo que de verdad te pesa, si quieres.',
 };
 
 /** Parte dinámica: la postura con su guía y sus motivos en lenguaje llano, y el estado vivo (R-019.4). */
-export function stancePart(pv: PersonView, choice: StanceChoice, stance: StanceInfo): string {
+export function stancePart(pv: PersonView, choice: StanceChoice, stance: StanceInfo, level?: DisclosureLevel): string {
   const reasons = choice.sources.filter((s) => s.contribution > 0).slice(0, 3).map((s) => SOURCE_TEXT[s.source]?.(s) ?? s.source);
   const needs = Object.entries(pv.state.needs).map(([k, v]) => `${k} ${v}`).join(', ');
   const emotions = Object.entries(pv.state.emotions).map(([k, v]) => `${k} ${v}`).join(', ');
   return [
     `AHORA: ${pv.situation.date}, ${pv.situation.time}. Estás ${pv.situation.activity}${pv.situation.place ? ` en ${pv.situation.place}` : ''}. Dinero: ${money(pv.situation.money)}.`,
     `Cómo estás (0 = muy mal o nada, 1 = muy bien o lleno): ánimo ${pv.state.mood}, estrés ${pv.state.stress}; ${needs}${emotions ? `; emociones: ${emotions}` : ''}.`,
+    ...(level === undefined ? [] : [TRUST_TEXT[level]]),
     `POSTURA PARA ESTE TURNO: ${stance.label}. ${stance.guidance}${reasons.length > 0 ? ` Lo que te mueve: ${reasons.join('; ')}.` : ''}`,
   ].join('\n');
 }
@@ -67,11 +76,13 @@ export function toMessages(transcript: readonly TranscriptTurn[]): ChatMessage[]
 }
 
 /** Petición de expresión en streaming (043 R-010, R-023). La última entrada del transcript es el visitante. */
-export function expressionRequest(pv: PersonView, transcript: readonly TranscriptTurn[], choice: StanceChoice, stance: StanceInfo, onText?: (s: string) => void): LlmRequest<never> {
+export function expressionRequest(
+  pv: PersonView, transcript: readonly TranscriptTurn[], choice: StanceChoice, stance: StanceInfo, onText?: (s: string) => void, level?: DisclosureLevel,
+): LlmRequest<never> {
   const system: PromptPart[] = [
     { text: instructions(pv), cacheable: true },
     { text: renderView(pv), cacheable: true },
-    { text: stancePart(pv, choice, stance), cacheable: false },
+    { text: stancePart(pv, choice, stance, level), cacheable: false },
   ];
   return { purpose: 'dialogue', citizenId: pv.citizenId, system, messages: toMessages(transcript), ...(onText ? { onText } : {}) };
 }

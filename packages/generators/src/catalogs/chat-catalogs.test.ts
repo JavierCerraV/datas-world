@@ -46,7 +46,7 @@ describe('catálogos de la charla (043)', () => {
     ]);
     for (const s of stances) {
       const a = s.attrs ?? {};
-      for (const f of ['escape', 'w0']) {
+      for (const f of ['escape', 'w0', 'exposure']) {
         expect(num(a[f]), `${s.key}.${f}`).toBeGreaterThanOrEqual(0);
         expect(num(a[f]), `${s.key}.${f}`).toBeLessThanOrEqual(1);
       }
@@ -55,6 +55,11 @@ describe('catálogos de la charla (043)', () => {
     // Abrirse no escapa de nada; terminar es el escape completo (R-007).
     expect(stances.find((s) => s.key === 'abrirse')!.attrs!.escape).toBe(0);
     expect(stances.find((s) => s.key === 'terminar')!.attrs!.escape).toBe(1);
+    // Cuánto se expone cada postura ante un desconocido (043 R-025): abrirse es la más expuesta y callar, la menos.
+    const exposure = (k: string) => num(stances.find((s) => s.key === k)!.attrs!.exposure);
+    expect(exposure('abrirse')).toBe(1);
+    expect(exposure('callar')).toBe(0);
+    for (const k of ['callar', 'evadir', 'responder_breve', 'terminar']) expect(exposure(k), k).toBeLessThan(0.5);
   });
 
   it('chat_scripts cubre cada tono al menos una vez, con turnos válidos (R-015)', () => {

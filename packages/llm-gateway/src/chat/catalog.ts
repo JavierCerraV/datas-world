@@ -28,6 +28,8 @@ export interface StanceInfo {
   guidance: string;
   escape: number;
   w0: number;
+  /** 043 R-025: cuánto se expone la persona con esta postura, en [0,1]. */
+  exposure: number;
 }
 
 /** Afirmación del visitante sobre un tercero (`chat_claims`, 044 R-001). */
@@ -82,7 +84,7 @@ export function chatCatalogs(c: {
     key: e.key, label: e.name, description: str(e.attrs?.description), examples: strs(e.attrs?.examples), keywords: strs(e.attrs?.keywords),
     stimulus: str(e.attrs?.stimulus), magnitude: num(e.attrs?.magnitude), prior: num(e.attrs?.prior),
   }));
-  const stances = c.chat_stances.entries.map((e) => ({ key: e.key, label: e.name, guidance: str(e.attrs?.guidance), escape: num(e.attrs?.escape), w0: num(e.attrs?.w0) }));
+  const stances = c.chat_stances.entries.map((e) => ({ key: e.key, label: e.name, guidance: str(e.attrs?.guidance), escape: num(e.attrs?.escape), w0: num(e.attrs?.w0), exposure: typeof e.attrs?.exposure === 'number' ? e.attrs.exposure : 0.5 }));
   const scripts = c.chat_scripts.entries.map((e) => ({ key: e.key, label: e.name, turns: (e.attrs?.turns ?? []) as { text: string; tone: string }[] }));
   const claims = (c.chat_claims?.entries ?? []).map((e) => ({
     key: e.key, label: e.name, description: str(e.attrs?.description), examples: strs(e.attrs?.examples), keywords: strs(e.attrs?.keywords),
@@ -95,7 +97,7 @@ export function chatCatalogs(c: {
     tones, stances, scripts, claims, relations, memories, topics,
     engine: {
       tones: tones.map(({ key, stimulus, magnitude, prior }) => ({ key, stimulus, magnitude, prior })),
-      stances: stances.map(({ key, escape, w0 }) => ({ key, escape, w0 })),
+      stances: stances.map(({ key, escape, w0, exposure }) => ({ key, escape, w0, exposure })),
       claims: claims.map(({ key, stimulus, magnitude, prior, about }) => ({ key, stimulus, magnitude, prior, about })),
       relations: relations.map(({ key, resolve, closeness }) => ({ key, resolve: resolve as RelationResolve, closeness })),
     },

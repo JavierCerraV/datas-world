@@ -3,7 +3,7 @@
 // y el lugar; los mensajes numerados con su hora, tono o postura y tiempo de respuesta, y las afirmaciones
 // verificadas; y un panel con por qué respondió así en el último turno, el estado de la charla y lo que sabe la
 // persona. Al despedirse, un resumen de lo que cambió. Solo muestra lo que devuelve la API.
-import { TONES, claimLine, endChat, openChat, sendTurn, sourceLabel, stanceLabel, toneLabel, topProbabilities, verdictMark, verification } from './chat.ts';
+import { TONES, TRUST_LABEL, claimLine, endChat, openChat, sendTurn, sourceLabel, stanceLabel, toneLabel, topProbabilities, verdictMark, verification } from './chat.ts';
 import type { DoneMsg, OpenResult, StanceMsg } from './chat.ts';
 import { withAuth } from './auth.ts';
 import { dec } from './card-compact.ts';
@@ -55,6 +55,7 @@ export function setupChat(d: ChatUiDeps): ChatPage {
   let busy = false;
   let startedAt = 0;
   let turns = 0;
+  let trust: 0 | 1 | 2 = 0;
   let checks = { ok: 0, bad: 0 };
   let live: ReturnType<typeof setInterval> | undefined;
   const q = <T extends HTMLElement>(s: string) => root.querySelector(s) as T;
@@ -76,7 +77,7 @@ export function setupChat(d: ChatUiDeps): ChatPage {
   const state = () => {
     if (!person) return;
     const food = person.needs.hunger;
-    q('#chat-state').innerHTML = `<dl class="kv2"><dt>Ánimo (en vivo)</dt><dd class="mono">${dec(person.state.mood)}</dd><dt>Estrés (en vivo)</dt><dd class="mono">${dec(person.state.stress)}</dd>${food !== undefined ? `<dt>Alimentación (en vivo)</dt><dd class="mono">${dec(food)}</dd>` : ''}<dt>Turnos</dt><dd class="mono">${turns}</dd><dt>Verificación</dt><dd class="mono">${checks.ok} ✓ · ${checks.bad} ✗</dd></dl>`;
+    q('#chat-state').innerHTML = `<dl class="kv2"><dt>Ánimo (en vivo)</dt><dd class="mono">${dec(person.state.mood)}</dd><dt>Estrés (en vivo)</dt><dd class="mono">${dec(person.state.stress)}</dd>${food !== undefined ? `<dt>Alimentación (en vivo)</dt><dd class="mono">${dec(food)}</dd>` : ''}<dt>Turnos</dt><dd class="mono">${turns}</dd><dt>Confianza en el visitante</dt><dd>${TRUST_LABEL[trust]}</dd><dt>Verificación</dt><dd class="mono">${checks.ok} ✓ · ${checks.bad} ✗</dd></dl>`;
   };
 
   const shell = (p: CitizenDetail) => `<header class="bar"><a href="#/expediente/${esc(p.id)}">Expediente ${esc(p.id)}</a><span class="sub">/</span><h1>Charla con ${esc(p.name)}</h1><span class="mono sub" id="chat-id"></span><span class="grow"></span>`
@@ -155,6 +156,7 @@ export function setupChat(d: ChatUiDeps): ChatPage {
         bubble.textContent += (data as { text: string }).text;
       } else if (event === 'done') {
         const dn = data as DoneMsg;
+        if (dn.level !== undefined) trust = dn.level;
         if (first) bubble.textContent = dn.reply;
         meta.innerHTML += ` · ${dn.expression === 'template' ? 'plantilla (sin LLM)' : `${(dn.latencyMs.total / 1000).toFixed(1).replace('.', ',')} s`}`;
         const poll = async (left: number) => {
@@ -188,6 +190,7 @@ export function setupChat(d: ChatUiDeps): ChatPage {
     session = r.body;
     startedAt = d.worldMinute();
     turns = 0;
+    trust = 0;
     checks = { ok: 0, bad: 0 };
     q('#chat-start').hidden = true;
     q('#chat-msgs').hidden = false;

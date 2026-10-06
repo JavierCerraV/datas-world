@@ -8,6 +8,7 @@ import type { Rng } from '../rng.ts';
 import { applicable, ruleContribution } from '../rules/rules.ts';
 import type { Rule } from '../rules/rules.ts';
 import { valueContribution } from '../rules/values.ts';
+import { familiarity, strangerParams } from './familiarity.ts';
 import type { ChatParams } from './params.ts';
 import { stanceResponse } from './params.ts';
 import { citizenAnswered, stanceStrength, visitorValue } from './tone.ts';
@@ -19,7 +20,12 @@ export interface PersonCtx extends LearnerCtx {
   rules: readonly Rule[];
   net?: RelationalNetwork;
   variability: number;
+  /** Edad en años: los menores de `MINOR_STRANGER_AGE` no hablan con extraños (R-025). Sin ella no rige la regla. */
+  age?: number;
 }
+
+/** R-025: las posturas a las que aporta la regla «no hablar con extraños». */
+const MINOR_STANCES: ReadonlySet<string> = new Set(['callar', 'evadir', 'terminar']);
 
 /** R-008 [M]: multiplicador del escape por la operación motivadora (energía baja, estrés alto). */
 export const motivation = (live: LiveState, params: ChatParams): number =>
@@ -43,6 +49,8 @@ export function stanceOptions(
   const appetitive = Math.max(0, v) * tone.magnitude + Math.max(0, vv);
   const aversive = Math.max(0, -v) * tone.magnitude + Math.max(0, -vv);
   const mo = motivation(live, params);
+  const sp = strangerParams(params);
+  const caut = 1 - familiarity(s, params);
   const value = valueContribution(pc.net, (x) => directValue(s.store, pc.onto, x, '', now, pc.P), tone.stimulus);
   return cat.stances.map((st) => {
     const e = st.escape;
@@ -58,6 +66,12 @@ export function stanceOptions(
     for (const r of applicable(pc.rules, tone.stimulus, stanceResponse(st.key)))
       sources.push({ source: 'regla', contribution: ruleContribution(r), ref: `${r.resp}:${r.cons}` });
     if (value && e < 0.5) sources.push({ source: 'valor', contribution: (1 - e) * value.value, ref: value.root });
+    // R-025: ante un desconocido, exponerse cuesta y callarse, evadir o responder breve alivia; un menor de 14 años
+    // además tiene la regla «no hablar con extraños». La cautela decae con la familiaridad (R-024).
+    const cautela = sp.exposureCost * caut * (0.5 - (st.exposure ?? 0.5));
+    if (Math.abs(cautela) > 1e-9) sources.push({ source: 'cautela', contribution: cautela, ref: 'desconocido' });
+    if (pc.age !== undefined && pc.age < sp.minorAge && MINOR_STANCES.has(st.key) && caut > 0)
+      sources.push({ source: 'regla', contribution: sp.minorRule * caut, ref: 'regla.no_hablar_con_extranos' });
     return { stance: st.key, value: sources.reduce((a, x) => a + x.contribution, 0), sources };
   });
 }

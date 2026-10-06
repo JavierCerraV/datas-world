@@ -3,6 +3,7 @@
 // hechos de otros que no presenció. Se sustituye por la `PersonView` de la 025 cuando exista.
 import { ACTIVITY, ACTIVITY_COLUMN, CHAT_RECALL, MEMORY_DEFAULTS, ageInYears, formatId, recall, toCalendar } from '@datas-world/engine';
 import type { EntityId, Memory, WorldEvent, WorldView } from '@datas-world/engine';
+import { factLevel } from './disclosure.ts';
 import { renderFact } from './facts.ts';
 
 export interface ViewFact {
@@ -10,6 +11,8 @@ export interface ViewFact {
   date: string;
   /** Edad de la persona en ese momento (null si no se conoce su nacimiento). */
   age: number | null;
+  /** 043 R-026: 1 personal (se cuenta a un conocido), 2 íntimo (solo a quien le tiene confianza). */
+  level: 1 | 2;
   text: string;
 }
 
@@ -143,13 +146,13 @@ export function buildPersonView(input: ViewInput): PersonView {
   };
   const facts: ViewFact[] = [...origin, ...recent]
     .sort((a, b) => a.at - b.at || (a.id < b.id ? -1 : 1))
-    .map((e) => ({ id: e.id, date: dateOf(e.at), age: ageAt(e.at), text: renderFact(view, id, e, family) }));
+    .map((e) => ({ id: e.id, date: dateOf(e.at), age: ageAt(e.at), level: factLevel(e.type), text: renderFact(view, id, e, family) }));
   if (remembers) {
     const byId = new Map(input.events.map((e) => [e.id as string, e]));
     const recalled = recall(me.memory, { mood: f['state.mood']?.[row] ?? 0.5, now }, CHAT_RECALL, MEMORY_DEFAULTS);
     for (const m of [...recalled].sort((a, b) => a.at - b.at)) {
       const text = memoryText(view, id, m, byId, family, input.memoryText);
-      if (text) facts.push({ id: m.id, date: dateOf(m.at), age: ageAt(m.at), text: `${m.source === 'told' ? 'Le contaron' : 'Recuerda'}: ${text} (${feeling(m.valence)})` });
+      if (text) facts.push({ id: m.id, date: dateOf(m.at), age: ageAt(m.at), level: m.source === 'told' ? 2 : factLevel(m.event ? byId.get(m.event)?.type : undefined), text: `${m.source === 'told' ? 'Le contaron' : 'Recuerda'}: ${text} (${feeling(m.valence)})` });
     }
   }
   // 025 R-009 (P5): lo que cree de otras personas y de quién lo sabe; nunca si es verdad.
@@ -158,7 +161,7 @@ export function buildPersonView(input: ViewInput): PersonView {
     if (!b.about.startsWith('CIT-') || b.about === id || !input.topicText?.(b.predicate)) continue;
     const how = b.source === 'visto' ? 'Lo vio' : b.source.startsWith('EXT-') ? 'Se lo dijo un visitante' : `Se lo contó ${given(b.source)}`;
     const sure = b.credibility >= 0.8 ? 'está segura/o' : b.credibility >= 0.5 ? 'lo cree' : 'no está segura/o';
-    facts.push({ id: `CREE-${b.about}-${b.predicate}`, date: dateOf(b.at), age: ageAt(b.at), text: `Cree que ${given(b.about)}: ${input.topicText(b.predicate)!.toLowerCase()}. ${how}; ${sure}.` });
+    facts.push({ id: `CREE-${b.about}-${b.predicate}`, date: dateOf(b.at), age: ageAt(b.at), level: 2, text: `Cree que ${given(b.about)}: ${input.topicText(b.predicate)!.toLowerCase()}. ${how}; ${sure}.` });
   }
   // El ocio de la última semana, resumido en un hecho.
   const week = mine.filter((e) => e.type === 'LEISURE_DONE' && e.at >= now - 7 * 1440);
@@ -168,7 +171,7 @@ export function buildPersonView(input: ViewInput): PersonView {
       const n = (e.payload as { name: string }).name.toLowerCase();
       count.set(n, (count.get(n) ?? 0) + 1);
     }
-    facts.push({ id: 'OCIO-SEMANA', date: '', age: ageAt(now), text: `En la última semana: ${[...count].map(([n, k]) => `${n} (${k} ${k === 1 ? 'vez' : 'veces'})`).join(', ')}.` });
+    facts.push({ id: 'OCIO-SEMANA', date: '', age: ageAt(now), level: 1, text: `En la última semana: ${[...count].map(([n, k]) => `${n} (${k} ${k === 1 ? 'vez' : 'veces'})`).join(', ')}.` });
   }
 
   const cal = toCalendar(now, epoch);

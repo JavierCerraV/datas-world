@@ -1,6 +1,8 @@
 // Charla con ciudadanos (spec 043): tono como estímulo, postura por fuentes de control y consolidación en el mundo.
-export { CHAT_DEFAULTS, CLAIM_DEFAULTS, STANCE_PREFIX, stanceResponse, visitorStimulus } from './params.ts';
-export type { ChatParams, ClaimParams } from './params.ts';
+export { CHAT_DEFAULTS, CLAIM_DEFAULTS, STANCE_PREFIX, STRANGER_DEFAULTS, stanceResponse, visitorStimulus } from './params.ts';
+export type { ChatParams, ClaimParams, StrangerParams } from './params.ts';
+export { caution, disclosureLevel, disclosureOf, familiarity, strangerParams } from './familiarity.ts';
+export type { DisclosureLevel } from './familiarity.ts';
 export { areFamily, assessClaim, bondOf, claimsHeard, resolveRelation } from './claims.ts';
 export type { ClaimCtx } from './claims.ts';
 export { INTENTION_KINDS, awake, canCall, chooseIntention, hasPhone, intentionOptions, placeOf, stratumOf, together } from './intentions.ts';
