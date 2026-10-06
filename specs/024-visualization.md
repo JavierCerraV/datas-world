@@ -4,7 +4,7 @@ nombre: visualization
 estado: aprobada
 hito: M4
 depende_de: [022, 003, 004]
-version: 0.7
+version: 0.8
 ---
 
 # 024 — Visualización pixel art
@@ -170,6 +170,13 @@ El usuario eligió, entre 10 estilos, el 10 del lienzo «Datas World — Mesa de
   - Centro: burbujas con el tono de cada turno, indicador «escribiendo…», selector de tono y entrada de texto con «Enviar».
   - Derecha: **Estado en vivo** (ánimo, estrés, alimentación, postura, turnos y malestar) y **Verificación** de cada afirmación (verificada, por verificar).
   - El panel «por qué respondió así» (aportes de la 040) queda como desplegable de cada respuesta (R-018).
+- **R-030** [M] — **Mapa en el estilo del lienzo T10 (ajusta R-006 y R-012).** El usuario revisó el mapa frente al lienzo y lo encontró distinto (2026-10-05). La geografía, los datos y el comportamiento del mapa no cambian; cambia el dibujo:
+  - El mapa se pinta en vectores a `layerScale` veces la resolución (3×, menos si el lienzo pasa de ~16 millones de píxeles) y se copia con suavizado, para que no se pixele al acercar.
+  - Formas redondeadas con contorno grueso de tinta, colores planos con un reflejo: césped en damero, calles beige con bordillo y línea discontinua, árboles redondos, edificios con tejado de color (los colores de cada tipo siguen siendo los de `styleOf`), ventanas con marco, puerta y los adornos de cada tipo; parque con estanque y plaza con adoquín.
+  - Las personas son figuras «chibi» más grandes (cabeza grande, cuerpo redondeado, contorno), con sombra, rebote al caminar y orden de profundidad por `y`. El color de la ropa sigue saliendo de `lookOf`.
+  - El **ánimo** va en un punto junto a la cabeza (capa Ánimo), no en toda la figura. La cohorte lleva un aro dorado con halo. La persona elegida lleva una flecha dorada que rebota, y el lugar elegido, un marco dorado con borde de tinta.
+  - El mapa abre con zoom ×1,9 (cerca, como el lienzo); «Ver todo» lo muestra entero.
+  - Fuera de alcance: río y puentes del lienzo (el mundo no tiene agua; requeriría cambiar la geografía, spec 003).
 
 ## 5. Eventos
 No define tipos propios (usa los de otras specs).
@@ -200,6 +207,7 @@ No define tipos propios (usa los de otras specs).
 - **CA-019** — El filtro de cohorte calcula el tamaño y la lista de la cohorte para una población de ejemplo y resalta o atenúa en el mapa según pertenezca (prueba de la lógica).
 - **CA-020** — El mazo de conducta toma las ocho conductas con más fuerza de una ficha de ejemplo, en orden estable, y la barra de fuentes suma 100 % (prueba del formateo).
 - **CA-021** — Revisión visual: capturas de las cuatro pantallas junto al lienzo T10 en `docs/validaciones/`, y aceptación del usuario. Sustituye a la CA-017.
+- **CA-023** — El lienzo del mapa se pinta a `layerScale` veces el tamaño del mapa, entre 1 y 3, y baja para mapas muy grandes sin pasar de ~16 millones de píxeles (prueba de `layerScale`); el aspecto de edificios y personas sigue saliendo de `styleOf` y `lookOf` (R-030); la revisión visual frente al lienzo está en `docs/validaciones/M4-visor-datas-world.md`.
 - **CA-022** — El visor no ofrece selector de velocidades y el menú «Avanzar» ofrece 1 día, 1 semana, 1 mes, 3 meses, 6 meses y 1 año (prueba de la lista de avances); qué pestañas del expediente piden la historia de vida y cuándo toca volver a pedir el expediente es lógica pura y se prueba.
 
 ## 8. Parámetros y calibración
@@ -239,3 +247,4 @@ Fps del render (visible en el visor).
 | 2026-10-05 | 0.6 | Implementación del bloque 3 (T3, expediente, `apps/web`). Precisiones: el salario no lo expone la API y se muestra bloqueado con «Pronto»; las fuentes de control salen de las causas `fuente.*` del último evento que las cita (los tres aportes mayores de la 040 R-006, normalizados a 100 %); las direcciones de las once pestañas anteriores se conservan y llevan a su pestaña nueva; Estado y necesidades y Aprendizaje van plegados dentro del Resumen. CA-020 verde; R-028, R-029 y CA-021 pendientes |
 | 2026-10-05 | 0.6 | Implementación del bloque 4 (T4, dashboard y charla, `apps/web`). Precisiones: el dashboard conserva los periodos de la API (último mes, último año, desde la fundación) porque «Hoy» y «7 días» no los da la 022 R-016; «enfermos hoy» y «patrimonio mediano» no se muestran (la API no los expone); la cohorte activa se muestra con su «✕» pero solo resalta el mapa, las cifras del dashboard son de toda la población. R-029: la charla conserva su estructura (cabecera, franja, mensajes y panel lateral) con el estilo nuevo; la columna izquierda de tonos del lienzo no se porta (el tono del visitante lo clasifica el sistema, salvo en modo prueba). CA-021 pendiente
 | 2026-10-05 | 0.7 | Decisiones del usuario: se quita el selector de velocidades (queda «Avanzar» con 1 día, 1 semana, 1 mes, 3 meses, 6 meses y 1 año, R-025) y el expediente se carga de forma ligera (ventana de eventos, sin repetir pedidos y la historia de vida solo en las pestañas que la usan, R-027). CA-022 nuevo |
+| 2026-10-06 | 0.8 | Decisión del usuario (2026-10-05, «el diseño del mapa sí está diferente»): el mapa pasa al estilo del lienzo T10 (R-030: dibujo vectorial a 3×, contornos gruesos, calles beige, césped en damero, figuras chibi más grandes, ánimo en un punto, zoom inicial ×1,9) sin cambiar la geografía ni los datos; ajusta R-006 y R-012. Queda fuera el río con puentes (el mundo no tiene agua). Criterio CA-023 con prueba de `layerScale` y captura en `docs/validaciones/M4-visor-datas-world.md` |

@@ -4,7 +4,7 @@
 // el tooltip y los clics. Solo dibuja lo que ya pasó en el mundo.
 import { clampZoom, frameOf, toMap } from './camera.ts';
 import type { Cam } from './camera.ts';
-import { COHORT_RING, darkness, drawArrow, drawFigure, drawFrame, drawNight } from './figures.ts';
+import { darkness, drawArrow, drawCohortRing, drawFigure, drawFrame, drawMoodDot, drawNight } from './figures.ts';
 import { TS } from './logic.ts';
 import { drawPlan, renderScale } from './overlays.ts';
 import type { Layers } from './overlays.ts';
@@ -52,8 +52,8 @@ export function setupMap(d: MapDeps): MapView {
   const canvas = document.querySelector<HTMLCanvasElement>('#map')!;
   const tip = document.querySelector<HTMLElement>('#tip')!;
   const g = canvas.getContext('2d')!;
-  const mapW = d.layer.canvas.width;
-  const mapH = d.layer.canvas.height;
+  const mapW = d.layer.w;
+  const mapH = d.layer.h;
   const points = d.world.points ?? {};
   const outdoor = outdoorRects(d.world.places);
   // El edificio de cada punto de entrada, para enmarcarlo cuando la persona elegida está dentro.
@@ -65,7 +65,8 @@ export function setupMap(d: MapDeps): MapView {
   const tag = document.querySelector<HTMLElement>('#seltag')!;
   const labelled = d.world.places.filter((p) => p.rect && !p.kind.startsWith('territorio') && !p.kind.startsWith('vivienda'));
   let lastScale = 0;
-  const cam: Cam = { x: mapW / 2, y: mapH / 2, z: 1 };
+  // R-030: el mapa abre cerca (como el lienzo) y «Ver todo» lo muestra entero.
+  const cam: Cam = { x: mapW / 2, y: mapH / 2, z: 1.9 };
   let follow = false;
   let figures: Figure[] = [];
   let where = new Map<string, Where>();
@@ -100,18 +101,19 @@ export function setupMap(d: MapDeps): MapView {
     }
     frame = frameOf(cam, r.width, r.height, mapW, mapH, dpr);
     g.setTransform(1, 0, 0, 1, 0, 0);
-    g.fillStyle = '#6DBB3F';
+    g.fillStyle = '#77C648';
     g.fillRect(0, 0, w, h);
     g.setTransform(dpr * frame.s, 0, 0, dpr * frame.s, dpr * (r.width / 2 - frame.cx * frame.s), dpr * (r.height / 2 - frame.cy * frame.s));
-    g.imageSmoothingEnabled = false;
-    g.drawImage(d.layer.canvas, 0, 0);
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(d.layer.canvas, 0, 0, mapW, mapH);
     const sel = d.selected();
     const plan = drawPlan(d.layers(), !!sel.person);
     if (!plan.figures) figures = [];
     // Punto de una persona en el mapa (px): su figura o la puerta de donde está.
     const pointOf = (id: string): Point | null => {
       const f = figures.find((x) => x.id === id);
-      if (f) return { x: f.x, y: f.y - 4 };
+      if (f) return { x: f.x, y: f.y - 5 };
       const w2 = where.get(id);
       const pt = w2?.kind === 'at' && w2.place ? points[w2.place] : undefined;
       return pt ? { x: pt[0] * TS + TS / 2, y: pt[1] * TS + TS / 2 } : null;
@@ -132,27 +134,17 @@ export function setupMap(d: MapDeps): MapView {
       g.setLineDash([]);
     }
     const cohort = d.cohort();
-    for (const f of figures) {
+    // De atrás hacia delante: la figura de más abajo queda encima (como en el lienzo).
+    const ordered = [...figures].sort((a, b) => a.y - b.y);
+    for (const f of ordered) {
+      if (cohort?.has(f.id)) drawCohortRing(g, f);
       g.globalAlpha = cohort && !cohort.has(f.id) ? 0.3 : 1;
       drawFigure(g, f);
     }
     g.globalAlpha = 1;
-    if (cohort) {
-      g.strokeStyle = COHORT_RING;
-      g.lineWidth = 1;
-      for (const f of figures) {
-        if (!cohort.has(f.id)) continue;
-        g.beginPath();
-        g.arc(f.x, f.y - (f.small ? 2 : 3), 5, 0, Math.PI * 2);
-        g.stroke();
-      }
-    }
     if (plan.mood) {
       const mood = new Map(people.map((c) => [c.id, c.mood]));
-      for (const f of figures) {
-        g.fillStyle = moodColor(mood.get(f.id) ?? 0.5);
-        g.fillRect(f.x - 1, f.y - (f.small ? 10 : 12), 3, 2);
-      }
+      for (const f of ordered) drawMoodDot(g, f, moodColor(mood.get(f.id) ?? 0.5));
     }
     if (plan.night) drawNight(g, darkness(t % 1440), { w: mapW, h: mapH }, d.layer.windows, occupancy(where, people, points));
     const blink = Math.floor(now / 400) % 2 === 0;

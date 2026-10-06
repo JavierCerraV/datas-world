@@ -66,3 +66,25 @@ La captura del visor muestra la prudencia ante un desconocido (043 v0.7): ante u
 - Criterios con prueba automática: CA-018 a CA-020 y CA-022 verdes (`apps/web`).
 - **CA-021: pendiente de la aceptación del usuario** frente a estas capturas.
 - Fuera de esta entrega: el modo oscuro afinado (decisión del usuario: tras aceptar la CA-021).
+
+## Mapa en el estilo del lienzo (024 v0.8, R-030, CA-023)
+
+Revisión pedida por el usuario el 2026-10-05 («el diseño del mapa del mundo… en eso sí está diferente»). Mismo mundo (`data/world.db`, 2027-03-02) y mismo tamaño de pantalla.
+
+| Visor (antes) | Visor (después, zoom de apertura ×1,9) |
+|---|---|
+| ![Antes](M4-visor-datas-world/visor-mundo.png) | ![Después](M4-visor-datas-world/visor-mapa-nuevo.png) |
+
+Con acercamiento, comparable al tablero del lienzo:
+
+![Mapa de cerca](M4-visor-datas-world/visor-mapa-cerca.png)
+
+| Lienzo | Visor | Diferencia |
+|---|---|---|
+| Calles beige con línea discontinua, césped en damero brillante | Igual | — |
+| Edificios grandes con tejado de color y contorno grueso | Igual; los colores de cada tipo siguen siendo los del prototipo (`styleOf`) | — |
+| Figuras grandes con aro dorado para la cohorte | Figuras «chibi» con ropa variada (`lookOf`), aro con halo y el ánimo en un punto junto a la cabeza | Decisión del usuario: el ánimo va en un punto, no en toda la figura |
+| Río con puentes | No está | El mundo no tiene agua (cambiaría la geografía, spec 003) |
+| Zoom cercano | Abre en ×1,9; «Ver todo» muestra el mapa entero | — |
+
+- **CA-023:** prueba automática de `layerScale` verde. La revisión visual queda **pendiente de la aceptación del usuario** frente a estas capturas.
