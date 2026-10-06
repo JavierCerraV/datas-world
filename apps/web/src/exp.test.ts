@@ -1,5 +1,7 @@
 // Visor A+ (spec 024 v0.5): expediente (CA-014), dashboard (CA-015), capas y panel «Ahora» (CA-016), ficha compacta
 // y direcciones de las pantallas.
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { compactCard, criticalNeeds } from './card-compact.ts';
 import { niceMax, occupationSvg, pyramidSvg, renderDashboard } from './dashboard.ts';
@@ -7,7 +9,8 @@ import type { Demographics, Dossier } from './dossier-types.ts';
 import { tabEmociones, tabEstado, tabHistoria, tabResumen } from './exp-tabs.ts';
 import type { ExpData } from './exp-tabs.ts';
 import { tabAprendizaje, tabCharlas, tabEconomia, tabSalud, tabVinculos } from './exp-tabs2.ts';
-import { EXP_TABS, identityStrip, tabId } from './expediente.ts';
+import { EXP_TABS, dossierStale, identityStrip, needsLife, tabId } from './expediente.ts';
+import { ADVANCES } from './topbar.ts';
 import { milestones, placeLabels } from './lifecourse.ts';
 import { DEFAULT_LAYERS, drawPlan, nowRows, scaleBar } from './overlays.ts';
 import { hrefOf, parseRoute } from './router.ts';
@@ -46,6 +49,7 @@ const dossier: Dossier = {
     ev('EVT-5', 'MIGRATED', '2010-08-22 00:00', -8079840, { citizenId: 'CIT-000019' }, 'CIT-000019 llega a Data\'s World desde el campo.'),
     ev('EVT-3', 'JOB_HIRED', '2026-01-02 00:00', 1440, { citizenId: 'CIT-000019', orgName: 'Oficinas Andina' }, 'CIT-000019 empieza a trabajar en Oficinas Andina.'),
   ],
+  omitted: 0,
   counts: { events: 5, functions: 1, rules: 1, chats: 0 },
 };
 const x: ExpData = { d: detail, dos: dossier, report: null, today: '2026-01-07 10:15', doing: 'trabajando en Oficinas Andina' };
@@ -163,6 +167,36 @@ describe('024 R-023: dashboard', () => {
     expect(con).toContain('Estrés medio');
     expect(con).toContain('0,31');
     expect(renderDashboard(g, { pyramid: false, occ: false }, { employedPct: 0.79, mood: 0.54, stress: null })).not.toContain('Estrés medio');
+  });
+});
+
+describe('024 CA-022: controles de tiempo y carga ligera', () => {
+  it('el menú Avanzar ofrece 1 día, 1 semana, 1 mes, 3 meses, 6 meses y 1 año (en minutos de mundo)', () => {
+    expect(ADVANCES).toEqual([[1440, '1 día'], [10080, '1 semana'], [43200, '1 mes'], [129600, '3 meses'], [259200, '6 meses'], [525600, '1 año']]);
+    const html = readFileSync(join(import.meta.dirname, '..', 'index.html'), 'utf8');
+    expect(html).not.toContain('id="speeds"');
+    expect(html).not.toContain('min/s');
+  });
+
+  it('solo Historia de vida, Memoria y Red piden la historia de vida', () => {
+    expect(EXP_TABS.map(([k]) => [k, needsLife(k)])).toEqual([['resumen', false], ['historia', true], ['memoria', true], ['creencias', false], ['charlas', false], ['vinculos', true]]);
+  });
+
+  it('el expediente no se vuelve a pedir mientras el mundo no avance una hora', () => {
+    expect(dossierStale(null, '2026-01-07 10:15')).toBe(true);
+    expect(dossierStale('2026-01-07 10:15', '2026-01-07 10:59')).toBe(false);
+    expect(dossierStale('2026-01-07 10:15', '2026-01-07 11:00')).toBe(true);
+    expect(dossierStale('2026-01-07 23:30', '2026-01-08 00:10')).toBe(true);
+  });
+
+  it('con eventos fuera de la ventana, la historia dice cuántos hay y ofrece «Ver más»', () => {
+    const corta = { ...x, dos: { ...dossier, omitted: 700 } };
+    const h = tabHistoria(corta, 'todos');
+    expect(h).toContain('5 de 705');
+    expect(h).toContain('data-more-events');
+    expect(h).toContain('Ver 300 eventos más');
+    expect(h).toContain('quedan 700 más antiguos');
+    expect(tabHistoria(x, 'todos')).not.toContain('data-more-events');
   });
 });
 

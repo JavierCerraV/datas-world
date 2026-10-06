@@ -25,6 +25,8 @@ export interface Dossier {
   objects: { id: string; name: string; owner: 'persona' | 'hogar'; acquired: string | null; price: number }[];
   debts: { creditor: string; balance: number; installment: number; period: 'month' | 'day' }[];
   events: (EventView & { origin: boolean })[];
+  /** 022 R-015: eventos de la simulación que quedan fuera de la ventana pedida. */
+  omitted: number;
   counts: { events: number; functions: number; rules: number; chats: number };
 }
 

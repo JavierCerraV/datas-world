@@ -20,7 +20,7 @@ import type { Route } from './router.ts';
 import { routeCache } from './streets.ts';
 import { setupTimeline, urlsFor } from './timeline.ts';
 import type { Moment } from './timeline.ts';
-import { SPEEDS, setupTopbar } from './topbar.ts';
+import { setupTopbar } from './topbar.ts';
 import type { CitizenDetail, CitizenPosition, Stats, WorldView } from './types.ts';
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
@@ -123,7 +123,7 @@ const inspector = setupInspector({
   doing,
   intro: () => populationIntro(stats?.population ?? people.length, stats?.households ?? 0, stats?.districts ?? 0),
   fetchPerson,
-  fetchDossier: api.dossier,
+  fetchDossier: (id) => api.dossier(id, 20), // la ficha solo usa «por qué está aquí»: ventana mínima (022 R-015)
   fetchPlace: (id) => api.place(id),
   onSelect: (person, place) => {
     selected.person = person;
@@ -155,7 +155,7 @@ let chatPrefs: { mode: 'in_world' | 'sandbox'; test: boolean } | undefined;
 const chat = setupChat({
   auth,
   fetchPerson,
-  fetchDossier: api.dossier,
+  fetchDossier: (id) => api.dossier(id, 20),
   worldMinute: minuteNow,
   clock: (m) => (world ? clockOf(world.epoch, m).time : ''),
 });
@@ -216,7 +216,7 @@ async function start(): Promise<void> {
   book.add(moves);
   log.add(events);
   await Promise.all([loadPeople(), loadStats(), timeline.refresh()]);
-  topbar.setWorld(status, speed);
+  topbar.setWorld(status);
   if (!selected.person) inspector.showPopulation();
   map = setupMap({
     world: w,
@@ -247,7 +247,7 @@ async function start(): Promise<void> {
       const newDay = Math.floor(t.now / 1440) !== Math.floor(latest / 1440);
       latest = t.now;
       status = t.status;
-      topbar.setWorld(status, speed);
+      topbar.setWorld(status);
       if (t.moves) book.add(t.moves);
       book.prune((view ?? latest) - 1440);
       if (newDay) void timeline.refresh();
@@ -258,7 +258,7 @@ async function start(): Promise<void> {
       log.add([e]);
       if (e.type === 'SPEED_CHANGED') {
         speed = (e.payload.to as number) ?? speed;
-        topbar.setWorld(status, speed);
+        topbar.setWorld(status);
       }
     },
     status: (ok) => ($('#live').textContent = ok ? '● en vivo' : '○ reconectando…'),
@@ -270,18 +270,14 @@ async function start(): Promise<void> {
   }, 1000);
 }
 
-// Teclado (024 R-005), solo en la pantalla Mundo: espacio pausa, + y − velocidad, flechas mueven la cámara, Esc
-// vuelve a la población.
+// Teclado (024 R-005), solo en la pantalla Mundo: espacio pausa, flechas mueven la cámara, Esc vuelve a la población.
 window.addEventListener('keydown', (e) => {
   if (router.current().view !== 'mundo') return;
   if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName) || document.querySelector('dialog[open]')) return;
-  const i = SPEEDS.findIndex(([v]) => Math.abs(v - speed) < 1e-9);
   if (e.key === ' ') {
     e.preventDefault();
     void send(status === 'paused' ? 'resume' : 'pause').then((m) => message(m ?? ''));
-  } else if (e.key === '+' && i < SPEEDS.length - 1) void send('speed', SPEEDS[i + 1]![0]).then((m) => message(m ?? ''));
-  else if (e.key === '-' && i > 0) void send('speed', SPEEDS[i - 1]![0]).then((m) => message(m ?? ''));
-  else if (e.key === 'ArrowLeft') map?.pan(-40, 0);
+  } else if (e.key === 'ArrowLeft') map?.pan(-40, 0);
   else if (e.key === 'ArrowRight') map?.pan(40, 0);
   else if (e.key === 'ArrowUp') map?.pan(0, -40);
   else if (e.key === 'ArrowDown') map?.pan(0, 40);

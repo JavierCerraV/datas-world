@@ -39,3 +39,4 @@ Referencia: el lienzo de 10 arenas, tablero T10 (https://claude.ai/artifact/5FCJ
 - [x] T3 Expediente (R-027, CA-020): cabecera, seis pestañas, mazo de conducta, camino de vida y fuentes de control.
 - [x] T4 Dashboard y Charla (R-028, R-029).
 - [ ] T5 Capturas junto al lienzo en `docs/validaciones/M4-visor-datas-world.md` y aceptación del usuario (CA-021).
+- [x] T6 Decisiones del usuario (2026-10-05): sin selector de velocidades, «Avanzar» con 3 y 6 meses (022 R-013, 024 R-025) y carga ligera del expediente (022 R-015, 024 R-027, CA-022).

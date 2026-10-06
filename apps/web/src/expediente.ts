@@ -7,7 +7,7 @@ import { LifeData } from './card-life.ts';
 import { showChatHistory } from './chat-history.ts';
 import type { Dossier } from './dossier-types.ts';
 import { deckHtml, decisionHtml, roadHtml } from './exp-cards.ts';
-import { card, tabEmociones, tabEstado, tabHistoria, tabResumen } from './exp-tabs.ts';
+import { MORE_EVENTS, card, tabEmociones, tabEstado, tabHistoria, tabResumen } from './exp-tabs.ts';
 import type { ExpData, HistFilter } from './exp-tabs.ts';
 import { tabAprendizaje, tabCharlas, tabCreenciasExp, tabEconomia, tabMemoria, tabSalud, tabVinculos } from './exp-tabs2.ts';
 import { ACTIVITY_ES, NEED_ES, money } from './format.ts';
@@ -48,9 +48,16 @@ export function historiaBody(x: ExpData, hist: HistFilter): string {
   return `${tabHistoria(x, hist)}<div class="stack">${tabEmociones(x)}${tabSalud(x)}${tabEconomia(x)}</div>`;
 }
 
+/** Ventana inicial de eventos del expediente (022 R-015). */
+export const DEFAULT_LIMIT = 150;
+/** Carga ligera (024 R-027): solo estas pestañas piden la historia de vida y el informe. */
+export const needsLife = (tab: string): boolean => tab === 'historia' || tab === 'memoria' || tab === 'vinculos';
+/** Carga ligera (024 R-027): el expediente no se vuelve a pedir mientras el mundo no avance una hora. */
+export const dossierStale = (fetchedAt: string | null, now: string): boolean => fetchedAt === null || fetchedAt.slice(0, 13) !== now.slice(0, 13);
+
 export interface ExpDeps {
   fetchPerson: (id: string) => Promise<CitizenDetail>;
-  fetchDossier: (id: string) => Promise<Dossier>;
+  fetchDossier: (id: string, limit?: number) => Promise<Dossier>;
   /** Fecha y hora del mundo que se ve (`2026-01-07 10:15`). */
   today: () => string;
   /** Lo que hace ahora, con el lugar. */
@@ -83,6 +90,8 @@ export function setupExpediente(dp: ExpDeps): { show: (id: string, tab?: string)
   let id: string | null = null;
   let tab = 'resumen';
   let hist: HistFilter = 'todos';
+  let limit = DEFAULT_LIMIT;
+  let fetchedAt: string | null = null;
   let detail: CitizenDetail | null = null;
   let dossier: Dossier | null = null;
   let timer: ReturnType<typeof setInterval> | undefined;
@@ -124,15 +133,19 @@ export function setupExpediente(dp: ExpDeps): { show: (id: string, tab?: string)
     if (tab === 'charlas' && x) void showChatHistory(el.querySelector('#exp-chats')!, x.d.id, dp.auth);
   };
 
-  const load = async (full: boolean) => {
+  const load = async (force: boolean) => {
     const want = id;
     if (!want) return;
-    const [d, dos] = await Promise.all([dp.fetchPerson(want), dossier?.id === want && !full ? Promise.resolve(dossier) : dp.fetchDossier(want)]);
+    const stale = force || !dossier || dossier.id !== want || dossierStale(fetchedAt, dp.today());
+    const [d, dos] = await Promise.all([dp.fetchPerson(want), stale ? dp.fetchDossier(want, limit) : Promise.resolve(dossier!)]);
     if (id !== want) return;
     detail = d;
-    dossier = dos;
-    life.load(want, () => render(false));
-    render(full);
+    if (stale) {
+      dossier = dos;
+      fetchedAt = dp.today();
+    }
+    if (needsLife(tab)) life.load(want, () => render(false));
+    render(force);
   };
 
   root.addEventListener('click', (e) => {
@@ -141,6 +154,11 @@ export function setupExpediente(dp: ExpDeps): { show: (id: string, tab?: string)
     if (tb && id) {
       tab = tb.dataset.etab!;
       dp.setTab(id, tab);
+      return;
+    }
+    if (t.closest('[data-more-events]')) {
+      limit += MORE_EVENTS;
+      void load(true);
       return;
     }
     const hb = t.closest<HTMLElement>('[data-hist]');
@@ -177,17 +195,19 @@ export function setupExpediente(dp: ExpDeps): { show: (id: string, tab?: string)
         id = pid;
         detail = null;
         dossier = null;
+        fetchedAt = null;
+        limit = DEFAULT_LIMIT;
         hist = 'todos';
         life.reset();
         root.innerHTML = '<p class="empty pad">Cargando el expediente…</p>';
         void load(true);
       } else if (tabChanged || !root.querySelector('#exp-body')) {
+        if (id && needsLife(tab)) life.load(id, () => render(false));
         render(true);
       }
       clearInterval(timer);
-      // En vivo: la ficha cada 5 s y el expediente completo cada 30 s.
-      let n = 0;
-      timer = setInterval(() => void load(++n % 6 === 0), 5000);
+      // En vivo: la ficha cada 5 s; el expediente solo cuando el mundo avanza una hora (R-027).
+      timer = setInterval(() => void load(false), 5000);
     },
     hide: () => clearInterval(timer),
   };

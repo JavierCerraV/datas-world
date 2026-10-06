@@ -84,7 +84,7 @@ function situation(world: World, rid: string): string {
 }
 
 /** 022 R-015: el expediente. `events` son todos los de la persona en orden cronológico; `chats`, cuántas charlas tuvo. */
-export function dossierView(world: World, id: EntityId, events: readonly WorldEvent[], moves: readonly Movement[], catalogs: Catalogs, chats: number) {
+export function dossierView(world: World, id: EntityId, events: readonly WorldEvent[], moves: readonly Movement[], catalogs: Catalogs, chats: number, limit = 150) {
   const c = world.citizens.get(id);
   if (!c || c.ancestor) return undefined;
   const row = idNumber(id);
@@ -142,7 +142,9 @@ export function dossierView(world: World, id: EntityId, events: readonly WorldEv
     },
     objects,
     debts: (c.debts ?? []).map((d) => ({ creditor: d.creditor, balance: d.balance, installment: d.installment, period: d.period })),
-    events: views,
+    // 022 R-015: la historia de origen entera y los últimos `limit` eventos de la simulación; los recuentos son de todos.
+    events: [...views.filter((e) => e.origin), ...views.filter((e) => !e.origin).slice(-limit)],
+    omitted: Math.max(0, views.filter((e) => !e.origin).length - limit),
     counts: { events: views.length, functions: c.functions?.f.length ?? 0, rules: c.rules?.length ?? 0, chats },
   };
 }

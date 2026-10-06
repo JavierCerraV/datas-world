@@ -27,7 +27,7 @@ export const api = {
   /** 022 R-013: indicadores de la barra superior y avance sin observar. */
   stats: () => get<Stats>('/api/stats'),
   /** 022 R-015: el expediente de una persona. */
-  dossier: (id: string) => get<Dossier>(`/api/citizens/${id}/dossier`),
+  dossier: (id: string, limit?: number) => get<Dossier>(`/api/citizens/${id}/dossier${limit ? `?limit=${limit}` : ''}`),
   /** 022 R-016: la demografía del periodo y el panel «Ahora». */
   demographics: (period: 'month' | 'year' | 'all' = 'year') => get<Demographics>(`/api/demographics?period=${period}`),
   events: (limit = 30) => get<EventView[]>(`/api/events?limit=${limit}`),

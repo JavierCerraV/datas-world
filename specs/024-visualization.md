@@ -4,7 +4,7 @@ nombre: visualization
 estado: aprobada
 hito: M4
 depende_de: [022, 003, 004]
-version: 0.6
+version: 0.7
 ---
 
 # 024 — Visualización pixel art
@@ -39,7 +39,7 @@ Ventana visual al mundo en pixel art 2D: mapa, personas moviéndose, día/noche,
 - **R-002** — Interpolación de posiciones en cliente entre actualizaciones (lineal durante 1 s).
 - **R-003** [M] — **Inspector con pestañas:** Estado (necesidades, emociones, ánimo, estrés, actividad y lugar), Historia (últimos eventos con sus causas legibles) y Funcional (funciones más fuertes, reglas con su tipo y aporte, relaciones). Relaciones, Memoria y Creencias llegan con M3.
 - **R-004** — Diseño adaptable: por debajo de 700 px de ancho el inspector pasa a hoja inferior.
-- **R-005** — Accesibilidad: contraste AA, controles por teclado (espacio pausa, + y − velocidad, flechas mueven la cámara, Esc cierra el inspector), textos en español.
+- **R-005** — Accesibilidad: contraste AA, controles por teclado (espacio pausa, flechas mueven la cámara, Esc cierra el inspector), textos en español.
 - **R-006** [M] — **Aspecto de una persona:** piel, pelo, camisa y pantalón elegidos por un hash de su id sobre las paletas del prototipo; el mismo en cada carga (sin azar del motor).
 - **R-007** [M] — **Día y noche:** un velo azul oscuro con opacidad según la hora del mundo (0 a mediodía, 0,45 a medianoche, transición al amanecer y al atardecer).
 
@@ -143,7 +143,7 @@ La referencia de la interfaz pasa a ser el lienzo aprobado «Datas World — Vis
 El usuario eligió, entre 10 estilos, el 10 del lienzo «Datas World — Mesa de análisis, 10 arenas» (https://claude.ai/artifact/5FCJEBnX28Ky4CHsPdP39t, tableros `T10-*`): estética de juego de cartas (bordes gruesos, relieve, texto con contorno) sobre la estructura de mesa de análisis con paneles enlazados y cohortes. El lienzo T10 sustituye al «Visor A+» como referencia visual, y estas reglas sustituyen a la R-020 y ajustan la R-021 a la R-024. El mapa sigue en pixel art (R-001, R-006, R-007, R-009, R-013) y se recolorea con la paleta nueva.
 
 - **R-025** [M] — **Estructura y estilo (sustituye a la R-020).**
-  - Barra superior con la marca, tres fichas de recurso (personas, fecha y hora, personas en casa), pausa, velocidades y «+día / +semana / +mes / +año».
+  - Barra superior con la marca, tres fichas de recurso (personas, fecha y hora, personas en casa), pausa y un menú «Avanzar» con 1 día, 1 semana, 1 mes, 3 meses, 6 meses y 1 año. No hay selector de velocidades (decisión del usuario, 2026-10-05): el mundo corre a la velocidad con que arranca (1 min/s con `pnpm dev`).
   - Debajo, pestañas Mundo, Expediente, Dashboard y Charla, con aviso numérico en Charla si hay una abierta. Los menús desactivados de Estudio y Muestra (028 y 034) pasan a un menú «Más».
   - Fuentes Lilita One para títulos y números, y Nunito 800 para el texto.
   - Paleta: fondo #22346b con diagonal azul y roja; panel #f4f1ea y panel interior #ffffff; borde #10163a; texto #1d2240 y secundario #575d80; azul #2d6fe0 (acento), rojo #e0413a, oro #ffd23e, verde #3fae14, pista de barras #1b2352 y elixir #d946ef.
@@ -200,6 +200,7 @@ No define tipos propios (usa los de otras specs).
 - **CA-019** — El filtro de cohorte calcula el tamaño y la lista de la cohorte para una población de ejemplo y resalta o atenúa en el mapa según pertenezca (prueba de la lógica).
 - **CA-020** — El mazo de conducta toma las ocho conductas con más fuerza de una ficha de ejemplo, en orden estable, y la barra de fuentes suma 100 % (prueba del formateo).
 - **CA-021** — Revisión visual: capturas de las cuatro pantallas junto al lienzo T10 en `docs/validaciones/`, y aceptación del usuario. Sustituye a la CA-017.
+- **CA-022** — El visor no ofrece selector de velocidades y el menú «Avanzar» ofrece 1 día, 1 semana, 1 mes, 3 meses, 6 meses y 1 año (prueba de la lista de avances); qué pestañas del expediente piden la historia de vida y cuándo toca volver a pedir el expediente es lógica pura y se prueba.
 
 ## 8. Parámetros y calibración
 | Parámetro | Valor | Estado |
@@ -237,3 +238,4 @@ Fps del render (visible en el visor).
 | 2026-10-05 | 0.6 | Implementación del bloque 2 (T2, Mundo): panel Cohorte (`cohort.ts`, `cohort-ui.ts`), Capas, mapa con aro dorado para la cohorte y atenuado para el resto, línea temporal en barra inferior, panel Ahora con pestañas Ahora y Registro, y mapa recoloreado. Precisiones: las ocupaciones y el estrato no venían en `/api/citizens`; se añaden en la 022 R-017 (solo lectura de datos que ya están en el estado); la barra de la línea temporal está siempre visible (ya no hay botón que la abra); la ocupación se ordena como en la API. CA-019 verde; R-027 a R-029 y CA-020, CA-021 pendientes |
 | 2026-10-05 | 0.6 | Implementación del bloque 3 (T3, expediente, `apps/web`). Precisiones: el salario no lo expone la API y se muestra bloqueado con «Pronto»; las fuentes de control salen de las causas `fuente.*` del último evento que las cita (los tres aportes mayores de la 040 R-006, normalizados a 100 %); las direcciones de las once pestañas anteriores se conservan y llevan a su pestaña nueva; Estado y necesidades y Aprendizaje van plegados dentro del Resumen. CA-020 verde; R-028, R-029 y CA-021 pendientes |
 | 2026-10-05 | 0.6 | Implementación del bloque 4 (T4, dashboard y charla, `apps/web`). Precisiones: el dashboard conserva los periodos de la API (último mes, último año, desde la fundación) porque «Hoy» y «7 días» no los da la 022 R-016; «enfermos hoy» y «patrimonio mediano» no se muestran (la API no los expone); la cohorte activa se muestra con su «✕» pero solo resalta el mapa, las cifras del dashboard son de toda la población. R-029: la charla conserva su estructura (cabecera, franja, mensajes y panel lateral) con el estilo nuevo; la columna izquierda de tonos del lienzo no se porta (el tono del visitante lo clasifica el sistema, salvo en modo prueba). CA-021 pendiente
+| 2026-10-05 | 0.7 | Decisiones del usuario: se quita el selector de velocidades (queda «Avanzar» con 1 día, 1 semana, 1 mes, 3 meses, 6 meses y 1 año, R-025) y el expediente se carga de forma ligera (ventana de eventos, sin repetir pedidos y la historia de vida solo en las pestañas que la usan, R-027). CA-022 nuevo |

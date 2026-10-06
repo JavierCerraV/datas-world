@@ -64,6 +64,8 @@ function sqliteRecords(rw: Db): RecordStore {
 
 const eventsQuery = z.object({ since: z.string().regex(/^EVT-\d+$/).optional(), limit: z.coerce.number().int().min(1).max(200).default(100) });
 const citizenParams = z.object({ id: z.string().regex(/^CIT-\d+$/) });
+/** 022 R-015: cuántos eventos de la simulación lleva el expediente (la historia de origen va siempre entera). */
+const dossierQuery = z.object({ limit: z.coerce.number().int().min(20).max(5000).default(150) });
 const controlBody = z
   .object({ cmd: z.enum(['pause', 'resume', 'speed', 'step', 'advance']), arg: z.union([z.string(), z.number()]).optional() })
   .refine((b) => b.cmd !== 'advance' || ADVANCE_MINUTES.includes(Number(b.arg)), { message: 'avance no admitido' }); // 022 R-013
@@ -165,10 +167,12 @@ export function buildApi(opts: ApiOptions): Api {
     if (!p.success) return reply.code(400).send({ error: 'id inválido' });
     const id = p.data.id as EntityId;
     const w = reader.world;
+    const q = dossierQuery.safeParse(req.query);
+    if (!q.success) return reply.code(400).send({ error: 'límite inválido' });
     const events = queryEvents(reader.db, { participant: id, limit: 5000 });
     const dayStart = Math.floor(w.now / 1440) * 1440;
     const moves = movesSince(reader.db, dayStart - 1440).filter((m) => m.citizenId === id);
-    const d = dossierView(w, id, events, moves, lifeCatalogs, chatSessionsOf(reader.db, id).length);
+    const d = dossierView(w, id, events, moves, lifeCatalogs, chatSessionsOf(reader.db, id).length, q.data.limit);
     return d ?? reply.code(404).send({ error: 'no existe' });
   });
 

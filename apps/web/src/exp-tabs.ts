@@ -10,6 +10,9 @@ import type { ReportView } from './report.ts';
 import type { CitizenDetail } from './types.ts';
 import { whyToggle } from './why.ts';
 
+/** 022 R-015: cuántos eventos más pide «Ver más eventos». */
+export const MORE_EVENTS = 300;
+
 export interface ExpData {
   d: CitizenDetail;
   dos: Dossier;
@@ -107,7 +110,8 @@ export function tabHistoria(x: ExpData, filter: HistFilter): string {
     const [label, tone] = kindOf(e.type);
     return [`<span class="mono">${esc(e.origin ? e.date.slice(0, 10) : e.date)}</span>`, `<span class="kind k-${tone}">${esc(label)}</span><span class="code mono">${esc(e.type)}</span>`, evText(e), `<span class="causes">${esc(e.causes.map(causeEs).join(' · ') || '—')}</span>`, whyToggle(e.id)];
   });
-  const head = `<div class="card-head"><h2>Eventos <span class="h-note">${all.length} · del más reciente al más antiguo</span></h2><div class="seg" role="group" aria-label="Filtro de eventos">${btn('todos', 'Todos')}${btn('origen', 'Historia de origen')}${btn('simulacion', 'Simulación')}</div></div>`;
+  const head = `<div class="card-head"><h2>Eventos <span class="h-note">${all.length}${x.dos.omitted > 0 ? ` de ${all.length + x.dos.omitted}` : ''} · del más reciente al más antiguo</span></h2><div class="seg" role="group" aria-label="Filtro de eventos">${btn('todos', 'Todos')}${btn('origen', 'Historia de origen')}${btn('simulacion', 'Simulación')}</div></div>`;
   const report = x.report ? `<details class="card"><summary><h2>Informe de vida de ${esc(name1(x.d))}</h2></summary>${renderReport(x.report)}</details>` : '';
-  return `<section class="card">${head}${table(['Fecha', 'Tipo', 'Descripción', 'Causas', ''], rows, 'Sin eventos de este tipo.')}</section>${report}`;
+  const more = x.dos.omitted > 0 ? `<p class="more"><button class="btn" type="button" data-more-events>Ver ${Math.min(MORE_EVENTS, x.dos.omitted)} eventos más</button> <span class="sub">quedan ${x.dos.omitted} más antiguos de la simulación</span></p>` : '';
+  return `<section class="card">${head}${table(['Fecha', 'Tipo', 'Descripción', 'Causas', ''], rows, 'Sin eventos de este tipo.')}${more}</section>${report}`;
 }
