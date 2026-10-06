@@ -87,4 +87,4 @@ Con acercamiento, comparable al tablero del lienzo:
 | Río con puentes | No está | El mundo no tiene agua (cambiaría la geografía, spec 003) |
 | Zoom cercano | Abre en ×1,9; «Ver todo» muestra el mapa entero | — |
 
-- **CA-023:** prueba automática de `layerScale` verde. La revisión visual queda **pendiente de la aceptación del usuario** frente a estas capturas.
+- **CA-023:** prueba automática de `layerScale` verde. La revisión visual fue **aceptada por el usuario el 2026-10-06** («me parece bien como quedó»).
