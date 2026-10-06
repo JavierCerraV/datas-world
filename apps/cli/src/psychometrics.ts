@@ -40,7 +40,7 @@ const mockResponder: MockResponder = (c) => {
   return JSON.stringify({ answers });
 };
 
-function gatewayFor(provider: string): Gateway {
+function gatewayFor(provider: string, llmConfig: string): Gateway {
   // Cada instrumento va en una llamada: más salida y más tiempo que una réplica de charla.
   const big = (m: ModelConfig): ModelConfig => ({ ...m, maxOutputTokens: 16_000, timeoutMs: 300_000, temperature: 0.7 });
   if (provider === 'mock') {
@@ -48,7 +48,7 @@ function gatewayFor(provider: string): Gateway {
     const config: GatewayConfig = { ...DEFAULT_CONFIG, purposes: { ...DEFAULT_CONFIG.purposes, dialogue: m }, budget: { ...DEFAULT_CONFIG.budget, dailyTokens: BATTERY_TOKENS } };
     return new Gateway({ config, adapters: { mock: mockAdapter(mockResponder) }, records: new MemoryRecordStore(100_000) });
   }
-  const path = 'config/llm.json';
+  const path = llmConfig;
   const base = existsSync(path) ? parseConfig(JSON.parse(readFileSync(path, 'utf8'))) : DEFAULT_CONFIG;
   const dialogue = base.purposes.dialogue;
   if (!dialogue) throw new UsageError('config/llm.json tiene desactivado el propósito dialogue');
@@ -135,14 +135,14 @@ export async function psychometrics(args: string[], io: Io): Promise<void> {
     options: {
       db: { type: 'string', default: DEFAULT_DB }, work: { type: 'string', default: 'data/psicometria/mundo.db' }, out: { type: 'string', default: 'data/psicometria/bateria' },
       provider: { type: 'string', default: 'mock' }, n: { type: 'string', default: String(N_SAMPLE) }, 'month-days': { type: 'string', default: '30' }, 'year-days': { type: 'string', default: '365' },
-      concurrency: { type: 'string', default: '4' }, 'delay-ms': { type: 'string', default: '0' }, 'per-call': { type: 'string', default: 'person' }, resume: { type: 'boolean', default: false },
+      concurrency: { type: 'string', default: '4' }, 'delay-ms': { type: 'string', default: '0' }, 'per-call': { type: 'string', default: 'person' }, 'llm-config': { type: 'string', default: 'config/llm.json' }, resume: { type: 'boolean', default: false },
     },
   });
   if (v.provider !== 'mock' && v.provider !== 'config') throw new UsageError('--provider debe ser mock o config');
   if (v['per-call'] !== 'person' && v['per-call'] !== 'instrument') throw new UsageError('--per-call debe ser person o instrument');
   const n = toInt('n', v.n, 8);
   const monthDays = toInt('month-days', v['month-days'], 1), yearDays = toInt('year-days', v['year-days'], 1);
-  const gateway = gatewayFor(v.provider!);
+  const gateway = gatewayFor(v.provider!, v['llm-config']!);
   const cats = chatCatalogs(loadCatalogs());
 
   // Punto de control: lo hecho se guarda en disco para reanudar con `--resume` sin repetir llamadas (y sin volver a pagarlas).

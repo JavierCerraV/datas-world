@@ -30,7 +30,11 @@ export function openaiCompatibleAdapter(opts: { baseUrl?: string; apiKey?: strin
         body: JSON.stringify(body),
         signal: c.signal,
       });
-      if (!res.ok) throw new Error(`openai_compatible: HTTP ${res.status}`);
+      if (!res.ok) {
+        // El cuerpo dice si es un límite por minuto, por día o de crédito; se acota y la pasarela quita cualquier clave.
+        const body = (await res.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 300);
+        throw new Error(`openai_compatible: HTTP ${res.status}${body ? ` ${body}` : ''}`);
+      }
       if (!c.onText) {
         const j = (await res.json()) as Chunk;
         return { text: j.choices?.[0]?.message?.content ?? '', usage: usageOf(j.usage) };

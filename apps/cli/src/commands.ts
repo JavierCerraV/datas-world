@@ -55,7 +55,7 @@ export const USAGE = `Uso: pnpm cli <comando> [opciones]
   bench:relations [--out RUTA]
   chat:battery [--citizens N|CIT-…,…] [--scripts all|clave,…] [--provider mock|config] [--out RUTA] [--db RUTA]
   chat:stats [--json] [--db RUTA]
-  psychometrics [--provider mock|config] [--n 50] [--month-days 30] [--year-days 365] [--concurrency 4] [--delay-ms 0] [--per-call person|instrument] [--resume] [--db RUTA] [--work RUTA] [--out RUTA]`;
+  psychometrics [--provider mock|config] [--n 50] [--month-days 30] [--year-days 365] [--concurrency 4] [--delay-ms 0] [--per-call person|instrument] [--llm-config RUTA] [--resume] [--db RUTA] [--work RUTA] [--out RUTA]`;
 
 function worldAdvance(args: string[], io: Io): void {
   const { values: v } = parseArgs({
