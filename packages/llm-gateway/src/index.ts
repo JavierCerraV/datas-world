@@ -28,3 +28,5 @@ export { verifyReply } from './chat/verify.ts';
 export type { Claim, Verdict, Verification } from './chat/verify.ts';
 export { buildPersonView } from './chat/view.ts';
 export type { FamilyMember, PersonView, ViewFact, ViewInput } from './chat/view.ts';
+export { LLM_RANGE, administerInstrument, itemsText } from './psychometrics.ts';
+export type { ItemAnswer, ItemPlan, ItemSource } from './psychometrics.ts';

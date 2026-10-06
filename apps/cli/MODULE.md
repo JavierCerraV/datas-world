@@ -2,8 +2,8 @@
 modulo: cli
 ruta: apps/cli
 estado: en-desarrollo
-specs: [001, 002, 009, 010, 015, 021, 023, 027, 029, 030, 043, 044]
-actualizado: 2026-09-27
+specs: [001, 002, 009, 010, 015, 021, 023, 027, 029, 030, 043, 044, 045]
+actualizado: 2026-10-06
 ---
 
 # Módulo: cli
@@ -38,6 +38,7 @@ Desde la raíz, `pnpm cli <comando>` (`src/main.ts`). Base por defecto: `data/wo
 | `citizen:explain EVT [--db RUTA]` | La cadena del documento rector §12 para una conducta elegida (035 CA-001, `explain.ts`): qué emite, contexto, fuentes de control, repertorio, estímulos con función hoy, relaciones aprendidas, qué ocurrió (los hechos o años de desarrollo que lo formaron), qué recibe y cómo cambia su historia |
 | `world:advance --days N [--db RUTA]` | Toma el cerrojo de escritor (falla si el worker está en marcha), avanza con `WorldSession` (flush cada `FLUSH_TICKS`, instantánea diaria) y muestra el progreso cada 5 % por stderr |
 | `world:info [--json] [--db RUTA]` | Abre en solo lectura; carga el mundo (verifica el hash) y muestra fecha, estado, capacidades, eventos, instantáneas, hash, tamaño y escritor |
+| `psychometrics [--provider mock\|config] [--n 50] [--month-days 30] [--year-days 365] [--db RUTA] [--work RUTA] [--out RUTA]` | Batería psicométrica (045): copia la base, mide a 50 adultos en tres tomas y escribe `<out>.xlsx` y `<out>.json`. `config` usa el LLM de `config/llm.json` (necesita `ANTHROPIC_API_KEY`); `mock` es determinista y sin red. Trabaja sobre la copia: no toca el mundo en marcha |
 | `chat:stats [--json] [--db RUTA]` | Solo lectura (043 R-023, L4.3): latencia del primer token y de la respuesta completa (p50, p95) de las respuestas con LLM frente a los objetivos, y coste total, por charla y por propósito desde `llm_records` |
 | `control pause\|resume\|step\|stop\|speed <v> [--db RUTA]` | Encola una orden en `control_commands` para el worker. En M0 solo la CLI encola órdenes (decisión del usuario) |
 | `bench [--days N] [--json] [--check]` | También `pnpm bench`. Ticks/s y memoria de un mundo vacío, solo con el motor y con el motor + SQLite, y tiempo y tamaño de `world:new` con el mundo de M1. Con `--check` (solo con 365 días) termina con código 1 si no se cumple la 002 CA-005 o la 030 CA-007 |
@@ -117,3 +118,4 @@ Sustituye a los scripts headless usados para calibrar el prototipo.
 | 2026-09-28 | m3/relaciones (R5) | 012 | `citizen:explain` explica también los eventos de relación (`relationshipChain`): qué lo explica ahora, el vínculo de cada lado y la historia del par por las causas (hasta 12 eventos). Prueba 012 CA-005. `citizen:report` muestra etiquetas, trato y afecto de cada vínculo. Pruebas: la de la 044 espera al `BOND_STRAINED` (los vínculos ya existen desde la generación) y la de determinismo entre procesos sube a 300 s |
 | 2026-09-29 | m3/causalidad (C3) | 019 | Comando nuevo `event:why EVT-… [--depth 4]` (`eventWhy` en `explain.ts`): el árbol de causas de cualquier evento, con fechas y nombres, hasta su origen (019 R-004, R-007). Prueba: las conductas elegidas llegan por sus fuentes a los hechos que formaron sus funciones (R-006) |
 | 2026-09-29 | m3/historia (H3) | 020 | Comando nuevo `citizen:life CIT-…` (`life.ts`): informe de vida en texto, con las etapas vividas y recordadas lado a lado, sus diferencias, lo que cambió su vida con su árbol de causas, el perfil y la trayectoria. `reportFor` reúne los hechos de la persona y las muertes. 1 prueba |
+| 2026-10-06 | m4/bateria-psicometrica | 045 | Comando nuevo `psychometrics` (`psychometrics.ts`, `psychometrics-report.ts`, `xlsx.ts`): copia la base (`VACUUM INTO`, sin tocar el mundo en marcha), elige 50 adultos estratificados, mide AAQ-II, GHQ-12, GPQ-9, GTQ, DASS-21 y SWLS hoy, a +30 días y +1 año (el avance usa la vida diaria sobre la copia) y escribe un `.xlsx` (10 hojas) y un `.json`. Las respuestas las expresa el LLM (`--provider config`, necesita `ANTHROPIC_API_KEY`) o el proveedor `mock`. Escritor de xlsx propio (ZIP con `node:zlib`), sin dependencias nuevas. Pruebas `psychometrics.test.ts` (045 CA-002, CA-003, CA-006, CA-007) |
