@@ -3,7 +3,7 @@ modulo: decision
 ruta: packages/engine/src/decision
 estado: en-desarrollo
 specs: [040, 036, 037, 038, 039, 032, 010, 011, 016, 021, 035]
-actualizado: 2026-09-26
+actualizado: 2026-10-05
 ---
 
 # Módulo: decision
@@ -30,6 +30,7 @@ Desde `@datas-world/engine`:
 | `buildOptions(ctx, rng)`, `freeUntil`, `explainCauses`, `OBLIGATION_DELAY_DAYS`, tipos `Option`, `SourceContribution`, `ControlSource`, `ActionParams`, `DecisionCtx` | Candidatas con sus aportes por fuente y su explicación |
 | `softmax`, `temperatureOf(variability)`, `strengthContribution(w)`, `pickIndex`, `STRENGTH_SCALE`, `STRENGTH_REF` | Núcleo puro de la selección (`select.ts`), compartido con el laboratorio |
 | `choose(view, options, T, rng, validate)` → `{ pick, rejected }` | Elección con rechazo y nueva elección (R-008) |
+| `MINOR_SUPERVISED_AGE`, `ADULT_AGE`, `MINOR_CURFEW`, `MINOR_OUTING_MAX_H`, `ageOf`, `bandOf`, `guardianAt`, `teenStayLimit`, `isStranded` (`supervision.ts`) | Supervisión de menores (011 v0.3, R-007): un menor de 12 años solo elige tiempo libre fuera de casa donde ya esté un adulto de su hogar y, si está fuera sin él, vuelve a casa aunque tenga algo comprometido (fuente `regla`, `rutina.menor_en_casa`; el sistema de decisión suelta lo comprometido de un niño en esa situación); de 12 a 17 sale de día, hasta las 20:00 y como mucho 2 h seguidas |
 | `DECISION_COLUMNS`, `defineDecisionColumns` | Columnas `act.choice` (u8), `act.place` e `act.until` (i32) |
 
 ## 4. Diseño interno y decisiones
@@ -51,7 +52,7 @@ Desde `@datas-world/engine`:
 INV-001 (softmax finita que suma 1), INV-002 (no lee `tmp.*` ni `pers.*`: ni el adaptador ni el temperamento; lo comprueban ESLint y la prueba de arquitectura) e INV-003 (toda acción lleva sus aportes). Determinismo con la vista congelada.
 
 ## 6. Cómo se prueba
-`decision.test.ts`: un pueblo pequeño con bar y La Capital, y personas sin empleo con fichas a medida.
+`decision.test.ts`: un pueblo pequeño con bar y La Capital, y personas sin empleo con fichas a medida. `supervision.test.ts` (011 CA-006): una casa con un menor y un adulto, y un parque.
 
 | Criterio | Prueba |
 |---|---|
@@ -87,3 +88,5 @@ Porta `decide`: opciones de tiempo libre con puntuación y ruido y duración aco
 | 2026-09-26 | mf/4-red | 037, 040 | La fuente `aversion` usa el valor funcional (037 R-006) de la actividad y del lugar: el aprendido (con `directValue`: generalización y primarios) o el derivado por la red relacional, si es mayor; sus orígenes incluyen los eventos de las relaciones del camino |
 | 2026-09-26 | mf/5-reglas-valores | 038, 040 | La fuente `regla` de las obligaciones sale de las reglas de la persona (038 R-004; sin reglas, el número fijo de antes). Fuente nueva `valor` para el ocio que señala un valor (038 R-006). La aversión se calcula sin las raíces de valor. Elegir buscar empleo acumula el contraste de su regla (desaliento, 038 R-005). Prueba 038 CA-004 |
 | 2026-09-28 | mf/6-privados (MF6.2) | 039, 040 | Fuente nueva `alivio` (039 R-004): con un episodio de PNR abierto, dormir un rato y cada afición valen `2 × carga × fuerza de la evitación` (`evit.dormir`, `evit.distraccion`). Dormir se ofrece también sin agotamiento si hay episodio |
+| 2026-10-05 | claude/busy-mayer-fj6x13 (011 v0.3) | 011, 040 | Supervisión de menores (`supervision.ts`, 011 R-007 y R-008): las candidatas de tiempo libre de un menor de 12 años excluyen los lugares sin un adulto de su hogar; un niño solo fuera de casa tiene la opción de volver (fuente `regla`, peso 6); de 12 a 17 años la salida se acota por el toque de queda y las 2 h. Pruebas nuevas en `supervision.test.ts` |
+| 2026-10-05 | claude/busy-mayer-fj6x13 (011 v0.3, ajuste) | 011 | `isStranded`: el sistema de decisión (`system.ts`) suelta lo comprometido de un niño que se queda sin adulto fuera de casa para que vuelva (antes terminaba el episodio entero: en 7 días de un mundo generado había niños hasta 11 ticks solos; ahora, como mucho uno). Prueba sobre el mundo en `generators/src/minors.test.ts` |

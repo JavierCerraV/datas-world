@@ -21,6 +21,7 @@ import type { LeisureTable } from './columns.ts';
 import { buildOptions, freeUntil } from './options.ts';
 import type { Option } from './options.ts';
 import { pickIndex, softmax, temperatureOf } from './select.ts';
+import { isStranded } from './supervision.ts';
 import { createActionValidator } from './validate.ts';
 
 const DAY = 1440;
@@ -74,9 +75,11 @@ export function createDecisionSystem(table: LeisureTable, onto?: Ontology): Syst
 
     for (const row of ctx.citizens) {
       const until = i['act.until']![row]!;
-      const committed = now < until;
+      // 011 R-007: un niño solo fuera de casa deja lo que tenía comprometido para volver.
+      const stranded = now < until && isStranded(view, row, now, i['loc.place']?.[row] ?? 0, homeOf(view, row));
+      const committed = now < until && !stranded;
       const drop = () => {
-        if (committed) patches.push({ op: 'set', type: 'i32', column: 'act.until', row, value: now });
+        if (now < until) patches.push({ op: 'set', type: 'i32', column: 'act.until', row, value: now });
       };
       // Dormida, enferma o en camino: no decide; la enfermedad cancela lo que tenía previsto.
       if ((u['health.acute']?.[row] ?? 0) > 0) {
