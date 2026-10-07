@@ -1,0 +1,14 @@
+{
+  "id": "despido-y-consolidacion",
+  "base": { "db": "../../../data/world.db", "branchAt": 0 },
+  "durationDays": 60,
+  "seeds": [1, 2, 3],
+  "sampleEveryDays": 7,
+  "subjects": { "sample": 50 },
+  "metrics": ["mood", "stress", "money", "debt", "employed", "bonds", "pnr_episodes", "events:JOB_LOST"],
+  "arms": [
+    { "name": "control" },
+    { "name": "despido forzado", "interventions": [{ "afterDays": 0, "kind": "force_job_loss", "target": "subjects" }] },
+    { "name": "sin consolidation", "capabilities": { "disable": ["consolidation"] } }
+  ]
+}

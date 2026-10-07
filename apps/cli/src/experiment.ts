@@ -7,7 +7,7 @@ import { deserializeWorld, parseExperiment, serializeWorld, stateHash } from '@d
 import type { Experiment } from '@datas-world/engine';
 import { experimentSubjects, loadCatalogs, runArm } from '@datas-world/generators';
 import type { InterventionLog, Observation } from '@datas-world/generators';
-import { WorldRepository, openReadonly } from '@datas-world/persistence';
+import { WorldRepository, openReadonly, writerLock } from '@datas-world/persistence';
 import { UsageError, dateOf, withDb } from './common.ts';
 import type { Io } from './common.ts';
 import { contrasts, csvOf, workbookOf } from './experiment-report.ts';
@@ -28,6 +28,8 @@ export function experimentRun(args: string[], io: Io): void {
   if (def.metrics.includes('psychometrics')) throw new UsageError('la métrica psychometrics aún no se mide en experimentos (spec 028 §10); quítela de metrics');
   const out = v.out ?? `data/experimentos/${def.id}`;
   const before = statSync(dbPath);
+  // Si el worker tiene la base abierta para escribir, su archivo cambia por su cuenta: el experimento solo la abre en solo lectura.
+  const writer = withDb(openReadonly(dbPath), (db) => writerLock(db));
 
   // R-001: la instantánea de la base (en solo lectura). Con `branchAt` 0, el estado actual de la base.
   const { snapshot, world0 } = withDb(openReadonly(dbPath), (db) => {
@@ -69,6 +71,7 @@ export function experimentRun(args: string[], io: Io): void {
   writeFileSync(`${out}.csv`, csvOf(observations));
   writeFileSync(`${out}.xlsx`, workbookOf(result, rows));
   const after = statSync(dbPath);
-  if (after.size !== before.size || after.mtimeMs !== before.mtimeMs) throw new Error('la base cambió durante el experimento (INV-003)');
+  if (writer !== null) io.err(`Aviso: el worker (PID ${writer}) tiene la base abierta para escribir; el experimento la leyó en solo lectura y no comprobó que el archivo no cambió.`);
+  else if (after.size !== before.size || after.mtimeMs !== before.mtimeMs) throw new Error('la base cambió durante el experimento (INV-003)');
   io.out(`Experimento ${def.id}: ${rows.length} contrastes → ${out}.xlsx, ${out}.csv y ${out}.json`);
 }

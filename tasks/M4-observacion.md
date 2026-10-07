@@ -42,6 +42,13 @@ Referencia: el lienzo de 10 arenas, tablero T10 (https://claude.ai/artifact/5FCJ
 - [x] T5b Aceptación del usuario de las capturas (CA-021), 2026-10-05: «bien aceptado».
 - [x] T6 Decisiones del usuario (2026-10-05): sin selector de velocidades, «Avanzar» con 3 y 6 meses (022 R-013, 024 R-025) y carga ligera del expediente (022 R-015, 024 R-027, CA-022).
 
+## Batería psicométrica (spec 045, petición del usuario 2026-10-05)
+- [x] B1 Spec 045 aprobada (v0.2: respuestas con LLM, con mentira, exageración y tacto impreciso según la historia de aprendizaje).
+- [x] B2 Módulo `measurement` del motor: catálogo de los seis instrumentos, corrección, indicadores, respuesta verdadera, disposición y muestra (CA-001, CA-004, CA-005, CA-008).
+- [x] B3 `administerInstrument` en llm-gateway: la charla la valida el motor (CA-009, CA-010).
+- [x] B4 Comando `psychometrics`, informe y Excel (CA-002, CA-003, CA-006, CA-007).
+- [ ] B5 Ejecución real con LLM (`--provider config`) y entrega del Excel: falta `ANTHROPIC_API_KEY`.
+
 ## Mapa en el estilo del lienzo (spec 024 v0.8, petición del usuario 2026-10-05)
 - [x] M1 Dibujo vectorial del mapa a 3× (`render.ts`, `draw-places.ts`), figuras «chibi», punto de ánimo, aro de cohorte y zoom de apertura (R-030, CA-023).
 - [x] M2 Aceptación del usuario de las capturas del mapa (2026-10-06, CA-023).
