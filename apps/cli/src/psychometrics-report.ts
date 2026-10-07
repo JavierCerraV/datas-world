@@ -130,6 +130,13 @@ function sheetMethod(b: Battery): Sheet {
     ['Lo verdadero y lo que dice', 'Según su historia de aprendizaje, la persona puede decir su estado tal cual (fiel), decir menos malestar (minimiza), más (exagera), algo muy alejado (miente) o no tactarlo bien (impreciso). El motor decide cuánto se desvía de lo verdadero; las probabilidades salen de la vergüenza, el valor de la aprobación, la evitación, el pliance, la carga aversiva, la soledad, la flexibilidad y la confianza en quien pregunta (un extraño).'],
     ['Quién escribe la respuesta', `El LLM (${b.meta.provider}) interpreta cada ítem como en una charla y elige la opción dentro de ±1 punto de lo que el motor decidió; si se sale del rango, el motor usa la decidida. Ítems: ${llm.length}. Con LLM: ${count('llm')}. Corregidos por el motor: ${count('corregida')}. Con plantilla (sin LLM): ${count('plantilla')}.`],
     ['Disposiciones (ítems)', `fiel ${disp('fiel')} · minimiza ${disp('minimiza')} · exagera ${disp('exagera')} · miente ${disp('miente')} · impreciso ${disp('impreciso')}`],
+    ['Indicadores (hoja «Indicadores»)', (() => {
+      const measured = b.takes.filter((t) => t.instruments);
+      const missing = [...new Set(measured.filter((t) => !t.indicators).map((t) => t.toma))].sort();
+      return missing.length === 0
+        ? 'Cada respuesta se explica con los indicadores de su propia toma.'
+        : `LIMITACIÓN: faltan los indicadores de la(s) toma(s) ${missing.join(', ')}. Una corrida reanudada con una versión anterior del comando los recalculó con el mundo ya avanzado y se descartaron por no ser los de su toma. Las respuestas, las puntuaciones y la disposición de cada ítem sí son las originales.`;
+    })()],
     ['LÍMITES (leer antes de usar)', 'Estas puntuaciones NO son datos humanos. Son la salida de un modelo [M] de cómo el estado de una persona simulada se refleja en cada escala. Los pesos de los indicadores y las probabilidades de distorsión son supuestos sin validar con poblaciones reales (PA-155). Sirven para ver si el mundo produce perfiles coherentes y cómo cambian entre tomas, no para validar el modelo ni para inferir sobre personas reales.'],
     ['Corte de las fichas', 'Los cortes son los de la ficha de cada prueba. En el GTQ la ficha solo da dos promedios (clínicos 48, no clínicos 58): el corte 52/53 es el punto medio, no un corte de la ficha. En el DASS-21 se usan las sumas crudas por subescala con los cortes de la ficha.'],
     ['Toma 2', 'Un año después de la toma 1 (13 meses desde hoy).'],

@@ -50,7 +50,8 @@ Referencia: el lienzo de 10 arenas, tablero T10 (https://claude.ai/artifact/5FCJ
 - [x] B2 Módulo `measurement` del motor: catálogo de los seis instrumentos, corrección, indicadores, respuesta verdadera, disposición y muestra (CA-001, CA-004, CA-005, CA-008).
 - [x] B3 `administerInstrument` en llm-gateway: la charla la valida el motor (CA-009, CA-010).
 - [x] B4 Comando `psychometrics`, informe y Excel (CA-002, CA-003, CA-006, CA-007).
-- [ ] B5 Ejecución real con LLM (`--provider config`) y entrega del Excel: falta `ANTHROPIC_API_KEY`.
+- [x] B5 Ejecución real con LLM (OpenRouter, modelo gratuito) y Excel entregado (2026-10-07): `docs/validaciones/bateria-psicometrica.md`.
+- [ ] B6 Acotar el rango del LLM en el DASS-21 y repetir; decidir la corrección del GHQ-12 (hallazgos 1 y 2).
 
 ## Mapa en el estilo del lienzo (spec 024 v0.8, petición del usuario 2026-10-05)
 - [x] M1 Dibujo vectorial del mapa a 3× (`render.ts`, `draw-places.ts`), figuras «chibi», punto de ánimo, aro de cohorte y zoom de apertura (R-030, CA-023).

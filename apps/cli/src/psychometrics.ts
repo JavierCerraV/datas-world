@@ -168,6 +168,12 @@ export async function psychometrics(args: string[], io: Io): Promise<void> {
       reached = toma;
       save();
     }
+    // Una toma anterior a la que alcanzó la copia y ya medida entera no se vuelve a leer: el mundo está más adelante y
+    // sus indicadores, fechas y hashes son los guardados (reanudar no puede reescribirlos).
+    if (toma < reached && sample.length > 0 && sample.every((p) => battery.takes.some((t) => t.citizenId === p.id && t.toma === toma && (t.instruments || !t.alive)))) {
+      io.err(`Toma ${toma}: ya medida (${battery.tomas.find((t) => t.toma === toma)?.date ?? '—'})`);
+      continue;
+    }
     const { world, events, byCitizen } = withDb(openReadonly(v.work!), (db) => {
       const w = new WorldRepository(db).loadWorld();
       const all = queryEvents(db, { limit: 5_000_000 });
@@ -193,7 +199,8 @@ export async function psychometrics(args: string[], io: Io): Promise<void> {
       let take = battery.takes.find((t) => t.citizenId === p.id && t.toma === toma);
       if (!take) battery.takes.push((take = { citizenId: p.id, toma, alive: !!info }));
       if (!info) continue;
-      take.indicators = indicatorsOf({ world, id: p.id, profile: info.profile, trajectory: info.trajectory, events: info.events });
+      // Los indicadores son los de su toma: al reanudar, el mundo ya está en una toma posterior y no se recalculan.
+      if (!take.indicators) take.indicators = indicatorsOf({ world, id: p.id, profile: info.profile, trajectory: info.trajectory, events: info.events });
       if (!take.instruments) jobs.push({ p, take });
     }
     let done = 0;
