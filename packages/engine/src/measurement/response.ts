@@ -1,4 +1,4 @@
-// Respuesta verdadera de cada ítem (spec 045 R-003, R-004, §4 bis): cómo está la persona, antes de decidir qué dice.
+// Respuesta verdadera de cada ítem (spec 046 R-003, R-004, §4 bis): cómo está la persona, antes de decidir qué dice.
 // Todo [M] (PA-155): constructos con pesos fijos, sesgos por ítem y un ruido pequeño con semilla.
 import type { Rng } from '../rng.ts';
 import type { Indicators } from './indicators.ts';

@@ -22,13 +22,13 @@ Corre **un brazo** de un experimento (spec 028): parte de una instantánea ya ca
 | Símbolo | Descripción |
 |---|---|
 | `runArm(world, def, arm, seed, subjects, catalogs, onDay?)` → `ArmResult` | Corre un brazo con una semilla. Modifica `world`: pásale una copia propia |
-| `experimentSubjects(world, subjects)` | Las personas que se miden: las dadas (vivas) o una muestra estratificada de adultos (045) con el flujo `experiment:subjects` |
+| `experimentSubjects(world, subjects)` | Las personas que se miden: las dadas (vivas) o una muestra estratificada de adultos (046) con el flujo `experiment:subjects` |
 | `Observation`, `InterventionLog`, `ArmResult` | Observaciones por persona y día, intervenciones aplicadas o rechazadas con su motivo, hashes de la rama y del final, y pico de memoria |
 
 ## 4. Diseño interno y decisiones
 - **Dos corredores sobre el mismo mundo:** hasta la rama, el de la base (mismo azar para todos los brazos); desde la rama, otro con `createRng(seed)`, los manejadores de intervención y `feedKinds` (028 R-003, R-005).
 - **Eventos que se cuentan y se descartan:** cada día se vacía la bandeja del corredor en un `EventCounter` (R-007).
-- **Ánimo y estrés:** medias móviles de 7 días de las medidas diarias (como las ventanas de 045).
+- **Ánimo y estrés:** medias móviles de 7 días de las medidas diarias (como las ventanas de 046).
 
 ## 5. Invariantes y guardarraíles
 - Los brazos llegan a la rama con el mismo hash (028 INV-004).

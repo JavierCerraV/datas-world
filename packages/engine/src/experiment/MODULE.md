@@ -52,3 +52,4 @@ No aplica.
 | Fecha | Tarea / commit | Specs | Cambio |
 |---|---|---|---|
 | 2026-10-07 | m5/experimentos | 028 | Módulo creado |
+| 2026-10-07 | fusión con main | 028, 046 | La spec de la batería psicométrica pasa de 045 a 046 (en `main` ya había una 045 distinta); solo cambian las referencias en los comentarios |

@@ -60,7 +60,31 @@ Las capturas son del mundo de ejemplo `docs/validaciones/mundos/m2-482917.db` (1
 - `apps/web/src/exp.test.ts`: 024 CA-014 (cada pestaña del expediente), CA-015 (pirámide, ocupación, periodo y «Ver como tabla»), CA-016 (capas, «Ahora» y escala) y las direcciones de las pantallas.
 - Prueba de punta a punta en Chromium: abrir cada pantalla, cambiar de pestaña, empezar una charla en sandbox con modo prueba, enviar dos mensajes con tono etiquetado y despedirse.
 
+## v0.6: retrato, carga, Datos y escala (2026-09-30)
+
+Tras revisar el Visor A+, el usuario pidió: el retrato pixel art en la ficha, un indicador de carga en las pestañas, una pantalla Datos menos densa y con más información (red de vínculos en 3D) y ajustar la escala del mapa.
+
+| Pedido | Qué se hizo |
+|---|---|
+| Retrato pixel art | Busto de 12 × 14 píxeles con los colores de la figura del mapa, en la ficha, el expediente, la charla y la población (024 R-025) |
+| Las pestañas tardan | Causa: cada cambio reconstruía la pantalla y la Historia pintaba todos los eventos. Ahora el cambio es instantáneo, con esqueleto de carga, y la Historia va por páginas de 100 (R-026) |
+| Datos denso, líneas gruesas | Causa: las gráficas SVG se estiraban al ancho de la tarjeta y el trazo engordaba. Ahora tienen su ancho natural, trazo fino que no escala, barras de ≤ 24 px, y siete indicadores, distribuciones del ánimo, el estrés y el dinero (mediana y Gini), hogares por tamaño, empleadores y red de vínculos en 3D (R-027) |
+| Escala del mapa | 40 m por tile (003 v0.4). En un mundo nuevo, los trayectos a pie tienen una mediana de 15 min (el 90 %, menos de 27), frente a unos 3 min antes; a mediodía había 19 personas en la calle. `lookahead` pasa a 60 min para que nadie salga tarde (016) |
+
+| Datos | Red de vínculos y series |
+|---|---|
+| ![Datos](capturas/m4-aplus/v06-datos.jpg) | ![Red](capturas/m4-aplus/v06-datos-red.jpg) |
+
+| Datos en oscuro | Expediente con retrato |
+|---|---|
+| ![Datos oscuro](capturas/m4-aplus/v06-datos-oscuro.jpg) | ![Expediente](capturas/m4-aplus/v06-expediente.jpg) |
+
+| Mundo con 40 m por tile y ficha con retrato |
+|---|
+| ![Mundo 40 m](capturas/m4-aplus/v06-mundo-40m.jpg) |
+
 ## Pendiente
 
 - **Revisión del usuario (024 CA-017).**
+- **Elegir el rediseño:** cinco propuestas en el lienzo «Datas World — 5 propuestas de rediseño» (Observatorio, Atlas, Mesa de análisis, Constelación y Crónica).
 - Exponer en la API de la charla el valor del visitante y el malestar acumulado, que dibuja el lienzo (043).

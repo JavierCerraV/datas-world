@@ -22,11 +22,11 @@ export interface Arm {
   capabilities?: { enable?: Capability[]; disable?: Capability[] };
 }
 
-/** Quién se mide: personas dadas, o una muestra estratificada de `sample` adultos (045 R-005). */
+/** Quién se mide: personas dadas, o una muestra estratificada de `sample` adultos (046 R-005). */
 export type Subjects = { citizens: EntityId[] } | { sample: number };
 
 export const BASE_METRICS = ['mood', 'stress', 'money', 'debt', 'employed', 'bonds', 'pnr_episodes'] as const;
-/** `events:<TYPE>` cuenta un tipo de evento; `psychometrics` es la batería de la 045. */
+/** `events:<TYPE>` cuenta un tipo de evento; `psychometrics` es la batería de la 046. */
 export type MetricId = (typeof BASE_METRICS)[number] | `events:${string}` | 'psychometrics';
 
 export interface Experiment {

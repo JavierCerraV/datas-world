@@ -1,4 +1,4 @@
-// Indicadores de la persona (spec 045 R-002, §4 bis): todo sale de su estado, su historia, su aprendizaje y sus valores.
+// Indicadores de la persona (spec 046 R-002, §4 bis): todo sale de su estado, su historia, su aprendizaje y sus valores.
 // No lee el temperamento (`pers.*`, `tmp.*`: 009 R-006) ni a otras personas.
 import type { WorldEvent } from '../events.ts';
 import { DEFAULT_VARIABILITY } from '../functions/history.ts';
@@ -15,7 +15,7 @@ const DAY = 1440;
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 const mean = (xs: readonly number[], empty = 0) => (xs.length ? xs.reduce((a, x) => a + x, 0) / xs.length : empty);
 
-/** Todo en [0,1] (045 §3). */
+/** Todo en [0,1] (046 §3). */
 export interface Indicators {
   mood: number; stress: number; negAffect: number; joy: number; sadness: number; fear: number; anger: number; shame: number;
   energyLack: number; funLack: number; lonely: number; sleepDebt: number;

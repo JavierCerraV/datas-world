@@ -1,4 +1,4 @@
-// Informe de la batería psicométrica (spec 045 R-007, R-010): estadísticos, correlaciones y libro de Excel.
+// Informe de la batería psicométrica (spec 046 R-007, R-010): estadísticos, correlaciones y libro de Excel.
 import { INSTRUMENTS, INSTRUMENT_IDS } from '@datas-world/engine';
 import type { Disposition, Indicators, InstrumentId, Score } from '@datas-world/engine';
 import { buildXlsx } from './xlsx.ts';
@@ -122,7 +122,7 @@ function sheetMethod(b: Battery): Sheet {
   const disp = (d: Disposition) => llm.filter((x) => x.disposition === d).length;
   const rows: Cell[][] = [
     ['Tema', 'Detalle'],
-    ['Qué es', "Batería psicométrica aplicada a personas simuladas de Data's World (spec 045). Instrumentos del ClinikLab de la Universidad Konrad Lorenz: AAQ-II, GHQ-12, GPQ-9, GTQ, DASS-21 y SWLS."],
+    ['Qué es', "Batería psicométrica aplicada a personas simuladas de Data's World (spec 046). Instrumentos del ClinikLab de la Universidad Konrad Lorenz: AAQ-II, GHQ-12, GPQ-9, GTQ, DASS-21 y SWLS."],
     ['Mundo', `${b.meta.world} · semilla ${b.meta.seed}. Se trabajó sobre una copia de la base: el mundo en marcha no se tocó.`],
     ['Muestra', `${b.meta.nSample} personas de 18 años o más y vivas en la toma 0, estratificadas por sexo y grupo de edad (18–29, 30–44, 45–59, 60 o más), con asignación proporcional y una persona como mínimo por estrato. Son las mismas en las tres tomas.`],
     ...b.tomas.map((t) => [TOMA_LABEL[t.toma]!, `${t.date} (minuto ${t.minute}) · hash del estado ${t.hash}`] as Cell[]),

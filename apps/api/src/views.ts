@@ -38,7 +38,7 @@ export interface CitizenPosition {
   age: number;
   /** 024 R-017: su vivienda, para decir «en casa» o «camino a casa». */
   homeId: EntityId | null;
-  /** 022 R-017: su ocupación (una de `OCCUPATIONS`) y el estrato de su vivienda, para el filtro de cohorte de la 024 R-026. */
+  /** 022 R-019: su ocupación (una de `OCCUPATIONS`) y el estrato de su vivienda, para el filtro de cohorte de la 024 R-026. */
   occupation: string;
   stratum: number | null;
   /** 022 R-008: el viaje en curso con sus dos puertas en el mapa, para dibujar el recorrido por las calles. */
@@ -120,7 +120,7 @@ export function worldView(world: World) {
     date: dateOf(world, world.now),
     epoch: world.config.epoch,
     status: world.status,
-    geo: world.geo ? { width: world.geo.width, height: world.geo.height, tiles: Array.from(world.geo.tiles) } : null,
+    geo: world.geo ? { width: world.geo.width, height: world.geo.height, tileMeters: world.geo.tileMeters, tiles: Array.from(world.geo.tiles) } : null,
     places: [...world.places.values()]
       .filter((p) => p.door || p.rect)
       .map((p) => ({ id: p.id, kind: p.kind, name: p.name, ...(p.rect ? { rect: p.rect } : {}), ...(p.door ? { door: p.door } : {}), open: open(p) })),

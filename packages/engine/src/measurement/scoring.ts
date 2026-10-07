@@ -1,4 +1,4 @@
-// Corrección de los instrumentos (spec 045 R-001, INV-003): suma de ítems, subescalas del DASS-21 y banda de la ficha.
+// Corrección de los instrumentos (spec 046 R-001, INV-003): suma de ítems, subescalas del DASS-21 y banda de la ficha.
 import { INSTRUMENTS } from './instruments.ts';
 import type { Cutoff, InstrumentId } from './instruments.ts';
 

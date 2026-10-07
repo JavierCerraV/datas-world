@@ -1,5 +1,5 @@
-// Una prueba psicométrica como charla (spec 045 R-012, R-013): un evaluador plantea los ítems y la persona responde con
-// sus palabras. El motor ya decidió cuánto se desvía de lo verdadero (`target` y `disposition`, 045 R-011); el LLM
+// Una prueba psicométrica como charla (spec 046 R-012, R-013): un evaluador plantea los ítems y la persona responde con
+// sus palabras. El motor ya decidió cuánto se desvía de lo verdadero (`target` y `disposition`, 046 R-011); el LLM
 // interpreta y expresa dentro de un rango, y el motor valida. El prompt no lleva la respuesta verdadera (CA-010).
 import { optionsOf } from '@datas-world/engine';
 import type { Disposition, Instrument } from '@datas-world/engine';
@@ -9,7 +9,7 @@ import { renderView } from './chat/prompt.ts';
 import type { PersonView } from './chat/view.ts';
 import type { PromptPart } from './types.ts';
 
-/** 045 §8, `LLM_RANGE`: margen de interpretación alrededor de lo que el motor decidió que dirá. */
+/** 046 §8, `LLM_RANGE`: margen de interpretación alrededor de lo que el motor decidió que dirá. */
 export const LLM_RANGE = 1;
 
 export interface ItemPlan {

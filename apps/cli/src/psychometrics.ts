@@ -1,4 +1,4 @@
-// `pnpm cli psychometrics` (spec 045): aplica AAQ-II, GHQ-12, GPQ-9, GTQ, DASS-21 y SWLS a una muestra de adultos en tres
+// `pnpm cli psychometrics` (spec 046): aplica AAQ-II, GHQ-12, GPQ-9, GTQ, DASS-21 y SWLS a una muestra de adultos en tres
 // tomas (hoy, +30 días, +1 año) sobre una COPIA de la base (el mundo en marcha no se toca) y escribe un Excel y un JSON.
 // La respuesta verdadera y la disposición las decide el motor; el LLM las expresa como charla y el motor las valida.
 import { existsSync, mkdirSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
@@ -147,7 +147,7 @@ export async function psychometrics(args: string[], io: Io): Promise<void> {
 
   // Punto de control: lo hecho se guarda en disco para reanudar con `--resume` sin repetir llamadas (y sin volver a pagarlas).
   const ckptPath = `${v.out}.ckpt.json`;
-  let battery: Battery = { meta: { world: '', seed: 0, provider: v.provider!, nSample: n, generatedFor: 'spec 045' }, participants: [], tomas: [], takes: [], events: [] };
+  let battery: Battery = { meta: { world: '', seed: 0, provider: v.provider!, nSample: n, generatedFor: 'spec 046' }, participants: [], tomas: [], takes: [], events: [] };
   let sample: Participant[] = [];
   let reached: 0 | 1 | 2 = 0;
   const save = () => { mkdirSync(dirname(ckptPath), { recursive: true }); writeFileSync(ckptPath, JSON.stringify({ battery, sample, reached } satisfies Checkpoint)); };

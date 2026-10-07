@@ -1,5 +1,5 @@
 ---
-id: 045
+id: 046
 nombre: psychometric-battery
 estado: aprobada
 hito: Laboratorio de medición (petición del usuario, 2026-10-05) · antecede a M5
@@ -7,7 +7,7 @@ depende_de: [010, 012, 013, 019, 020, 023, 031, 036, 037, 038, 039, 040, 041]
 version: 0.2
 ---
 
-# 045 — Batería psicométrica: las personas responden pruebas desde lo que han vivido
+# 046 — Batería psicométrica: las personas responden pruebas desde lo que han vivido
 
 ## 1. Propósito
 Poder aplicar a las personas del mundo los cuestionarios que usa la psicología clínica y obtener sus puntuaciones, en varios momentos, para ver cómo cambian. Es el primer paso para comparar a las personas simuladas con las poblaciones humanas y, más adelante, para evaluar intervenciones (034).
@@ -164,6 +164,8 @@ Por instrumento y toma: media, desviación, mínimo, máximo y porcentaje sobre 
 - [ ] La toma 2 es un año después de la toma 1 (13 meses desde hoy). Si se prefiere «un año desde hoy», cambia solo el intervalo.
 - [ ] ¿Se guardan las tomas en la base (como datos del laboratorio, fuera del hash) para repetirlas en el visor? Propuesta: no en esta entrega.
 
+- [ ] **Relación con la 045** (`specs/045-instruments.md`, borrador de main): la 045 propone una plataforma general (subir un PDF, convertirlo en encuesta con un LLM, aplicarla a la población y analizarla). Esta spec es la primera aplicación concreta, con seis instrumentos fijos tomados de las fichas del ClinikLab, un modelo de respuesta por indicadores y una disposición a no decir lo verdadero. Cuando se apruebe la 045, decidir si esta se absorbe como un instrumento más o conserva su módulo `measurement`.
+
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
@@ -171,3 +173,4 @@ Por instrumento y toma: media, desviación, mínimo, máximo y porcentaje sobre 
 | 2026-10-05 | 0.2 | El usuario aprueba y pide que las personas respondan **con el LLM, en estilo de charla**, y que algunas puedan mentir, exagerar o no *tactar* bien según su historia de aprendizaje. Se añaden R-011 (verdadero frente a dicho, disposición), R-012 (charla con el LLM validada por el motor), R-013 (sin LLM), CA-008 a CA-010 y sus parámetros; R-008 y INV-002 se ajustan. Informe: se guardan `t_i`, disposición, `r_i`, texto y opción |
 | 2026-10-06 | 0.2 | Estado → aprobada |
 | 2026-10-06 | 0.3 | Lo que reveló la implementación sobre un mundo real: (1) las emociones son transitorias y las funciones de aprobación saturan en 1, así que ánimo y estrés son los de la última semana de la trayectoria, las emociones se completan desde ellos y lo aversivo y la aprobación pesan por exposición (ensayos); (2) GHQ-12: las opciones de la ficha ya van de mejor a peor en todos los ítems, no hay cambio de signo en los positivos (corrige R-004); (3) «origen de la escala» fijo para GPQ-9, GTQ y AAQ-II (sin él salían en zona clínica para todos); (4) cada ítem usa `0,75·constructo + extras + sesgo + origen + ruido` (los «+ indicador» de §4 bis son extras de 0,05–0,2); (5) `lieFracStranger` 0,25; (6) límite nuevo: las reglas de *pliance*/*tracking* casi no varían entre personas (solo hay reglas de rutina) |
+| 2026-10-07 | 0.2 | Renumerada de 045 a 046: `main` ya tenía una spec 045 distinta (instrumentos psicológicos desde PDF, borrador). Decisión del usuario del 2026-10-07. Sin cambios de contenido |

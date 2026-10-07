@@ -1,4 +1,4 @@
-// Catálogo de instrumentos (spec 045 R-001): ítems, escalas, corrección e interpretación tal como los publica el
+// Catálogo de instrumentos (spec 046 R-001): ítems, escalas, corrección e interpretación tal como los publica el
 // ClinikLab de la Universidad Konrad Lorenz (https://la.konradlorenz.edu.co/wp-content/uploads/2025/09/…).
 
 export type InstrumentId = 'AAQ-II' | 'GHQ-12' | 'GPQ-9' | 'GTQ' | 'DASS-21' | 'SWLS';

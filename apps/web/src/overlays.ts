@@ -32,7 +32,7 @@ export function nowRows(now: readonly { kind: string; count: number }[]): { labe
 /** Escala del mapa: la distancia redonda (en m) que ocupa entre 40 y 120 px, y su ancho. Un tile mide 8 m (003). */
 export function scaleBar(pxPerTile: number, metersPerTile = 8): { meters: number; px: number } {
   const pxPerMeter = pxPerTile / metersPerTile;
-  for (const m of [5, 10, 20, 25, 50, 100, 200, 250, 500, 1000]) if (m * pxPerMeter >= 40) return { meters: m, px: Math.round(m * pxPerMeter) };
+  for (const m of [5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000]) if (m * pxPerMeter >= 40) return { meters: m, px: Math.round(m * pxPerMeter) };
   return { meters: 1000, px: Math.round(1000 * pxPerMeter) };
 }
 
@@ -73,9 +73,9 @@ export function renderNow(now: readonly { kind: string; count: number }[]): void
   document.querySelector('#nowbox')!.innerHTML = `<dl>${rows.map((r) => `<dt>${esc(r.label)}</dt><dd class="mono">${r.count}</dd>`).join('')}</dl>`;
 }
 
-/** Pinta la escala con los px de un tile en pantalla. */
-export function renderScale(pxPerTile: number): void {
-  const s = scaleBar(pxPerTile);
+/** Pinta la escala con los px de un tile en pantalla y los metros por tile del mundo (003 v0.4: 40; los anteriores, 8). */
+export function renderScale(pxPerTile: number, metersPerTile = 8): void {
+  const s = scaleBar(pxPerTile, metersPerTile);
   const bar = document.querySelector<HTMLElement>('#scale-bar');
   if (!bar) return;
   bar.style.width = `${s.px}px`;

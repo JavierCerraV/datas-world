@@ -1,4 +1,4 @@
-// Batería psicométrica (spec 045): instrumentos, corrección, indicadores, respuesta verdadera, disposición y muestra.
+// Batería psicométrica (spec 046): instrumentos, corrección, indicadores, respuesta verdadera, disposición y muestra.
 export { INSTRUMENTS, INSTRUMENT_IDS, optionsOf } from './instruments.ts';
 export type { Cutoff, Instrument, InstrumentId, InstrumentItem } from './instruments.ts';
 export { scoreInstrument } from './scoring.ts';

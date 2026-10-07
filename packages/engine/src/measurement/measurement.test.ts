@@ -1,4 +1,4 @@
-// Spec 045: corrección (CA-001), respuestas verdaderas (CA-004, CA-005), disposición (CA-008) y muestra.
+// Spec 046: corrección (CA-001), respuestas verdaderas (CA-004, CA-005), disposición (CA-008) y muestra.
 import { describe, expect, it } from 'vitest';
 import { createRng } from '../rng.ts';
 import { dispose } from './candor.ts';
@@ -18,7 +18,7 @@ const NEUTRAL: Indicators = {
 };
 const total = (id: InstrumentId, ind: Indicators, seed = 7) => scoreInstrument(id, truthfulResponses(id, ind, createRng(seed)).t).total;
 
-describe('045 — corrección (CA-001)', () => {
+describe('046 — corrección (CA-001)', () => {
   it('suma, subescalas y banda de la ficha', () => {
     expect(scoreInstrument('AAQ-II', [3, 3, 3, 3, 3, 3, 3])).toMatchObject({ total: 21, band: 'sin problema clínico (promedio 18–23)' });
     expect(scoreInstrument('AAQ-II', [5, 5, 5, 5, 5, 5, 5]).band).toBe('clínico (más de 29)');
@@ -54,7 +54,7 @@ describe('045 — corrección (CA-001)', () => {
   });
 });
 
-describe('045 — respuesta verdadera (CA-004, CA-005)', () => {
+describe('046 — respuesta verdadera (CA-004, CA-005)', () => {
   it('quien perdió su empleo y acumuló deuda puntúa más en malestar y menos en satisfacción (CA-004)', () => {
     const hit: Indicators = {
       ...NEUTRAL, mood: 0.3, stress: 0.7, negAffect: 0.65, sadness: 0.5, joy: 0.1, coreNow: 0.65, jobStability: 0.2, economicTrajectory: 0.15, aversiveBurden: 0.6,
@@ -91,7 +91,7 @@ describe('045 — respuesta verdadera (CA-004, CA-005)', () => {
   });
 });
 
-describe('045 — disposición (CA-008)', () => {
+describe('046 — disposición (CA-008)', () => {
   const share = (ind: Indicators, kind: string, trust = 0) => {
     let hit = 0, all = 0;
     for (let s = 0; s < 300; s++) {
@@ -123,7 +123,7 @@ describe('045 — disposición (CA-008)', () => {
   });
 });
 
-describe('045 — muestra (R-005)', () => {
+describe('046 — muestra (R-005)', () => {
   const pool: Participant[] = [];
   for (let i = 0; i < 200; i++) {
     const g = AGE_GROUPS[i % 4]!;

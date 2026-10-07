@@ -3,7 +3,7 @@ id: 028
 nombre: experiments
 estado: aprobada
 hito: M5
-depende_de: [001, 021, 022, 023, 027, 045]
+depende_de: [001, 021, 022, 023, 027, 046]
 version: 0.3
 ---
 
@@ -34,7 +34,7 @@ interface Experiment {
   sampleEveryDays: number;          // cada cuántos días se miden las métricas por persona
   subjects: Subjects;               // a quién se mide
 }
-type Subjects = { citizens: EntityId[] } | { cohort: CohortFilter; n: number };   // la cohorte es la de 024 R-026; `n` con selectSample (045 R-005)
+type Subjects = { citizens: EntityId[] } | { cohort: CohortFilter; n: number };   // la cohorte es la de 024 R-026; `n` con selectSample (046 R-005)
 
 interface Arm {
   name: string;                     // «control», «pierde el empleo»
@@ -61,12 +61,12 @@ Memoria: un brazo en marcha ocupa lo de un mundo (≈ 20–40 KB por persona má
 - **R-005** [M] — **Azar común.** Para cada semilla `s`, todos los brazos usan `createRng(s)` como azar futuro después de la rama (el de antes de la rama es el de la base). Así, dos brazos sin intervención con la misma semilla son idénticos (CA-001) y la diferencia entre brazos con la misma semilla se debe a la intervención, no al azar. Un brazo se identifica por `(arm, seed)`. El azar de la rama se registra en los metadatos.
 - **R-006** [M] — **Métricas.** Se miden por persona en `sampleEveryDays` y al final, desde el estado del mundo (nunca desde lo que la persona «cree»):
   - `mood`, `stress` (semana móvil), `money`, `debt` (suma de saldos), `employed` (0 o 1), `bonds` (vínculos con confianza ≥ 0,5), `pnr_episodes` (acumulados) y `events:<TYPE>` (conteo acumulado de un tipo de evento);
-  - `psychometrics`: la batería de la spec 045 al final de cada brazo (sin LLM por defecto: proveedor `mock` o respuesta verdadera; con LLM solo si se pide, por su coste).
+  - `psychometrics`: la batería de la spec 046 al final de cada brazo (sin LLM por defecto: proveedor `mock` o respuesta verdadera; con LLM solo si se pide, por su coste).
 - **R-007** [M] — **Eventos que no se guardan.** Para respetar el presupuesto de memoria, los eventos de un brazo pasan por un colector que cuenta los tipos pedidos y los descarta; no se acumulan. El experimento no produce registro de eventos. Si se quiere explicar una trayectoria en detalle, se repite ese `(arm, seed)` con `--keep-events` (lo guarda en una base aparte, con las causas, para `event:why`).
 - **R-008** [M] — **Comparación.** Para cada brazo distinto del control, cada métrica y cada día medido: la diferencia **pareada** por `(semilla, persona)` (brazo − control), con n, media, desviación, tamaño del efecto `dz` (media / desviación) e intervalo del 95 % por *bootstrap* con el flujo `experiment:bootstrap` (`BOOTSTRAP_N` remuestreos). Las personas con una intervención rechazada se excluyen de ese brazo y se cuentan aparte.
 - **R-009** [T] — **Exportación.** `--out` escribe `<out>.json` (todo), `<out>.csv` (formato largo: `seed, arm, citizen, day, metric, value`, para R o Python) y `<out>.xlsx` (método y límites, brazos, contrastes, observaciones). Metadatos: versión del motor, hash de la base y de la rama, semillas, capacidades e intervenciones de cada brazo, parámetros. Mismos datos de entrada, mismo informe, byte a byte.
 - **R-010** [T] — **Puertas de peldaño.** Cada peldaño de la escalera (ADR-005, `docs/roadmap.md`) se cierra con un experimento guardado en `docs/validaciones/` cuyos brazos comparan el mundo con y sin las capacidades nuevas.
-- **R-011** [M] — **Honestidad.** Un experimento sobre personas simuladas muestra lo que **el modelo** predice, no lo que ocurriría a personas reales: depende de las reglas y parámetros [M] del motor. El informe lo dice en su primera hoja, igual que la batería psicométrica (045 R-009). Con pocas semillas, los intervalos son anchos y no deben leerse como evidencia de efecto.
+- **R-011** [M] — **Honestidad.** Un experimento sobre personas simuladas muestra lo que **el modelo** predice, no lo que ocurriría a personas reales: depende de las reglas y parámetros [M] del motor. El informe lo dice en su primera hoja, igual que la batería psicométrica (046 R-009). Con pocas semillas, los intervalos son anchos y no deben leerse como evidencia de efecto.
 
 ## 5. Eventos
 No define tipos propios. Las intervenciones emiten los de otras specs (`JOB_LOST` con motivo `experiment`, un `EXTERNAL_INPUT_APPLIED` como causa) y el cambio de capacidades usa `CAPABILITY_ENABLED` (001 R-007); `disable_capability` añade `CAPABILITY_DISABLED` (spec 001, por incorporar).
@@ -92,7 +92,7 @@ No define tipos propios. Las intervenciones emiten los de otras specs (`JOB_LOST
 |---|---|---|---|
 | `durationDays` | 90 | 1–730 | [M] horizonte típico de un duelo o un cambio laboral |
 | `seeds` | 5 | 1–30 | [M] compromiso entre intervalo y tiempo de cómputo |
-| `sampleEveryDays` | 7 | 1–90 | [M] semana, como las ventanas de 045 |
+| `sampleEveryDays` | 7 | 1–90 | [M] semana, como las ventanas de 046 |
 | `BOOTSTRAP_N` | 1 000 | 200–10 000 | [M] estándar para un intervalo percentil |
 | `arms` máximo | 6 | 2–10 | [M] límite de tiempo y de informe |
 | `bonds` (umbral de confianza) | 0,5 | 0,3–0,8 | [M] vínculo fuerte (012) |
@@ -104,7 +104,7 @@ Por experimento: tiempo y memoria pico por brazo, número de intervenciones apli
 - [ ] **PA-156** — Diseño dentro del mismo mundo (unas personas tratadas, otras de control): es más barato (una corrida) pero las personas interactúan, así que hay interferencia. Qué resolvería la duda: medir cuánto cambia el control cuando los tratados son sus vecinos o su familia.
 - [ ] ¿Qué intervenciones faltan para la primera validación (apoyo social, un conflicto forzado, una enfermedad)? Cada una necesita su manejador y su spec de origen.
 - [ ] Enganche de la capa clínica (034 R-007): brazos por intervención (un plan de tratamiento por brazo, incluido «sin intervención») sobre la misma persona y la misma instantánea.
-- [ ] ¿Una métrica `psychometrics` con LLM por brazo es asumible en coste? 150 llamadas por brazo y semilla (045); propongo `mock` por defecto y LLM solo en los experimentos de cierre.
+- [ ] ¿Una métrica `psychometrics` con LLM por brazo es asumible en coste? 150 llamadas por brazo y semilla (046); propongo `mock` por defecto y LLM solo en los experimentos de cierre.
 - [ ] Orden con M6: este hito (M5) va antes de la pasarela LLM de nivel 4; ninguna regla de esta spec depende del LLM.
 
 ## 11. Historial de cambios
@@ -113,7 +113,7 @@ Por experimento: tiempo y memoria pico por brazo, número de intervenciones apli
 | 2026-09-23 | 0.1 | Borrador inicial generado desde la visión y el prototipo |
 | 2026-09-23 | 0.2 | Brazos que activan o desactivan capacidades y experimentos como puerta de cada peldaño (R-004, R-005, CA-003). ADR-005 |
 | 2026-09-24 | 0.2 | Pregunta abierta: brazos por intervención para la capa clínica (spec 034) |
-| 2026-10-06 | 0.3 | Diseño completo para revisión: rama desde instantánea sin tocar la base (R-001, INV-003), intervenciones como entradas externas con `check` y `apply` (R-003), azar común por semilla (R-005), métricas, colector de eventos que respeta el presupuesto de memoria (R-006, R-007), comparación pareada con intervalo por *bootstrap* (R-008), exportación en CSV, JSON y Excel (R-009), límites (R-011), CA-004 a CA-008 y PA-156. Usa la batería psicométrica (045) como medida de resultado. Pendiente de revisión del usuario |
+| 2026-10-06 | 0.3 | Diseño completo para revisión: rama desde instantánea sin tocar la base (R-001, INV-003), intervenciones como entradas externas con `check` y `apply` (R-003), azar común por semilla (R-005), métricas, colector de eventos que respeta el presupuesto de memoria (R-006, R-007), comparación pareada con intervalo por *bootstrap* (R-008), exportación en CSV, JSON y Excel (R-009), límites (R-011), CA-004 a CA-008 y PA-156. Usa la batería psicométrica (046) como medida de resultado. Pendiente de revisión del usuario |
 | 2026-10-07 | 0.3 | Estado → aprobada |
-| 2026-10-07 | 0.4 | Implementación (aprobada por el usuario el 2026-10-07, «como lo propones»). Precisiones: (1) `subjects` admite `{ citizens }` o `{ sample: n }` (muestra estratificada de adultos de la 045); el filtro de cohorte del visor queda como mejora; (2) los eventos de una intervención llegan a los sistemas de aprendizaje y memoria en el tick siguiente mediante `Runner` `feedKinds` (sin eso un despido forzado no dejaba huella en lo aprendido); (3) el pico de memoria va a la consola y no a los archivos, para que el informe se repita byte a byte (CA-006); (4) `base.branchAt` 0 significa el estado actual de la base; (5) la métrica `psychometrics` queda pendiente (la CLI la rechaza con un aviso) y `--keep-events` (R-007) también; (6) desactivar una capacidad exige que ninguna activa dependa de ella. Módulos: `engine/experiment`, `generators/experiment` y `experiment:run`
+| 2026-10-07 | 0.4 | Implementación (aprobada por el usuario el 2026-10-07, «como lo propones»). Precisiones: (1) `subjects` admite `{ citizens }` o `{ sample: n }` (muestra estratificada de adultos de la 046); el filtro de cohorte del visor queda como mejora; (2) los eventos de una intervención llegan a los sistemas de aprendizaje y memoria en el tick siguiente mediante `Runner` `feedKinds` (sin eso un despido forzado no dejaba huella en lo aprendido); (3) el pico de memoria va a la consola y no a los archivos, para que el informe se repita byte a byte (CA-006); (4) `base.branchAt` 0 significa el estado actual de la base; (5) la métrica `psychometrics` queda pendiente (la CLI la rechaza con un aviso) y `--keep-events` (R-007) también; (6) desactivar una capacidad exige que ninguna activa dependa de ella. Módulos: `engine/experiment`, `generators/experiment` y `experiment:run`
 | 2026-10-07 | 0.4 | Primer experimento real (`docs/validaciones/M5-experimentos.md`): el despido forzado se revierte en menos de una semana por la recontratación del motor; sin `consolidation` no cambian las métricas de estado y falta la métrica de memoria por persona que pide CA-003; el chequeo INV-003 avisa en vez de fallar si el worker tiene la base abierta. Pendientes: memoria por persona, CA-007 con `pnpm bench`, `psychometrics`, `--keep-events` e intervención de desempleo sostenido |

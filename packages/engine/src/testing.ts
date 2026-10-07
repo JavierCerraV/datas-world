@@ -45,7 +45,7 @@ export const TEST_PROFILE: CountryProfile = {
     entry('mobility.fuelPerKm', { moto: 170, car: 420 }),
     entry('mobility.bus', { headway: 60, first: 300, last: 1200 }),
     entry('mobility.intercity', { km: 45, privateFactor: 0.8 }),
-    entry('mobility.habits', { margin: 5, bikeMinMeters: 400, lookahead: 30 }),
+    entry('mobility.habits', { margin: 5, bikeMinMeters: 400, lookahead: 60 }),
     entry('labor.minimumWageMonthly', 1_750_905),
     entry('labor.transportAllowance', 249_095),
     entry('stratum.utilitySubsidy', { '1': 0.6, '2': 0.5, '3': 0.15 }),

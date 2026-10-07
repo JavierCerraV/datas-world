@@ -1,4 +1,4 @@
-// Lo verdadero y lo que dice (spec 045 R-011): según su historia de aprendizaje, una persona puede decir su estado tal
+// Lo verdadero y lo que dice (spec 046 R-011): según su historia de aprendizaje, una persona puede decir su estado tal
 // cual (fiel), decir menos malestar (minimiza), más (exagera), algo muy alejado (miente) o no *tactarlo* bien (impreciso).
 // El motor decide la desviación; el LLM solo la expresa con palabras (R-012). Todo [M] (PA-155).
 import type { Rng } from '../rng.ts';

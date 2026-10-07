@@ -2,7 +2,7 @@
 modulo: measurement
 ruta: packages/engine/src/measurement
 estado: en-desarrollo
-specs: [045]
+specs: [046]
 actualizado: 2026-10-06
 ---
 
@@ -11,23 +11,23 @@ actualizado: 2026-10-06
 > Documentación viva. Se actualiza en el mismo cambio en que se toca el código (lo exigen los guardarraíles).
 
 ## 1. Propósito
-Aplicar cuestionarios psicométricos a las personas del mundo (spec 045): el catálogo de los seis instrumentos, su corrección, los indicadores de la persona, la respuesta **verdadera** de cada ítem, la disposición a decirla tal cual o no (minimiza, exagera, miente, imprecisa) y la selección de la muestra. No cambia el mundo (INV-001) y no habla con ningún LLM: la expresión en estilo de charla está en `llm-gateway` (`psychometrics`).
+Aplicar cuestionarios psicométricos a las personas del mundo (spec 046): el catálogo de los seis instrumentos, su corrección, los indicadores de la persona, la respuesta **verdadera** de cada ítem, la disposición a decirla tal cual o no (minimiza, exagera, miente, imprecisa) y la selección de la muestra. No cambia el mundo (INV-001) y no habla con ningún LLM: la expresión en estilo de charla está en `llm-gateway` (`psychometrics`).
 
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 045 | CA-001, CA-004, CA-005, CA-008 (aquí); CA-002, CA-003, CA-006, CA-007 (en `apps/cli`); CA-009, CA-010 (en `llm-gateway`) | Ejecución real con LLM (necesita `ANTHROPIC_API_KEY`) |
+| 046 | CA-001, CA-004, CA-005, CA-008 (aquí); CA-002, CA-003, CA-006, CA-007 (en `apps/cli`); CA-009, CA-010 (en `llm-gateway`) | Ejecución real con LLM (necesita `ANTHROPIC_API_KEY`) |
 
 ## 3. API pública
 | Símbolo | Descripción |
 |---|---|
 | `INSTRUMENTS`, `INSTRUMENT_IDS`, `optionsOf` | Los seis instrumentos con ítems (texto literal de la ficha), escala, subescalas, cortes y fuente |
 | `scoreInstrument(id, respuestas)` → `Score` | Suma, subescalas del DASS-21 y banda de la ficha; lanza si falta un ítem o sale de la escala |
-| `indicatorsOf({ world, id, profile, trajectory, events })` → `Indicators` | Los indicadores [0,1] de la persona (045 §4 bis); solo lee su estado, su historia y su aprendizaje |
-| `truthfulResponses(id, ind, rng)` → `{ t, p }` | Respuesta verdadera por ítem (045 R-003, R-004) |
-| `dispose(id, t, ind, rng, trust)` → `Disposed` | Disposición por ítem y lo que dirá `r_i` (045 R-011) |
-| `adults(world)`, `selectSample(pool, n, rng)`, `AGE_GROUPS`, `N_SAMPLE` | Muestra estratificada (045 R-005) |
-| `MEASURE_PARAMS`, `CANDOR_PARAMS` | Parámetros [M] (045 §8) |
+| `indicatorsOf({ world, id, profile, trajectory, events })` → `Indicators` | Los indicadores [0,1] de la persona (046 §4 bis); solo lee su estado, su historia y su aprendizaje |
+| `truthfulResponses(id, ind, rng)` → `{ t, p }` | Respuesta verdadera por ítem (046 R-003, R-004) |
+| `dispose(id, t, ind, rng, trust)` → `Disposed` | Disposición por ítem y lo que dirá `r_i` (046 R-011) |
+| `adults(world)`, `selectSample(pool, n, rng)`, `AGE_GROUPS`, `N_SAMPLE` | Muestra estratificada (046 R-005) |
+| `MEASURE_PARAMS`, `CANDOR_PARAMS` | Parámetros [M] (046 §8) |
 
 ## 4. Diseño interno y decisiones
 - **Cuatro capas:** indicadores → constructo del instrumento → `p_i` por ítem (`0,75·constructo + extras + sesgo + origen + ruido`) → opción de la escala. El GHQ-12 compara «ahora» con «lo habitual».
@@ -38,9 +38,9 @@ Aplicar cuestionarios psicométricos a las personas del mundo (spec 045): el cat
 - Sin estado nuevo en el mundo: 0 bytes por persona.
 
 ## 5. Invariantes y guardarraíles
-- Medir solo lee el mundo; no escribe parches ni eventos (045 INV-001, probado en `apps/cli`).
-- No lee `pers.*` / `tmp.*`: solo lo vivido y lo aprendido (045 INV-002).
-- Toda respuesta está en la escala de su ítem (045 INV-003, `scoreInstrument` lanza si no).
+- Medir solo lee el mundo; no escribe parches ni eventos (046 INV-001, probado en `apps/cli`).
+- No lee `pers.*` / `tmp.*`: solo lo vivido y lo aprendido (046 INV-002).
+- Toda respuesta está en la escala de su ítem (046 INV-003, `scoreInstrument` lanza si no).
 
 ## 6. Cómo se prueba
 `measurement.test.ts` (13 pruebas): corrección y cortes, DASS-21, respuestas de personas fabricadas (pérdida de empleo, cambio frente a lo habitual, pliance), probabilidades de disposición y muestra. Con mundo generado y libro de Excel: `apps/cli/src/psychometrics.test.ts`.
@@ -55,5 +55,5 @@ No aplica: el prototipo no tiene pruebas psicométricas.
 ## 9. Bitácora de cambios
 | Fecha | Tarea / commit | Specs | Cambio |
 |---|---|---|---|
-| 2026-10-05 | Batería psicométrica | 045 | Módulo creado (catálogo, corrección, indicadores, respuesta y disposición) |
-| 2026-10-06 | Batería psicométrica | 045 | Indicadores con proxies que varían, origen de escala, `lieFracStranger` 0,25, API y pruebas documentadas |
+| 2026-10-05 | Batería psicométrica | 046 | Módulo creado (catálogo, corrección, indicadores, respuesta y disposición) |
+| 2026-10-06 | Batería psicométrica | 046 | Indicadores con proxies que varían, origen de escala, `lieFracStranger` 0,25, API y pruebas documentadas |

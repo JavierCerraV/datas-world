@@ -1,4 +1,4 @@
-// Spec 045: CA-002 (determinismo), CA-003 (muestra y que medir no cambia el mundo), CA-006 (cordura) y CA-007 (libro de Excel).
+// Spec 046: CA-002 (determinismo), CA-003 (muestra y que medir no cambia el mundo), CA-006 (cordura) y CA-007 (libro de Excel).
 import { inflateRawSync } from 'node:zlib';
 import { INSTRUMENT_IDS, adults, createRng, dispose, indicatorsOf, scoreInstrument, selectSample, stateHash, truthfulResponses } from '@datas-world/engine';
 import type { EmergentProfile, WorldView } from '@datas-world/engine';
@@ -35,7 +35,7 @@ function run(): { battery: Battery; hash: string } {
   return { battery, hash: stateHash(gen.world) };
 }
 
-describe('045 sobre un mundo generado', () => {
+describe('046 sobre un mundo generado', () => {
   const before = stateHash(gen.world);
   const a = run();
 

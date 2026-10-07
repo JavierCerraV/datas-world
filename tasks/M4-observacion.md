@@ -30,6 +30,9 @@ Specs: 024 v0.4, 022 v0.4 y 027 v0.5.
 - [x] A2 Expediente de vida de pantalla completa con sus pestañas (024 R-022).
 - [x] A3 Dashboard: indicadores, pirámide, ocupación y periodo (024 R-023).
 - [x] A4 Charla de pantalla completa con su panel lateral (024 R-024).
+- [x] A6 Retrato pixel art, indicador de carga y pantalla Datos rediseñada con red 3D (024 v0.6, R-025 a R-027; 022 R-017, R-018).
+- [x] A7 Escala del mapa: 40 m por tile (003 v0.4) y `lookahead` de 60 min (016).
+- [ ] A8 Elegir una de las 5 propuestas de rediseño del lienzo «Datas World — 5 propuestas de rediseño» y especificarla.
 - [ ] A5 Capturas de las cuatro pantallas (`docs/validaciones/M4-visor-aplus.md`, hechas) y aceptación del usuario (024 CA-017).
 
 ## Bloque T — Estilo Visor Data's World (024 v0.6, aprobada el 2026-10-05; rama `m4/visor-datas-world`)
@@ -42,8 +45,8 @@ Referencia: el lienzo de 10 arenas, tablero T10 (https://claude.ai/artifact/5FCJ
 - [x] T5b Aceptación del usuario de las capturas (CA-021), 2026-10-05: «bien aceptado».
 - [x] T6 Decisiones del usuario (2026-10-05): sin selector de velocidades, «Avanzar» con 3 y 6 meses (022 R-013, 024 R-025) y carga ligera del expediente (022 R-015, 024 R-027, CA-022).
 
-## Batería psicométrica (spec 045, petición del usuario 2026-10-05)
-- [x] B1 Spec 045 aprobada (v0.2: respuestas con LLM, con mentira, exageración y tacto impreciso según la historia de aprendizaje).
+## Batería psicométrica (spec 046, petición del usuario 2026-10-05)
+- [x] B1 Spec 046 aprobada (v0.2: respuestas con LLM, con mentira, exageración y tacto impreciso según la historia de aprendizaje).
 - [x] B2 Módulo `measurement` del motor: catálogo de los seis instrumentos, corrección, indicadores, respuesta verdadera, disposición y muestra (CA-001, CA-004, CA-005, CA-008).
 - [x] B3 `administerInstrument` en llm-gateway: la charla la valida el motor (CA-009, CA-010).
 - [x] B4 Comando `psychometrics`, informe y Excel (CA-002, CA-003, CA-006, CA-007).

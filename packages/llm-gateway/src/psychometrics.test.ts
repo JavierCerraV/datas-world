@@ -1,4 +1,4 @@
-// Spec 045 R-012, R-013 (CA-009, CA-010): el LLM expresa dentro del rango que decidió el motor; el motor valida.
+// Spec 046 R-012, R-013 (CA-009, CA-010): el LLM expresa dentro del rango que decidió el motor; el motor valida.
 import { INSTRUMENTS } from '@datas-world/engine';
 import type { WorldEvent, WorldView } from '@datas-world/engine';
 import { generateWorld } from '@datas-world/generators';
@@ -27,7 +27,7 @@ const gw = (responder: MockResponder, purposes: Partial<GatewayConfig['purposes'
   new Gateway({ config: { ...DEFAULT_CONFIG, purposes: { ...DEFAULT_CONFIG.purposes, dialogue: mock, ...purposes } }, adapters: { mock: mockAdapter(responder) } });
 const answers = (opts: number[]) => JSON.stringify({ answers: opts.map((option, i) => ({ n: i + 1, reply: `respuesta ${i + 1}`, option })) });
 
-describe('045 R-012: la charla con el LLM la valida el motor (CA-009)', () => {
+describe('046 R-012: la charla con el LLM la valida el motor (CA-009)', () => {
   it('una opción dentro del rango se respeta; fuera del rango, el motor usa la decidida y lo anota', async () => {
     const out = await administerInstrument(gw(() => answers([4, 5, 5, 3, 4])), pv, ins, plan);
     expect(out.map((a) => [a.option, a.source])).toEqual([[4, 'llm'], [5, 'llm'], [2, 'corregida'], [6, 'corregida'], [4, 'llm']]);
@@ -49,7 +49,7 @@ describe('045 R-012: la charla con el LLM la valida el motor (CA-009)', () => {
   });
 });
 
-describe('045 R-012: varias pruebas en una llamada', () => {
+describe('046 R-012: varias pruebas en una llamada', () => {
   const parts = [{ ins: INSTRUMENTS.SWLS, plan }, { ins: INSTRUMENTS['DASS-21'], plan: [{ n: 1, target: 0, disposition: 'fiel' as const }, { n: 2, target: 3, disposition: 'miente' as const }] }];
 
   it('cada respuesta se asigna a su prueba y se valida con el rango de su escala', async () => {
@@ -71,7 +71,7 @@ describe('045 R-012: varias pruebas en una llamada', () => {
   });
 });
 
-describe('045 CA-010: lo que ve el LLM', () => {
+describe('046 CA-010: lo que ve el LLM', () => {
   it('lleva el ítem, las opciones, el rango y cómo responde; no lleva la respuesta verdadera ni los indicadores', async () => {
     const seen: string[] = [];
     await administerInstrument(gw((c) => (seen.push(c.system.map((p) => p.text).join('\n'), ...c.messages.map((m) => m.text)), answers([3, 5, 2, 6, 4]))), pv, ins, plan);

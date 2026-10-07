@@ -1,4 +1,4 @@
-// Muestra de la batería (spec 045 R-005): adultas y vivas, estratificada por sexo y grupo de edad, con asignación
+// Muestra de la batería (spec 046 R-005): adultas y vivas, estratificada por sexo y grupo de edad, con asignación
 // proporcional (al menos una por estrato no vacío) y elección al azar dentro de cada estrato con un flujo con nombre.
 import type { EntityId } from '../ids.ts';
 import { idNumber } from '../ids.ts';

@@ -8,7 +8,7 @@ import type { MetricId } from './types.ts';
 
 /** 028 §8: umbral de confianza de un vínculo fuerte (012). */
 export const STRONG_BOND_TRUST = 0.5;
-/** Días de la media móvil de ánimo y estrés (como las ventanas de 045). */
+/** Días de la media móvil de ánimo y estrés (como las ventanas de 046). */
 export const ROLLING_DAYS = 7;
 
 /** Media móvil de los últimos `ROLLING_DAYS` valores diarios, por persona. */

@@ -1,4 +1,4 @@
-// Plantillas de mapa (spec 003 R-001, R-004). La de M1 reproduce el prototipo: 64×40 tiles de 8 m,
+// Plantillas de mapa (spec 003 R-001, R-004). La de M1 reproduce el prototipo: 64×40 tiles de 40 m (003 v0.4),
 // calles de 2 tiles, 3 filas de 4 manzanas y un barrio por fila (más la iglesia de la spec 004).
 
 export interface DistrictTemplate {
@@ -46,7 +46,7 @@ export const PROTOTYPE_64X40: MapTemplate = Object.freeze<MapTemplate>({
   id: 'prototipo-64x40',
   width: 64,
   height: 40,
-  tileMeters: 8,
+  tileMeters: 40,
   roadX: [5, 17, 29, 41, 53],
   roadY: [4, 14, 24, 34],
   blockCols: [7, 19, 31, 43],
@@ -90,7 +90,7 @@ export const DATAS_WORLD_V1: MapTemplate = Object.freeze<MapTemplate>({
   id: 'datas-world-v1',
   width: 80,
   height: 50,
-  tileMeters: 8,
+  tileMeters: 40,
   roadX: [5, 17, 29, 41, 53, 65],
   roadY: [4, 14, 24, 34, 44],
   blockCols: [7, 19, 31, 43, 55],
