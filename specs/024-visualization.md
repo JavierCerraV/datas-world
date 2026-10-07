@@ -178,6 +178,19 @@ El usuario eligió, entre 10 estilos, el 10 del lienzo «Datas World — Mesa de
   - El mapa abre con zoom ×1,9 (cerca, como el lienzo); «Ver todo» lo muestra entero.
   - Fuera de alcance: río y puentes del lienzo (el mundo no tiene agua; requeriría cambiar la geografía, spec 003).
 
+### Visor A+ de main (PR #66, v0.6 del 2026-09-30): NO portado al Visor Data's World
+Tres peticiones del usuario sobre el Visor A+ que se aprobaron en main y que el rediseño del 2026-10-05 dejó fuera. Se conservan aquí, renumeradas para no chocar con R-025 a R-030, como pendientes de decidir si se portan al estilo nuevo. No tienen código ni pruebas en esta rama.
+### Retrato, carga y datos (v0.6, decisiones del usuario del 2026-09-30, tras revisar el Visor A+)
+- **R-031** [M] — **Retrato pixel art.** Cada persona tiene un retrato pixel art (busto de 12 × 14 píxeles: pelo, cara con ojos, cuello y camisa) con los mismos colores de su figura del mapa (R-006), estable por su id y escalado por enteros sin suavizado. Aparece en la ficha compacta, en la franja del expediente, en la cabecera de la charla y, pequeño, en la lista de población.
+- **R-032** [M] — **Indicador de carga.** Mientras llega lo que necesita una pestaña del expediente (la ficha, el expediente, la historia de vida o el informe), la pestaña muestra un esqueleto animado con el texto «Cargando …» y `aria-busy`; lo mismo el dashboard al abrirlo o cambiar de periodo. Con movimiento reducido, sin animación.
+- **R-033** [M] — **Pantalla Datos rediseñada (con red de vínculos 3D).** Ligera y legible, con las marcas de la guía de visualización (líneas de 1,5–2 px que no engordan al ensanchar la gráfica, barras de ≤ 24 px, rejilla fina, etiquetas directas selectivas, leyenda con dos o más series, cursor con tooltip y «Ver como tabla»):
+  - indicadores: personas, nacidos, fallecidos, hogares, organizaciones, ánimo medio y con empleo;
+  - pirámide por edad y sexo y personas por ocupación (R-023);
+  - distribución del ánimo y del estrés (histogramas) y del dinero, con su mediana y su índice de Gini;
+  - hogares por tamaño y empleo por organización;
+  - **red de vínculos en 3D:** una persona por nodo, color por barrio, aristas por tipo de vínculo (familia, pareja, amistad, compañeros, otros) con filtros; se gira arrastrando, se acerca con la rueda o los botones, «Restablecer», y un clic abre el expediente. La disposición es un modelo de fuerzas en 3D con semilla fija por id: la misma red siempre se dibuja igual;
+  - series por día (R-011) en tres gráficas pequeñas en fila.
+
 ## 5. Eventos
 No define tipos propios (usa los de otras specs).
 
@@ -209,6 +222,9 @@ No define tipos propios (usa los de otras specs).
 - **CA-021** — Revisión visual: capturas de las cuatro pantallas junto al lienzo T10 en `docs/validaciones/`, y aceptación del usuario. Sustituye a la CA-017.
 - **CA-023** — El lienzo del mapa se pinta a `layerScale` veces el tamaño del mapa, entre 1 y 3, y baja para mapas muy grandes sin pasar de ~16 millones de píxeles (prueba de `layerScale`); el aspecto de edificios y personas sigue saliendo de `styleOf` y `lookOf` (R-030); la revisión visual frente al lienzo está en `docs/validaciones/M4-visor-datas-world.md`.
 - **CA-022** — El visor no ofrece selector de velocidades y el menú «Avanzar» ofrece 1 día, 1 semana, 1 mes, 3 meses, 6 meses y 1 año (prueba de la lista de avances); qué pestañas del expediente piden la historia de vida y cuándo toca volver a pedir el expediente es lógica pura y se prueba.
+- **CA-024** (no portada) — El retrato de una persona es el mismo en cada llamada, usa los colores de su figura y difiere entre personas (prueba de la lógica).
+- **CA-025** — Una pestaña del expediente cuyos datos no han llegado muestra el esqueleto con `aria-busy="true"`, y al llegar lo sustituye (prueba del formateo).
+- **CA-026** — Los histogramas cuentan a toda la población y la red 3D coloca los nodos igual en dos llamadas, sin NaN, y su proyección respeta la rotación (prueba de la lógica).
 
 ## 8. Parámetros y calibración
 | Parámetro | Valor | Estado |
@@ -249,3 +265,6 @@ Fps del render (visible en el visor).
 | 2026-10-05 | 0.7 | Decisiones del usuario: se quita el selector de velocidades (queda «Avanzar» con 1 día, 1 semana, 1 mes, 3 meses, 6 meses y 1 año, R-025) y el expediente se carga de forma ligera (ventana de eventos, sin repetir pedidos y la historia de vida solo en las pestañas que la usan, R-027). CA-022 nuevo |
 | 2026-10-06 | 0.8 | Decisión del usuario (2026-10-05, «el diseño del mapa sí está diferente»): el mapa pasa al estilo del lienzo T10 (R-030: dibujo vectorial a 3×, contornos gruesos, calles beige, césped en damero, figuras chibi más grandes, ánimo en un punto, zoom inicial ×1,9) sin cambiar la geografía ni los datos; ajusta R-006 y R-012. Queda fuera el río con puentes (el mundo no tiene agua). Criterio CA-023 con prueba de `layerScale` y captura en `docs/validaciones/M4-visor-datas-world.md` |
 | 2026-10-06 | 0.8 | El usuario acepta el mapa en el estilo del lienzo frente a las capturas («me parece bien como quedó»): CA-023 aceptada |
+| 2026-09-30 | 0.6 (main, no portada) | Tras revisar el Visor A+, el usuario pide (decisión del 2026-09-30): el retrato pixel art de cada persona en su ficha (R-031), un indicador de carga en las pestañas del expediente (R-032) y una pantalla Datos menos densa, con líneas finas y más información, incluida una red de vínculos en 3D (R-033). CA-024 a CA-026 nuevos |
+| 2026-09-30 | 0.6 (main, no portada) | Implementación de la v0.6 (`apps/web`), probada en el navegador con capturas (`docs/validaciones/M4-visor-aplus.md`). Precisiones: el retrato lleva pelo largo y mechón según el id; la Historia se pinta por páginas de 100 eventos (lo que más tardaba al cambiar de pestaña era reconstruir la pantalla entera y pintar todos los eventos); en la red, la pareja se dibuja en el color de acento; la escala del mapa lee los metros por tile del mundo (003 v0.4). CA-024 a CA-026 verdes |
+| 2026-10-07 | 0.8 | Fusión con `main` (PR #66, 2026-09-30), decisión del usuario: gana el rediseño «Visor Data's World»; del trabajo de main se conserva lo que no depende del Visor A+ (la barra de escala lee los metros por tile del mundo, 003 v0.4, y las rutas `/api/network` y las distribuciones de 022). El retrato pixel art, el indicador de carga y la pantalla Datos con red 3D se conservan solo como requisitos pendientes R-031 a R-033 y CA-024 a CA-026, sin código en esta rama |

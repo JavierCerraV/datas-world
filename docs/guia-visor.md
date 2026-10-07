@@ -105,15 +105,21 @@ Se abre con «Charlar» y ocupa toda la pantalla; el mundo sigue en tiempo real.
 
 - **Periodo:** último mes, último año o desde la fundación.
 - **Exportar CSV** descarga el registro de eventos.
-- **Indicadores:** personas, nacidos y fallecidos del periodo con su tasa por mil, hogares con su tamaño medio y organizaciones.
-- **Gráficas:**
-  - pirámide por edad y sexo;
-  - personas por ocupación.
+- **Indicadores:** personas, nacidos y fallecidos del periodo con su tasa por mil, hogares con su tamaño medio, organizaciones, ánimo medio y porcentaje con empleo.
+- **Gráficas**, cada una con «Ver como tabla» y su valor al pasar el cursor:
+  - pirámide por edad y sexo, y personas por ocupación;
+  - distribución del ánimo, del estrés y del dinero (con la mediana y el índice de Gini: 0 es igualdad y 1 desigualdad total);
+  - hogares por tamaño y empleo formal por organización.
+- **Red de vínculos en 3D:** cada punto es una persona, con el color de su barrio; las líneas son sus vínculos (pareja en el color de acento). Arrastra para girarla, usa la rueda o «+» y «−» para acercarla, «Girar» para parar o seguir la rotación y «Restablecer» para volver al inicio. Las casillas filtran por tipo de vínculo. Al pasar el ratón por una persona se ven su edad, su barrio y cuántos vínculos tiene; un clic abre su expediente.
+- **El mundo en el tiempo:** ánimo, estrés, dinero y eventos por día, en tres gráficas pequeñas, con los avisos si el mundo se estanca o se satura y la descarga de trayectorias y eventos.
 
-  Cada una tiene «Ver como tabla» y muestra su valor al pasar el cursor.
-- **El mundo en el tiempo:** ánimo, estrés, dinero y eventos por día, con los avisos si el mundo se estanca o se satura, y la descarga de trayectorias y eventos.
+### Retratos y carga
+- Cada persona tiene un **retrato pixel art** con los colores de su figura del mapa: en la ficha, en el expediente, en la charla y en la lista de población.
+- Mientras llega algo (una pestaña del expediente, la red, los datos del mundo), se ve un **esqueleto gris animado** con «Cargando …». La pestaña Historia muestra los 100 hechos más recientes; «Ver más» carga los anteriores.
 
 ## 3. Mundos
+
+> **Escala del mapa (desde el 2026-09-30).** Cada casilla mide 40 m (antes 8 m): un paseo dura de 10 a 25 minutos y se ve más gente en la calle. Solo los mundos **nuevos** tienen la escala nueva, porque cada mundo guarda la suya. Para verla, crea un mundo nuevo (abajo) o guarda el tuyo y deja que `pnpm dev` cree otro: renombra `data/world.db` a `data/mundo-8m.db` antes de arrancar.
 
 - `data/world.db` es el mundo de la demostración: semilla 482917, 199 personas, creado con el motor actual (relaciones, memoria y rumores).
 - El mundo anterior, de M2, está en `data/mundo-anterior-m2.db`.

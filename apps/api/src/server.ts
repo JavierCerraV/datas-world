@@ -14,6 +14,7 @@ import { registerChatRoutes } from './chat.ts';
 import { demographicsOf } from './demographics.ts';
 import type { Period } from './demographics.ts';
 import { dossierView } from './dossier.ts';
+import { networkOf } from './network.ts';
 import { placeDetail } from './places.ts';
 import { registerDayRoutes } from './days.ts';
 import { registerMetricsRoutes } from './metrics.ts';
@@ -175,6 +176,9 @@ export function buildApi(opts: ApiOptions): Api {
     const d = dossierView(w, id, events, moves, lifeCatalogs, chatSessionsOf(reader.db, id).length, q.data.limit);
     return d ?? reply.code(404).send({ error: 'no existe' });
   });
+
+  // 022 R-018: red de vínculos para la red 3D del dashboard (024 R-027).
+  app.get('/api/network', async () => networkOf(reader.world));
 
   // 022 R-016: demografía para el dashboard (024 R-023) y el panel «Ahora» (R-021).
   app.get('/api/demographics', async (req, reply) => {
