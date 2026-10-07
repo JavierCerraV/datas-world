@@ -28,7 +28,7 @@ import {
   routinesSystem,
   rulesSystem,
 } from '@datas-world/engine';
-import type { Capability, ChatCatalog, KnowledgeCatalog, LoopOptions, RelationResolve, SystemRegistry, TopicDef, World } from '@datas-world/engine';
+import type { Capability, ChatCatalog, InputHandler, KnowledgeCatalog, LoopOptions, RelationResolve, SystemRegistry, TopicDef, World } from '@datas-world/engine';
 import { loadCatalogs } from './catalogs/load.ts';
 import type { Catalogs } from './catalogs/load.ts';
 import { leisureTable } from './leisure/params.ts';
@@ -118,13 +118,24 @@ function phoneOf(catalogs: Catalogs): Pick<ChatCatalog, 'phone'> {
 }
 
 /** Runner con la vida diaria, el azar de la semilla del mundo (023) y las entradas de la charla (043 R-019). */
-export function lifeRunner(world: World, catalogs: Catalogs = loadCatalogs(), loop: LoopOptions = {}): Runner {
+export function lifeRunner(
+  world: World,
+  catalogs: Catalogs = loadCatalogs(),
+  loop: LoopOptions = {},
+  /** Experimentos (028): otro azar futuro (`rngSeed`, R-005) y más manejadores de entradas con los tipos que ven los sistemas. */
+  extra: { rngSeed?: number; inputs?: Record<string, InputHandler>; feedKinds?: ReadonlySet<string> } = {},
+): Runner {
   const life = lifeSystems(world, catalogs);
-  const inputs = chatInputHandlers({
-    cat: chatEngineCatalog(catalogs),
-    onto: buildOntology(catalogs),
-    P: learningParams(world.config.profile, world.config.epoch.slice(0, 10)),
-    params: CHAT_DEFAULTS,
+  const inputs = {
+    ...chatInputHandlers({
+      cat: chatEngineCatalog(catalogs),
+      onto: buildOntology(catalogs),
+      P: learningParams(world.config.profile, world.config.epoch.slice(0, 10)),
+      params: CHAT_DEFAULTS,
+    }),
+    ...(extra.inputs ?? {}),
+  };
+  return new Runner(world, createRng(extra.rngSeed ?? world.config.seed), {}, {
+    systems: life.systems, loop: { ...life.loop, ...loop }, inputs, ...(extra.feedKinds ? { feedKinds: extra.feedKinds } : {}),
   });
-  return new Runner(world, createRng(world.config.seed), {}, { systems: life.systems, loop: { ...life.loop, ...loop }, inputs });
 }

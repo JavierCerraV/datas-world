@@ -2,7 +2,7 @@
 // registro de sistemas por fases (spec 021, `simulation/`).
 import { MINUTES_PER_DAY, formatDate, toCalendar } from './calendar.ts';
 import type { WorldMinute } from './calendar.ts';
-import { canEnable, withCapability } from './capabilities.ts';
+import { canDisable, canEnable, withCapability, withoutCapability } from './capabilities.ts';
 import { EVENT_TYPES, makeEvent } from './events.ts';
 import type { CauseRef, NewEvent, WorldEvent } from './events.ts';
 import type { Rng } from './rng.ts';
@@ -114,6 +114,18 @@ export function applyExternalInput(world: World, input: ExternalInput, inputs: R
         type: 'CAPABILITY_ENABLED',
         payload: { capability: cap },
         apply: () => (world.capabilities = withCapability(world.capabilities, cap)),
+      };
+      break;
+    }
+    case 'disable_capability': {
+      // 028 R-004: solo en ramas de experimento. Los sistemas de la capacidad dejan de correr; sus datos se conservan.
+      const cap = p.capability as Parameters<typeof canDisable>[1];
+      const why = canDisable(world.capabilities, cap);
+      if (why) return { ok: false, reason: why };
+      specific = {
+        type: 'CAPABILITY_DISABLED',
+        payload: { capability: cap },
+        apply: () => (world.capabilities = withoutCapability(world.capabilities, cap)),
       };
       break;
     }

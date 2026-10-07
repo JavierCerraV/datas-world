@@ -1,7 +1,7 @@
 ---
 id: 028
 nombre: experiments
-estado: borrador
+estado: aprobada
 hito: M5
 depende_de: [001, 021, 022, 023, 027, 045]
 version: 0.3
@@ -114,3 +114,5 @@ Por experimento: tiempo y memoria pico por brazo, número de intervenciones apli
 | 2026-09-23 | 0.2 | Brazos que activan o desactivan capacidades y experimentos como puerta de cada peldaño (R-004, R-005, CA-003). ADR-005 |
 | 2026-09-24 | 0.2 | Pregunta abierta: brazos por intervención para la capa clínica (spec 034) |
 | 2026-10-06 | 0.3 | Diseño completo para revisión: rama desde instantánea sin tocar la base (R-001, INV-003), intervenciones como entradas externas con `check` y `apply` (R-003), azar común por semilla (R-005), métricas, colector de eventos que respeta el presupuesto de memoria (R-006, R-007), comparación pareada con intervalo por *bootstrap* (R-008), exportación en CSV, JSON y Excel (R-009), límites (R-011), CA-004 a CA-008 y PA-156. Usa la batería psicométrica (045) como medida de resultado. Pendiente de revisión del usuario |
+| 2026-10-07 | 0.3 | Estado → aprobada |
+| 2026-10-07 | 0.4 | Implementación (aprobada por el usuario el 2026-10-07, «como lo propones»). Precisiones: (1) `subjects` admite `{ citizens }` o `{ sample: n }` (muestra estratificada de adultos de la 045); el filtro de cohorte del visor queda como mejora; (2) los eventos de una intervención llegan a los sistemas de aprendizaje y memoria en el tick siguiente mediante `Runner` `feedKinds` (sin eso un despido forzado no dejaba huella en lo aprendido); (3) el pico de memoria va a la consola y no a los archivos, para que el informe se repita byte a byte (CA-006); (4) `base.branchAt` 0 significa el estado actual de la base; (5) la métrica `psychometrics` queda pendiente (la CLI la rechaza con un aviso) y `--keep-events` (R-007) también; (6) desactivar una capacidad exige que ninguna activa dependa de ella. Módulos: `engine/experiment`, `generators/experiment` y `experiment:run`

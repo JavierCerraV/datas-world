@@ -19,6 +19,12 @@ export interface LoopOptions {
   validate?: ActionValidator;
   /** Nivel de todas las personas (R-011; 021 CA-001 compara el 1 con el 2). Sin él, `levelOf` (2 en M2). */
   level?: SimLevel;
+  /**
+   * Eventos de entradas externas que los sistemas de este tick deben ver como si los hubiera emitido una fase anterior
+   * (028 R-003: una intervención de un experimento llega al aprendizaje y a la memoria). No se devuelven: el
+   * llamador ya los tiene. Sin ellos, el bucle es el de siempre.
+   */
+  carried?: readonly WorldEvent[];
 }
 
 const due = (cadence: Cadence, now: number) =>
@@ -54,7 +60,8 @@ export function runSystems(world: World, rng: Rng, registry: SystemRegistry, opt
   const view = viewOf(world, opts.guard ?? false);
   const rows = activeRows(world);
   const level = (row: number) => opts.level ?? levelOf(world, row);
-  const events: WorldEvent[] = [];
+  const carried = opts.carried?.length ?? 0;
+  const events: WorldEvent[] = [...(opts.carried ?? [])];
 
   const until = world.components.i32[CHAT_UNTIL];
   for (const phase of PHASES) {
@@ -86,5 +93,5 @@ export function runSystems(world: World, rng: Rng, registry: SystemRegistry, opt
       }
     }
   }
-  return events;
+  return carried ? events.slice(carried) : events;
 }

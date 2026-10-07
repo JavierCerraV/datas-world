@@ -26,7 +26,9 @@ export type { CauseRef, DevelopmentEpisode, EventOrigin, EventType, NewEvent, Wo
 export {
   CAPABILITIES,
   CAPABILITY_DEPS,
+  canDisable,
   canEnable,
+  withoutCapability,
   isCapability,
   validateCapabilities,
   withCapability,
@@ -501,3 +503,9 @@ export {
   selectSample, truthfulResponses,
 } from './measurement/index.ts';
 export type { Cutoff, Disposed, Disposition, IndicatorInput, Indicators, Instrument, InstrumentId, InstrumentItem, Participant, Score, Truthful } from './measurement/index.ts';
+
+export {
+  BASE_METRICS, BOOTSTRAP_N, EXPERIMENT_FEED_KINDS, EXPERIMENT_LIMITS, EventCounter, INTERVENTION_KINDS, ROLLING_DAYS, Rolling, STRONG_BOND_TRUST, eventTypesOf,
+  experimentInputs, measure, pairedContrast, parseExperiment,
+} from './experiment/index.ts';
+export type { Arm, Contrast, Experiment, Intervention, InterventionKind, MetricId, Pair, Subjects } from './experiment/index.ts';

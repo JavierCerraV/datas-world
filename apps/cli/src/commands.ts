@@ -20,6 +20,7 @@ import { bench } from './bench.ts';
 import { chatBattery } from './battery.ts';
 import { chatStatsCommand } from './chat-stats.ts';
 import { psychometrics } from './psychometrics.ts';
+import { experimentRun } from './experiment.ts';
 import { benchLife } from './bench-life.ts';
 import { benchRelations } from './bench-relations.ts';
 import { validateParity } from './validate.ts';
@@ -55,6 +56,7 @@ export const USAGE = `Uso: pnpm cli <comando> [opciones]
   bench:relations [--out RUTA]
   chat:battery [--citizens N|CIT-…,…] [--scripts all|clave,…] [--provider mock|config] [--out RUTA] [--db RUTA]
   chat:stats [--json] [--db RUTA]
+  experiment:run <definición.json> [--out RUTA] [--db RUTA]
   psychometrics [--provider mock|config] [--n 50] [--month-days 30] [--year-days 365] [--concurrency 4] [--delay-ms 0] [--per-call person|instrument] [--llm-config RUTA] [--resume] [--db RUTA] [--work RUTA] [--out RUTA]`;
 
 function worldAdvance(args: string[], io: Io): void {
@@ -163,6 +165,7 @@ const COMMANDS: Record<string, (args: string[], io: Io) => void> = {
   'bench:life': (args, io) => benchLife(args, io),
   'bench:relations': (args, io) => benchRelations(args, io),
   'chat:stats': chatStatsCommand,
+  'experiment:run': experimentRun,
 };
 
 /** Comandos asíncronos (usan la pasarela LLM, 026). */

@@ -26,6 +26,9 @@ export class Runner {
   #replay: ExternalInput[] = [];
   #seqAt = -1;
   #seq = 0;
+  readonly #feedKinds: ReadonlySet<string>;
+  /** Eventos de entradas de `feedKinds` aplicadas desde el último tick. */
+  #fed: WorldEvent[] = [];
 
   readonly #systems: SystemRegistry;
   readonly #loop: LoopOptions;
@@ -35,8 +38,15 @@ export class Runner {
     world: World,
     rng: Rng,
     handlers: Readonly<Record<string, ScheduledHandler>> = {},
-    opts: { systems?: SystemRegistry; loop?: LoopOptions; inputs?: Readonly<Record<string, InputHandler>> } = {},
+    opts: {
+      systems?: SystemRegistry;
+      loop?: LoopOptions;
+      inputs?: Readonly<Record<string, InputHandler>>;
+      /** Tipos de entrada cuyos eventos ven los sistemas en el tick siguiente (028 R-003). Por defecto, ninguno. */
+      feedKinds?: ReadonlySet<string>;
+    } = {},
   ) {
+    this.#feedKinds = opts.feedKinds ?? new Set();
     this.world = world;
     this.#rng = rng;
     this.#handlers = handlers;
@@ -72,6 +82,7 @@ export class Runner {
     if (input.kind === 'set_speed') this.#speed = (input.payload as { to: Speed }).to;
     this.#applied.push(input);
     this.#outbox.push(...r.events);
+    if (this.#feedKinds.has(input.kind)) this.#fed.push(...r.events);
     return r.events;
   }
 
@@ -105,7 +116,9 @@ export class Runner {
 
   #tick(): void {
     this.flushReplay();
-    this.#outbox.push(...tick(this.world, this.#rng, this.#handlers, this.#systems, this.#loop));
+    const carried = this.#fed;
+    this.#fed = [];
+    this.#outbox.push(...tick(this.world, this.#rng, this.#handlers, this.#systems, carried.length ? { ...this.#loop, carried } : this.#loop));
   }
 
   /** Ejecuta n ticks seguidos, sin mirar la velocidad ni el estado (CLI, pruebas, replay). */
