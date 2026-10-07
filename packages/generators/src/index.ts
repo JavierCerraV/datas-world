@@ -63,6 +63,8 @@ export type { Holiday } from './country/holidays.ts';
 export { seriesAt } from './country/series.ts';
 
 export { LIFE_CAPABILITIES, chatEngineCatalog, knowledgeCatalog, lifeRunner, lifeSystems } from './life.ts';
+export { experimentSubjects, runArm } from './experiment/index.ts';
+export type { ArmResult, InterventionLog, Observation } from './experiment/index.ts';
 export { buildOntology } from './stimuli/ontology.ts';
 export { generateEconomy } from './economy/generate.ts';
 export type { EconomyResult } from './economy/generate.ts';

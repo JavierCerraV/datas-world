@@ -572,6 +572,19 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { capability: (v) => (CAPABILITIES as readonly unknown[]).includes(v) }),
     text: (e) => `El mundo activa la capacidad «${e.payload.capability}».`,
   }),
+  // Experimentos (spec 028): solo en ramas.
+  CAPABILITY_DISABLED: def<{ capability: Capability }>({
+    baseImportance: 0.8,
+    spontaneous: false,
+    check: (p) => needObj(p, { capability: (v) => (CAPABILITIES as readonly unknown[]).includes(v) }),
+    text: (e) => `El experimento desactiva la capacidad «${e.payload.capability}».`,
+  }),
+  MONEY_GRANTED: def<{ citizenId: string; amount: number; reason: string }>({
+    baseImportance: 0.5,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, amount: (v) => Number.isInteger(v) && (v as number) > 0, reason: str }),
+    text: (e) => `Recibe ${e.payload.amount} de un experimento (${e.payload.reason}).`,
+  }),
 });
 
 export type EventType = keyof typeof EVENT_TYPES;

@@ -71,6 +71,8 @@ export interface LlmResult<T = unknown> {
   data?: T;
   source: Source;
   fallbackReason?: FallbackReason;
+  /** Mensaje del proveedor cuando falló (sin claves), para diagnosticar. */
+  errorDetail?: string;
   usage: Usage;
   /** Millonésimas de dólar (entero). */
   costMicros: number;

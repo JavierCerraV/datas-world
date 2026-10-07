@@ -80,8 +80,10 @@ export class Gateway {
   async run<T>(req: LlmRequest<T>): Promise<LlmResult<T>> {
     const t0 = performance.now();
     const cfg = this.config.purposes[req.purpose];
+    let errorDetail: string | undefined;
     const fallback = (reason: FallbackReason, key = '', partial?: string): LlmResult<T> => {
       const r: LlmResult<T> = {
+        ...(errorDetail ? { errorDetail } : {}),
         ...(partial ? { text: partial } : {}),
         source: partial ? 'network' : 'fallback',
         fallbackReason: reason,
@@ -128,7 +130,9 @@ export class Gateway {
           ...(req.onText && !req.schema ? { onText: (s: string) => { streamed += s; req.onText!(s); } } : {}),
           signal: ctrl.signal,
         });
-      } catch {
+      } catch (err) {
+        // Solo el mensaje del proveedor (estado y tipo de error), nunca la petición: no arrastra claves (026 INV-004).
+        errorDetail = String((err as { status?: number }).status ?? '') + ' ' + ((err as Error).message ?? '').slice(0, 200).replace(/sk-[A-Za-z0-9_-]+/g, '[clave]');
         return fallback(ctrl.signal.aborted ? 'timeout' : 'network_error', key, streamed || undefined);
       } finally {
         clearTimeout(timer);

@@ -50,7 +50,20 @@ export function canEnable(active: readonly Capability[], cap: Capability): strin
   return missing.length ? `${cap} requiere ${missing.join(', ')}` : null;
 }
 
-export const canonicalOrder = (caps: readonly Capability[]): Capability[] =>
+/**
+ * Motivo por el que no se puede desactivar (solo en ramas de experimento, 028 R-004), o null si se puede. Una capacidad
+ * de la que otra activa depende no se desactiva sin desactivar antes esa otra.
+ */
+export function canDisable(active: readonly Capability[], cap: Capability): string | null {
+  if (!isCapability(cap)) return `capacidad desconocida: ${String(cap)}`;
+  if (!active.includes(cap)) return `la capacidad ${cap} no está activa`;
+  const dependents = active.filter((c) => CAPABILITY_DEPS[c].includes(cap));
+  return dependents.length ? `${dependents.join(', ')} depende(n) de ${cap}` : null;
+}
+
+export const withoutCapability = (active: readonly Capability[], cap: Capability): Capability[] => canonicalOrder(active.filter((c) => c !== cap));
+
+export const canonicalOrder =(caps: readonly Capability[]): Capability[] =>
   CAPABILITIES.filter((c) => caps.includes(c));
 
 export function withCapability(active: readonly Capability[], cap: Capability): Capability[] {
