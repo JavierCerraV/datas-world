@@ -39,5 +39,9 @@ Referencia: el lienzo de 10 arenas, tablero T10 (https://claude.ai/artifact/5FCJ
 - [x] T3 Expediente (R-027, CA-020): cabecera, seis pestañas, mazo de conducta, camino de vida y fuentes de control.
 - [x] T4 Dashboard y Charla (R-028, R-029).
 - [x] T5a Capturas de las cuatro pantallas junto al lienzo en `docs/validaciones/M4-visor-datas-world.md`.
-- [ ] T5b Aceptación del usuario de las capturas (CA-021).
+- [x] T5b Aceptación del usuario de las capturas (CA-021), 2026-10-05: «bien aceptado».
 - [x] T6 Decisiones del usuario (2026-10-05): sin selector de velocidades, «Avanzar» con 3 y 6 meses (022 R-013, 024 R-025) y carga ligera del expediente (022 R-015, 024 R-027, CA-022).
+
+## Mapa en el estilo del lienzo (spec 024 v0.8, petición del usuario 2026-10-05)
+- [x] M1 Dibujo vectorial del mapa a 3× (`render.ts`, `draw-places.ts`), figuras «chibi», punto de ánimo, aro de cohorte y zoom de apertura (R-030, CA-023).
+- [x] M2 Aceptación del usuario de las capturas del mapa (2026-10-06, CA-023).
