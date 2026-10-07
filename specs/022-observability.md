@@ -65,7 +65,7 @@ Ver el mundo sin alterarlo: API de consulta, flujo en vivo, controles de tiempo,
 - **R-012** [M] — **Movimientos (P1).** `GET /api/moves?since=<minuto>` da los viajes de `movements` (027 R-013) con salida posterior a `since` o aún en curso, en orden de salida. Cada `tick` del SSE lleva los viajes nuevos desde el tick anterior (`moves`), para que el visor reproduzca cada trayecto a su hora.
 - **R-013** [M] — **Indicadores y avance (P2).**
   - `GET /api/stats`: personas, hogares, barrios, porcentaje con empleo (personas de 18 a 64 años que no estudian ni están jubiladas), ánimo medio, eventos de hoy y, si hay un avance sin observar en curso, su inicio y su destino (027 R-015);
-  - `POST /api/control` acepta `advance` con los minutos a avanzar (1440, 10080, 43200 o 525600).
+  - `POST /api/control` acepta `advance` con los minutos a avanzar: 1 día (1440), 1 semana (10080), 1 mes (43200), 3 meses (129600), 6 meses (259200) o 1 año (525600).
 - **R-014** [M] — **Ficha completa (P3).**
   - La ficha del ciudadano añade:
     - el nombre de su vivienda y su barrio;
@@ -80,12 +80,14 @@ Ver el mundo sin alterarlo: API de consulta, flujo en vivo, controles de tiempo,
   - agenda de hoy: los bloques de su rutina prevista (011) con su clase (dormir, desplazamiento, trabajo, estudio, tiempo libre), su lugar actual y cuándo queda libre;
   - salud: régimen de aseguramiento y desde cuándo (031), condiciones y episodios del sueño;
   - objetos con dueño, fecha de adquisición y precio (005);
-  - todos sus eventos en orden cronológico, marcados como historia de origen (030) o simulación, y los recuentos de eventos, estímulos con función, reglas y charlas.
+  - sus eventos en orden cronológico, marcados como historia de origen (030) o simulación, y los recuentos de eventos, estímulos con función, reglas y charlas;
+  - **ventana de eventos (v0.6, decisión del usuario del 2026-10-05):** `?limit=N` (por defecto 150; entre 20 y 5000) devuelve toda la historia de origen y los últimos `N` eventos de la simulación, y `omitted` con los de la simulación que quedan fuera. Los recuentos (`counts.events`), la salud, la llegada y los objetos se calculan siempre con todos los eventos; solo cambia lo que se envía.
 - **R-016** [M] — **Demografía.** `GET /api/demographics?period=month|year|all` da, sobre el estado guardado: personas vivas, nacidos y fallecidos del periodo con su tasa bruta por mil, hogares con su tamaño medio, organizaciones, la pirámide por edad (grupos de 10 años, 80 o más) y sexo, y las personas por ocupación; también el recuento «Ahora» (trabajando, en clase, en casa, en la calle) de la 024 R-021.
 
 ### Datos del mundo (v0.6, derivada de la 024 v0.6)
 - **R-017** [M] — **Distribuciones.** `GET /api/demographics` añade: el ánimo medio y el porcentaje con empleo; histogramas de 10 tramos del ánimo y del estrés; la distribución del dinero en tramos, su mediana y su índice de Gini; los hogares por número de miembros; y el empleo formal por organización.
 - **R-018** [M] — **Red de vínculos.** `GET /api/network` da los nodos (id, nombre, edad, sexo, barrio, hogar y ánimo de cada persona viva) y las aristas sin repetir: los vínculos (012) con su tipo, su trato y su tensión, y el parentesco de los hogares (008) como familia o pareja.
+- **R-019** [M] — **Ocupación y estrato en la población.** Cada elemento de `GET /api/citizens` (y de `/api/days/:day/citizens`) añade `occupation` (una de las ocupaciones de la R-016) y `stratum` (el de su vivienda, 1 a 6, o `null` si no se conoce). Es lo que necesita el filtro de cohorte de la 024 R-026; no hay lógica nueva, solo se leen datos que ya están en el estado.
 
 ## 5. Eventos
 No define tipos propios (usa los de otras specs).
@@ -109,6 +111,8 @@ No define tipos propios (usa los de otras specs).
 - **CA-012** — *Dado* un mundo de ejemplo, *entonces* el expediente de una persona coincide con el estado guardado y sus eventos (incluida la historia de origen marcada como tal) y su agenda cubre las 24 horas.
 - **CA-013** — *Dado* un mundo de ejemplo, *entonces* `/api/demographics` suma en la pirámide y en la ocupación el total de personas vivas, y cambiar el periodo cambia los nacidos y los fallecidos contados.
 - **CA-014** — *Dado* un mundo de ejemplo, *entonces* los histogramas de `/api/demographics` suman la población, el Gini está en [0,1], y `/api/network` da un nodo por persona viva y aristas entre nodos existentes, sin repetir.
+- **CA-015** — *Dado* el mundo de ejemplo, *entonces* cada persona de `/api/citizens` trae una ocupación de la lista de la R-016 y un estrato de 1 a 6 o `null`, y alguna tiene estrato (prueba de la API).
+- **CA-016** — *Dado* un expediente con más eventos de simulación que el límite, *entonces* `?limit=N` devuelve la historia de origen completa y los últimos N de la simulación, `omitted` es el resto, `counts.events` no cambia y la salud y la llegada salen igual que sin límite (prueba de la API).
 
 ## 8. Parámetros y calibración
 | Parámetro | Valor | Estado |
@@ -138,5 +142,7 @@ Distribuciones de los valores que introduce esta spec en la prueba de 100 person
 | 2026-09-29 | 0.4 | Paridad con el prototipo, aprobada por el usuario (P1 a P4): movimientos para reproducir los trayectos (R-012), indicadores de la barra superior y avance sin observar (R-013), ficha completa con lo que otros creen de la persona y personal del lugar (R-014). CA-009 a CA-011 nuevos |
 | 2026-09-29 | 0.4 | Implementación de la paridad (P1 a P4). Precisiones, sin cambios en CA: `/api/world` añade `points` (por dónde se entra a cada lugar, también a las viviendas de un edificio) y `names`; las posiciones, `homeId`; cada evento, `text` legible (lugares, organizaciones y temas de rumor en palabras) y `names`. R-004: los 401 no llevan `WWW-Authenticate`, porque el navegador abría su propia ventana de acceso y la petición del visor quedaba colgada; las credenciales las pide el visor. La verdad de las creencias lee solo los tipos de evento que la deciden. CA-009 a CA-011 verdes |
 | 2026-09-30 | 0.5 | Visor A+ (derivada de la 024 v0.5, aprobada por el usuario): expediente (R-015) y demografía (R-016). CA-012 y CA-013 nuevos |
+| 2026-10-05 | 0.5 | Precisión derivada de la 024 v0.6 (R-026, filtro de cohorte), sin cambiar reglas anteriores: `/api/citizens` añade `occupation` y `stratum` (R-019, renumerada: la R-017 es de la v0.6 de main). CA-015 nuevo |
+| 2026-10-05 | 0.6 | Decisiones del usuario: el avance admite también 3 y 6 meses (R-013) y el expediente se envía por ventanas (`limit` y `omitted`, R-015) para que las historias de vida no pesen. CA-016 nuevo |
 | 2026-09-30 | 0.6 | Datos del mundo (derivada de la 024 v0.6): distribuciones en la demografía (R-017) y red de vínculos (R-018). `/api/world` da también `geo.tileMeters` (003 v0.4). CA-014 nuevo |
 | 2026-09-30 | 0.6 | Implementación de R-017 y R-018 (`distributions.ts`, `network.ts`). Precisiones: el dinero va en 8 tramos, de «Deuda» a «> 20 M»; el Gini cuenta las deudas como 0; en la red, si dos personas tienen varios lazos, gana el más fuerte (pareja, familia, amistad, compañeros, otros). CA-014 verde |

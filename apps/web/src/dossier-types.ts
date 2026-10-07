@@ -25,6 +25,8 @@ export interface Dossier {
   objects: { id: string; name: string; owner: 'persona' | 'hogar'; acquired: string | null; price: number }[];
   debts: { creditor: string; balance: number; installment: number; period: 'month' | 'day' }[];
   events: (EventView & { origin: boolean })[];
+  /** 022 R-015: eventos de la simulación que quedan fuera de la ventana pedida. */
+  omitted: number;
   counts: { events: number; functions: number; rules: number; chats: number };
 }
 
@@ -41,12 +43,4 @@ export interface Demographics {
   pyramid: { group: string; F: number; M: number }[];
   occupations: { name: string; count: number }[];
   now: { kind: string; count: number }[];
-  /** 022 R-017 (opcionales en respuestas anteriores). */
-  moodMean?: number;
-  employedPct?: number;
-  mood?: number[];
-  stress?: number[];
-  money?: { bins: { label: string; count: number }[]; median: number; gini: number };
-  householdSizes?: { size: string; count: number }[];
-  employers?: { id: string; name: string; count: number }[];
 }

@@ -22,7 +22,7 @@ Pregunta guía de todo el proyecto: *¿estas personas parecen haber vivido, y po
 7. **El LLM no es el núcleo.** El MVP funciona sin LLM. Cuando exista, solo genera expresión o propuestas de acción que el motor valida (spec 026).
 8. **Presupuesto de servidor real.** Se desarrolla en local (ADR-004), pero el diseño debe caber en 1 GB de RAM, medio vCore y 5 GB de disco, el servidor previsto para publicarlo. Cualquier dependencia o estructura de datos nueva debe justificar su coste de memoria (`pnpm bench`).
 9. **Documentación viva.** Todo cambio de código de un módulo actualiza en el mismo cambio su `MODULE.md`: API, diseño, criterios cubiertos y una fila nueva en la bitácora. Lo verifican los guardarraíles (§10).
-10. **Referencias.** La interfaz sigue el lienzo aprobado «Visor A+» (spec 024 v0.5). `prototipo/index.html` guió la etapa temprana y ya cumplió su función (decisión del usuario, 2026-09-30): queda como registro histórico de solo lectura y su línea base es informativa, no obligatoria (`docs/prototipo-referencia.md`).
+10. **Referencias.** La interfaz sigue el lienzo aprobado «Visor Data's World» (spec 024 v0.6, estilo 10 del lienzo de 10 arenas; sustituye al «Visor A+»). `prototipo/index.html` guió la etapa temprana y ya cumplió su función (decisión del usuario, 2026-09-30): queda como registro histórico de solo lectura y su línea base es informativa, no obligatoria (`docs/prototipo-referencia.md`).
 
 ## 3. Stack (decidido en `docs/adr/ADR-001-stack-tecnologico.md`)
 

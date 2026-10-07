@@ -1,7 +1,6 @@
 // Cliente de la API (spec 022): lecturas con fetch, flujo en vivo con EventSource (reconecta solo y envía
 // Last-Event-ID) y controles con basic auth.
 import type { Demographics, Dossier } from './dossier-types.ts';
-import type { Network } from './network3d.ts';
 import type { Move } from './replay.ts';
 import type { Metrics } from './world-panel.ts';
 import type { CitizenDetail, CitizenPosition, EventView, Health, PlaceDetail, Stats, WorldView } from './types.ts';
@@ -28,11 +27,9 @@ export const api = {
   /** 022 R-013: indicadores de la barra superior y avance sin observar. */
   stats: () => get<Stats>('/api/stats'),
   /** 022 R-015: el expediente de una persona. */
-  dossier: (id: string) => get<Dossier>(`/api/citizens/${id}/dossier`),
+  dossier: (id: string, limit?: number) => get<Dossier>(`/api/citizens/${id}/dossier${limit ? `?limit=${limit}` : ''}`),
   /** 022 R-016: la demografía del periodo y el panel «Ahora». */
   demographics: (period: 'month' | 'year' | 'all' = 'year') => get<Demographics>(`/api/demographics?period=${period}`),
-  /** 022 R-018: la red de vínculos (024 R-027). */
-  network: () => get<Network>('/api/network'),
   events: (limit = 30) => get<EventView[]>(`/api/events?limit=${limit}`),
   health: () => get<Health>('/api/health'),
 };

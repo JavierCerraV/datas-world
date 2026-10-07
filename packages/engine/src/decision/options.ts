@@ -30,6 +30,10 @@ import type { ActionRequest, WorldView } from '../simulation/system.ts';
 import { activityOf } from './columns.ts';
 import type { LeisureTable } from './columns.ts';
 import { strengthContribution } from './select.ts';
+import { ageOf, bandOf, guardianAt, isStranded, teenStayLimit } from './supervision.ts';
+
+/** 011 R-007 [M]: peso de la regla «un menor solo vuelve a casa» frente a las demás fuentes. */
+export const MINOR_HOME_RULE = 6;
 
 /** Fuentes de control de la 040 R-003 (sin reglas verbales, valores ni contexto social hasta MF5 y M3). */
 export type ControlSource = 'reforzador' | 'fuerza' | 'demorado' | 'regla' | 'valor' | 'aversion' | 'coste' | 'alivio';
@@ -200,6 +204,11 @@ export function buildOptions(c: DecisionCtx, rng: Rng): Option[] {
   const rules = view.citizens.get(id)?.rules as readonly Rule[] | undefined;
   add('follow_routine', { activity: routine, until: Math.min(now + 60, cap), cost: 0 }, routineSources(plan.activity, energy, discountKOf(view, row), rules));
 
+  // 011 R-007: un menor de 12 años que está fuera de casa sin un adulto de su hogar vuelve a casa.
+  const band = bandOf(ageOf(view, row, now));
+  if (isStranded(view, row, now, here, home))
+    add('follow_routine', { activity: 'idle', until: Math.min(now + 60, cap), cost: 0 }, [{ source: 'regla', contribution: MINOR_HOME_RULE, ref: 'rutina.menor_en_casa' }], home);
+
   // Comer donde esté (prototipo: hambre > 0,35); con hambre crítica, casi seguro (CA-003). El hambre es la
   // operación motivadora del reforzador comida (R-007).
   if (hunger < 0.65)
@@ -233,6 +242,8 @@ export function buildOptions(c: DecisionCtx, rng: Rng): Option[] {
     const candidates = [...a.placeKinds.flatMap((k) => net.byKind.get(k) ?? []), ...(a.atHome || a.placeKinds.length === 0 ? [home] : [])];
     for (const place of [...new Set(candidates)].sort((x, y) => x - y)) {
       if (!place) continue;
+      // 011 R-007: un menor de 12 años solo sale donde ya está un adulto de su hogar.
+      if (band === 'child' && place !== home && !guardianAt(view, row, place, now)) continue;
       const out = place === here ? { minutes: 0, cost: 0 } : planTrip(view, row, here, place, now, null, c.P);
       if (!out) continue;
       if (place !== home && enterRefusal(view, row, place, now + out.minutes, c.occ) !== null) continue;
@@ -242,7 +253,9 @@ export function buildOptions(c: DecisionCtx, rng: Rng): Option[] {
     }
     if (!best) continue;
     // Tiempo: ida, al menos la mitad de la actividad y vuelta antes de la próxima obligación.
-    const stay = Math.min(a.hours * 60, cap - now - best.out - best.back);
+    let stay = Math.min(a.hours * 60, cap - now - best.out - best.back);
+    // 011 R-007: de 12 a 17 años, fuera de casa solo de día y como mucho dos horas seguidas.
+    if (band === 'teen' && best.place !== home) stay = Math.min(stay, teenStayLimit(now, best.out, best.back));
     if (stay < a.hours * 30) continue;
     // El dinero no filtra la opción: si no alcanza, el validador la rechaza y se elige otra (R-006).
     const cost = a.cost;

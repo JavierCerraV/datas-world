@@ -67,8 +67,13 @@ export interface DoneMsg {
   reply: string;
   expression: 'llm' | 'template';
   latencyMs: { firstToken?: number; total: number };
+  /** 043 R-026: nivel de intimidad abierto en este turno (0 desconocido, 1 conocido, 2 de confianza). */
+  level?: 0 | 1 | 2;
   ended: boolean;
 }
+
+/** Cuánto lo conoce la persona, en palabras (043 R-024, R-026). */
+export const TRUST_LABEL: Record<0 | 1 | 2, string> = { 0: 'Desconocido', 1: 'Lo conoce poco', 2: 'De confianza' };
 
 export interface Claim {
   about: string;
@@ -88,6 +93,7 @@ export const STANCES: Record<string, string> = {
 };
 
 const SOURCES: Record<string, string> = {
+  cautela: 'prudencia ante un desconocido',
   fuerza: 'su forma habitual de responder',
   reforzador: 'cómo le llega lo que le dicen',
   negativo: 'quitarse el malestar de la charla',

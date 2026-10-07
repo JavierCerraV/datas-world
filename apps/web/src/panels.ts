@@ -2,7 +2,6 @@
 // el color de su ánimo, su edad y lo que hace con el nombre del lugar; un clic en un lugar muestra su ficha con su
 // personal, sus residentes y quién está dentro (022 R-007, R-014). Formateo puro.
 import { ACTIVITY_ES } from './format.ts';
-import { portraitSvg } from './portrait.ts';
 import type { Where } from './replay.ts';
 import type { CitizenPosition, PlaceDetail, PlaceView } from './types.ts';
 
@@ -40,7 +39,7 @@ export function populationRows(list: readonly CitizenPosition[], query: string, 
 }
 
 export function populationHtml(rows: readonly PersonRow[]): string {
-  const items = rows.map((r) => `<li><button data-person="${esc(r.id)}"><span class="pp">${portraitSvg(r.id, r.name, 2)}<i class="dot" style="background:${r.color}" title="Ánimo ${Math.round(r.mood * 100)}"></i></span><span class="nm">${esc(r.name)}</span>${r.age !== null ? `<span class="age">${r.age} ${r.age === 1 ? 'año' : 'años'}</span>` : '<span></span>'}<span class="doing">${esc(r.doing)}</span></button></li>`);
+  const items = rows.map((r) => `<li><button data-person="${esc(r.id)}"><i class="dot" style="background:${r.color}" title="Ánimo ${Math.round(r.mood * 100)}"></i><span class="nm">${esc(r.name)}</span>${r.age !== null ? `<span class="age">${r.age} ${r.age === 1 ? 'año' : 'años'}</span>` : '<span></span>'}<span class="doing">${esc(r.doing)}</span></button></li>`);
   return items.join('') || '<li class="empty">Nadie coincide con esa búsqueda.</li>';
 }
 

@@ -4,7 +4,7 @@
 export const TS = 8; // tile de 8 px (R-001)
 
 /** Colores de los tiles (`TILE` del motor: grass, road, building, water, park, plaza), del prototipo. */
-export const TILE_COLORS: readonly string[] = ['#76A053', '#6A655C', '#C8BFA4', '#3F7FB5', '#5F9146', '#CDBF98'];
+export const TILE_COLORS: readonly string[] = ['#79C84A', '#5E6580', '#E6D6A4', '#2F9BF0', '#62C03F', '#EBDDB0'];
 
 export interface BuildingStyle {
   roof: string;

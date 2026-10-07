@@ -54,6 +54,9 @@ export interface CitizenPosition {
   mood: number;
   /** 024 R-008 (opcional en respuestas antiguas). */
   age?: number;
+  /** 022 R-019: su ocupación y el estrato de su vivienda (opcionales en respuestas antiguas). */
+  occupation?: string;
+  stratum?: number | null;
   /** 024 R-017: su vivienda. */
   homeId?: string | null;
   /** 022 R-008: el viaje en curso, para dibujarlo por las calles. */

@@ -4,7 +4,7 @@ nombre: visualization
 estado: aprobada
 hito: M4
 depende_de: [022, 003, 004]
-version: 0.6
+version: 0.8
 ---
 
 # 024 — Visualización pixel art
@@ -39,7 +39,7 @@ Ventana visual al mundo en pixel art 2D: mapa, personas moviéndose, día/noche,
 - **R-002** — Interpolación de posiciones en cliente entre actualizaciones (lineal durante 1 s).
 - **R-003** [M] — **Inspector con pestañas:** Estado (necesidades, emociones, ánimo, estrés, actividad y lugar), Historia (últimos eventos con sus causas legibles) y Funcional (funciones más fuertes, reglas con su tipo y aporte, relaciones). Relaciones, Memoria y Creencias llegan con M3.
 - **R-004** — Diseño adaptable: por debajo de 700 px de ancho el inspector pasa a hoja inferior.
-- **R-005** — Accesibilidad: contraste AA, controles por teclado (espacio pausa, + y − velocidad, flechas mueven la cámara, Esc cierra el inspector), textos en español.
+- **R-005** — Accesibilidad: contraste AA, controles por teclado (espacio pausa, flechas mueven la cámara, Esc cierra el inspector), textos en español.
 - **R-006** [M] — **Aspecto de una persona:** piel, pelo, camisa y pantalón elegidos por un hash de su id sobre las paletas del prototipo; el mismo en cada carga (sin azar del motor).
 - **R-007** [M] — **Día y noche:** un velo azul oscuro con opacidad según la hora del mundo (0 a mediodía, 0,45 a medianoche, transición al amanecer y al atardecer).
 
@@ -139,10 +139,51 @@ La referencia de la interfaz pasa a ser el lienzo aprobado «Datas World — Vis
 - **R-023** [M] — **Dashboard (pantalla Datos).** Cabecera con «datos al …», periodo (Último mes, Último año, Desde la fundación) y «Exportar CSV». Indicadores: personas, nacidos y fallecidos del periodo con su tasa bruta por mil, hogares con su tamaño medio y organizaciones. Gráficas: pirámide por edad y sexo en grupos de 10 años, y personas por ocupación, cada una con «Ver como tabla» y el valor al pasar el cursor. Debajo, las series por día y las alertas de la R-011. El aviso de Estudio y Muestra queda al pie.
 - **R-024** [M] — **Charla (pantalla completa, sustituye al panel de la R-018).** Cabecera con el expediente de origen, id de la charla, «Modo prueba» y «Despedirse»; franja con el modo, la hora de inicio y la duración, hasta cuándo está libre, el lugar y «El mundo sigue en tiempo real». Mensajes con número, hora, tono o postura y tiempo de respuesta, y las afirmaciones verificadas. Selector de tono en modo prueba. Panel lateral: por qué respondió así en el último turno (aportes de las fuentes de la 040 y probabilidades), estado de la charla (valor del visitante, malestar, necesidades en vivo, verificación) y lo que sabe la persona.
 
+### Visor Data's World (v0.6, decisiones del usuario del 2026-10-05)
+El usuario eligió, entre 10 estilos, el 10 del lienzo «Datas World — Mesa de análisis, 10 arenas» (https://claude.ai/artifact/5FCJEBnX28Ky4CHsPdP39t, tableros `T10-*`): estética de juego de cartas (bordes gruesos, relieve, texto con contorno) sobre la estructura de mesa de análisis con paneles enlazados y cohortes. El lienzo T10 sustituye al «Visor A+» como referencia visual, y estas reglas sustituyen a la R-020 y ajustan la R-021 a la R-024. El mapa sigue en pixel art (R-001, R-006, R-007, R-009, R-013) y se recolorea con la paleta nueva.
+
+- **R-025** [M] — **Estructura y estilo (sustituye a la R-020).**
+  - Barra superior con la marca, tres fichas de recurso (personas, fecha y hora, personas en casa), pausa y un menú «Avanzar» con 1 día, 1 semana, 1 mes, 3 meses, 6 meses y 1 año. No hay selector de velocidades (decisión del usuario, 2026-10-05): el mundo corre a la velocidad con que arranca (1 min/s con `pnpm dev`).
+  - Debajo, pestañas Mundo, Expediente, Dashboard y Charla, con aviso numérico en Charla si hay una abierta. Los menús desactivados de Estudio y Muestra (028 y 034) pasan a un menú «Más».
+  - Fuentes Lilita One para títulos y números, y Nunito 800 para el texto.
+  - Paleta: fondo #22346b con diagonal azul y roja; panel #f4f1ea y panel interior #ffffff; borde #10163a; texto #1d2240 y secundario #575d80; azul #2d6fe0 (acento), rojo #e0413a, oro #ffd23e, verde #3fae14, pista de barras #1b2352 y elixir #d946ef.
+  - Forma: radio de 12 px, borde de 3 px y sombra inferior de 5 px. Cabecera de panel con degradado azul → rojo y título con contorno. Botones con volumen en azul, verde (positivo), oro (secundario) y rojo (cerrar).
+  - Modo oscuro: variante derivada de la misma paleta (panel #1b2352), en un segundo bloque tras la aceptación de la CA-021.
+- **R-026** [M] — **Mundo como mesa de análisis (ajusta la R-021).**
+  - Columna izquierda: panel **Cohorte** (tamaño de la cohorte con su porcentaje, rango de edad con histograma, ocupación, estrato y rango de ánimo, más «Restablecer» y «Guardar cohorte») y panel **Capas**.
+  - La cohorte se calcula en el cliente sobre la población que ya entrega la API (022). Resalta a esas personas en el mapa con un aro dorado y atenúa al resto. Solo lectura: no escribe en el mundo. «Guardar cohorte» se muestra desactivado, con «Pronto», hasta que exista persistencia de cohortes.
+  - Centro: el mapa con su leyenda, el zoom y la línea temporal (R-010) en una barra inferior.
+  - Derecha: **Ficha** compacta con barras de ánimo, estrés, energía y alimentación, y los botones «Abrir expediente» y «Charlar»; y **Ahora**, con los últimos eventos y sus causas.
+  - El registro completo en tabla (R-021) pasa a una pestaña del panel Ahora.
+- **R-027** [M] — **Expediente (ajusta la R-022).**
+  - Cabecera con retrato, nombre, id, edad, trabajo, estrato, patrimonio y salario, y los botones «Mundo» y «Charlar».
+  - Pestañas: Resumen, Historia de vida, Memoria, Creencias, Charlas y Red. Las pestañas Estado y necesidades, Emociones, Aprendizaje, Salud y Economía y objetos de la R-022 se reparten así: Estado y Aprendizaje van dentro de Resumen; el resto, en Red y Historia de vida (decisión del usuario del 2026-10-05).
+  - Resumen: **Estado hoy** (barras), **Mazo de conducta** (las ocho conductas con más fuerza aprendida; el número de la gota es esa fuerza, 0 a 9, tomada de la «fuerza de respuestas» de la pestaña Aprendizaje de la R-022), **Camino de vida** (etapas I a V desde la historia de la 030 y la 041; la etapa futura, bloqueada) y **Por qué decidió esto**: la barra apilada de las fuentes de control de la 040 y la cadena causal del evento, con los datos que ya expone la API del expediente.
+  - Lo que la API aún no expone se muestra bloqueado, con el texto «Pronto», y no se inventa.
+- **R-028** [M] — **Dashboard (ajusta la R-023).**
+  - Cohorte activa visible, con su «✕» para quitarla, periodo (Hoy, 7 días, 30 días, 1 año) y «Exportar CSV».
+  - Seis indicadores con su variación en el periodo (población, empleo de 18 a 64, ánimo medio, estrés medio, enfermos hoy y patrimonio mediano).
+  - Pirámide por edad y sexo, ocupación por tipo de lugar en forma de ranking (la corona es del primero), serie de ánimo y estrés del periodo, eventos del periodo por tipo y alertas (R-011).
+  - Cada gráfica conserva «Ver como tabla» y el valor al pasar el cursor (R-023).
+- **R-029** [M] — **Charla (ajusta la R-024).**
+  - Columna izquierda con el tono de la frase (12 tonos), el compromiso, la velocidad y «Cerrar charla».
+  - Centro: burbujas con el tono de cada turno, indicador «escribiendo…», selector de tono y entrada de texto con «Enviar».
+  - Derecha: **Estado en vivo** (ánimo, estrés, alimentación, postura, turnos y malestar) y **Verificación** de cada afirmación (verificada, por verificar).
+  - El panel «por qué respondió así» (aportes de la 040) queda como desplegable de cada respuesta (R-018).
+- **R-030** [M] — **Mapa en el estilo del lienzo T10 (ajusta R-006 y R-012).** El usuario revisó el mapa frente al lienzo y lo encontró distinto (2026-10-05). La geografía, los datos y el comportamiento del mapa no cambian; cambia el dibujo:
+  - El mapa se pinta en vectores a `layerScale` veces la resolución (3×, menos si el lienzo pasa de ~16 millones de píxeles) y se copia con suavizado, para que no se pixele al acercar.
+  - Formas redondeadas con contorno grueso de tinta, colores planos con un reflejo: césped en damero, calles beige con bordillo y línea discontinua, árboles redondos, edificios con tejado de color (los colores de cada tipo siguen siendo los de `styleOf`), ventanas con marco, puerta y los adornos de cada tipo; parque con estanque y plaza con adoquín.
+  - Las personas son figuras «chibi» más grandes (cabeza grande, cuerpo redondeado, contorno), con sombra, rebote al caminar y orden de profundidad por `y`. El color de la ropa sigue saliendo de `lookOf`.
+  - El **ánimo** va en un punto junto a la cabeza (capa Ánimo), no en toda la figura. La cohorte lleva un aro dorado con halo. La persona elegida lleva una flecha dorada que rebota, y el lugar elegido, un marco dorado con borde de tinta.
+  - El mapa abre con zoom ×1,9 (cerca, como el lienzo); «Ver todo» lo muestra entero.
+  - Fuera de alcance: río y puentes del lienzo (el mundo no tiene agua; requeriría cambiar la geografía, spec 003).
+
+### Visor A+ de main (PR #66, v0.6 del 2026-09-30): NO portado al Visor Data's World
+Tres peticiones del usuario sobre el Visor A+ que se aprobaron en main y que el rediseño del 2026-10-05 dejó fuera. Se conservan aquí, renumeradas para no chocar con R-025 a R-030, como pendientes de decidir si se portan al estilo nuevo. No tienen código ni pruebas en esta rama.
 ### Retrato, carga y datos (v0.6, decisiones del usuario del 2026-09-30, tras revisar el Visor A+)
-- **R-025** [M] — **Retrato pixel art.** Cada persona tiene un retrato pixel art (busto de 12 × 14 píxeles: pelo, cara con ojos, cuello y camisa) con los mismos colores de su figura del mapa (R-006), estable por su id y escalado por enteros sin suavizado. Aparece en la ficha compacta, en la franja del expediente, en la cabecera de la charla y, pequeño, en la lista de población.
-- **R-026** [M] — **Indicador de carga.** Mientras llega lo que necesita una pestaña del expediente (la ficha, el expediente, la historia de vida o el informe), la pestaña muestra un esqueleto animado con el texto «Cargando …» y `aria-busy`; lo mismo el dashboard al abrirlo o cambiar de periodo. Con movimiento reducido, sin animación.
-- **R-027** [M] — **Pantalla Datos rediseñada.** Ligera y legible, con las marcas de la guía de visualización (líneas de 1,5–2 px que no engordan al ensanchar la gráfica, barras de ≤ 24 px, rejilla fina, etiquetas directas selectivas, leyenda con dos o más series, cursor con tooltip y «Ver como tabla»):
+- **R-031** [M] — **Retrato pixel art.** Cada persona tiene un retrato pixel art (busto de 12 × 14 píxeles: pelo, cara con ojos, cuello y camisa) con los mismos colores de su figura del mapa (R-006), estable por su id y escalado por enteros sin suavizado. Aparece en la ficha compacta, en la franja del expediente, en la cabecera de la charla y, pequeño, en la lista de población.
+- **R-032** [M] — **Indicador de carga.** Mientras llega lo que necesita una pestaña del expediente (la ficha, el expediente, la historia de vida o el informe), la pestaña muestra un esqueleto animado con el texto «Cargando …» y `aria-busy`; lo mismo el dashboard al abrirlo o cambiar de periodo. Con movimiento reducido, sin animación.
+- **R-033** [M] — **Pantalla Datos rediseñada (con red de vínculos 3D).** Ligera y legible, con las marcas de la guía de visualización (líneas de 1,5–2 px que no engordan al ensanchar la gráfica, barras de ≤ 24 px, rejilla fina, etiquetas directas selectivas, leyenda con dos o más series, cursor con tooltip y «Ver como tabla»):
   - indicadores: personas, nacidos, fallecidos, hogares, organizaciones, ánimo medio y con empleo;
   - pirámide por edad y sexo y personas por ocupación (R-023);
   - distribución del ánimo y del estrés (histogramas) y del dinero, con su mediana y su índice de Gini;
@@ -175,9 +216,15 @@ No define tipos propios (usa los de otras specs).
 - **CA-015** — La pirámide y la ocupación cuentan bien una población de ejemplo, y el periodo cambia los nacidos y los fallecidos (pruebas de la API y del formateo).
 - **CA-016** — El panel «Ahora» cuenta a cada persona en una sola categoría y las capas ocultan lo que se apaga (prueba de la lógica).
 - **CA-017** — Revisión visual: capturas del visor junto a las cuatro pantallas del lienzo en `docs/validaciones/`, y aceptación del usuario. Sustituye a la CA-013.
-- **CA-018** — El retrato de una persona es el mismo en cada llamada, usa los colores de su figura y difiere entre personas (prueba de la lógica).
-- **CA-019** — Una pestaña del expediente cuyos datos no han llegado muestra el esqueleto con `aria-busy="true"`, y al llegar lo sustituye (prueba del formateo).
-- **CA-020** — Los histogramas cuentan a toda la población y la red 3D coloca los nodos igual en dos llamadas, sin NaN, y su proyección respeta la rotación (prueba de la lógica).
+- **CA-018** — Los tokens de R-025 (colores, radio, borde y fuentes) están en un único archivo de estilos y ninguna pantalla usa colores fuera de él (prueba de la hoja de estilos).
+- **CA-019** — El filtro de cohorte calcula el tamaño y la lista de la cohorte para una población de ejemplo y resalta o atenúa en el mapa según pertenezca (prueba de la lógica).
+- **CA-020** — El mazo de conducta toma las ocho conductas con más fuerza de una ficha de ejemplo, en orden estable, y la barra de fuentes suma 100 % (prueba del formateo).
+- **CA-021** — Revisión visual: capturas de las cuatro pantallas junto al lienzo T10 en `docs/validaciones/`, y aceptación del usuario. Sustituye a la CA-017.
+- **CA-023** — El lienzo del mapa se pinta a `layerScale` veces el tamaño del mapa, entre 1 y 3, y baja para mapas muy grandes sin pasar de ~16 millones de píxeles (prueba de `layerScale`); el aspecto de edificios y personas sigue saliendo de `styleOf` y `lookOf` (R-030); la revisión visual frente al lienzo está en `docs/validaciones/M4-visor-datas-world.md`.
+- **CA-022** — El visor no ofrece selector de velocidades y el menú «Avanzar» ofrece 1 día, 1 semana, 1 mes, 3 meses, 6 meses y 1 año (prueba de la lista de avances); qué pestañas del expediente piden la historia de vida y cuándo toca volver a pedir el expediente es lógica pura y se prueba.
+- **CA-024** (no portada) — El retrato de una persona es el mismo en cada llamada, usa los colores de su figura y difiere entre personas (prueba de la lógica).
+- **CA-025** — Una pestaña del expediente cuyos datos no han llegado muestra el esqueleto con `aria-busy="true"`, y al llegar lo sustituye (prueba del formateo).
+- **CA-026** — Los histogramas cuentan a toda la población y la red 3D coloca los nodos igual en dos llamadas, sin NaN, y su proyección respeta la rotación (prueba de la lógica).
 
 ## 8. Parámetros y calibración
 | Parámetro | Valor | Estado |
@@ -192,6 +239,7 @@ Fps del render (visible en el visor).
 
 ## 10. Preguntas abiertas
 - [x] Paridad con el prototipo aprobado «Visor A+»: resuelta en la v0.5 (R-020 a R-024).
+- [x] «Visor Data's World» (estilo 10 del lienzo de 10 arenas): resuelta en la v0.6 (R-025 a R-029). Decisiones: modo oscuro en un segundo bloque, expediente de seis pestañas y «Guardar cohorte» desactivado con «Pronto».
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
 |---|---|---|
@@ -208,5 +256,15 @@ Fps del render (visible en el visor).
 | 2026-09-30 | — | Propuesta v0.5 en *Preguntas abiertas*: paridad con el prototipo aprobado «Visor A+» (menú lateral, ficha compacta, expediente de vida de pantalla completa, dashboard y charla de pantalla completa). Pendiente de aprobación; sin cambios en reglas ni CA vigentes |
 | 2026-09-30 | 0.5 | Visor A+, aprobado por el usuario: el lienzo pasa a ser la referencia de la interfaz y `prototipo/index.html` deja de serlo. Menú lateral y estilo (R-020), pantalla Mundo con ficha compacta, capas y «Ahora» (R-021), expediente de vida de pantalla completa (R-022), dashboard (R-023) y charla de pantalla completa (R-024). Se conservan el modo oscuro y las pestañas Memoria y Creencias. CA-014 a CA-017 nuevos; la CA-017 sustituye a la CA-013 |
 | 2026-09-30 | 0.5 | Implementación del Visor A+ (`apps/web`, con 022 R-015 y R-016 en `apps/api`), probada de punta a punta con capturas (`docs/validaciones/M4-visor-aplus.md`). Precisiones:<br>- la capa Objetos se muestra bloqueada: los objetos aún no tienen posición en el mapa;<br>- las velocidades siguen siendo las del motor, en minutos por segundo;<br>- el panel de la charla muestra ánimo, estrés y alimentación en vivo, turnos y verificación; el valor del visitante y el malestar acumulado del lienzo esperan a la API de la 043;<br>- cada pantalla tiene su dirección (`#/expediente/CIT-…/pestaña`). CA-014 a CA-016 verdes; CA-017 pendiente de la revisión del usuario |
-| 2026-09-30 | 0.6 | Tras revisar el Visor A+, el usuario pide (decisión del 2026-09-30): el retrato pixel art de cada persona en su ficha (R-025), un indicador de carga en las pestañas del expediente (R-026) y una pantalla Datos menos densa, con líneas finas y más información, incluida una red de vínculos en 3D (R-027). CA-018 a CA-020 nuevos |
-| 2026-09-30 | 0.6 | Implementación de la v0.6 (`apps/web`), probada en el navegador con capturas (`docs/validaciones/M4-visor-aplus.md`). Precisiones: el retrato lleva pelo largo y mechón según el id; la Historia se pinta por páginas de 100 eventos (lo que más tardaba al cambiar de pestaña era reconstruir la pantalla entera y pintar todos los eventos); en la red, la pareja se dibuja en el color de acento; la escala del mapa lee los metros por tile del mundo (003 v0.4). CA-018 a CA-020 verdes |
+| 2026-10-05 | 0.6 | «Visor Data's World», aprobado por el usuario: el estilo 10 del lienzo de 10 arenas pasa a ser la referencia visual y sustituye al «Visor A+». R-025 (estructura y estilo, sustituye a la R-020), R-026 a R-029 (ajustan R-021 a R-024). Decisiones: modo oscuro en un segundo bloque, expediente de seis pestañas, «Guardar cohorte» desactivado con «Pronto». CA-018 a CA-021 nuevos; la CA-021 sustituye a la CA-017 |
+| 2026-10-05 | 0.6 | Estado → aprobada |
+| 2026-10-05 | 0.6 | Implementación del bloque 1 (T1, `apps/web`): `dw-tokens.css` como único archivo con colores (CA-018, con prueba), barra superior con la marca, los recursos y los controles de tiempo, y pestañas Mundo, Expediente, Dashboard y Charla con el menú «Más» (Estudio y Muestra, desactivados). Precisiones: las pestañas Expediente y Charla llevan a la última persona elegida y están desactivadas sin ninguna; el modo oscuro es una variante provisional. Resto de R-026 a R-029 y CA-019 a CA-021 pendientes |
+| 2026-10-05 | 0.6 | Implementación del bloque 2 (T2, Mundo): panel Cohorte (`cohort.ts`, `cohort-ui.ts`), Capas, mapa con aro dorado para la cohorte y atenuado para el resto, línea temporal en barra inferior, panel Ahora con pestañas Ahora y Registro, y mapa recoloreado. Precisiones: las ocupaciones y el estrato no venían en `/api/citizens`; se añaden en la 022 R-017 (solo lectura de datos que ya están en el estado); la barra de la línea temporal está siempre visible (ya no hay botón que la abra); la ocupación se ordena como en la API. CA-019 verde; R-027 a R-029 y CA-020, CA-021 pendientes |
+| 2026-10-05 | 0.6 | Implementación del bloque 3 (T3, expediente, `apps/web`). Precisiones: el salario no lo expone la API y se muestra bloqueado con «Pronto»; las fuentes de control salen de las causas `fuente.*` del último evento que las cita (los tres aportes mayores de la 040 R-006, normalizados a 100 %); las direcciones de las once pestañas anteriores se conservan y llevan a su pestaña nueva; Estado y necesidades y Aprendizaje van plegados dentro del Resumen. CA-020 verde; R-028, R-029 y CA-021 pendientes |
+| 2026-10-05 | 0.6 | Implementación del bloque 4 (T4, dashboard y charla, `apps/web`). Precisiones: el dashboard conserva los periodos de la API (último mes, último año, desde la fundación) porque «Hoy» y «7 días» no los da la 022 R-016; «enfermos hoy» y «patrimonio mediano» no se muestran (la API no los expone); la cohorte activa se muestra con su «✕» pero solo resalta el mapa, las cifras del dashboard son de toda la población. R-029: la charla conserva su estructura (cabecera, franja, mensajes y panel lateral) con el estilo nuevo; la columna izquierda de tonos del lienzo no se porta (el tono del visitante lo clasifica el sistema, salvo en modo prueba). CA-021 pendiente
+| 2026-10-05 | 0.7 | Decisiones del usuario: se quita el selector de velocidades (queda «Avanzar» con 1 día, 1 semana, 1 mes, 3 meses, 6 meses y 1 año, R-025) y el expediente se carga de forma ligera (ventana de eventos, sin repetir pedidos y la historia de vida solo en las pestañas que la usan, R-027). CA-022 nuevo |
+| 2026-10-06 | 0.8 | Decisión del usuario (2026-10-05, «el diseño del mapa sí está diferente»): el mapa pasa al estilo del lienzo T10 (R-030: dibujo vectorial a 3×, contornos gruesos, calles beige, césped en damero, figuras chibi más grandes, ánimo en un punto, zoom inicial ×1,9) sin cambiar la geografía ni los datos; ajusta R-006 y R-012. Queda fuera el río con puentes (el mundo no tiene agua). Criterio CA-023 con prueba de `layerScale` y captura en `docs/validaciones/M4-visor-datas-world.md` |
+| 2026-10-06 | 0.8 | El usuario acepta el mapa en el estilo del lienzo frente a las capturas («me parece bien como quedó»): CA-023 aceptada |
+| 2026-09-30 | 0.6 (main, no portada) | Tras revisar el Visor A+, el usuario pide (decisión del 2026-09-30): el retrato pixel art de cada persona en su ficha (R-031), un indicador de carga en las pestañas del expediente (R-032) y una pantalla Datos menos densa, con líneas finas y más información, incluida una red de vínculos en 3D (R-033). CA-024 a CA-026 nuevos |
+| 2026-09-30 | 0.6 (main, no portada) | Implementación de la v0.6 (`apps/web`), probada en el navegador con capturas (`docs/validaciones/M4-visor-aplus.md`). Precisiones: el retrato lleva pelo largo y mechón según el id; la Historia se pinta por páginas de 100 eventos (lo que más tardaba al cambiar de pestaña era reconstruir la pantalla entera y pintar todos los eventos); en la red, la pareja se dibuja en el color de acento; la escala del mapa lee los metros por tile del mundo (003 v0.4). CA-024 a CA-026 verdes |
+| 2026-10-07 | 0.8 | Fusión con `main` (PR #66, 2026-09-30), decisión del usuario: gana el rediseño «Visor Data's World»; del trabajo de main se conserva lo que no depende del Visor A+ (la barra de escala lee los metros por tile del mundo, 003 v0.4, y las rutas `/api/network` y las distribuciones de 022). El retrato pixel art, el indicador de carga y la pantalla Datos con red 3D se conservan solo como requisitos pendientes R-031 a R-033 y CA-024 a CA-026, sin código en esta rama |

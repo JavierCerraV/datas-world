@@ -21,6 +21,7 @@ export function startConversation(store: FunctionStore, visitorId: string): Conv
   return {
     visitorId,
     visitorStim: visitorStimulus(visitorId),
+    baseTrials: store.f.find((f) => f.s === visitorStimulus(visitorId))?.n ?? 0,
     store: JSON.parse(JSON.stringify(store)) as FunctionStore,
     aversiveLoad: 0,
     maxLoad: 0,

@@ -4,7 +4,7 @@ nombre: citizen-chat
 estado: implementada
 hito: Bloque L (versión mínima adelantada, decisión del usuario 2026-09-27) · completa en M6
 depende_de: [010, 013, 020, 022, 023, 024, 025, 026, 030, 036, 037, 038, 039, 040]
-version: 0.6
+version: 0.7
 ---
 
 # 043 — Charla con ciudadanos
@@ -258,6 +258,10 @@ interface ChatScript { key: string; label: string; turns: { text: string; tone: 
   - la parte fija del prompt (vista y reglas) usa el caché de prompts del proveedor;
   - el texto llega en streaming;
   - el verificador corre después, sin bloquear.
+- **R-024** [T] idea / [M] formas — **Familiaridad del visitante.** `familiaridad ∈ [0,1]` = `min(1, turnos_previos × F_PREV_TURNO + turnos_cálidos_de_esta_sesión × F_TURNO + max(0, valor_del_visitante) × F_VALOR)`. Los turnos previos son los ensayos de la función del visitante en el almacén de la persona (se acumulan con cada charla `in_world` consolidada); un turno es cálido si el valor de su tono es ≥ 0. Con 0 es un desconocido. La deriva lo vivido con el visitante, no un rasgo.
+- **R-025** [M] — **Cautela como fuente de la postura.** Con familiaridad baja, `abrirse` recibe un aporte `cautela` negativo y, a las posturas que se exponen poco (`callar`, `evadir`, `responder_breve`, `terminar`), uno positivo (reforzamiento negativo por evitar la exposición a un extraño): `EXPOSURE_COST × (1 − familiaridad) × (0,5 − exposición)`, con la `exposición` de cada postura en `chat_stances`. La cautela decae con la familiaridad (R-024). Un menor de `MINOR_STRANGER_AGE` (14) años recibe además la regla «no hablar con extraños» (038, tipo *pliance*), que aporta `MINOR_RULE × (1 − familiaridad)` a `callar`, `evadir` y `terminar`. No lee `tmp.*` ni `pers.*` (R-008).
+- **R-026** [M] — **Revelación gradual (por construcción).** Los hechos de la `PersonView` llevan un nivel de intimidad: 0 público (nombre de pila, edad aproximada, ocupación general, dónde vive en términos de barrio), 1 personal (familia con nombres, trabajo concreto, rutina), 2 íntimo (salud, deudas, pérdidas, avisos de despido, conflictos de pareja, miedos). La vista que recibe el LLM se filtra **antes** del prompt: con familiaridad < `DISCLOSE_L1` solo el nivel 0; con < `DISCLOSE_L2`, hasta el 1; el 2 solo con familiaridad ≥ `DISCLOSE_L2` y valor del visitante > `DISCLOSE_VALUE`. Un hecho sin nivel declarado es íntimo (lo seguro). Lo que no está en la vista no se puede decir (R-003).
+- **R-027** [M] — **Primer turno.** Con un desconocido, la primera respuesta incluye que no lo conoce («¿Y usted quién es?»), en la plantilla de la postura y en la guía del prompt. El verificador (R-012) recibe la vista **abierta** de ese turno, no la completa: lo que cuente fuera de ella queda como afirmación sin respaldo.
 
   Se usan modelos económicos y el proveedor es configurable (Anthropic u otro compatible, 026). Objetivos: primer token con p50 ≤ `FIRST_TOKEN_P50_MS` y respuesta completa con p95 ≤ `TOTAL_P95_MS`.
 
@@ -320,6 +324,10 @@ Todos se prueban con el proveedor `mock`, salvo que se diga otra cosa.
   - otra apertura `in_world` responde 409.
 - **CA-019** — *Dado* un ciudadano en su turno de trabajo, *entonces* la charla se acepta con `availableUntil` = ahora + `BUSY_WINDOW_MIN`; y *dado* uno dormido, *entonces* `CONVERSATION_DECLINED`.
 - **CA-020** — *Dado* un ciudadano que entra a trabajar durante la charla, *cuando* llega la hora, *entonces* se despide con la postura `terminar` y el motivo, la charla cierra con `endReason: 'obligation'` y el ciudadano sigue su rutina.
+- **CA-021** — *Dado* un desconocido (sin charlas previas ni turnos), *entonces* la vista que se pasa al LLM tiene solo hechos de nivel 0 y su prompt no contiene familia con nombres, hechos de la historia ni dinero (prueba sobre el prompt, con `mock`).
+- **CA-022** — *Dado* turnos cálidos, *entonces* el nivel de la vista sube a 1 al llegar la familiaridad a `DISCLOSE_L1` y no antes, y al 2 solo con `DISCLOSE_L2` y valor positivo del visitante; un tono hostil no sube la familiaridad (prueba de la lógica).
+- **CA-023** — *Dado* un menor de menos de 14 años y un desconocido, *entonces* la probabilidad de `callar`, `evadir` o `terminar` es mayor que para un adulto en la misma situación, y la de `abrirse` es menor que con un conocido (prueba de las opciones de postura).
+- **CA-024** — *Dado* un desconocido, *entonces* la primera respuesta (con plantilla) dice que no lo conoce (prueba de la plantilla).
 
 ## 8. Parámetros y calibración
 | Parámetro | Valor por defecto | Rango | Fuente / justificación |
@@ -336,6 +344,10 @@ Todos se prueban con el proveedor `mock`, salvo que se diga otra cosa.
 | magnitudes de `chat_tones` | por tono | [0,1] | [M] (PA-135) |
 | `prior` de `chat_tones` | hostil −0,8; grosero −0,6; burla −0,5; desagradable y culpabilizador −0,4; presión e invasivo −0,3; victimizante −0,1; neutro 0; curioso +0,1; íntimo +0,2; amable +0,5 | [-1,1] | [M] aprobado por el usuario (PA-135) |
 | `w0` y `escape` de `chat_stances` | por postura | [0,1] | [M] (PA-134) |
+| `F_PREV_TURNO`, `F_TURNO`, `F_VALOR` | 0,04; 0,07; 0,3 | 0–1 | [M] familiaridad por turno previo, por turno cálido y por valor del visitante (R-024; PA-154) |
+| `EXPOSURE_COST` | 2 | 0–5 | [M] peso de la cautela ante un desconocido (R-025; PA-154) |
+| `DISCLOSE_L1`, `DISCLOSE_L2`, `DISCLOSE_VALUE` | 0,25; 0,6; 0,1 | 0–1 | [M] familiaridad y valor del visitante con que se abre el nivel personal y el íntimo (R-026; PA-154) |
+| `MINOR_STRANGER_AGE`, `MINOR_RULE` | 14 años; 1,5 | — | [M] edad bajo la cual rige «no hablar con extraños» y su peso (R-025; PA-154) |
 | `MAX_LEARNING_DELTA` | 0,1 por sesión | 0–0,5 | [M] una charla no reescribe una vida; aceptado por el usuario para empezar, a calibrar con pruebas avanzadas (PA-137) |
 | `MAX_MOOD_DELTA` | 0,15 | 0–0,5 | [M] aceptado por el usuario para empezar; a calibrar (PA-137) |
 | `MIN_TONE_EFFECT` (CA-004) | 0,15 | — | [M] |
@@ -368,6 +380,7 @@ Por sesión, por ciudadano y por guion (informe de la batería y panel de la vis
 - [x] El mundo sigue su curso durante la charla, que es casual y sin duración acordada; la duración pactada es de las sesiones clínicas (034) (usuario, 2026-09-27; R-019).
 - [x] Topes de huella: valen para empezar; se calibran en las pruebas avanzadas (usuario, 2026-09-27; PA-137).
 - [ ] PA-134, PA-135 y PA-136: fuerzas iniciales de las posturas, magnitudes de los tonos y decaimiento de la carga.
+- [x] **Prudencia ante un desconocido** (hallazgo del usuario, 2026-10-05: nadie se extraña de que un extraño le hable y responden cualquier pregunta): resuelta en la v0.7 (R-024 a R-027), aprobada por el usuario el mismo día. Los umbrales y pesos son supuestos [M] que se revisan con expertos (PA-154).
 
 ## 11. Historial de cambios
 | Fecha | Versión | Cambio |
@@ -386,3 +399,7 @@ Por sesión, por ciudadano y por guion (informe de la batería y panel de la vis
 | 2026-09-27 | 0.6 | Medición con Haiku 4.5 real (L4.3, `pnpm cli chat:stats` sobre 12 charlas y 78 respuestas del usuario): primer token p50 616 ms y p95 869 ms; respuesta completa p50 2032 ms y p95 2634 ms; cumple R-023. Coste 0,36 USD en total, unos 0,04 USD por charla; el verificador es casi la mitad (0,16 USD). El caché de prompts no actúa (0 tokens): la parte fija del prompt ronda los 2000 tokens y Haiku 4.5 solo cachea desde 4096. Con este coste no hace falta forzarlo; si la vista crece (025), empezará a actuar sola. Sin cambios en CA |
 | 2026-09-28 | 0.6 | Estado → implementada |
 | 2026-09-29 | 0.6 | La vista de chat (R-017) se amplía en la 024 R-018 (decisión del usuario, P4): panel junto al mapa, burbujas, indicador de escritura, el porqué desplegable en cada respuesta y un resumen al despedirse. Sin cambios en esta spec ni en sus CA |
+| 2026-10-05 | 0.7 | Prudencia ante un desconocido, aprobada por el usuario: familiaridad del visitante (R-024), cautela como fuente de la postura y regla de no hablar con extraños para menores de 14 años (R-025), revelación gradual por niveles de intimidad filtrada antes del prompt (R-026) y primer turno (R-027). CA-021 a CA-024 nuevos |
+| 2026-10-06 | 0.7 | Estado → aprobada |
+| 2026-10-05 | 0.7 | Implementación de R-024 a R-027 (`engine/src/conversation/familiarity.ts`, `stance.ts`; `llm-gateway/src/chat/disclosure.ts`, `session.ts`, `prompt.ts`; catálogo `chat_stances` 2026.10.2 con `exposure`). Precisiones: los turnos previos son los ensayos de la función del visitante (`baseTrials`); solo cuentan los turnos que la persona ya contestó; el nivel se calcula tras el tono de cada turno; la vista completa sigue siendo la que ve el visor en «Lo que sabe». El verificador recibe la vista abierta del turno. CA-021 a CA-024 verdes |
+| 2026-10-06 | 0.7 | Estado → implementada |

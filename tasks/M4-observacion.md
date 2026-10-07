@@ -34,3 +34,17 @@ Specs: 024 v0.4, 022 v0.4 y 027 v0.5.
 - [x] A7 Escala del mapa: 40 m por tile (003 v0.4) y `lookahead` de 60 min (016).
 - [ ] A8 Elegir una de las 5 propuestas de rediseño del lienzo «Datas World — 5 propuestas de rediseño» y especificarla.
 - [ ] A5 Capturas de las cuatro pantallas (`docs/validaciones/M4-visor-aplus.md`, hechas) y aceptación del usuario (024 CA-017).
+
+## Bloque T — Estilo Visor Data's World (024 v0.6, aprobada el 2026-10-05; rama `m4/visor-datas-world`)
+Referencia: el lienzo de 10 arenas, tablero T10 (https://claude.ai/artifact/5FCJEBnX28Ky4CHsPdP39t). El modo oscuro afinado queda para después de la CA-021.
+- [x] T1 Estilos y marco: `dw-tokens.css` (CA-018), barra superior con pestañas, controles de tiempo globales y `tabHref`.
+- [x] T2 Mundo (R-026, CA-019): cohorte con su lógica pura, capas, ficha compacta, «Ahora» y mapa recoloreado. Añade 022 R-017 (ocupación y estrato en `/api/citizens`).
+- [x] T3 Expediente (R-027, CA-020): cabecera, seis pestañas, mazo de conducta, camino de vida y fuentes de control.
+- [x] T4 Dashboard y Charla (R-028, R-029).
+- [x] T5a Capturas de las cuatro pantallas junto al lienzo en `docs/validaciones/M4-visor-datas-world.md`.
+- [x] T5b Aceptación del usuario de las capturas (CA-021), 2026-10-05: «bien aceptado».
+- [x] T6 Decisiones del usuario (2026-10-05): sin selector de velocidades, «Avanzar» con 3 y 6 meses (022 R-013, 024 R-025) y carga ligera del expediente (022 R-015, 024 R-027, CA-022).
+
+## Mapa en el estilo del lienzo (spec 024 v0.8, petición del usuario 2026-10-05)
+- [x] M1 Dibujo vectorial del mapa a 3× (`render.ts`, `draw-places.ts`), figuras «chibi», punto de ánimo, aro de cohorte y zoom de apertura (R-030, CA-023).
+- [x] M2 Aceptación del usuario de las capturas del mapa (2026-10-06, CA-023).

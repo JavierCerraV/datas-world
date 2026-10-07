@@ -1,10 +1,11 @@
-// Visor de Data's World (spec 024 v0.5, Visor A+): menú lateral con las pantallas Mundo, Datos, el expediente de vida
-// y la charla. Une los módulos; solo lee de la API (022) y envía órdenes de control. No tiene lógica de simulación
+// Visor de Data's World (spec 024 v0.6): barra superior con pestañas para Mundo, Expediente, Dashboard y Charla. Une los módulos; solo lee de la API (022) y envía órdenes de control. No tiene lógica de simulación
 // (INV-002).
 import { api, stream } from './api.ts';
-import { askAuth, auth, send } from './auth.ts';
+import { auth, send } from './auth.ts';
 import { clockOf } from './camera.ts';
 import { setupChat } from './chat-ui.ts';
+import { describe } from './cohort.ts';
+import { setupCohort } from './cohort-ui.ts';
 import { setupDashboard } from './dashboard.ts';
 import { setupExpediente } from './expediente.ts';
 import { setupInspector } from './inspector.ts';
@@ -14,12 +15,12 @@ import { renderNow, setupLayers } from './overlays.ts';
 import { doingOf, populationIntro } from './panels.ts';
 import { drawMap } from './render.ts';
 import { MoveBook, stepView } from './replay.ts';
-import { setupRouter } from './router.ts';
+import { setupRouter, tabHref } from './router.ts';
 import type { Route } from './router.ts';
 import { routeCache } from './streets.ts';
 import { setupTimeline, urlsFor } from './timeline.ts';
 import type { Moment } from './timeline.ts';
-import { SPEEDS, setupTopbar } from './topbar.ts';
+import { setupTopbar } from './topbar.ts';
 import type { CitizenDetail, CitizenPosition, Stats, WorldView } from './types.ts';
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
@@ -59,6 +60,17 @@ let stats: Stats | null = null;
 let orgs: number | undefined;
 let moment: Moment = { mode: 'live' };
 const selected = { person: null as string | null, place: null as string | null };
+let tabPerson: string | null = null; // la última persona abierta: a ella llevan las pestañas Expediente y Charla
+
+/** Las pestañas Expediente y Charla abren a la última persona elegida; sin ninguna, se muestran desactivadas. */
+function refreshTabs(): void {
+  for (const a of document.querySelectorAll<HTMLAnchorElement>('[data-nav="expediente"], [data-nav="charla"]')) {
+    const href = tabHref(a.dataset.nav as 'expediente' | 'charla', tabPerson);
+    a.href = href ?? '#/mundo';
+    if (href) a.removeAttribute('aria-disabled');
+    else a.setAttribute('aria-disabled', 'true');
+  }
+}
 
 const names = (id: string) => world?.names?.[id] ?? world?.places.find((p) => p.id === id)?.name;
 const minuteNow = () => (moment.mode === 'past' ? moment.day * 1440 : view ?? latest);
@@ -66,6 +78,7 @@ const worldDate = () => (world ? (({ iso, time }) => `${iso} ${time}`)(clockOf(w
 
 async function loadPeople(): Promise<void> {
   people = await api.at<CitizenPosition[]>(urlsFor(moment).citizens);
+  cohort?.refresh();
 }
 
 async function loadStats(): Promise<void> {
@@ -77,10 +90,23 @@ async function loadStats(): Promise<void> {
     renderNow(g.now);
   }
   topbar.setStats(stats, latest, orgs);
+  dashboard.refreshLive();
 }
 
 const topbar = setupTopbar({ message, status: () => status });
 const layers = setupLayers();
+const cohort = setupCohort({
+  people: () => people,
+  onChange: (r, f) => {
+    const on = r.ids !== null;
+    $('#legend').hidden = !on;
+    const tag = $('#map-tag');
+    tag.hidden = !on;
+    tag.textContent = on ? `${r.count} resaltadas` : '';
+    tag.title = describe(f, r);
+    dashboard.refreshCohort();
+  },
+});
 const log = setupLog({ openPerson: (id) => router.go({ view: 'mundo', person: id }) });
 
 // Se crea en `start`, cuando ya se conoce el mapa.
@@ -97,11 +123,13 @@ const inspector = setupInspector({
   doing,
   intro: () => populationIntro(stats?.population ?? people.length, stats?.households ?? 0, stats?.districts ?? 0),
   fetchPerson,
-  fetchDossier: api.dossier,
+  fetchDossier: (id) => api.dossier(id, 20), // la ficha solo usa «por qué está aquí»: ventana mínima (022 R-015)
   fetchPlace: (id) => api.place(id),
   onSelect: (person, place) => {
     selected.person = person;
     selected.place = place;
+    if (person) tabPerson = person;
+    refreshTabs();
     if (!person) map?.setFollow(false);
     const want = person ? `#/mundo/${person}` : '#/mundo';
     if (router.current().view === 'mundo' && location.hash !== want) history.replaceState(null, '', want);
@@ -116,7 +144,6 @@ const expediente = setupExpediente({
   today: worldDate,
   doing: doingId,
   auth,
-  askAuth,
   onStartChat: (id, mode, test) => {
     chatPrefs = { mode, test };
     router.go({ view: 'charla', person: id });
@@ -127,16 +154,23 @@ const expediente = setupExpediente({
 let chatPrefs: { mode: 'in_world' | 'sandbox'; test: boolean } | undefined;
 const chat = setupChat({
   auth,
-  askAuth,
   fetchPerson,
-  fetchDossier: api.dossier,
+  fetchDossier: (id) => api.dossier(id, 20),
   worldMinute: minuteNow,
   clock: (m) => (world ? clockOf(world.epoch, m).time : ''),
 });
 
-const dashboard = setupDashboard({ fetch: api.demographics, metrics: api.metrics, network: api.network, open: (id) => router.go({ view: 'expediente', person: id }) });
+const dashboard = setupDashboard({
+  fetch: api.demographics,
+  metrics: api.metrics,
+  live: () => (stats ? { employedPct: Math.round(stats.employedPct * 100) / 100, mood: Math.round(stats.moodMean * 100) / 100 } : null),
+  cohort: () => (cohort.ids() ? describe(cohort.filter(), cohort.result()) : null),
+  clearCohort: cohort.reset,
+});
 
 const router = setupRouter((r: Route, prev) => {
+  if (r.view !== 'datos' && r.person) tabPerson = r.person;
+  refreshTabs();
   if (prev?.view === 'charla' && r.view !== 'charla') chat.leave();
   if (prev?.view === 'expediente' && r.view !== 'expediente') expediente.hide();
   if (r.view === 'mundo') {
@@ -157,12 +191,17 @@ const timeline = setupTimeline({
     if (selected.person) inspector.select(selected.person);
   },
 });
-$('#tl-open').addEventListener('click', () => {
-  const row = $('#tlrow');
-  row.hidden = !row.hidden;
-  $('#tl-open').setAttribute('aria-expanded', String(!row.hidden));
-  $('#tl-open').textContent = row.hidden ? 'Abrir línea de tiempo' : 'Cerrar línea de tiempo';
-});
+// Panel Ahora: sus dos pestañas (024 R-026).
+for (const [tab, pane, other, otherPane] of [['#nt-now', '#pane-now', '#nt-log', '#pane-log'], ['#nt-log', '#pane-log', '#nt-now', '#pane-now']] as const) {
+  $(tab).addEventListener('click', () => {
+    $(pane).hidden = false;
+    $(otherPane).hidden = true;
+    for (const [t, on] of [[tab, true], [other, false]] as const) {
+      $(t).setAttribute('aria-selected', String(on));
+      $(t).setAttribute('aria-pressed', String(on));
+    }
+  });
+}
 
 let shownMinute = -1;
 async function start(): Promise<void> {
@@ -177,7 +216,7 @@ async function start(): Promise<void> {
   book.add(moves);
   log.add(events);
   await Promise.all([loadPeople(), loadStats(), timeline.refresh()]);
-  topbar.setWorld(status, speed);
+  topbar.setWorld(status);
   if (!selected.person) inspector.showPopulation();
   map = setupMap({
     world: w,
@@ -201,13 +240,14 @@ async function start(): Promise<void> {
     onPlace: (id) => inspector.showPlace(id),
     layers: layers.get,
     bonds: () => (inspector.detail()?.bonds ?? []).map((b) => b.id),
+    cohort: cohort.ids,
   });
   stream({
     tick: (t) => {
       const newDay = Math.floor(t.now / 1440) !== Math.floor(latest / 1440);
       latest = t.now;
       status = t.status;
-      topbar.setWorld(status, speed);
+      topbar.setWorld(status);
       if (t.moves) book.add(t.moves);
       book.prune((view ?? latest) - 1440);
       if (newDay) void timeline.refresh();
@@ -218,27 +258,26 @@ async function start(): Promise<void> {
       log.add([e]);
       if (e.type === 'SPEED_CHANGED') {
         speed = (e.payload.to as number) ?? speed;
-        topbar.setWorld(status, speed);
+        topbar.setWorld(status);
       }
     },
     status: (ok) => ($('#live').textContent = ok ? '● en vivo' : '○ reconectando…'),
   });
   // La población y la ficha se repintan cada segundo aunque no llegue un tick (el reloj de la vista avanza).
-  setInterval(() => inspector.refresh(), 1000);
+  setInterval(() => {
+    inspector.refresh();
+    cohort.refresh();
+  }, 1000);
 }
 
-// Teclado (024 R-005), solo en la pantalla Mundo: espacio pausa, + y − velocidad, flechas mueven la cámara, Esc
-// vuelve a la población.
+// Teclado (024 R-005), solo en la pantalla Mundo: espacio pausa, flechas mueven la cámara, Esc vuelve a la población.
 window.addEventListener('keydown', (e) => {
   if (router.current().view !== 'mundo') return;
   if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName) || document.querySelector('dialog[open]')) return;
-  const i = SPEEDS.findIndex(([v]) => Math.abs(v - speed) < 1e-9);
   if (e.key === ' ') {
     e.preventDefault();
     void send(status === 'paused' ? 'resume' : 'pause').then((m) => message(m ?? ''));
-  } else if (e.key === '+' && i < SPEEDS.length - 1) void send('speed', SPEEDS[i + 1]![0]).then((m) => message(m ?? ''));
-  else if (e.key === '-' && i > 0) void send('speed', SPEEDS[i - 1]![0]).then((m) => message(m ?? ''));
-  else if (e.key === 'ArrowLeft') map?.pan(-40, 0);
+  } else if (e.key === 'ArrowLeft') map?.pan(-40, 0);
   else if (e.key === 'ArrowRight') map?.pan(40, 0);
   else if (e.key === 'ArrowUp') map?.pan(0, -40);
   else if (e.key === 'ArrowDown') map?.pan(0, 40);

@@ -30,13 +30,37 @@ afterAll(async () => {
 
 const get = async <T>(url: string) => (await api.app.inject({ url })).json() as T;
 
+describe('022 R-015: ventana de eventos', () => {
+  it('CA-016: la historia de origen entera y los últimos N de la simulación; los recuentos y la salud no cambian', async () => {
+    const w = api.reader.world;
+    // La persona con más eventos de simulación del mundo de ejemplo.
+    let c = living(w)[0]!;
+    let full = await get<Dossier>(`/api/citizens/${c.id}/dossier?limit=5000`);
+    for (const x of living(w)) {
+      const d = await get<Dossier>(`/api/citizens/${x.id}/dossier?limit=5000`);
+      if (d.events.filter((e) => !e.origin).length > full.events.filter((e) => !e.origin).length) [c, full] = [x, d];
+    }
+    const sim = full.events.filter((e) => !e.origin);
+    expect(sim.length).toBeGreaterThan(20);
+    const win = await get<Dossier>(`/api/citizens/${c.id}/dossier?limit=20`);
+    expect(win.events.filter((e) => e.origin)).toEqual(full.events.filter((e) => e.origin));
+    expect(win.events.filter((e) => !e.origin).map((e) => e.id)).toEqual(sim.slice(-20).map((e) => e.id));
+    expect(win.omitted).toBe(sim.length - 20);
+    expect(win.counts).toEqual(full.counts);
+    expect(win.health).toEqual(full.health);
+    expect(win.identity).toEqual(full.identity);
+    expect((await api.app.inject({ url: `/api/citizens/${c.id}/dossier?limit=3` })).statusCode).toBe(400);
+  });
+});
+
 describe('022 R-015: expediente', () => {
   it('CA-012: coincide con el estado guardado y sus eventos, con la historia de origen marcada, y la agenda cubre 24 h', async () => {
     const w = api.reader.world;
     // Una persona adulta con historia de origen y trabajo formal.
     const c = living(w).find((x) => x.occupation?.kind === 'formal' && x.motherId)!;
-    const d = await get<Dossier>(`/api/citizens/${c.id}/dossier`);
+    const d = await get<Dossier>(`/api/citizens/${c.id}/dossier?limit=5000`);
     expect(d.id).toBe(c.id);
+    expect(d.omitted).toBe(0);
     const birth = w.components.i32['demo.birthMinute']![idNumber(c.id)]!;
     expect(d.identity.birthDate.slice(0, 4)).toBe(String(new Date(Date.UTC(2026, 0, 1) + birth * 60_000).getUTCFullYear()));
     expect(d.identity.education).toBeTruthy();

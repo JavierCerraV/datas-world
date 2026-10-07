@@ -15,5 +15,5 @@ export const MOVES_KEEP_DAYS = 2;
 /** R-015: tiempo real de cada tramo de un avance sin observar. */
 export const ADVANCE_SLICE_MS = 250;
 
-/** R-015 (022 R-013): avances sin observar admitidos, en minutos de mundo: 1 día, 1 semana, 1 mes y 1 año. */
-export const ADVANCE_MINUTES: readonly number[] = Object.freeze([1440, 10080, 43200, 525600]);
+/** R-015 (022 R-013): avances sin observar admitidos, en minutos de mundo: 1 día, 1 semana, 1 mes, 3 meses, 6 meses y 1 año. */
+export const ADVANCE_MINUTES: readonly number[] = Object.freeze([1440, 10080, 43200, 129600, 259200, 525600]);

@@ -1,7 +1,7 @@
 // Registro de eventos bajo el mapa (spec 024 R-016 y R-021): guarda los últimos eventos, los filtra por categoría y
 // menores, y pinta como mucho 150 en una tabla (hora, tipo, qué pasó y causas), el más reciente arriba. Un nombre
 // abre la ficha de esa persona.
-import { CATEGORIES, logTableRow, passes } from './log.ts';
+import { CATEGORIES, logRow, logTableRow, passes } from './log.ts';
 import type { Category } from './log.ts';
 import type { EventView } from './types.ts';
 
@@ -18,6 +18,7 @@ export function setupLog(o: { openPerson: (id: string) => void }): LogView {
   const list = document.querySelector<HTMLElement>('#events')!;
   const chips = document.querySelector<HTMLSelectElement>('#log-filter')!;
   const sub = document.querySelector<HTMLElement>('#log-sub')!;
+  const recent = document.querySelector<HTMLElement>('#recent')!;
   const minorBox = document.querySelector<HTMLInputElement>('#show-minor')!;
   let events: EventView[] = [];
   let filter: Category | 'all' = 'all';
@@ -34,6 +35,10 @@ export function setupLog(o: { openPerson: (id: string) => void }): LogView {
       if (passes(e.type, filter, minorBox.checked)) shown.push(logTableRow(e, today));
     }
     list.innerHTML = shown.join('') || '<tr><td colspan="4" class="empty">Aún no hay eventos de este tipo. Sube la velocidad o avanza un día para que el mundo produzca historia.</td></tr>';
+    // El panel «Ahora» muestra los 5 últimos eventos que no son menores (024 R-026).
+    const latest: string[] = [];
+    for (let i = events.length - 1; i >= 0 && latest.length < 5; i--) if (passes(events[i]!.type, 'all', false)) latest.push(logRow(events[i]!, today, false));
+    recent.innerHTML = latest.join('');
     const todayN = events.filter((e) => e.date.startsWith(today)).length;
     sub.textContent = `en vivo · ${todayN} ${todayN === 1 ? 'evento' : 'eventos'} hoy en el registro`;
   };

@@ -19,7 +19,38 @@ export interface ChatParams {
   moodK: number;
   /** Consecuencias de lo dicho sobre terceros (044); si falta, `CLAIM_DEFAULTS`. */
   claims?: ClaimParams;
+  /** Prudencia ante un desconocido (R-024 a R-026); si falta, `STRANGER_DEFAULTS`. */
+  stranger?: StrangerParams;
 }
+
+/** Prudencia ante un desconocido (spec 043 v0.7, §8). Todos [M] (PA-154). */
+export interface StrangerParams {
+  /** R-024: familiaridad que suma cada turno previo con el visitante (ensayos de su función), cada turno cálido de esta sesión y el valor positivo del visitante. */
+  fPrevTurn: number;
+  fTurn: number;
+  fValue: number;
+  /** R-025: peso de la cautela en la postura. */
+  exposureCost: number;
+  /** R-026: familiaridad con que se abre el nivel personal (1) y el íntimo (2), y valor mínimo del visitante para el 2. */
+  discloseL1: number;
+  discloseL2: number;
+  discloseValue: number;
+  /** R-025: menores de esta edad no hablan con extraños (regla *pliance*) y su peso. */
+  minorAge: number;
+  minorRule: number;
+}
+
+export const STRANGER_DEFAULTS: StrangerParams = Object.freeze({
+  fPrevTurn: 0.04,
+  fTurn: 0.07,
+  fValue: 0.3,
+  exposureCost: 2,
+  discloseL1: 0.25,
+  discloseL2: 0.6,
+  discloseValue: 0.1,
+  minorAge: 14,
+  minorRule: 1.5,
+});
 
 export const CHAT_DEFAULTS: ChatParams = Object.freeze({
   loadDecay: 0.2,

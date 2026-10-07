@@ -2,23 +2,28 @@
 // (clasificar, expresar y verificar). Orden de cada turno (R-016, R-023): tono → postura (local, < 10 ms) →
 // `onStance` → texto en streaming → la verificación queda en segundo plano.
 import {
-  CHAT_DEFAULTS, CLAIM_DEFAULTS, claimsHeard, createRng, formatId, rulesOf, selectStance, sensitivityOf, startConversation, storeOf,
+  CHAT_DEFAULTS, CLAIM_DEFAULTS, claimsHeard, createRng, disclosureOf, formatId, rulesOf, selectStance, sensitivityOf, startConversation, storeOf,
   variabilityOf, visitorSaid,
 } from '@datas-world/engine';
 import type {
-  ChatParams, ChatSessionInput, ClaimAssessment, ConversationState, EntityId, HeardClaim, LearningParams, LiveState, Ontology,
+  ChatParams, ChatSessionInput, ClaimAssessment, ConversationState, DisclosureLevel, EntityId, HeardClaim, LearningParams, LiveState, Ontology,
   PersonCtx, Rng, StanceChoice, WorldEvent, WorldView,
 } from '@datas-world/engine';
 import type { Gateway } from '../gateway.ts';
 import type { ChatCatalogs, StanceInfo } from './catalog.ts';
 import { classifyTone } from './classify.ts';
 import type { ToneResult } from './classify.ts';
+import { discloseView } from './disclosure.ts';
 import { expressionRequest } from './prompt.ts';
 import type { TranscriptTurn } from './prompt.ts';
 import { verifyReply } from './verify.ts';
 import type { Verification } from './verify.ts';
 import { buildPersonView } from './view.ts';
 import type { PersonView } from './view.ts';
+
+/** 043 R-027: la primera respuesta a un desconocido, con plantilla, dice que no lo conoce (las posturas de choque conservan la suya). */
+export const STRANGER_TEMPLATE = '¿Y usted quién es? No lo conozco.';
+const STRANGER_FIRST = new Set(['abrirse', 'aplacar', 'callar', 'evadir', 'responder_breve']);
 
 /** R-014: plantilla por postura cuando no hay LLM, presupuesto o red. */
 export const TEMPLATES: Record<string, string> = {
@@ -76,6 +81,8 @@ export interface TurnOutcome {
   expression: 'llm' | 'template';
   llmRef?: string;
   latencyMs: { firstToken?: number; total: number };
+  /** Nivel de intimidad abierto en este turno (043 R-026): 0 desconocido, 1 conocido, 2 de confianza. */
+  level: DisclosureLevel;
   /** Llega después, sin bloquear el turno (R-012, R-013). */
   verification: Promise<Verification>;
 }
@@ -100,6 +107,7 @@ export class ChatSession {
       onto: o.onto, P: o.P, sens: sensitivityOf(o.view, row), rules: rulesOf(o.view, row),
       ...(person?.network ? { net: JSON.parse(JSON.stringify(person.network)) } : {}),
       variability: variabilityOf(o.view, row),
+      ...(this.view.age !== null ? { age: this.view.age } : {}),
     };
     this.#rng = createRng(o.seed).fork(`chat:${o.sessionId}`);
   }
@@ -128,11 +136,16 @@ export class ChatSession {
     t.onStance?.({ tone, choice, claims });
     this.transcript.push({ speaker: 'visitor', text });
     const stance = catalogs.stances.find((s) => s.key === choice.stance) as StanceInfo;
-    const r = await gw.run(expressionRequest(this.view, this.transcript, choice, stance, t.onText));
+    // R-026: el LLM solo ve lo que este visitante se ha ganado; lo demás no está en el prompt y no se puede contar.
+    const level = disclosureOf(this.state, this.params);
+    const open = discloseView(this.view, level);
+    const r = await gw.run(expressionRequest(open, this.transcript, choice, stance, t.onText, level));
     let reply = r.text ?? '';
     let expression: 'llm' | 'template' = 'llm';
     if (!reply.trim()) {
-      reply = TEMPLATES[choice.stance] ?? '…';
+      // R-027: al desconocido, lo primero es que no lo conoce.
+      const firstTurn = this.transcript.length === 1; // solo está lo que acaba de decir el visitante
+      reply = firstTurn && level === 0 && STRANGER_FIRST.has(choice.stance) ? STRANGER_TEMPLATE : (TEMPLATES[choice.stance] ?? '…');
       expression = 'template';
       t.onText?.(reply);
     }
@@ -140,10 +153,11 @@ export class ChatSession {
     this.#turns.push({ tone: tone.tone, stance: choice.stance, ...(valid.length > 0 ? { claims: valid } : {}) });
     if (choice.stance === 'terminar') this.ended = true;
     return {
-      seq, tone, claims, choice, reply, expression,
+      seq, tone, claims, choice, reply, expression, level,
       ...(expression === 'llm' ? { llmRef: r.recordKey } : {}),
       latencyMs: { ...(r.latencyMs.firstToken !== undefined ? { firstToken: r.latencyMs.firstToken } : {}), total: performance.now() - t0 },
-      verification: expression === 'llm' ? verifyReply(gw, this.view, stance, reply) : Promise.resolve({ claims: [], stanceCheck: 'unchecked' }),
+      // R-026, R-027: se verifica contra la vista abierta de este turno; lo que cuente fuera de ella queda sin respaldo.
+      verification: expression === 'llm' ? verifyReply(gw, open, stance, reply) : Promise.resolve({ claims: [], stanceCheck: 'unchecked' }),
     };
   }
 

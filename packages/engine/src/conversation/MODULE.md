@@ -3,7 +3,7 @@ modulo: conversation
 ruta: packages/engine/src/conversation
 estado: en-desarrollo
 specs: [043, 044, 036, 037, 038, 040, 010, 011]
-actualizado: 2026-09-27
+actualizado: 2026-10-05
 ---
 
 # Módulo: conversation
@@ -30,8 +30,9 @@ Desde `@datas-world/engine`:
 
 | Símbolo | Descripción |
 |---|---|
-| `ToneDef`, `StanceDef`, `ChatCatalog` | Tonos (`stimulus`, `magnitude`, `prior`) y posturas (`escape`, `w0`) de `chat_tones` y `chat_stances`, inyectados |
+| `ToneDef`, `StanceDef`, `ChatCatalog` | Tonos (`stimulus`, `magnitude`, `prior`) y posturas (`escape`, `w0`, `exposure`) de `chat_tones` y `chat_stances`, inyectados |
 | `CHAT_DEFAULTS`, `ChatParams` | Parámetros de 043 §8: decaimiento de la carga, pesos de las fuentes, ventana de ocupado, topes de huella y `k` del ánimo |
+| `familiarity(state, params)`, `caution`, `disclosureLevel(f, valor, params)`, `disclosureOf(state, params)`, `STRANGER_DEFAULTS`, `StrangerParams` | Prudencia ante un desconocido (043 v0.7, R-024 a R-026), puro (`familiarity.ts`): familiaridad del visitante (turnos previos + turnos cálidos + valor), cautela y nivel de intimidad que se abre (0, 1 o 2) |
 | `startConversation(store, visitorId)` → `ConversationState` | Charla nueva con una copia de trabajo del almacén de funciones |
 | `toneValue(store, lc, tone, now)` | R-005: `clamp(prior + netValue)` |
 | `visitorSaid(state, lc, cat, tone, now, params)` → `{ toneValue, visitorValue, aversiveLoad }` | Turno del visitante: aprende la consecuencia del turno anterior (R-009), empareja al visitante (R-006) y actualiza la carga (R-007) |
@@ -99,7 +100,7 @@ Desde `@datas-world/engine`:
 - Determinismo: sin azar fuera de `selectStance`, que usa el `rng` recibido. La consolidación es igual con la misma entrada.
 
 ## 6. Cómo se prueba
-`src/conversation/conversation.test.ts` (11 pruebas). Replican los catálogos de la charla (el motor no lee archivos):
+Las de la prudencia ante un desconocido están en `llm-gateway/src/chat/stranger.test.ts` (CA-021 a CA-024), donde está la sesión. `src/conversation/conversation.test.ts` (11 pruebas). Replican los catálogos de la charla (el motor no lee archivos):
 - R-005: la aprobación aprendida no vuelve agradable un insulto;
 - CA-004: 200 charlas amables frente a 200 groseras;
 - CA-005: el insulto aprendido −0,8 frente a −0,2, y la política de arquitectura;
@@ -155,3 +156,4 @@ No aplica: el prototipo no tiene charla.
 | 2026-09-29 | m3/memoria (M4) | 013, 043, 044 | `consolidateChat`, con la capacidad `memory`: los `CHAT_RECALL` (12) recuerdos que recibió la charla cuentan como repaso (013 R-008, P5); queda el recuerdo de la charla (vivido, con su valencia e intensidad) y el de cada afirmación creída (contado, con la persona y el estímulo de la afirmación) |
 | 2026-09-29 | m3/causalidad (C1) | 019, 044 | Solo pruebas: la intención de `encounter.test.ts` cita un evento que el mundo de prueba da por creado (019 R-002 rechaza citar un evento que no existe todavía) |
 | 2026-09-29 | m3/creencias (K1) | 025, 044 | `consolidateChat` y el sistema `bonds` copian las creencias en profundidad: con la 025 llevan la lista de a quién se contaron |
+| 2026-10-05 | claude/busy-mayer-fj6x13 (043 v0.7) | 043 | Prudencia ante un desconocido: `familiarity.ts` (R-024, R-026), fuente de postura `cautela` y regla de no hablar con extraños para menores de 14 años en `stance.ts` (R-025, `PersonCtx.age`), `StanceDef.exposure`, `ConversationState.baseTrials` y `StrangerParams`. Sin temperamento (009 R-006) |

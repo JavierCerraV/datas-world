@@ -1,5 +1,5 @@
-// Lo que va encima del mapa en la pantalla Mundo (spec 024 R-021, Visor A+): el panel de capas, el panel «Ahora» con
-// lo que hace la gente y la escala en metros. La lógica es pura y se prueba (CA-016); el cableado del DOM, al final.
+// Capas, panel «Ahora» y escala de la pantalla Mundo (spec 024 R-021 y R-026): el panel de capas, lo que hace la gente
+// ahora y la escala en metros. La lógica es pura y se prueba (CA-016); el cableado del DOM, al final.
 
 export type LayerKey = 'personas' | 'lugares' | 'objetos' | 'vinculos' | 'animo' | 'noche';
 export type Layers = Record<LayerKey, boolean>;
@@ -49,7 +49,7 @@ export function setupLayers(): { get: () => Layers } {
     // Sin almacenamiento local, las capas por defecto.
   }
   const render = () => {
-    box.innerHTML = `<span class="ov-title">Capas</span>${LAYERS.map(([k, l, off]) => `<button type="button" data-layer="${k}" aria-pressed="${layers[k]}"${off ? ` disabled title="${esc(off)}"` : ''}>${l}</button>`).join('')}`;
+    box.innerHTML = LAYERS.map(([k, l, off]) => `<button type="button" class="layer" data-layer="${k}" aria-pressed="${layers[k]}"${off ? ` disabled title="${esc(off)}"` : ''}><span>${l}</span><span class="tag">${off ? 'Pronto' : layers[k] ? 'Sí' : 'No'}</span></button>`).join('');
   };
   box.addEventListener('click', (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-layer]');
@@ -70,11 +70,11 @@ export function setupLayers(): { get: () => Layers } {
 /** Pinta el panel «Ahora». */
 export function renderNow(now: readonly { kind: string; count: number }[]): void {
   const rows = nowRows(now);
-  document.querySelector('#nowbox')!.innerHTML = `<span class="ov-title">Ahora</span><dl>${rows.map((r) => `<dt>${esc(r.label)}</dt><dd class="mono">${r.count}</dd>`).join('')}</dl>`;
+  document.querySelector('#nowbox')!.innerHTML = `<dl>${rows.map((r) => `<dt>${esc(r.label)}</dt><dd class="mono">${r.count}</dd>`).join('')}</dl>`;
 }
 
-/** Pinta la escala con los px de un tile en pantalla y los metros por tile del mundo. */
-export function renderScale(pxPerTile: number, metersPerTile: number): void {
+/** Pinta la escala con los px de un tile en pantalla y los metros por tile del mundo (003 v0.4: 40; los anteriores, 8). */
+export function renderScale(pxPerTile: number, metersPerTile = 8): void {
   const s = scaleBar(pxPerTile, metersPerTile);
   const bar = document.querySelector<HTMLElement>('#scale-bar');
   if (!bar) return;

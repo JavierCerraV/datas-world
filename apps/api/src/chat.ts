@@ -251,7 +251,7 @@ export function registerChatRoutes(app: FastifyInstance, d: ChatDeps): { sweep: 
       log(id, 'CHAT_VISITOR_SAID', { sessionId: id, seq: out.seq, ...out.tone }, [{ state: 'visitante', weight: 1 }]);
       log(id, 'CHAT_STANCE_SELECTED', { sessionId: id, seq: out.seq, stance: out.choice.stance, sources: out.choice.sources }, out.choice.sources.slice(0, 3).map((s) => ({ state: `fuente.${s.source}${s.ref ? `:${s.ref}` : ''}`, weight: Math.min(1, Math.abs(s.contribution)) })));
       log(id, 'CHAT_CITIZEN_REPLIED', { sessionId: id, seq: out.seq, expression: out.expression, llmRef: out.llmRef ?? null, latencyMs: out.latencyMs }, [{ state: 'postura', weight: 1 }]);
-      sse(reply, 'done', { seq: out.seq, reply: out.reply, expression: out.expression, latencyMs: out.latencyMs, ended: l.session.ended });
+      sse(reply, 'done', { seq: out.seq, reply: out.reply, expression: out.expression, latencyMs: out.latencyMs, level: out.level, ended: l.session.ended });
       void out.verification.then((v) => {
         insertChatTurn(d.rw, { sessionId: id, seq: out.seq, speaker: 'citizen', text: out.reply, data: { ...citizenData, claims: v.claims, stanceCheck: v.stanceCheck }, createdAt: at });
         for (const c of v.claims.filter((x) => x.verdict !== 'supported'))
