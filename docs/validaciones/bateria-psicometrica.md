@@ -38,7 +38,7 @@ Disposición decidida por el motor: fiel 67,8 %, minimiza 10,3 %, impreciso 9,4 
 Al reanudar la corrida (`--resume`), el comando recalculaba los indicadores de las tomas ya medidas con el mundo ya avanzado, y dejó los de las tomas 0 y 1 iguales a los de la toma 2. Las respuestas, puntuaciones, disposiciones y fechas **no** se vieron afectadas (se guardan al medir). Quedó dañada la hoja «Indicadores» de las tomas 0 y 1, que se **descartó** del libro entregado (no se pudo recuperar: el mundo de esas fechas ya no existe). La hoja «Método y límites» lo dice. Corregido: reanudar ya no relee ni reescribe las tomas ya medidas, con una prueba que falla con el código anterior (`psychometrics-resume.test.ts`).
 
 ## Pendiente
-- Acotar el rango del LLM en el DASS-21 y repetir (hallazgo 1).
+- ~~Acotar el rango del LLM en el DASS-21~~ (hallazgo 1): hecho el 2026-10-07 (046 v0.3, el LLM solo puede elegir igual o por debajo de lo decidido). **No se repitió la corrida**: sin medirla de nuevo no se sabe cuánto baja el DASS-21.
 - Decidir si el corte del GHQ-12 debe interpretarse con la corrección de la ficha o con una de 0-0-1-1 (hallazgo 2).
 - Variación del *pliance* y el *tracking* entre personas en el motor (hallazgo 3).
 - Validar los pesos con datos humanos (PA-155).

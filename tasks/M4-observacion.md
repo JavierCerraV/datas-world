@@ -51,7 +51,8 @@ Referencia: el lienzo de 10 arenas, tablero T10 (https://claude.ai/artifact/5FCJ
 - [x] B3 `administerInstrument` en llm-gateway: la charla la valida el motor (CA-009, CA-010).
 - [x] B4 Comando `psychometrics`, informe y Excel (CA-002, CA-003, CA-006, CA-007).
 - [x] B5 Ejecución real con LLM (OpenRouter, modelo gratuito) y Excel entregado (2026-10-07): `docs/validaciones/bateria-psicometrica.md`.
-- [ ] B6 Acotar el rango del LLM en el DASS-21 y repetir; decidir la corrección del GHQ-12 (hallazgos 1 y 2).
+- [x] B6 Rango del LLM en el DASS-21 solo hacia abajo (046 v0.3, 2026-10-07). No se repite el experimento por ahora (decisión del usuario).
+- [ ] B7 Refinar qué mediciones dan información más útil (decisión del usuario, 2026-10-07); decidir la corrección del GHQ-12 (hallazgo 2 de la validación).
 
 ## Mapa en el estilo del lienzo (spec 024 v0.8, petición del usuario 2026-10-05)
 - [x] M1 Dibujo vectorial del mapa a 3× (`render.ts`, `draw-places.ts`), figuras «chibi», punto de ánimo, aro de cohorte y zoom de apertura (R-030, CA-023).
