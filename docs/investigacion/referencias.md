@@ -2,7 +2,7 @@
 
 Inventario de las **49 marcas** `referencia a verificar` repartidas entre los specs (`specs/009`, `035`–`038`, `040`, `042`, `043`) y `docs/investigacion/preguntas-abiertas.md`, con la fuente que respalda (o no) cada afirmación.
 
-Nace del barrido de 2026-09-28 sobre el repositorio. **No modifica los specs**: entrega la fuente, el estado y —donde falta— el plan concreto para cerrarla. Cuando el marcador se resuelve con un ajuste conceptual (p. ej. una regla que describe un mecanismo propio del motor y no una ley de la literatura), se dice explícitamente y se propone el reemplazo del texto.
+Nace del barrido de 2026-09-28 sobre el repositorio y se amplía con la pasada del 2026-10-07 (specs 028 y 046 y PA-153 a PA-156, al final). **No modifica los specs**: entrega la fuente, el estado y —donde falta— el plan concreto para cerrarla. Cuando el marcador se resuelve con un ajuste conceptual (p. ej. una regla que describe un mecanismo propio del motor y no una ley de la literatura), se dice explícitamente y se propone el reemplazo del texto.
 
 ## Leyenda
 
@@ -206,6 +206,53 @@ Formato APA simplificado. `Verif.` = cómo se comprobaron los metadatos en la pa
 | 48 | PA-139 (celos y traición percibida) | Sin fuente localizada para el umbral de acción ni el estrés residual | Buscar "betrayal" + "jealousy" (Buss, Shackelford), "betrayal trauma" (Freyd), "relationship intrusion". Criterio: magnitud empírica de la reacción ante una revelación; en su defecto, revisión experta |
 
 Parámetros que **se quedan en [M] a sabiendas** porque la literatura no da el número, solo la dirección del efecto: `tmp.variability0`; `discounting.k_plasticity` (PA-104, con R33 como discusión del tema); la base de credibilidad 0,4 (PA-138); el tope 0,3 y el decaimiento 0,05/día (PA-140); la forma `escape × carga` (`043:178`); y las métricas de grafo para el MDML (PA-111, con R3 como marco y R35 como discusión de la complejidad). Su cierre es calibración con `docs/validaciones/batería-conductual.md` y revisión experta, no más bibliografía.
+
+## Pasada del 2026-10-07: specs 028 y 046 y PA-153 a PA-156
+
+Las cuatro preguntas abiertas que nacieron después del barrido del 2026-09-28 (PA-153 a PA-156) y las fuentes de las specs 028 (experimentos) y 046 (batería psicométrica), con el mismo criterio: solo se escribe un DOI que se resolvió y devolvió el título esperado, y se comprobaron metadatos, no textos completos.
+
+| Marcador | Qué pide | Estado | Fuente | Verif. |
+|---|---|---|---|---|
+| PA-153 — edad desde la que un menor sale solo | Normas y datos de autonomía infantil (ICBF, ENUT) y desarrollo | ⚠️ | R67 y R68 dan la dirección (la libertad de movimiento de los niños depende de la edad y de la norma de los padres y varía entre países), no los umbrales; no se localizó la fuente colombiana (ICBF, ENUT). Los umbrales 12, 20:00 y 2 h siguen [M] | CR |
+| PA-154 — crecimiento de la confianza hacia un desconocido y qué se cuenta en cada nivel | Psicología social de la autorrevelación | ✅ + 🟡 | R61 (metaanálisis: lo que uno cuenta y cuánto agrada quien lo cuenta, con reciprocidad); R62 como teoría de la penetración social (🟡). Los incrementos por turno y los niveles 0,25 y 0,6 son [M] | CR |
+| PA-155 — pesos de los ítems y frecuencia de respuestas no fieles | Estructura factorial en población colombiana; deseabilidad social | ✅ + ⚠️ | Las seis pruebas y sus validaciones colombianas: R48 a R58 (R56 y R52 en 🟡). Deseabilidad social y sobreinforme: R59 y R60. Los **pesos** de la 046 §4 bis y las probabilidades de minimizar, exagerar y mentir siguen sin fuente que dé el número: [M] | CR, DL |
+| PA-156 — interferencia entre tratados y controles | Inferencia causal con interferencia | ✅ | R63 y R64 (marcos formales de efectos con interferencia); el MVP evita el problema con brazos en mundos separados | CR |
+| 028 R-005 — azar común por semilla | Variables aleatorias comunes en simulación | ✅ | R66 | CR |
+| 028 R-008 — intervalo por *bootstrap* | Remuestreo | ✅ | R65 | CR |
+
+Para **cerrar** lo que sigue en ⚠️: PA-153, buscar la *Encuesta Nacional de Uso del Tiempo* del DANE y los lineamientos del ICBF sobre cuidado y supervisión de niños en Colombia, y compararlos con estudios de movilidad independiente por edad (criterio: una edad y una franja horaria con fuente); PA-155, datos con las seis pruebas en una misma muestra colombiana para estimar cargas factoriales y correlaciones entre ellas (criterio: poder comparar las correlaciones de la batería con las humanas; ver `docs/validaciones/bateria-psicometrica.md`).
+
+### H. Medición psicométrica (spec 046)
+
+- **R48** Bond, F. W., Hayes, S. C., Baer, R. A., Carpenter, K. M., Guenole, N., Orcutt, H. K., … Zettle, R. D. (2011). Preliminary psychometric properties of the Acceptance and Action Questionnaire–II: A revised measure of psychological inflexibility and experiential avoidance. *Behavior Therapy, 42*(4), 676–688. https://doi.org/10.1016/j.beth.2011.03.007 — Verif. CR, DL (ficha del ClinikLab).
+- **R49** Ruiz, F. J., Langer, A. I., Luciano, C., Cangas, A. J., & Beltrán, I. (2013). Measuring experiential avoidance and psychological inflexibility: The Spanish translation of the Acceptance and Action Questionnaire – II. *Psicothema, 25*(1), 123–129. https://doi.org/10.7334/psicothema2011.239 — Verif. CR, DL.
+- **R50** Ruiz, F. J., Suárez-Falcón, J. C., Cárdenas-Sierra, S., Durán, Y. A., Guerrero, K., & Riaño-Hernández, D. (2016). Psychometric properties of the Acceptance and Action Questionnaire – II in Colombia. *The Psychological Record, 66*, 429–437. https://doi.org/10.1007/s40732-016-0183-2 — Verif. CR, DL.
+- **R51** Ruiz, F. J., García-Beltrán, D. M., & Suárez-Falcón, J. C. (2017). General Health Questionnaire-12 validity in Colombia and factorial equivalence between clinical and nonclinical participants. *Psychiatry Research, 256*, 53–58. https://doi.org/10.1016/j.psychres.2017.06.020 — Verif. CR, DL.
+- **R52** Goldberg, D., & Williams, P. (1988). *A user's guide to the General Health Questionnaire*. NFER-Nelson. — Verif. DL (ficha) — (🟡).
+- **R53** Ruiz, F. J., Suárez-Falcón, J. C., Barbero-Rubio, A., & Flórez, C. L. (2019). Development and initial validation of the Generalized Pliance Questionnaire. *Journal of Contextual Behavioral Science, 12*, 189–198. https://doi.org/10.1016/j.jcbs.2018.03.003 — Verif. CR, DL. Base del GPQ-9, el *pliance* generalizado (R17 y R44 como origen conceptual).
+- **R54** Ruiz, F. J., García-Martín, M. B., Suárez-Falcón, J. C., Bedoya-Valderrama, L., Segura-Vargas, M. A., Peña-Vargas, A., … Ávila-Campos, J. E. (2020). Development and initial validation of the Generalized Tracking Questionnaire. *PLOS ONE, 15*, e0234393. https://doi.org/10.1371/journal.pone.0234393 — Verif. CR, DL.
+- **R55** Antony, M. M., Bieling, P. J., Cox, B. J., Enns, M. W., & Swinson, R. P. (1998). Psychometric properties of the 42-item and 21-item versions of the Depression Anxiety Stress Scales in clinical groups and a community sample. *Psychological Assessment, 10*(2), 176–181. https://doi.org/10.1037/1040-3590.10.2.176 — Verif. CR, DL.
+- **R56** Ruiz, F. J., García-Martín, M. B., Suárez-Falcón, J. C., & Odriozola-González, P. (2017). The hierarchical factor structure of the Spanish version of Depression Anxiety and Stress Scale-21. *International Journal of Psychology and Psychological Therapy, 17*, 97–105. — Verif. DL (ficha); no se localizó en Crossref (la revista no devuelve DOI) — (🟡).
+- **R57** Diener, E., Emmons, R. A., Larsen, R. J., & Griffin, S. (1985). The Satisfaction With Life Scale. *Journal of Personality Assessment, 49*(1), 71–75. https://doi.org/10.1207/s15327752jpa4901_13 — Verif. CR (resolución directa del DOI), DL.
+- **R58** Ruiz, F. J., Suárez-Falcón, J. C., Flórez, C. L., Odriozola-González, P., Tovar, D., López-González, S., & Baeza-Martín, R. (2019). Validity of the Satisfaction with Life Scale in Colombia and factorial equivalence with Spanish data. *Revista Latinoamericana de Psicología, 51*(2), 58–65. https://doi.org/10.14349/rlp.2019.v51.n2.1 — Verif. CR, DL.
+- **R59** Paulhus, D. L. (1984). Two-component models of socially desirable responding. *Journal of Personality and Social Psychology, 46*(3), 598–609. https://doi.org/10.1037/0022-3514.46.3.598 — Verif. CR. Autoengaño frente a manejo de la impresión: la base de que la gente minimice o exagere (046 R-011).
+- **R60** Krumpal, I. (2013). Determinants of social desirability bias in sensitive surveys: A literature review. *Quality & Quantity, 47*, 2025–2047. https://doi.org/10.1007/s11135-011-9640-9 — Verif. CR (publicado en línea en 2011; volumen 47 de 2013). Revisión de por qué se responde de forma socialmente deseable en temas sensibles.
+
+### I. Autorrevelación y confianza, y autonomía infantil (PA-153, PA-154)
+
+- **R61** Collins, N. L., & Miller, L. C. (1994). Self-disclosure and liking: A meta-analytic review. *Psychological Bulletin, 116*(3), 457–475. https://doi.org/10.1037/0033-2909.116.3.457 — Verif. CR. PA-154.
+- **R62** Altman, I., & Taylor, D. A. (1973). *Social penetration: The development of interpersonal relationships*. Holt, Rinehart & Winston. — Verif. — (🟡). Teoría de que la intimidad crece por pasos de revelación recíproca.
+- **R67** Rissotto, A., & Tonucci, F. (2002). Freedom of movement and environmental knowledge in elementary school children. *Journal of Environmental Psychology, 22*, 65–77. https://doi.org/10.1006/jevp.2002.0243 — Verif. CR. PA-153: apoya la dirección (la libertad de movimiento de los niños), no un umbral de edad.
+- **R68** Carver, A., Watson, B., Shaw, B., y colaboradores. (2013). A comparison study of children's independent mobility in England and Australia. *Children's Geographies, 11*, 461–475. https://doi.org/10.1080/14733285.2013.812303 — Verif. CR. PA-153: movilidad independiente infantil entre países.
+
+### J. Inferencia causal y simulación (spec 028)
+
+- **R63** Hudgens, M. G., & Halloran, M. E. (2008). Toward causal inference with interference. *Journal of the American Statistical Association, 103*, 832–842. https://doi.org/10.1198/016214508000000292 — Verif. CR. PA-156.
+- **R64** Aronow, P. M., & Samii, C. (2017). Estimating average causal effects under general interference, with application to a social network experiment. *The Annals of Applied Statistics, 11*. https://doi.org/10.1214/16-aoas1005 — Verif. CR (páginas sin comprobar). PA-156.
+- **R65** Efron, B. (1979). Bootstrap methods: Another look at the jackknife. *The Annals of Statistics, 7*. https://doi.org/10.1214/aos/1176344552 — Verif. CR (páginas sin comprobar). 028 R-008.
+- **R66** Glasserman, P., & Yao, D. D. (1992). Some guidelines and guarantees for common random numbers. *Management Science, 38*(6), 884–908. https://doi.org/10.1287/mnsc.38.6.884 — Verif. CR. 028 R-005.
+
+---
 
 ## Metodología y límites
 
