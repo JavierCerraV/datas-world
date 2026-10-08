@@ -59,7 +59,7 @@ export const USAGE = `Uso: pnpm cli <comando> [opciones]
   chat:stats [--json] [--db RUTA]
   experiment:run <definición.json> [--out RUTA] [--db RUTA]
   psychometrics [--provider mock|config] [--n 50] [--month-days 30] [--year-days 365] [--concurrency 4] [--delay-ms 0] [--per-call person|instrument] [--llm-config RUTA] [--resume] [--db RUTA] [--work RUTA] [--out RUTA]
-  study:session [--citizen CIT-000123] [--session 1] [--previous sesion.json] [--provider mock|config] [--llm-config RUTA] [--max-turns 40] [--out RUTA] [--db RUTA]   una sesión del protocolo, para leer el diálogo (047)`;
+  study:session [--citizen CIT-000123] [--session 1] [--previous sesion.json] [--provider mock|config] [--llm-config RUTA] [--max-turns 40] [--work RUTA] [--gap-days 7] [--out RUTA] [--db RUTA]   una sesión del protocolo, para leer el diálogo (047)`;
 
 function worldAdvance(args: string[], io: Io): void {
   const { values: v } = parseArgs({

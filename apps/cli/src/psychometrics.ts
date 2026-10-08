@@ -91,7 +91,7 @@ interface Checkpoint {
 }
 
 /** Copia consistente de la base (`VACUUM INTO`) sin el cerrojo del worker, para poder avanzarla sin tocar el mundo en marcha. */
-function copyWorld(src: string, dst: string): void {
+export function copyWorld(src: string, dst: string): void {
   mkdirSync(dirname(dst), { recursive: true });
   for (const ext of ['', '-wal', '-shm']) rmSync(`${dst}${ext}`, { force: true });
   withDb(openReadonly(src), (db) => void db.exec(`VACUUM INTO '${dst.replace(/'/g, "''")}'`));

@@ -5,17 +5,21 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { parseArgs } from 'node:util';
-import { ACT_PNR_3, learningParams, stateHash } from '@datas-world/engine';
-import type { EntityId, SessionNumber } from '@datas-world/engine';
-import { buildOntology, loadCatalogs } from '@datas-world/generators';
+import { ACT_PNR_3, MINUTES_PER_DAY, learningParams, stateHash } from '@datas-world/engine';
+import type { ChatSessionInput, EntityId, SessionNumber } from '@datas-world/engine';
+import { buildOntology, lifeRunner, loadCatalogs } from '@datas-world/generators';
 import {
   ChatSession, DEFAULT_CONFIG, Gateway, MAX_TURNS_SESSION, MemoryRecordStore, anthropicAdapter, chatCatalogs, mockAdapter, openaiCompatibleAdapter, parseConfig,
   patientResponder, runTherapySession,
 } from '@datas-world/llm-gateway';
 import type { GatewayConfig, MockResponder, ModelConfig, PatientTurnLog, ProviderAdapter, SessionNote, TherapySessionResult } from '@datas-world/llm-gateway';
-import { WorldRepository, openReadonly, queryEvents } from '@datas-world/persistence';
+import { WorldRepository, WorldSession, acquireWriterLock, openReadonly, openWorldDb, queryEvents, releaseWriterLock } from '@datas-world/persistence';
 import { DEFAULT_DB, UsageError, dateOf, nameOf, toInt, withDb } from './common.ts';
 import type { Io } from './common.ts';
+import { copyWorld } from './psychometrics.ts';
+
+/** El terapeuta es siempre el mismo para la persona: lo que aprende de él en una sesión vale en la siguiente (043 R-006). */
+const VISITOR = 'EXT-TERAPEUTA';
 
 /** Una sesión son unas 80 llamadas con el diálogo acumulado: el tope diario de la charla se queda corto. */
 const SESSION_TOKENS = 6_000_000;
@@ -109,6 +113,43 @@ const markdownOf = (s: Saved): string => {
   return lines.join('\n');
 };
 
+/**
+ * Deja la copia de trabajo una semana después de la sesión anterior (047 R-003, R-010) y devuelve su ruta. Primero la
+ * charla de esa sesión entra en la vida de la persona como cualquier conversación (043 R-019: la recuerda y aprende de
+ * cómo la trataron); después el mundo avanza solo. La base de origen no se toca. Aún sin dosis del protocolo (R-004).
+ */
+function weekLater(src: string, work: string, prev: Saved, gapDays: number, io: Io): string {
+  const at = (path: string) => withDb(openReadonly(path), (db) => {
+    const w = new WorldRepository(db).loadWorld();
+    return { date: dateOf(w.now, w.config.epoch), hash: stateHash(w) };
+  });
+  if (!existsSync(work)) {
+    if (at(src).hash !== prev.meta.hashBefore) throw new UsageError(`${src} no es el mundo en que se hizo la sesión ${prev.meta.session}: use la misma --db, o --work con la copia de esa sesión`);
+    io.err(`Copiando ${src} → ${work}`);
+    copyWorld(src, work);
+  } else if (at(work).date !== prev.meta.date) {
+    throw new UsageError(`${work} está en ${at(work).date} y la sesión ${prev.meta.session} fue en ${prev.meta.date}: borre la copia o indique otra con --work`);
+  }
+  withDb(openWorldDb(work), (db) => {
+    acquireWriterLock(db);
+    try {
+      const repo = new WorldRepository(db);
+      const world = repo.loadWorld();
+      const session = new WorldSession(repo, lifeRunner(world));
+      const turns = prev.patient.map((p) => ({ tone: p.tone, stance: p.stance }));
+      if (turns.length > 0) {
+        const input: ChatSessionInput = { sessionId: `EST-${prev.meta.citizen}-s${prev.meta.session}`, citizenId: String(prev.meta.citizen) as EntityId, visitorId: VISITOR, turns, summary: `Fue a consulta con un psicólogo (sesión ${prev.meta.session}).` };
+        session.runner.submit('chat_session', input);
+      }
+      io.err(`Pasan ${gapDays} días…`);
+      session.advanceTicks((gapDays * MINUTES_PER_DAY) / world.config.tickMinutes);
+    } finally {
+      releaseWriterLock(db);
+    }
+  });
+  return work;
+}
+
 export async function studySession(args: string[], io: Io): Promise<void> {
   const { values: v } = parseArgs({
     args,
@@ -116,6 +157,7 @@ export async function studySession(args: string[], io: Io): Promise<void> {
       db: { type: 'string', default: DEFAULT_DB }, citizen: { type: 'string' }, session: { type: 'string' }, previous: { type: 'string' },
       provider: { type: 'string', default: 'mock' }, 'llm-config': { type: 'string', default: 'config/llm.json' },
       'max-turns': { type: 'string', default: String(MAX_TURNS_SESSION) }, out: { type: 'string', default: 'data/estudio/sesion' },
+      work: { type: 'string', default: 'data/estudio/mundo.db' }, 'gap-days': { type: 'string', default: '7' },
     },
   });
   if (v.provider !== 'mock' && v.provider !== 'config') throw new UsageError('--provider debe ser mock o config');
@@ -125,7 +167,10 @@ export async function studySession(args: string[], io: Io): Promise<void> {
   const n = v.session ? toInt('session', v.session, 1) : prev ? Number(prev.meta.session) + 1 : 1;
   if (n > ACT_PNR_3.sessions.length) throw new UsageError(`el protocolo tiene ${ACT_PNR_3.sessions.length} sesiones`);
 
-  const { world, events } = withDb(openReadonly(v.db!), (db) => {
+  // Con sesión anterior, el mundo sigue: la charla se consolida en la persona y pasa la semana, en una copia de trabajo.
+  const gapDays = toInt('gap-days', v['gap-days'], 0);
+  const source = prev ? weekLater(v.db!, v.work!, prev, gapDays, io) : v.db!;
+  const { world, events } = withDb(openReadonly(source), (db) => {
     const w = new WorldRepository(db).loadWorld();
     return { world: w, events: queryEvents(db, { limit: 5_000_000 }) };
   });
@@ -142,7 +187,7 @@ export async function studySession(args: string[], io: Io): Promise<void> {
   const seed = Number.parseInt(createHash('sha256').update(`${hashBefore}:${sessionId}`).digest('hex').slice(0, 8), 16);
   const chat = new ChatSession({
     gateway, catalogs: chatCatalogs(catalogs), onto: buildOntology(catalogs), P: learningParams(world.config.profile, world.config.epoch.slice(0, 10)),
-    view: world, citizenId, events, sessionId, visitorId: 'EXT-TERAPEUTA', seed, now: world.now, setting: 'consulta', minLevel: 1,
+    view: world, citizenId, events, sessionId, visitorId: VISITOR, seed, now: world.now, setting: 'consulta', minLevel: 1,
   });
   const history: SessionNote[] = prev ? [...prev.history, { session: Number(prev.meta.session), note: prev.note }] : [];
   const log: PatientTurnLog[] = [];
