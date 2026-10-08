@@ -1,10 +1,10 @@
 ---
 id: 047
 nombre: intervention-study
-estado: borrador
+estado: aprobada
 hito: Capa de investigación (tras M5; antecede a la capa clínica 034)
 depende_de: [028, 034, 036, 038, 039, 043, 046]
-version: 0.1
+version: 0.2
 ---
 
 # 047 — Estudio de intervención: línea base, protocolo breve y seguimiento
@@ -12,7 +12,7 @@ version: 0.1
 ## 1. Propósito
 Medir si un protocolo psicológico breve cambia las medidas de las personas del mundo y si el cambio se mantiene un año después, con el diseño de un estudio clínico: una muestra pequeña con criterio de entrada, medidas de línea base, un protocolo de pocas semanas con medidas durante el tratamiento, una medida posterior y un seguimiento a los 12 meses.
 
-El primer protocolo es el de **tres sesiones de ACT centrado en desmantelar el pensamiento negativo repetitivo (PNR)**, de Ruiz y colaboradores (2019), en `docs/investigacion/SPANISH 3-session RNT-focused ACT protocol Ruiz et al. 2019.pdf`: tres sesiones semanales, cinco audios y práctica diaria de al menos un mes.
+El primer protocolo es el de **tres sesiones de ACT centrado en desmantelar el pensamiento negativo repetitivo (PNR)**, de Ruiz y colaboradores (2019), en `docs/investigacion/SPANISH 3-session RNT-focused ACT protocol Ruiz et al. 2019.pdf`: tres sesiones semanales, cinco audios y práctica diaria de al menos un mes. Ese PDF se usa **solo en el piloto** y **no está en el repositorio** (se entrega en local, en esa ruta): los estudios reales se harán con el autor de las pruebas y del protocolo, Francisco J. Ruiz, y con el material que él entregue.
 
 Dos usos futuros guían el diseño: el mismo flujo servirá para que **terapeutas reales** hablen con las personas del mundo (034), por eso cada sesión se hace con el LLM y se guarda su transcripción; y el estudio debe poder medir la **complacencia clínica** de la persona simulada, el problema que describen quienes han trabajado con pacientes simulados.
 
@@ -42,7 +42,8 @@ Las transcripciones se guardan fuera del estado del mundo (034 R-003); no añade
 
 ## 4. Reglas
 - **R-001** [T] — **Diseño.** Estudio pareado de dos brazos, **protocolo** y **lista de espera**, sobre las mismas personas y el mismo azar de cada semilla (028 R-005): la diferencia entre brazos es el efecto del protocolo. Primera versión con N pequeño (12 a 20) y 1 a 3 semillas.
-- **R-002** [M] — **Criterio de entrada.** Adultos con algo que mejorar en una medida de cribado (sin LLM, con la respuesta verdadera de 046): por ejemplo depresión leve o más en el DASS-21, AAQ-II ≥ 24 o SWLS ≤ 19. La **línea base** se mide aparte y con el LLM, para no confundir el cribado con la línea base (regresión a la media). Se informa cuántas personas cumplen el criterio.
+- **R-001b** [M] — **Fase 1: piloto.** La primera ejecución usa a **las personas del mundo que ya tuvieron episodios de PNR** (hoy 12 de 199; decisión del usuario del 2026-10-08), sin más criterio de entrada, porque el protocolo ataca justo eso y el mundo casi no lo produce (§10). Con tan pocas personas el análisis es **descriptivo**: sin contrastes de hipótesis ni conclusiones sobre el efecto, solo comprobar que el flujo funciona de punta a punta y mirar las transcripciones, las dosis y la dirección del cambio.
+- **R-002** [M] — **Criterio de entrada** (fases posteriores). Adultos con algo que mejorar en una medida de cribado (sin LLM, con la respuesta verdadera de 046): por ejemplo depresión leve o más en el DASS-21, AAQ-II ≥ 24 o SWLS ≤ 19. La **línea base** se mide aparte y con el LLM, para no confundir el cribado con la línea base (regresión a la media). Se informa cuántas personas cumplen el criterio.
 - **R-003** [T] — **Calendario** (por defecto, en días desde la línea base): medida de línea base día 0; sesiones los días 0, 7 y 14; práctica diaria con los audios hasta el día 42; medidas breves (AAQ-II y DASS-21) cada semana hasta el día 42; medida posterior completa el día 42; seguimiento completo **a los 12 meses de la medida posterior**.
 - **R-004** [M] — **El protocolo actúa sobre mecanismos del motor, no sobre el LLM.** Cada ejercicio de las sesiones y de los audios se traduce a ensayos de aprendizaje del mundo (036, 038, 039) con una dosis que decide el motor según el compromiso de la persona en la sesión (R-005):
   - *Enmarque con «Yo» y defusión* («¿quién está observando ese pensamiento?», globos, post-its, ejercicio de la silla): ensayos reforzados de `yo.enmarque` (039 R-006), que pasa a ser una de las salidas del episodio de PNR.
@@ -87,12 +88,13 @@ Las transcripciones se guardan fuera del estado del mundo (034 R-003); no añade
 | `P_PRACTICE_BASE` | 0,6 | 0–1 | [M] |
 | Dosis por ejercicio | la tasa operante de 036 (`operantRate` 0,12) | ×0,5–×2 | [M]; análisis de sensibilidad |
 | Seguimiento | 12 meses tras la medida posterior | 3–24 | petición del usuario |
+| Precio del modelo | 0,10 USD por millón de tokens de entrada y 0,50 de salida | — | dato del usuario (2026-10-08); va en `price` del archivo de configuración del LLM para que el coste del informe sea el real |
 
 ## 9. Métricas y observabilidad
 Por brazo y momento: media y desviación de cada instrumento y de cada subescala del DASS-21; episodios de PNR y cómo terminan (bajo, evitación, «yo»); minutos de rumia; asistencia, compromiso y práctica; brecha de informe; coste y llamadas al LLM.
 
 ## 10. Preguntas abiertas
-- [ ] **El mundo casi no produce PNR.** En 1,4 años hubo 32 episodios en 12 de 199 personas, todos disparados por la deuda (`verbal.deuda`). El protocolo apunta a eso: sin PNR no hay mecanismo que mover. Opciones: (a) un piloto solo con las 12 personas con episodios; (b) un mundo más grande; (c) revisar los disparadores del PNR en la 039, algo que el usuario pospuso a la revisión del motor conductual.
+- [x] **El mundo casi no produce PNR** (decisión del usuario, 2026-10-08: piloto con las 12 personas; los disparadores del PNR se revisan después, en la revisión del motor conductual). En 1,4 años hubo 32 episodios en 12 de 199 personas, todos disparados por la deuda (`verbal.deuda`). El protocolo apunta a eso: sin PNR no hay mecanismo que mover. Opciones: (a) un piloto solo con las 12 personas con episodios; (b) un mundo más grande; (c) revisar los disparadores del PNR en la 039, algo que el usuario pospuso a la revisión del motor conductual.
 - [ ] ¿La medida de cribado debe ser la verdadera o una autoinformada? Con la verdadera no hay sesgo de informe, pero un estudio real usaría autoinforme.
 - [ ] ¿Se añade un brazo de control de atención (sesiones sin contenido activo)? Separa el efecto de la atención del de los ejercicios; tres brazos.
 - [ ] Reproducir las sesiones sin red exige persistir el registro de respuestas del LLM (026 R-003, hoy en memoria).
@@ -102,3 +104,5 @@ Por brazo y momento: media y desviación de cada instrumento y de cada subescala
 | Fecha | Versión | Cambio |
 |---|---|---|
 | 2026-10-08 | 0.1 | Borrador a petición del usuario: línea base con AAQ-II, DASS-21, SWLS y GPQ-9; protocolo breve de 3 sesiones de ACT centrado en el PNR (Ruiz y colaboradores, 2019), con sesiones por LLM y transcripciones guardadas; medidas semanales, posterior y a los 12 meses; medida de complacencia clínica. Pendiente de aprobación |
+| 2026-10-08 | 0.2 | Decisiones del usuario: la primera ejecución es un piloto con las 12 personas que ya tuvieron episodios de PNR (R-001b); el PDF del protocolo es solo para el piloto y no se versiona (los estudios reales se harán con el autor, F. J. Ruiz); precio del modelo para el cálculo del coste. Aprobada |
+| 2026-10-08 | 0.2 | Estado → aprobada |
