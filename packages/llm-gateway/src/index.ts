@@ -28,7 +28,7 @@ export { verifyReply } from './chat/verify.ts';
 export type { Claim, Verdict, Verification } from './chat/verify.ts';
 export { buildPersonView } from './chat/view.ts';
 export type { FamilyMember, PersonView, ViewFact, ViewInput } from './chat/view.ts';
-export { LLM_RANGE, administerBattery, administerInstrument, itemsText } from './psychometrics.ts';
+export { DOWN_ONLY, LLM_RANGE, administerBattery, allowedRange, administerInstrument, itemsText } from './psychometrics.ts';
 export type { ItemAnswer, ItemPlan, ItemSource, PartPlan } from './psychometrics.ts';
 
 export { MAX_TURNS_SESSION, runTherapySession } from './therapy/session.ts';

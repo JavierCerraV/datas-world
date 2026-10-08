@@ -12,6 +12,21 @@ import type { PromptPart } from './types.ts';
 /** 046 §8, `LLM_RANGE`: margen de interpretación alrededor de lo que el motor decidió que dirá. */
 export const LLM_RANGE = 1;
 
+/**
+ * 046 R-012: instrumentos en los que el LLM solo puede elegir **igual o por debajo** de lo que decidió el motor. En el
+ * DASS-21 (0 a 3, «no me ha ocurrido» como mínimo) el modelo tiende a reconocer «un poco» donde el motor decidió 0 y
+ * duplicaba la puntuación (11,4 dicho frente a 4,9 verdadero en la primera corrida); en las demás pruebas la diferencia
+ * fue de 2,5 puntos o menos y el margen sigue siendo simétrico.
+ */
+export const DOWN_ONLY: ReadonlySet<string> = new Set(['DASS-21']);
+
+/** El rango de opciones que se le permite al LLM para un ítem cuya respuesta decidida es `target`: `[lo, hi]`. */
+export function allowedRange(ins: Pick<Instrument, 'id' | 'min' | 'max'>, target: number): [number, number] {
+  const lo = Math.max(ins.min, target - LLM_RANGE);
+  const hi = DOWN_ONLY.has(ins.id) ? target : Math.min(ins.max, target + LLM_RANGE);
+  return [lo, hi];
+}
+
 export interface ItemPlan {
   n: number;
   /** Lo que el motor decidió que dirá (`r_i`). */
@@ -66,7 +81,7 @@ export function itemsText(ins: Instrument, plan: readonly ItemPlan[]): string {
   const lines = [`CUESTIONARIO: ${ins.name}. ${ins.instruction}`];
   for (const p of plan) {
     const item = ins.items.find((x) => x.n === p.n)!;
-    const [lo, hi] = [Math.max(ins.min, p.target - LLM_RANGE), Math.min(ins.max, p.target + LLM_RANGE)];
+    const [lo, hi] = allowedRange(ins, p.target);
     const opts = optionsOf(ins, item).map((o, i) => `${ins.min + i} = ${o}`).join('; ');
     lines.push(`ÍTEM ${p.n}: ${item.text}`, `  Opciones: ${opts}.`, `  RANGO ${lo}-${hi}`, `  Cómo respondes a esta: ${HINT[p.disposition]}`);
   }
@@ -91,7 +106,8 @@ export async function administerInstrument(gateway: Gateway, pv: PersonView, ins
     const optionText = optionsOf(ins, item)[p.target - ins.min] ?? String(p.target);
     const a = byN.get(p.n);
     if (!a || res.source === 'fallback') return { n: p.n, reply: TEMPLATE_REPLY(optionText), option: p.target, source: 'plantilla', ...(why ? { why } : {}) };
-    const inRange = Number.isInteger(a.option) && a.option >=Math.max(ins.min, p.target - LLM_RANGE) && a.option <= Math.min(ins.max, p.target + LLM_RANGE);
+    const [lo, hi] = allowedRange(ins, p.target);
+    const inRange = Number.isInteger(a.option) && a.option >= lo && a.option <= hi;
     return inRange ? { n: p.n, reply: a.reply, option: a.option, source: 'llm' } : { n: p.n, reply: a.reply, option: p.target, source: 'corregida' };
   });
 }
@@ -127,7 +143,8 @@ export async function administerBattery(gateway: Gateway, pv: PersonView, parts:
       const a = given.get(`${ins.id}#${p.n}`);
       // Un ítem que falta cuando el resto sí llegó se cuenta como inválido, no como fallo del proveedor.
       if (!a) return { n: p.n, reply: TEMPLATE_REPLY(optionText), option: p.target, source: 'plantilla', why: why ?? 'missing' };
-      const inRange = Number.isInteger(a.option) && a.option >= Math.max(ins.min, p.target - LLM_RANGE) && a.option <= Math.min(ins.max, p.target + LLM_RANGE);
+      const [lo, hi] = allowedRange(ins, p.target);
+      const inRange = Number.isInteger(a.option) && a.option >= lo && a.option <= hi;
       return inRange ? { n: p.n, reply: a.reply, option: a.option, source: 'llm' } : { n: p.n, reply: a.reply, option: p.target, source: 'corregida' };
     });
   }

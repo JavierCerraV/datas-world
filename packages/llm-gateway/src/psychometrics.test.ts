@@ -8,7 +8,7 @@ import { Gateway } from './gateway.ts';
 import { mockAdapter } from './providers/mock.ts';
 import type { MockResponder } from './providers/mock.ts';
 import { buildPersonView } from './chat/view.ts';
-import { administerBattery, administerInstrument, itemsText } from './psychometrics.ts';
+import { administerBattery, administerInstrument, allowedRange, itemsText } from './psychometrics.ts';
 import type { ItemPlan } from './psychometrics.ts';
 import type { GatewayConfig, ModelConfig } from './types.ts';
 
@@ -55,11 +55,11 @@ describe('046 R-012: varias pruebas en una llamada', () => {
   it('cada respuesta se asigna a su prueba y se valida con el rango de su escala', async () => {
     const reply = JSON.stringify({ answers: [
       ...[3, 5, 2, 6, 4].map((option, i) => ({ q: 'SWLS', n: i + 1, reply: 'ok', option })),
-      { q: 'DASS-21', n: 1, reply: 'nada', option: 1 }, { q: 'DASS-21', n: 2, reply: 'harto', option: 0 },
+      { q: 'DASS-21', n: 1, reply: 'nada', option: 0 }, { q: 'DASS-21', n: 2, reply: 'harto', option: 0 },
     ] });
     const out = await administerBattery(gw(() => reply), pv, parts);
     expect(out.SWLS!.map((a) => a.source)).toEqual(['llm', 'llm', 'llm', 'llm', 'llm']);
-    expect(out['DASS-21']!.map((a) => [a.option, a.source])).toEqual([[1, 'llm'], [3, 'corregida']]);
+    expect(out['DASS-21']!.map((a) => [a.option, a.source])).toEqual([[0, 'llm'], [3, 'corregida']]);
   });
 
   it('un ítem que falta cae a plantilla con su causa; sin proveedor, todos', async () => {
@@ -84,8 +84,23 @@ describe('046 CA-010: lo que ve el LLM', () => {
   });
 
   it('el rango se acota a la escala', () => {
-    const text = itemsText(INSTRUMENTS['DASS-21'], [{ n: 1, target: 0, disposition: 'fiel' }, { n: 2, target: 3, disposition: 'fiel' }]);
-    expect(text).toContain('RANGO 0-1');
-    expect(text).toContain('RANGO 2-3');
+    const text = itemsText(INSTRUMENTS.SWLS, [{ n: 1, target: 1, disposition: 'fiel' }, { n: 2, target: 7, disposition: 'fiel' }]);
+    expect(text).toContain('RANGO 1-2');
+    expect(text).toContain('RANGO 6-7');
+  });
+
+  it('DASS-21: el LLM no puede subir por encima de lo decidido (la primera corrida duplicaba la puntuación)', async () => {
+    expect([allowedRange(INSTRUMENTS['DASS-21'], 0), allowedRange(INSTRUMENTS['DASS-21'], 2), allowedRange(INSTRUMENTS['DASS-21'], 3)]).toEqual([[0, 0], [1, 2], [2, 3]]);
+    // Las demás pruebas conservan el margen simétrico, también las de 0 a 3 como el GHQ-12.
+    expect(allowedRange(INSTRUMENTS['GHQ-12'], 1)).toEqual([0, 2]);
+    expect(allowedRange(INSTRUMENTS.SWLS, 4)).toEqual([3, 5]);
+    const text = itemsText(INSTRUMENTS['DASS-21'], [{ n: 1, target: 0, disposition: 'exagera' }, { n: 2, target: 2, disposition: 'fiel' }]);
+    expect(text).toContain('RANGO 0-0');
+    expect(text).toContain('RANGO 1-2');
+    // Un LLM que sube (opción 1 con lo decidido en 0) se corrige y queda lo decidido, no lo que subió.
+    const plan: ItemPlan[] = Array.from({ length: 21 }, (_, k) => ({ n: k + 1, target: 0, disposition: 'fiel' as const }));
+    const up = JSON.stringify({ answers: plan.map((p) => ({ n: p.n, reply: 'un poco', option: 1 })) });
+    const out = await administerInstrument(gw(() => up), pv, INSTRUMENTS['DASS-21'], plan);
+    expect(out.every((a) => a.source === 'corregida' && a.option === 0)).toBe(true);
   });
 });
