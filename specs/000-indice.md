@@ -54,6 +54,7 @@ Las specs 001–024 corresponden a la lista del documento de visión. 025–028 
 | [044](044-chat-consequences.md) | Consecuencias de la charla: lo que se dice sobre otros sale de la charla | Bloque L (ampliación, petición del usuario 2026-09-27) · completa con 012, 013 y 025 en M3–M6 | 008, 010, 014, 019, 023, 026, 036, 037, 038, 040, 043 | implementada | `apps/api`, `apps/cli`, `apps/web`, `packages/engine`, `packages/engine/src/conversation`, `packages/engine/src/knowledge`, `packages/engine/src/private`, `packages/engine/src/relationships`, `packages/generators`, `packages/generators/src/catalogs`, `packages/generators/src/objects`, `packages/llm-gateway` |
 | [045](045-instruments.md) | Instrumentos psicológicos: encuestas a la población | Capa de investigación (después del rediseño del visor; antes de la capa clínica 034) | 010, 011, 013, 019, 020, 022, 023, 025, 026, 027, 028, 034, 039, 040, 043 | borrador | — |
 | [046](046-psychometric-battery.md) | Batería psicométrica: las personas responden pruebas desde lo que han vivido | Laboratorio de medición (petición del usuario, 2026-10-05) · antecede a M5 | 010, 012, 013, 019, 020, 023, 031, 036, 037, 038, 039, 040, 041 | aprobada | `apps/cli`, `packages/engine/src/measurement`, `packages/llm-gateway` |
+| [047](047-intervention-study.md) | Estudio de intervención: línea base, protocolo breve y seguimiento | Capa de investigación (tras M5; antecede a la capa clínica 034) | 028, 034, 036, 038, 039, 043, 046 | aprobada | — |
 <!-- INDICE:FIN -->
 
 ## Orden sugerido de revisión
