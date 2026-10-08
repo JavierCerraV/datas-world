@@ -2,7 +2,7 @@
 modulo: llm-gateway
 ruta: packages/llm-gateway
 estado: en-desarrollo
-specs: [026, 043, 044, 013, 046]
+specs: [026, 043, 044, 013, 046, 047]
 actualizado: 2026-10-08
 ---
 
@@ -23,6 +23,7 @@ El LLM expresa; no decide la postura ni cambia el mundo (ADR-003). No hace E/S d
 | 026 | CA-003 a CA-013. R-001, R-003 (con almacén en memoria), R-004, R-006 a R-014 | CA-001 y CA-002 (el mundo con `mock` y el replay sin red se prueban con el worker, L3); R-002 y R-005 (decisiones de nivel 4, M6); el almacén SQLite de `llm_records` (L3) |
 | 043 | CA-002, CA-003, CA-009 a CA-012, CA-018. R-002 a R-004, R-010 a R-014, R-023 (streaming, caché y verificación asíncrona) | CA-001, CA-014, CA-015, CA-017 (L3); CA-016 (L4); la medición real de latencia y coste (L4.3) |
 | 044 | R-001: extracción de las afirmaciones sobre terceros en el clasificador, con respaldo léxico (L5.1) | Resolución a una persona real, credibilidad e impacto (L5.2, motor); CA-001 a CA-008 |
+| 047 | R-005 (terapeuta como agente: qué recibe y qué no), R-005b (diálogo por turnos con salida estructurada), R-005c (fidelidad). CA-008, CA-009, CA-010; la transcripción de CA-005 | La persona con el pipeline de la 043 y la alianza (R-005d); medidas (R-007); complacencia (R-008); la dosis y los eventos son del motor |
 
 ## 3. API pública
 Desde `@datas-world/llm-gateway`:
@@ -44,6 +45,8 @@ Desde `@datas-world/llm-gateway`:
 | `verifyReply` | Afirmaciones marcadas contra la vista y adherencia a la postura |
 | `administerInstrument`, `administerBattery`, `itemsText`, `LLM_RANGE`, tipos `ItemPlan`, `PartPlan`, `ItemAnswer` | Una prueba psicométrica como charla (046 R-012, R-013) |
 | `ChatSession` (`turn`, `close`, `input`), `TEMPLATES`, `ChatEndedError` | Sesión de charla: tono, postura, `onStance`, texto en streaming, verificación en segundo plano y entrada `chat_session` al cerrar |
+| `runTherapySession(input)`, `MAX_TURNS_SESSION`, tipos `TherapySessionInput`, `TherapySessionResult`, `PatientReply`, `SessionEnd` | Una sesión del protocolo como diálogo (047 R-005b): el terapeuta (propósito `therapist`) habla, `respond` trae lo que dice la persona, y el motor cuenta lo cubierto. Devuelve transcripción, fidelidad, lo que faltó, la formulación del caso y cómo terminó (`completa`, `tope`, `abandono`, `sin_llm`). No cambia el mundo |
+| `therapistRequest(ctx)`, `TherapistSchema`, tipos `TherapistContext`, `TherapistOutput`, `TherapyTurn` | Petición de un turno del terapeuta: papel y guía de la sesión cacheables; admisión, formulación, pendientes y turnos que quedan, aparte |
 
 ## 4. Diseño interno y decisiones
 - **SDK oficial para Claude.** El adaptador de Anthropic usa `@anthropic-ai/sdk`: `messages.stream` con `finalMessage()` y `messages.create`. Haiku 4.5 no lleva pensamiento adaptativo ni `effort`, y admite `temperature`.
@@ -61,6 +64,7 @@ Desde `@datas-world/llm-gateway`:
   - `@datas-world/generators`: solo para pruebas.
 
   Solo cargan en la API y la CLI; el worker no las usa. La memoria que añaden es la LRU de 500 registros (≈ 1 MB).
+- **Terapeuta (047).** Es un agente, no un guion: su prompt le explica cómo conducir una sesión por escrito (turnos cortos, una pregunta por turno, no suponer, no premiar el «sí», adaptar el ejercicio) y le da la guía de **esa** sesión. `therapistRequest` no recibe la vista de la persona ni el mundo: por su firma solo puede usar el nombre, la admisión, sus notas y el texto dicho; la postura y las notas de la transcripción se guardan pero no vuelven al prompt. Se le dice que es un estudio con población simulada. El motor cuenta los componentes (`recordExchange`): lo que el LLM declara en `covered` se guarda como `claimed` y no afecta a la fidelidad. Si el terapeuta falla, la sesión se corta con `sin_llm` y su motivo, sin plantilla: una sesión inventada contaminaría el estudio.
 
 ## 5. Invariantes y guardarraíles
 - 026 INV-004: ninguna clave de API se escribe en registros ni en métricas (CA-010). Las claves solo se leen del entorno.
@@ -74,10 +78,12 @@ Desde `@datas-world/llm-gateway`:
 
 ## 7. Paridad con el prototipo
 No aplica: el prototipo no usa LLM.
+- `src/therapy/therapy.test.ts` (6 pruebas): 047 CA-008 (qué lleva y qué no el prompt del terapeuta), CA-009 (un terapeuta `mock` que reacciona da sesiones distintas a dos personas), CA-010 (fidelidad al llegar al tope, lo declarado no cuenta), abandono y fallo del LLM.
 
 ## 8. Pendientes y deuda
 - [ ] Almacén SQLite de `llm_records` y lectura de `config/llm.json` en la API (L3).
 - [ ] Prueba real con Haiku 4.5: latencia (043 R-023) y coste por charla (L4.3).
+- [ ] Ninguna sesión real con `claude-haiku-5-5` todavía: el prompt del terapeuta está sin probar con el modelo (047, piloto).
 - [ ] `trueInWorld` de las afirmaciones para el informe de la batería (L4).
 
 ## 9. Bitácora de cambios
@@ -95,3 +101,4 @@ No aplica: el prototipo no usa LLM.
 | 2026-10-06 | m4/bateria-psicometrica | 046 | `psychometrics.ts`: `administerInstrument` aplica un instrumento a una persona como charla en una sola llamada (`dialogue`, salida JSON validada con Zod). El motor da `target` y `disposition` por ítem; el LLM responde con sus palabras y elige una opción dentro de `LLM_RANGE` (±1); fuera de rango, el motor usa la decidida (`corregida`); sin LLM, plantilla (`plantilla`). El prompt no lleva la respuesta verdadera ni los indicadores (CA-010). Pruebas `psychometrics.test.ts` (046 CA-009, CA-010) |
 | 2026-10-06 | m4/bateria-psicometrica | 046 | `ItemAnswer.why`: la causa por la que una respuesta cayó a plantilla (`budget`, `timeout`, `invalid`, `disabled`, `network_error`), para que el fallo del proveedor no sea silencioso. `LlmResult.errorDetail`: estado y mensaje del proveedor (acotado, sin claves) cuando la pasarela cae a respaldo por un error de red. `administerBattery`: las seis pruebas de una persona en UNA llamada (`q` identifica la prueba de cada respuesta): 150 llamadas en vez de 900, necesario con proveedores de cuota diaria baja. Probada contra OpenRouter (`nvidia/nemotron-3-super-120b-a12b:free`): 65 de 65 ítems del LLM, ninguno corregido. El adaptador `openai_compatible` incluye el cuerpo (acotado) de las respuestas de error, para distinguir límite por minuto, por día o de crédito |
 | 2026-10-08 | feat/gateway-haiku-5-5 | 026, 047 | Pasarela lista para `claude-haiku-5-5` (026 R-014, CA-012, CA-013): `temperature` pasa a ser opcional y no se envía si falta (el modelo la rechaza con un 400); `effort` (`output_config.effort`) y `thinking: "disabled"` nuevos, en la configuración, la llamada y la clave del registro (solo cuando están: las claves anteriores no cambian). Propósito `therapist` (047 R-005), desactivado por defecto. `HAIKU_5_5` con su precio. El adaptador `openai_compatible` también omite la temperatura ausente |
+| 2026-10-08 | m5/estudio-protocolo (bloque 2) | 047 | `therapy/`: el terapeuta del estudio como agente LLM (`therapistRequest`) y la sesión como diálogo (`runTherapySession`), con la cuenta de componentes del motor, fidelidad, formulación del caso entre turnos y cuatro finales (`completa`, `tope`, `abandono`, `sin_llm`). La persona entra por `respond`; conectarla a la charla de la 043 es el bloque siguiente |

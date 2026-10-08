@@ -10,3 +10,15 @@ Spec 028 (aprobada 2026-10-07). Hito M5 de `docs/roadmap.md`: mismo mundo con y 
 - [ ] E5 Memoria de un brazo de 200 personas × 90 días dentro del presupuesto (CA-007, `pnpm bench`); el primer experimento dio 563–574 MB de proceso.
 - [ ] E6 Métrica `psychometrics` por brazo y `--keep-events`.
 - [ ] E7 Intervención que sostenga un desempleo (congelar la contratación de una persona N días) y revisar por qué un despido sube los vínculos y el dinero a 7 días.
+
+## Estudio de intervención (spec 047, aprobada 2026-10-08)
+
+Piloto con las 12 personas con episodios de PNR, protocolo ACT de 3 sesiones, `claude-haiku-5-5` en esfuerzo bajo.
+
+- [x] P1 Pasarela lista para `claude-haiku-5-5`: temperatura opcional, `effort`, `thinking`, propósito `therapist` (026 R-014).
+- [x] P2 Guía del protocolo (`engine/protocol`) y terapeuta como agente con sesión dialogada y fidelidad (047 R-005 a R-005c; CA-008 a CA-010).
+- [ ] P3 La persona en la sesión con la charla de la 043: postura del motor, alianza y revelación (R-005d), compromiso por sesión; transcripciones guardadas fuera del hash (CA-005).
+- [ ] P4 Efecto en el motor: dosis por mecanismo, `PROTOCOL_SESSION`, `PRACTICE_DONE`, `PROTOCOL_ENDED`, adherencia a la práctica (R-004, R-006; CA-002 a CA-004).
+- [ ] P5 Pruebas en el mundo y regreso a sesión con lo que le pasó, o abandono (R-012, R-013; CA-011, CA-012).
+- [ ] P6 Medidas con los cuatro instrumentos, complacencia e informe (R-007 a R-009; CA-006, CA-007).
+- [ ] P7 Comando de la CLI y corrida del piloto, con tope de gasto de 5 USD.

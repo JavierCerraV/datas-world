@@ -30,3 +30,8 @@ export { buildPersonView } from './chat/view.ts';
 export type { FamilyMember, PersonView, ViewFact, ViewInput } from './chat/view.ts';
 export { LLM_RANGE, administerBattery, administerInstrument, itemsText } from './psychometrics.ts';
 export type { ItemAnswer, ItemPlan, ItemSource, PartPlan } from './psychometrics.ts';
+
+export { MAX_TURNS_SESSION, runTherapySession } from './therapy/session.ts';
+export type { PatientReply, SessionEnd, TherapySessionInput, TherapySessionResult } from './therapy/session.ts';
+export { TherapistSchema, therapistRequest } from './therapy/therapist.ts';
+export type { TherapistContext, TherapistOutput, TherapyTurn } from './therapy/therapist.ts';

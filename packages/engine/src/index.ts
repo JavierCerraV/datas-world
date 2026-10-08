@@ -509,3 +509,6 @@ export {
   experimentInputs, measure, pairedContrast, parseExperiment,
 } from './experiment/index.ts';
 export type { Arm, Contrast, Experiment, Intervention, InterventionKind, MetricId, Pair, Subjects } from './experiment/index.ts';
+
+export { ACT_PNR_3, PROTOCOLS, coverage, newProgress, recordExchange, sessionOf } from './protocol/index.ts';
+export type { Coverage, Mechanism, Protocol, ProtocolComponent, ProtocolId, ProtocolSession, SessionNumber, SessionProgress } from './protocol/index.ts';
