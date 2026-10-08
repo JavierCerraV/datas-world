@@ -4,7 +4,7 @@ nombre: intervention-study
 estado: aprobada
 hito: Capa de investigación (tras M5; antecede a la capa clínica 034)
 depende_de: [028, 034, 036, 038, 039, 043, 046]
-version: 0.2
+version: 0.3
 ---
 
 # 047 — Estudio de intervención: línea base, protocolo breve y seguimiento
@@ -51,13 +51,22 @@ Las transcripciones se guardan fuera del estado del mundo (034 R-003); no añade
   - *Valores y acción comprometida* («película de la vida», jardín, acciones concretas): refuerzo de los dominios `dominio.*` de la persona (038 R-006) y de 2 a 4 reglas propias del tipo *tracking* hacia acciones valiosas (038 R-002).
   - *Práctica diaria con audios:* cada día, con una probabilidad que decide el motor (R-006), un evento `PRACTICE_DONE` con media dosis de lo anterior.
   Los parámetros son [M] y **no se ajustan para que salga un efecto**: se fijan desde los de aprendizaje ya existentes (036 §8) y se informa un análisis de sensibilidad (R-009).
-- **R-005** [M] — **Sesión con el LLM.** El terapeuta es el guion del protocolo, sección por sección; la persona responde con el pipeline de la charla (043) en modo prueba (tono fijado por el guion: sin clasificador ni verificador, una llamada por turno). La **postura** de cada respuesta la elige el motor (043); el LLM solo la expresa. El compromiso `engagement` de la sesión es la proporción de turnos con postura de apertura; la dosis de R-004 es proporcional. Asistir a una sesión también lo decide el motor (034 R-005). Se guarda la transcripción completa, con la postura de cada turno.
+- **R-005** [M] — **El terapeuta es un agente LLM, no un guion.** Un modelo (configurable por separado de la persona: propósito `therapist`) con el papel de psicólogo formado en terapias de tercera generación (ACT: análisis funcional, defusión, aceptación, valores y acción comprometida). Recibe:
+  - el **manual** del protocolo como guía estructurada (objetivos, componentes obligatorios de cada sesión, ejercicios y frases de ejemplo), **no** como texto para leer igual a todos;
+  - lo que la persona ha dicho en la conversación;
+  - su **formulación del caso**: las notas que él mismo escribe en cada turno (disparadores, estrategias de evitación, valores, barreras), que pasan de una sesión a la siguiente;
+  - opcionalmente, las respuestas de la persona a las pruebas de la línea base, como en una admisión real.
+
+  **No** recibe la verdad del mundo, ni los indicadores, ni la postura que el motor decidió para la persona (026 R-002; CLAUDE.md regla 3): un terapeuta solo sabe lo que el paciente le cuenta.
+- **R-005b** [M] — **Diálogo.** Cada sesión es una conversación por turnos: terapeuta (LLM) → persona (pipeline de la 043, con la postura elegida por el motor y expresada por el LLM) → terapeuta… El terapeuta adapta la pregunta, el ritmo y el ejercicio a lo que la persona responde: repite o reformula si no la entiende, dedica más turnos a un componente que lo necesita, sigue una pista que ella da. Cada turno devuelve un objeto estructurado `{ say, component, covered, notes }` validado con Zod; **el motor, no el LLM, lleva la cuenta** de qué componentes obligatorios están cubiertos. La sesión termina cuando se cubrieron o al llegar a `MAX_TURNS_SESSION`. Se guarda la transcripción completa, con la postura de cada turno de la persona y las notas del terapeuta.
+- **R-005c** [M] — **Fidelidad.** Se registra qué proporción de los componentes obligatorios se cubrió (`fidelity`) y la dosis de R-004 se multiplica por ella: un terapeuta que se pierde da menos dosis. Así se separa «el protocolo no funciona» de «el protocolo no se aplicó». La persona **no** recibe el nombre de los componentes ni sabe cuántos faltan.
+- **R-005d** [M] — **Alianza.** La persona no conoce al terapeuta: su cautela ante un desconocido (043 R-024 a R-027) rige el principio y la confianza crece con los turnos. Por defecto llega a una consulta que aceptó, así que el nivel de revelación inicial es «conocido» y el motor decide lo demás; sin alianza no hay revelación de lo íntimo y por tanto menos apertura y menos dosis (R-004).
 - **R-006** [M] — **Adherencia a la práctica.** La probabilidad diaria de practicar es `P_PRACTICE_BASE` modulada por el estrés, la energía y el contacto reciente con sus valores; sin práctica, no hay dosis (se mide la relación dosis-respuesta).
 - **R-007** [M] — **Medidas.** Con los cuatro instrumentos de 046 en una sola llamada por persona y momento, con el LLM por defecto (con el rango del DASS-21 ya acotado, 046 v0.3), y con la respuesta verdadera calculada siempre en paralelo. Una opción `--sin-llm` usa la respuesta que decidió el motor.
 - **R-008** [M] — **Complacencia clínica.** Tres medidas, porque el GPQ-9 por sí solo no la mide (mide la tendencia general a seguir reglas por aprobación, un rasgo):
   - el **GPQ-9** en cada momento, como medida del rasgo;
   - la **brecha de informe**: cambio dicho menos cambio verdadero en cada instrumento, que solo es posible porque el mundo conoce la verdad;
-  - en las sesiones, la **complacencia en la transcripción**: proporción de turnos en que la persona acepta, promete o elogia mientras su postura decidida por el motor es evasiva o de límite (clasificada por reglas léxicas y, si se pide, por un LLM aparte).
+  - en las sesiones, la **complacencia en la transcripción**: proporción de turnos en que la persona acepta, promete o elogia mientras su postura decidida por el motor es evasiva o de límite (reglas léxicas y, si se pide, un LLM aparte); y la **aceptación de suposiciones**: cuántas veces el terapeuta afirma algo que la vista de la persona no respalda («seguro te sientes culpable») y ella lo acoge como propio, que el verificador de la 043 marca como no respaldado.
 - **R-009** [M] — **Análisis.** Contraste pareado protocolo − lista de espera por semilla y persona (028 R-008) en cada momento; efecto mantenido a los 12 meses; relación dosis-respuesta; quién responde mejor según su historia (episodios de PNR, aprobación, flexibilidad); y sensibilidad a los parámetros de R-004 (tres valores de dosis). Exporta CSV, JSON y Excel con los límites en la primera hoja.
 - **R-010** [T] — **El mundo sigue** entre sesiones y durante el año de seguimiento: nada se detiene ni se inyecta salvo lo de R-004 (034 R-004).
 - **R-011** [T] — **Honestidad.** El efecto sale de supuestos [M] sobre cómo aprende una persona simulada, no de datos de personas reales. El estudio muestra si el mundo responde en la dirección esperada, si el efecto se sostiene y quién responde, **no** si el protocolo funciona en humanos. Cada exportación lo dice (034 R-009).
@@ -78,6 +87,9 @@ Las transcripciones se guardan fuera del estado del mundo (034 R-003); no añade
 - **CA-005** — *Dada* una sesión, *entonces* se guarda su transcripción con la postura de cada turno, el guion y la sección, fuera del hash.
 - **CA-006** — *Dado* el estudio completo, *entonces* el informe trae las cuatro medidas en cada momento, el contraste pareado, la brecha de informe, la complacencia en las transcripciones y la relación dosis-respuesta, con los límites en la primera hoja.
 - **CA-007** — *Dado* el mismo estudio con el proveedor `mock`, *entonces* el informe es idéntico byte a byte.
+- **CA-008** — *Dado* el prompt del terapeuta en cualquier turno, *entonces* no contiene el estado del mundo, los indicadores, la verdad de lo que la persona cree ni su postura (prueba como la 043 CA-002).
+- **CA-009** — *Dadas* dos personas que responden distinto al mismo punto del manual, *entonces* las sesiones difieren: el terapeuta no repite el mismo guion (prueba con un proveedor `mock` que reacciona a lo que dice la persona).
+- **CA-010** — *Dada* una sesión que termina sin cubrir todos los componentes obligatorios, *entonces* `fidelity` < 1, la dosis baja en proporción y queda anotado qué faltó (R-005c).
 
 ## 8. Parámetros y calibración
 | Parámetro | Valor por defecto | Rango | Fuente / justificación |
@@ -86,12 +98,14 @@ Las transcripciones se guardan fuera del estado del mundo (034 R-003); no añade
 | Sesiones (días) | 0, 7, 14 | — | [T] protocolo de Ruiz y colaboradores (2019) |
 | Práctica diaria hasta | día 42 | 28–60 | [T] «al menos un mes» del protocolo |
 | `P_PRACTICE_BASE` | 0,6 | 0–1 | [M] |
+| `MAX_TURNS_SESSION` | 40 turnos del terapeuta | 20–80 | [M] equivale a una sesión de 45 a 60 minutos |
+| Propósito `therapist` | un modelo configurable, por defecto el mismo de la persona | — | el usuario pidió un modelo con conocimiento de terapias de tercera generación y diálogo (2026-10-08) |
 | Dosis por ejercicio | la tasa operante de 036 (`operantRate` 0,12) | ×0,5–×2 | [M]; análisis de sensibilidad |
 | Seguimiento | 12 meses tras la medida posterior | 3–24 | petición del usuario |
 | Precio del modelo | 0,10 USD por millón de tokens de entrada y 0,50 de salida | — | dato del usuario (2026-10-08); va en `price` del archivo de configuración del LLM para que el coste del informe sea el real |
 
 ## 9. Métricas y observabilidad
-Por brazo y momento: media y desviación de cada instrumento y de cada subescala del DASS-21; episodios de PNR y cómo terminan (bajo, evitación, «yo»); minutos de rumia; asistencia, compromiso y práctica; brecha de informe; coste y llamadas al LLM.
+Por brazo y momento: media y desviación de cada instrumento y de cada subescala del DASS-21; episodios de PNR y cómo terminan (bajo, evitación, «yo»); minutos de rumia; asistencia, compromiso y práctica; brecha de informe; coste y llamadas al LLM, separando las del terapeuta, las de la persona, las de verificación y las de medida.
 
 ## 10. Preguntas abiertas
 - [x] **El mundo casi no produce PNR** (decisión del usuario, 2026-10-08: piloto con las 12 personas; los disparadores del PNR se revisan después, en la revisión del motor conductual). En 1,4 años hubo 32 episodios en 12 de 199 personas, todos disparados por la deuda (`verbal.deuda`). El protocolo apunta a eso: sin PNR no hay mecanismo que mover. Opciones: (a) un piloto solo con las 12 personas con episodios; (b) un mundo más grande; (c) revisar los disparadores del PNR en la 039, algo que el usuario pospuso a la revisión del motor conductual.
@@ -106,3 +120,4 @@ Por brazo y momento: media y desviación de cada instrumento y de cada subescala
 | 2026-10-08 | 0.1 | Borrador a petición del usuario: línea base con AAQ-II, DASS-21, SWLS y GPQ-9; protocolo breve de 3 sesiones de ACT centrado en el PNR (Ruiz y colaboradores, 2019), con sesiones por LLM y transcripciones guardadas; medidas semanales, posterior y a los 12 meses; medida de complacencia clínica. Pendiente de aprobación |
 | 2026-10-08 | 0.2 | Decisiones del usuario: la primera ejecución es un piloto con las 12 personas que ya tuvieron episodios de PNR (R-001b); el PDF del protocolo es solo para el piloto y no se versiona (los estudios reales se harán con el autor, F. J. Ruiz); precio del modelo para el cálculo del coste. Aprobada |
 | 2026-10-08 | 0.2 | Estado → aprobada |
+| 2026-10-08 | 0.3 | A petición del usuario, el terapeuta pasa de ser un guion a ser un **agente LLM con formación en terapias de tercera generación** que dialoga y se adapta a cada persona (R-005 a R-005d: manual como guía, formulación del caso entre sesiones, motor que cuenta los componentes cubiertos, fidelidad que multiplica la dosis, alianza). La complacencia incluye aceptar suposiciones del terapeuta (R-008). CA-008 a CA-010. Pendiente de la confirmación del usuario |
