@@ -125,7 +125,10 @@ export class Gateway {
       let res;
       try {
         res = await adapter.call({
-          model: cfg.model, temperature: cfg.temperature, maxOutputTokens: cfg.maxOutputTokens, system: req.system, messages,
+          model: cfg.model, maxOutputTokens: cfg.maxOutputTokens, system: req.system, messages,
+          ...(cfg.temperature !== undefined ? { temperature: cfg.temperature } : {}),
+          ...(cfg.effort ? { effort: cfg.effort } : {}),
+          ...(cfg.thinking ? { thinking: cfg.thinking } : {}),
           ...(jsonSchema ? { jsonSchema } : {}),
           ...(req.onText && !req.schema ? { onText: (s: string) => { streamed += s; req.onText!(s); } } : {}),
           signal: ctrl.signal,

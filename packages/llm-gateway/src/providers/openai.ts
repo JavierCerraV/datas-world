@@ -17,7 +17,7 @@ export function openaiCompatibleAdapter(opts: { baseUrl?: string; apiKey?: strin
       const apiKey = opts.apiKey ?? process.env.LLM_API_KEY;
       const body = {
         model: c.model,
-        temperature: c.temperature,
+        ...(c.temperature !== undefined ? { temperature: c.temperature } : {}),
         max_tokens: c.maxOutputTokens,
         stream: Boolean(c.onText),
         ...(c.onText ? { stream_options: { include_usage: true } } : {}),
