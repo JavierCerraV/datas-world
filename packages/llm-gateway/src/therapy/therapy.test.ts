@@ -26,7 +26,7 @@ const therapist: MockResponder = (c) => {
   const component = pending.split(', ')[0]?.split(' ')[0] ?? '';
   const last = c.messages.at(-1)!.text;
   const say = /no entiendo/i.test(last) ? `Se lo digo de otra forma (${component}).` : `Trabajemos ${component}.`;
-  return JSON.stringify({ say, component, covered: [], notes: `Dijo: ${last.slice(0, 40)}` });
+  return JSON.stringify({ read: `LECTURA-PRIVADA de «${last.slice(0, 20)}»`, say, component, covered: [], notes: `Dijo: ${last.slice(0, 40)}`, close: false });
 };
 
 describe('047 CA-008: el terapeuta solo sabe lo que la persona le dice', () => {
@@ -81,6 +81,48 @@ describe('047 CA-013: el terapeuta recuerda las sesiones anteriores y no sabe qu
   });
 });
 
+describe('047 R-005f: el terapeuta trabaja por función, no por pasos', () => {
+  it('lee la función de cada respuesta antes de hablar; esa lectura se guarda y no vuelve a su prompt ni llega a la persona', async () => {
+    const heard: string[] = [];
+    const prompts: string[] = [];
+    const spy: MockResponder = (c) => {
+      if (c.jsonSchema) prompts.push(textOf(c));
+      return therapist(c);
+    };
+    const r = await runTherapySession({
+      gateway: gw(spy), protocol: ACT_PNR_3, session: 1, patientName: 'Marta', maxTurns: 4,
+      respond: async (say) => { heard.push(say); return { text: 'Ajá.' }; },
+    });
+    const turns = r.transcript.filter((t) => t.speaker === 'terapeuta');
+    expect(turns.every((t) => t.read?.startsWith('LECTURA-PRIVADA'))).toBe(true);
+    expect(heard.join(' ')).not.toContain('LECTURA-PRIVADA');
+    expect(prompts.at(-1)).not.toContain('LECTURA-PRIVADA');
+  });
+
+  it('no se le dan cuentas de intercambios que cumplir: los pendientes van sin números', () => {
+    const progress = newProgress();
+    const req = therapistRequest({ protocol: ACT_PNR_3, session: 1, patientName: 'Marta', formulation: '', progress, transcript: [], turnsLeft: 40 });
+    const text = textOf(req);
+    expect(text).not.toMatch(/\(\d+\/\d+\)/);
+    expect(text).not.toMatch(/al menos \d+ intercambio/);
+    expect(text).toMatch(/PENDIENTES: s1\.encuadre, s1\.logica/);
+  });
+
+  it('puede cerrar la sesión cuando lo juzga clínicamente oportuno, aunque falten componentes', async () => {
+    let n = 0;
+    const closer: MockResponder = (c) => {
+      if (!c.jsonSchema) return 'Nota.';
+      n++;
+      return JSON.stringify({ read: '', say: n === 3 ? 'Dejémoslo aquí por hoy.' : 'Cuénteme.', component: 's1.encuadre', covered: [], notes: '', close: n === 3 });
+    };
+    const r = await runTherapySession({ gateway: gw(closer), protocol: ACT_PNR_3, session: 1, patientName: 'Marta', respond: async () => ({ text: 'Bueno.' }) });
+    expect(r.ended).toBe('cierre');
+    expect(r.therapistTurns).toBe(3);
+    expect(r.fidelity).toBeLessThan(1);
+    expect(r.transcript.at(-1)).toMatchObject({ speaker: 'persona', text: 'Bueno.' });
+  });
+});
+
 describe('047 CA-009: dos personas que responden distinto tienen sesiones distintas', () => {
   it('el terapeuta reformula con quien no entiende y avanza con quien sí', async () => {
     const run = (respond: (say: string, turn: number) => PatientReply) =>
@@ -118,7 +160,7 @@ describe('047 CA-010: la fidelidad la decide lo que de verdad se trabajó', () =
   });
 
   it('lo que el terapeuta declara cubierto no cuenta, ni un componente inventado', async () => {
-    const liar: MockResponder = () => JSON.stringify({ say: 'Listo, ya vimos todo.', component: 'inventado', covered: required.map((c) => c.id), notes: '' });
+    const liar: MockResponder = () => JSON.stringify({ read: '', close: false, say: 'Listo, ya vimos todo.', component: 'inventado', covered: required.map((c) => c.id), notes: '' });
     const r = await runTherapySession({ gateway: gw(liar), protocol: ACT_PNR_3, session: 1, patientName: 'Marta', maxTurns: 4, respond: async () => ({ text: 'Bueno.' }) });
     expect(r.fidelity).toBe(0);
     expect(r.transcript.every((t) => t.section === 'otro')).toBe(true);

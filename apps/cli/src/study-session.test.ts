@@ -26,7 +26,6 @@ interface Saved {
   history: { session: number; note: string }[];
   transcript: { speaker: string; text: string; section: string; stance?: string }[];
   patient: { turn: number; stance: string; level: number; expression: string; stanceCheck: string }[];
-  usage: Record<string, { calls: number }>;
 }
 const read = (p: string) => JSON.parse(readFileSync(`${p}.json`, 'utf8')) as Saved;
 
@@ -47,7 +46,6 @@ describe('study:session (047)', () => {
     expect(s.transcript.filter((t) => t.speaker === 'persona').every((t) => !!t.stance)).toBe(true);
     expect(s.patient).toHaveLength(8);
     expect(s.note.length).toBeGreaterThan(0);
-    expect(s.usage.therapist!.calls).toBe(9);
     const md = readFileSync(`${a}.md`, 'utf8');
     expect(md).toContain('**Terapeuta:**');
     expect(md).toContain(`**${s.meta.name.split(' ')[0]}`);

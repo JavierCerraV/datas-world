@@ -34,8 +34,11 @@ export interface TherapySessionInput {
   respond: (say: string, turn: number) => Promise<PatientReply>;
 }
 
-/** `completa`: se cubrió todo; `tope`: se acabaron los turnos; `abandono`: la persona se fue; `sin_llm`: falló el terapeuta. */
-export type SessionEnd = 'completa' | 'tope' | 'abandono' | 'sin_llm';
+/**
+ * `completa`: se cubrió todo; `cierre`: el terapeuta dio por terminada la sesión; `tope`: se acabaron los turnos;
+ * `abandono`: la persona se fue; `sin_llm`: falló el terapeuta.
+ */
+export type SessionEnd = 'completa' | 'cierre' | 'tope' | 'abandono' | 'sin_llm';
 
 export interface TherapySessionResult {
   transcript: TherapyTurn[];
@@ -87,7 +90,7 @@ export async function runTherapySession(input: TherapySessionInput): Promise<The
     const section = known ? out.component : 'otro';
     if (out.notes.trim()) formulation = out.notes.trim();
     claimed = out.covered;
-    transcript.push({ speaker: 'terapeuta', text: out.say, section, notes: formulation });
+    transcript.push({ speaker: 'terapeuta', text: out.say, section, notes: formulation, ...(out.read.trim() ? { read: out.read.trim() } : {}) });
 
     const reply = await input.respond(out.say, turn);
     transcript.push({ speaker: 'persona', text: reply.text, section, ...(reply.stance !== undefined ? { stance: reply.stance } : {}) });
@@ -97,8 +100,14 @@ export async function runTherapySession(input: TherapySessionInput): Promise<The
       break;
     }
     if (known) recordExchange(progress, session, out.component);
+    // El terapeuta se despidió: la sesión acaba con la respuesta de la persona, falte lo que falte (R-005f).
+    if (out.close) {
+      ended = 'cierre';
+      turn++;
+      break;
+    }
   }
-  if (ended === 'tope' && coverage(session, progress).missing.length === 0) ended = 'completa';
+  if ((ended === 'tope' || ended === 'cierre') && coverage(session, progress).missing.length === 0) ended = 'completa';
 
   // La memoria del terapeuta para la próxima sesión: una nota suya; si no llega, lo que ya tenía formulado.
   let note = '';

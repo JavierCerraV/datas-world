@@ -21,6 +21,7 @@ import { chatBattery } from './battery.ts';
 import { chatStatsCommand } from './chat-stats.ts';
 import { psychometrics } from './psychometrics.ts';
 import { experimentRun } from './experiment.ts';
+import { studyPilot } from './study-pilot.ts';
 import { studySession } from './study-session.ts';
 import { benchLife } from './bench-life.ts';
 import { benchRelations } from './bench-relations.ts';
@@ -59,7 +60,8 @@ export const USAGE = `Uso: pnpm cli <comando> [opciones]
   chat:stats [--json] [--db RUTA]
   experiment:run <definición.json> [--out RUTA] [--db RUTA]
   psychometrics [--provider mock|config] [--n 50] [--month-days 30] [--year-days 365] [--concurrency 4] [--delay-ms 0] [--per-call person|instrument] [--llm-config RUTA] [--resume] [--db RUTA] [--work RUTA] [--out RUTA]
-  study:session [--citizen CIT-000123] [--session 1] [--previous sesion.json] [--provider mock|config] [--llm-config RUTA] [--max-turns 40] [--work RUTA] [--gap-days 7] [--out RUTA] [--db RUTA]   una sesión del protocolo, para leer el diálogo (047)`;
+  study:session [--citizen CIT-000123] [--session 1] [--previous sesion.json] [--provider mock|config] [--llm-config RUTA] [--max-turns 40] [--min-level 1|2] [--work RUTA] [--gap-days 7] [--out RUTA] [--db RUTA]   una sesión del protocolo, para leer el diálogo (047)
+  study:pilot --citizens CIT-…,CIT-… [--sessions 3] [--provider mock|config] [--llm-config RUTA] [--max-turns 40] [--min-level 1|2] [--gap-days 7] [--resume] [--work RUTA] [--out CARPETA] [--db RUTA]   el protocolo completo con unas pocas personas (047)`;
 
 function worldAdvance(args: string[], io: Io): void {
   const { values: v } = parseArgs({
@@ -175,6 +177,7 @@ const ASYNC_COMMANDS: Record<string, (args: string[], io: Io) => Promise<void>> 
   'chat:battery': (args, io) => chatBattery(args, io),
   psychometrics: (args, io) => psychometrics(args, io),
   'study:session': (args, io) => studySession(args, io),
+  'study:pilot': (args, io) => studyPilot(args, io),
 };
 
 /** Como `run`, pero también atiende los comandos asíncronos (el punto de entrada usa este). */

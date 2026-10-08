@@ -18,7 +18,8 @@ Piloto con las 12 personas con episodios de PNR, protocolo ACT de 3 sesiones, `c
 - [x] P1 Pasarela lista para `claude-haiku-5-5`: temperatura opcional, `effort`, `thinking`, propósito `therapist` (026 R-014).
 - [x] P2 Guía del protocolo (`engine/protocol`) y terapeuta como agente con sesión dialogada y fidelidad (047 R-005 a R-005c; CA-008 a CA-010).
 - [x] P3 La persona en la sesión con la charla de la 043 en escenario de consulta (R-005d, R-005e); memoria del terapeuta entre sesiones y terapeuta que no sabe que es una simulación (CA-013); comando `study:session` con la transcripción guardada (CA-005).
-- [ ] P3b Sesión real de prueba con una persona (OpenRouter) y revisión del diálogo con el usuario.
+- [x] P3b Sesión real de prueba con una persona (Natalia, OpenRouter, 12 turnos) y revisión con el usuario: terapeuta por función (R-005f) y nivel de confianza en consulta.
+- [ ] P3c Piloto de diálogo con 3 personas y las 3 sesiones en `claude-haiku-5-5` (`study:pilot`); revisar transcripciones con el usuario.
 - [ ] P4 Efecto en el motor: compromiso por sesión, dosis por mecanismo, `PROTOCOL_SESSION`, `PRACTICE_DONE`, `PROTOCOL_ENDED`, adherencia a la práctica (R-004, R-006; CA-002 a CA-004).
 - [ ] P5 Pruebas en el mundo y regreso a sesión con lo que le pasó, o abandono (R-012, R-013; CA-011, CA-012).
 - [ ] P6 Medidas con los cuatro instrumentos, complacencia e informe (R-007 a R-009; CA-006, CA-007).

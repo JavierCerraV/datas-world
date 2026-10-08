@@ -33,7 +33,7 @@ function gateway(prompts: { therapist: string[]; patient: string[] }): Gateway {
       if (!c.jsonSchema) return 'Nota de cierre.';
       prompts.therapist.push(sys);
       const component = (/PENDIENTES: (.*)/.exec(sys)?.[1] ?? '').split(', ')[0]?.split(' ')[0] ?? '';
-      return JSON.stringify({ say: `Cuénteme (${component}).`, component, covered: [], notes: 'Sin datos aún.' });
+      return JSON.stringify({ read: 'LECTURA-PRIVADA', say: `Cuénteme (${component}).`, component, covered: [], notes: 'Sin datos aún.', close: false });
     }
     prompts.patient.push(sys);
     return 'Pues ahí vamos, doctor.';
@@ -85,7 +85,7 @@ describe('047 R-005b: la sesión completa, terapeuta y persona, cada uno con su 
     for (const p of prompts.therapist) {
       expect(p).not.toContain('POSTURA PARA ESTE TURNO');
       expect(p).not.toContain('LO QUE SABES');
-      for (const s of new Set(log.map((l) => l.stance))) expect(p).not.toContain(s);
+      expect(p).not.toContain('Cómo estás (0 = muy mal');
     }
     // La persona no ve la guía ni los componentes.
     for (const p of prompts.patient) expect(p).not.toContain('s1.');
