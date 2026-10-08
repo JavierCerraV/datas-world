@@ -4,7 +4,7 @@ nombre: llm-gateway
 estado: aprobada
 hito: Bloque L (lo que necesita la charla, 043) · M6 (decisiones y diarios)
 depende_de: [021, 023, 025, 040]
-version: 0.2
+version: 0.3
 ---
 
 # 026 — Pasarela LLM
@@ -40,6 +40,7 @@ type Purpose =
   | 'classify'   // tono de un turno (043 R-004)
   | 'verify'     // afirmaciones y adherencia a la postura (043 R-012, R-013)
   | 'summarize'  // resumen de una charla para su recuerdo (043 R-020)
+  | 'therapist'  // terapeuta que aplica un protocolo en un estudio (047 R-005)
   | 'decision'   // propuestas de acción de nivel 4 (M6)
   | 'diary'      // diario de una persona observada (M6)
   | 'session';   // persona en sesión clínica (034)
@@ -47,7 +48,9 @@ type Purpose =
 interface ModelConfig {
   provider: 'anthropic' | 'openai_compatible' | 'mock';
   model: string;                 // p. ej. 'claude-haiku-4-5-20251001'
-  temperature: number;           // [0,1]
+  temperature?: number;          // [0,1]; sin ella no se envía (R-014)
+  effort?: 'low' | 'medium' | 'high';   // esfuerzo de razonamiento, si el modelo lo admite (R-014)
+  thinking?: 'disabled';         // apaga el pensamiento adaptativo (R-014)
   maxOutputTokens: number;
   timeoutMs: number;             // tiempo máximo de la respuesta completa
   baseUrl?: string;              // solo openai_compatible
@@ -111,6 +114,12 @@ interface LlmRecord {            // tabla llm_records, fuera del stateHash
 - **R-011** [M] — **Proveedor `mock`.** Es determinista: su respuesta sale de una función del llamador o de plantillas, a partir del hash de la petición. Tiene una latencia simulada configurable para probar el streaming y los tiempos máximos. Con `mock`, el mundo es determinista (CA-001).
 - **R-012** [M] — **Higiene.** Las claves nunca se registran ni se escriben en registros, logs o respuestas de la API. Los textos del mundo son ficción: no hay datos de personas reales.
 - **R-013** [M] — **Métricas.** Se agregan tokens, tokens de caché, coste y latencia (p50 y p95), por propósito y por día. La API de solo lectura las expone en `/api/llm/usage` (022).
+- **R-014** [T] — **Parámetros según el modelo.** No todos los modelos aceptan los mismos parámetros, así que la configuración decide cuáles se envían y la pasarela **nunca añade uno que no esté configurado**:
+  - `temperature` es opcional. Sin ella, la petición no lleva el campo. Los modelos con pensamiento adaptativo (`claude-haiku-5-5`) devuelven un error 400 si llega una temperatura distinta de la suya.
+  - `effort` (`low`, `medium`, `high`) regula cuánto razona el modelo; en Anthropic viaja en `output_config.effort`. Sin él, decide el proveedor (en Haiku 5.5, `medium`).
+  - `thinking: "disabled"` apaga el pensamiento adaptativo en los modelos que lo permiten; el pensamiento cuenta como tokens de salida.
+  - Los tres forman parte de la clave del registro (R-003) **solo cuando están**, para que los registros anteriores sigan valiendo.
+  - El adaptador `openai_compatible` omite `temperature` igual, y no envía `effort` ni `thinking` (no hay un campo común entre proveedores).
 
 ## 5. Eventos
 | Tipo | Cuándo | Payload | Causas esperadas |
@@ -139,6 +148,8 @@ Las llamadas, los respaldos y el agotamiento del presupuesto no son eventos del 
 - **CA-009** — *Dado* la misma petición dos veces, *entonces* la segunda sale del registro (`source: 'record'`) sin llamada de red; y *dado* otro modelo, *entonces* hay una llamada nueva.
 - **CA-010** — *Dado* una clave de API en el entorno, *entonces* una prueba que recorre `llm_records`, los logs y las respuestas de la API no la encuentra.
 - **CA-011** — *Dado* un servidor falso compatible con OpenAI, *entonces* el adaptador `openai_compatible` envía una petición válida y lee su respuesta, también en streaming.
+- **CA-012** — *Dada* una configuración sin `temperature`, con `effort: "low"` y `thinking: "disabled"`, *entonces* la petición de Anthropic no lleva `temperature`, lleva `output_config.effort` (junto al formato si hay esquema) y `thinking: { type: "disabled" }`; y *dada* una con `temperature` y sin lo demás, *entonces* la petición es la misma de antes (R-014).
+- **CA-013** — *Dadas* dos configuraciones que solo difieren en `effort`, *entonces* sus claves de registro son distintas; y *dada* una configuración sin `effort` ni `thinking`, *entonces* su clave es la misma que antes de este cambio (R-014, R-003).
 
 ## 8. Parámetros y calibración
 | Parámetro | Valor por defecto | Rango | Fuente / justificación |
@@ -147,6 +158,8 @@ Las llamadas, los respaldos y el agotamiento del presupuesto no son eventos del 
 | `classify` | Anthropic `claude-haiku-4-5-20251001`, temperatura 0, 50 tokens, 800 ms | configurable | 043 R-004 |
 | `verify` | Anthropic `claude-haiku-4-5-20251001`, temperatura 0, 400 tokens, 10 s | configurable | asíncrono (043 R-012) |
 | `summarize` | Anthropic `claude-haiku-4-5-20251001`, temperatura 0,3, 200 tokens, 10 s | configurable | 043 R-020 |
+| `therapist` | `null`; lo activa la configuración del estudio | configurable | 047 R-005 |
+| Haiku 5.5 (`HAIKU_5_5`) | `claude-haiku-5-5`, 0,10 USD por millón de tokens de entrada y 0,50 de salida, sin `temperature` | — | [T] documentación de Anthropic (2026-10-08). El precio vale hasta 100 000 tokens de prompt; por encima es 5 veces mayor y la pasarela **no** lo calcula (ningún prompt del proyecto se acerca). Los propósitos de la charla siguen en Haiku 4.5 hasta que el usuario decida cambiarlos |
 | `decision`, `diary` | `null` hasta M6 | — | ADR-003 |
 | `session` | `null` hasta la capa clínica | — | 034 R-008 |
 | `budget.dailyTokens` | 2 000 000 | configurable | decisión del usuario |
@@ -175,3 +188,4 @@ Las llamadas, los respaldos y el agotamiento del presupuesto no son eventos del 
 | 2026-09-27 | 0.2 | Concreción para el bloque L (043): propósitos `dialogue`, `classify`, `verify` y `summarize`; configuración por propósito sin código; adaptadores `anthropic`, `openai_compatible` y `mock`; streaming; caché de prompts; salidas estructuradas con reintento; registro con clave y replay; tiempos máximos y respaldos; métricas; higiene de claves. Se conservan R-001, R-002, R-004 y R-005, y CA-001 a CA-003. `depende_de` cambia la 017 (obsoleta) por la 040 y añade la 023. CA-004 a CA-011 nuevos |
 | 2026-09-27 | 0.2 | Estado → aprobada |
 | 2026-09-27 | 0.2 | Decisiones del usuario al aprobar: Haiku 4.5 por defecto, presupuesto de 20 USD al mes y 2 M de tokens al día, adaptador compatible con OpenAI listo y poda a 90 días de los registros que no afectan al mundo (`RECORD_TTL_DAYS`) |
+| 2026-10-08 | 0.3 | Para el estudio de intervención (047, aprobada por el usuario con el modelo `claude-haiku-5-5` en esfuerzo bajo): propósito `therapist`; `temperature` opcional, `effort` y `thinking` (R-014, CA-012, CA-013); precio de Haiku 5.5 |

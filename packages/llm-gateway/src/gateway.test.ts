@@ -2,8 +2,9 @@ import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { DEFAULT_CONFIG, parseConfig } from './config.ts';
+import { DEFAULT_CONFIG, HAIKU_5_5, parseConfig } from './config.ts';
 import { Gateway } from './gateway.ts';
+import { recordKey } from './key.ts';
 import { buildAnthropicParams } from './providers/anthropic.ts';
 import { mockAdapter } from './providers/mock.ts';
 import type { MockResponder } from './providers/mock.ts';
@@ -68,6 +69,34 @@ describe('pasarela LLM (026)', () => {
     expect(p).toMatchObject({ model: 'claude-haiku-4-5-20251001', max_tokens: 300, temperature: 0.8, messages: [{ role: 'user', content: 'hola' }] });
     expect(buildAnthropicParams({ model: 'm', temperature: 0, maxOutputTokens: 10, system: [], messages: [], jsonSchema: { type: 'object' } }).output_config)
       .toEqual({ format: { type: 'json_schema', schema: { type: 'object' } } });
+  });
+
+  it('CA-012: sin temperatura no se envía el campo; el esfuerzo y el pensamiento apagado viajan solo si están configurados', () => {
+    const base = { model: 'claude-haiku-5-5', maxOutputTokens: 300, system: [], messages: [{ role: 'user' as const, text: 'hola' }] };
+    const p = buildAnthropicParams({ ...base, effort: 'low', thinking: 'disabled' });
+    expect('temperature' in p).toBe(false);
+    expect(p.output_config).toEqual({ effort: 'low' });
+    expect(p.thinking).toEqual({ type: 'disabled' });
+    expect(buildAnthropicParams({ ...base, effort: 'low', jsonSchema: { type: 'object' } }).output_config)
+      .toEqual({ effort: 'low', format: { type: 'json_schema', schema: { type: 'object' } } });
+    const old = buildAnthropicParams({ ...base, temperature: 0.8 });
+    expect(old.temperature).toBe(0.8);
+    expect('output_config' in old).toBe(false);
+    expect('thinking' in old).toBe(false);
+    const cfg = parseConfig({ purposes: { therapist: { ...HAIKU_5_5, effort: 'low', thinking: 'disabled', maxOutputTokens: 800, timeoutMs: 60_000 } } });
+    expect(cfg.purposes.therapist).toMatchObject({ model: 'claude-haiku-5-5', effort: 'low', price: { input: 0.1, output: 0.5 } });
+    expect(cfg.purposes.therapist!.temperature).toBeUndefined();
+    expect(DEFAULT_CONFIG.purposes.therapist).toBeNull();
+    expect(() => parseConfig({ purposes: { therapist: { ...HAIKU_5_5, effort: 'mucho', maxOutputTokens: 800, timeoutMs: 60_000 } } })).toThrow();
+  });
+
+  it('CA-013: el esfuerzo entra en la clave del registro solo cuando está, y la clave de antes no cambia', () => {
+    const req = ask('hola');
+    const plain = recordKey(mockCfg(), req);
+    expect(plain).toBe('875fa9b21d31301990f4aebc06ebc5c34ae599f82afb535c1438ef2f6006cf99');
+    expect(recordKey(mockCfg({ effort: 'low' }), req)).not.toBe(plain);
+    expect(recordKey(mockCfg({ effort: 'low' }), req)).not.toBe(recordKey(mockCfg({ effort: 'high' }), req));
+    expect(recordKey(mockCfg({ thinking: 'disabled' }), req)).not.toBe(plain);
   });
 
   it('CA-007: con un tiempo máximo de 200 ms y 1 s de latencia, devuelve el respaldo por tiempo antes de 300 ms', async () => {

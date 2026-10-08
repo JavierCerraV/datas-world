@@ -2,15 +2,23 @@
 // proveedor ni qué modelo lo produce (R-006).
 import type { z } from 'zod';
 
-export const PURPOSES = ['dialogue', 'classify', 'verify', 'summarize', 'decision', 'diary', 'session'] as const;
+export const PURPOSES = ['dialogue', 'classify', 'verify', 'summarize', 'therapist', 'decision', 'diary', 'session'] as const;
 export type Purpose = (typeof PURPOSES)[number];
 
 export type ProviderName = 'anthropic' | 'openai_compatible' | 'mock';
 
+export const EFFORTS = ['low', 'medium', 'high'] as const;
+export type Effort = (typeof EFFORTS)[number];
+
 export interface ModelConfig {
   provider: ProviderName;
   model: string;
-  temperature: number;
+  /** Sin ella no se envía: hay modelos que la rechazan (R-014). */
+  temperature?: number;
+  /** Esfuerzo de razonamiento, si el modelo lo admite (R-014). */
+  effort?: Effort;
+  /** Apaga el pensamiento adaptativo (R-014). */
+  thinking?: 'disabled';
   maxOutputTokens: number;
   /** Tiempo máximo de la respuesta completa (R-009). */
   timeoutMs: number;

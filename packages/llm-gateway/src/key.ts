@@ -16,7 +16,10 @@ export function recordKey(cfg: ModelConfig, req: LlmRequest<unknown>): string {
     provider: cfg.provider,
     model: cfg.model,
     purpose: req.purpose,
-    temperature: cfg.temperature,
+    // Solo cuando están, para que las claves de los registros anteriores no cambien (R-014).
+    ...(cfg.temperature !== undefined ? { temperature: cfg.temperature } : {}),
+    ...(cfg.effort ? { effort: cfg.effort } : {}),
+    ...(cfg.thinking ? { thinking: cfg.thinking } : {}),
     maxOutputTokens: cfg.maxOutputTokens,
     system: req.system.map((p) => p.text),
     messages: req.messages,
