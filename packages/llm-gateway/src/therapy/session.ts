@@ -4,8 +4,8 @@
 import { coverage, newProgress, recordExchange, sessionOf } from '@datas-world/engine';
 import type { Protocol, SessionNumber } from '@datas-world/engine';
 import type { Gateway } from '../gateway.ts';
-import { therapistRequest } from './therapist.ts';
-import type { TherapyTurn } from './therapist.ts';
+import { sessionNoteRequest, therapistRequest } from './therapist.ts';
+import type { SessionNote, TherapyTurn } from './therapist.ts';
 
 /** 047 §8, `MAX_TURNS_SESSION`: turnos del terapeuta en una sesión. */
 export const MAX_TURNS_SESSION = 40;
@@ -27,6 +27,8 @@ export interface TherapySessionInput {
   admission?: string;
   /** Formulación del caso que viene de la sesión anterior. */
   formulation?: string;
+  /** Notas de cierre de las sesiones anteriores: la memoria del terapeuta con esta persona. */
+  history?: readonly SessionNote[];
   maxTurns?: number;
   /** La persona responde a lo que el terapeuta le dijo. `turn` empieza en 0. */
   respond: (say: string, turn: number) => Promise<PatientReply>;
@@ -44,6 +46,8 @@ export interface TherapySessionResult {
   claimed: string[];
   /** Formulación del caso al terminar, para la sesión siguiente. */
   formulation: string;
+  /** Nota clínica de cierre, para `history` de la sesión siguiente. Si el LLM no la da, la formulación; sin diálogo, vacía. */
+  note: string;
   therapistTurns: number;
   ended: SessionEnd;
   /** Motivo del fallo del LLM, si lo hubo. */
@@ -69,6 +73,7 @@ export async function runTherapySession(input: TherapySessionInput): Promise<The
     const req = therapistRequest({
       protocol: input.protocol, session: input.session, patientName: input.patientName, formulation, progress, transcript, turnsLeft: maxTurns - turn,
       ...(input.admission !== undefined ? { admission: input.admission } : {}),
+      ...(input.history ? { history: input.history } : {}),
     });
     const res = await input.gateway.run({ ...req, ...(input.citizenId ? { citizenId: input.citizenId } : {}) });
     if (!res.data) {
@@ -95,9 +100,17 @@ export async function runTherapySession(input: TherapySessionInput): Promise<The
   }
   if (ended === 'tope' && coverage(session, progress).missing.length === 0) ended = 'completa';
 
+  // La memoria del terapeuta para la próxima sesión: una nota suya; si no llega, lo que ya tenía formulado.
+  let note = '';
+  if (transcript.length > 0) {
+    const req = sessionNoteRequest({ protocol: input.protocol, session: input.session, patientName: input.patientName, formulation, transcript });
+    const res = await input.gateway.run({ ...req, ...(input.citizenId ? { citizenId: input.citizenId } : {}) });
+    note = res.text?.trim() || formulation;
+  }
+
   const cov = coverage(session, progress);
   return {
-    transcript, covered: cov.covered, missing: cov.missing, fidelity: cov.fidelity, claimed, formulation, therapistTurns: turn, ended,
+    transcript, covered: cov.covered, missing: cov.missing, fidelity: cov.fidelity, claimed, formulation, note, therapistTurns: turn, ended,
     ...(detail !== undefined ? { detail } : {}),
   };
 }

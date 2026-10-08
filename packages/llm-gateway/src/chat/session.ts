@@ -15,7 +15,7 @@ import { classifyTone } from './classify.ts';
 import type { ToneResult } from './classify.ts';
 import { discloseView } from './disclosure.ts';
 import { expressionRequest } from './prompt.ts';
-import type { TranscriptTurn } from './prompt.ts';
+import type { ChatSetting, TranscriptTurn } from './prompt.ts';
 import { verifyReply } from './verify.ts';
 import type { Verification } from './verify.ts';
 import { buildPersonView } from './view.ts';
@@ -58,6 +58,10 @@ export interface ChatSessionOptions {
   /** Semilla de la sesión (R-011): sale del hash del mundo y del id de la sesión. */
   seed: number;
   now: number;
+  /** Dónde ocurre la charla para la persona (047 R-005e). Por defecto `chat`: un visitante que le escribe. */
+  setting?: ChatSetting;
+  /** Nivel de intimidad mínimo de la charla (047 R-005d): una consulta aceptada no empieza como con un desconocido. */
+  minLevel?: DisclosureLevel;
 }
 
 export interface TurnOptions {
@@ -137,9 +141,10 @@ export class ChatSession {
     this.transcript.push({ speaker: 'visitor', text });
     const stance = catalogs.stances.find((s) => s.key === choice.stance) as StanceInfo;
     // R-026: el LLM solo ve lo que este visitante se ha ganado; lo demás no está en el prompt y no se puede contar.
-    const level = disclosureOf(this.state, this.params);
+    const earned = disclosureOf(this.state, this.params);
+    const level = (this.#o.minLevel !== undefined && this.#o.minLevel > earned ? this.#o.minLevel : earned) as DisclosureLevel;
     const open = discloseView(this.view, level);
-    const r = await gw.run(expressionRequest(open, this.transcript, choice, stance, t.onText, level));
+    const r = await gw.run(expressionRequest(open, this.transcript, choice, stance, t.onText, level, this.#o.setting));
     let reply = r.text ?? '';
     let expression: 'llm' | 'template' = 'llm';
     if (!reply.trim()) {

@@ -20,6 +20,8 @@ const textOf = (c: { system: { text: string }[]; messages: { text: string }[] })
 
 /** Terapeuta de prueba: trabaja el primer componente pendiente y reformula si la persona no entendió. */
 const therapist: MockResponder = (c) => {
+  // La nota de cierre se pide como texto, sin esquema.
+  if (!c.jsonSchema) return `Nota de la sesión: ${c.messages.length} mensajes; quedó en practicar.`;
   const pending = /PENDIENTES: (.*)/.exec(c.system.at(-1)!.text)?.[1] ?? '';
   const component = pending.split(', ')[0]?.split(' ')[0] ?? '';
   const last = c.messages.at(-1)!.text;
@@ -53,6 +55,29 @@ describe('047 CA-008: el terapeuta solo sabe lo que la persona le dice', () => {
     expect(req.messages.at(-1)).toEqual({ role: 'user', text: 'Pues la plata, doctor.' });
     // La guía de otra sesión no entra.
     expect(text).not.toContain('s3.jardin');
+  });
+});
+
+describe('047 CA-013: el terapeuta recuerda las sesiones anteriores y no sabe que es una simulación', () => {
+  it('al cerrar escribe una nota, y en la sesión siguiente la tiene delante', async () => {
+    const s1 = await runTherapySession({ gateway: gw(therapist), protocol: ACT_PNR_3, session: 1, patientName: 'Marta', respond: async () => ({ text: 'Sí.' }) });
+    expect(s1.note).toMatch(/^Nota de la sesión: \d+ mensajes/);
+    const req = therapistRequest({
+      protocol: ACT_PNR_3, session: 2, patientName: 'Marta', formulation: s1.formulation, history: [{ session: 1, note: s1.note }],
+      progress: newProgress(), transcript: [], turnsLeft: 40,
+    });
+    const text = textOf(req);
+    expect(text).toContain(`Sesión 1: ${s1.note}`);
+    expect(text).toContain('s2.repaso');
+    for (const word of ['simula', 'Data\'s World', 'artificial', 'personaje', 'investigación', 'población']) expect(text.toLowerCase()).not.toContain(word.toLowerCase());
+  });
+
+  it('si la nota falla, la memoria es la formulación del caso; una sesión sin diálogo no pide nota', async () => {
+    const noNote: MockResponder = (c) => (c.jsonSchema ? therapist(c) : '');
+    const r = await runTherapySession({ gateway: gw(noNote), protocol: ACT_PNR_3, session: 1, patientName: 'Marta', maxTurns: 2, respond: async () => ({ text: 'Sí.' }) });
+    expect(r.note).toBe(r.formulation);
+    const off = await runTherapySession({ gateway: new Gateway({ config: DEFAULT_CONFIG, adapters: {} }), protocol: ACT_PNR_3, session: 1, patientName: 'Marta', respond: async () => ({ text: 'Sí.' }) });
+    expect(off.note).toBe('');
   });
 });
 

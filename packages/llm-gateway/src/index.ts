@@ -21,7 +21,7 @@ export { classifyTone, lexicalClaims, lexicalTone } from './chat/classify.ts';
 export type { ClassifyCatalogs, ToneResult, VisitorClaim } from './chat/classify.ts';
 export { discloseView, factLevel } from './chat/disclosure.ts';
 export { TRANSCRIPT_TURNS, TRUST_TEXT, expressionRequest, instructions, renderView, stancePart } from './chat/prompt.ts';
-export type { TranscriptTurn } from './chat/prompt.ts';
+export type { ChatSetting, TranscriptTurn } from './chat/prompt.ts';
 export { ChatEndedError, ChatSession, STRANGER_TEMPLATE, TEMPLATES } from './chat/session.ts';
 export type { ChatSessionOptions, TurnOptions, TurnOutcome } from './chat/session.ts';
 export { verifyReply } from './chat/verify.ts';
@@ -33,5 +33,7 @@ export type { ItemAnswer, ItemPlan, ItemSource, PartPlan } from './psychometrics
 
 export { MAX_TURNS_SESSION, runTherapySession } from './therapy/session.ts';
 export type { PatientReply, SessionEnd, TherapySessionInput, TherapySessionResult } from './therapy/session.ts';
-export { TherapistSchema, therapistRequest } from './therapy/therapist.ts';
-export type { TherapistContext, TherapistOutput, TherapyTurn } from './therapy/therapist.ts';
+export { TherapistSchema, sessionNoteRequest, therapistRequest } from './therapy/therapist.ts';
+export type { SessionNote, TherapistContext, TherapistOutput, TherapyTurn } from './therapy/therapist.ts';
+export { patientResponder } from './therapy/patient.ts';
+export type { PatientTurnLog } from './therapy/patient.ts';

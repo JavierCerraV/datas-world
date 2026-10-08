@@ -4,7 +4,7 @@ nombre: intervention-study
 estado: aprobada
 hito: Capa de investigación (tras M5; antecede a la capa clínica 034)
 depende_de: [028, 034, 036, 038, 039, 043, 046]
-version: 0.4
+version: 0.5
 ---
 
 # 047 — Estudio de intervención: línea base, protocolo breve y seguimiento
@@ -55,11 +55,15 @@ Las transcripciones se guardan fuera del estado del mundo (034 R-003); no añade
   - el **manual** del protocolo como guía estructurada (objetivos, componentes obligatorios de cada sesión, ejercicios y frases de ejemplo), **no** como texto para leer igual a todos;
   - lo que la persona ha dicho en la conversación;
   - su **formulación del caso**: las notas que él mismo escribe en cada turno (disparadores, estrategias de evitación, valores, barreras), que pasan de una sesión a la siguiente;
+  - su **memoria de las sesiones anteriores**: al cerrar cada sesión escribe una nota clínica (qué se trabajó, qué contó la persona, qué acordaron, qué revisar la próxima vez) y en la sesión siguiente las tiene todas delante, para continuar el proceso con ese paciente (decisión del usuario, 2026-10-08);
   - las respuestas de la persona a las pruebas de la línea base, como en una admisión real (decisión del usuario, 2026-10-08). Son **lo que ella dijo**, nunca la medida verdadera del cribado de R-002, que el terapeuta no puede conocer.
+
+  **No sabe que es una simulación** (decisión del usuario, 2026-10-08): su prompt lo sitúa en una consulta con una persona que vive en un pueblo de Colombia, sin más. Va en una llamada propia, separada de la de la persona, y en el piloto usa el mismo modelo (`claude-haiku-5-5`).
 
   **No** recibe la verdad del mundo, ni los indicadores, ni la postura que el motor decidió para la persona (026 R-002; CLAUDE.md regla 3): un terapeuta solo sabe lo que el paciente le cuenta.
 - **R-005b** [M] — **Diálogo.** Cada sesión es una conversación por turnos: terapeuta (LLM) → persona (pipeline de la 043, con la postura elegida por el motor y expresada por el LLM) → terapeuta… El terapeuta adapta la pregunta, el ritmo y el ejercicio a lo que la persona responde: repite o reformula si no la entiende, dedica más turnos a un componente que lo necesita, sigue una pista que ella da. Cada turno devuelve un objeto estructurado `{ say, component, covered, notes }` validado con Zod; **el motor, no el LLM, lleva la cuenta** de qué componentes obligatorios están cubiertos. La sesión termina cuando se cubrieron o al llegar a `MAX_TURNS_SESSION`. Se guarda la transcripción completa, con la postura de cada turno de la persona y las notas del terapeuta.
 - **R-005c** [M] — **Fidelidad.** Se registra qué proporción de los componentes obligatorios se cubrió (`fidelity`) y la dosis de R-004 se multiplica por ella: un terapeuta que se pierde da menos dosis. Así se separa «el protocolo no funciona» de «el protocolo no se aplicó». La persona **no** recibe el nombre de los componentes ni sabe cuántos faltan.
+- **R-005e** [M] — **La persona está en consulta.** La charla de la 043 admite un escenario `consulta`: la persona sabe que está con un psicólogo al que aceptó ver, no con un visitante de chat, y puede responder algo más largo. El nivel de revelación no baja de «conocido» (R-005d). Sin ese escenario, la charla de la 043 no cambia.
 - **R-005d** [M] — **Alianza.** La persona no conoce al terapeuta: su cautela ante un desconocido (043 R-024 a R-027) rige el principio y la confianza crece con los turnos. Por defecto llega a una consulta que aceptó, así que el nivel de revelación inicial es «conocido» y el motor decide lo demás; sin alianza no hay revelación de lo íntimo y por tanto menos apertura y menos dosis (R-004).
 - **R-006** [M] — **Adherencia a la práctica.** La probabilidad diaria de practicar es `P_PRACTICE_BASE` modulada por el estrés, la energía y el contacto reciente con sus valores; sin práctica, no hay dosis (se mide la relación dosis-respuesta).
 - **R-007** [M] — **Medidas.** Con los cuatro instrumentos de 046 en una sola llamada por persona y momento, con el LLM por defecto (con el rango del DASS-21 ya acotado, 046 v0.3), y con la respuesta verdadera calculada siempre en paralelo. Una opción `--sin-llm` usa la respuesta que decidió el motor.
@@ -97,6 +101,7 @@ Las transcripciones se guardan fuera del estado del mundo (034 R-003); no añade
 - **CA-009** — *Dadas* dos personas que responden distinto al mismo punto del manual, *entonces* las sesiones difieren: el terapeuta no repite el mismo guion (prueba con un proveedor `mock` que reacciona a lo que dice la persona).
 - **CA-011** — *Dada* una persona tratada que después tiene un episodio de PNR, *entonces* el estudio registra esa prueba en el mundo con su causa, lo que hizo y cómo terminó, y la probabilidad de tomar distancia con «Yo» es mayor que en su brazo de espera (R-012).
 - **CA-012** — *Dada* una persona que entre dos sesiones tuvo un episodio y lo cortó evitando, *entonces* ese hecho está en su vista al empezar la sesión siguiente y el prompt del terapeuta no lo trae: solo lo sabrá si ella lo cuenta (R-013, R-005).
+- **CA-013** — *Dada* una segunda sesión, *entonces* el prompt del terapeuta trae la nota que él escribió al cerrar la primera, y ninguna parte de su prompt dice que la persona o el estudio sean simulados (R-005).
 - **CA-010** — *Dada* una sesión que termina sin cubrir todos los componentes obligatorios, *entonces* `fidelity` < 1, la dosis baja en proporción y queda anotado qué faltó (R-005c).
 
 ## 8. Parámetros y calibración
@@ -131,3 +136,4 @@ Por brazo y momento: media y desviación de cada instrumento y de cada subescala
 | 2026-10-08 | 0.2 | Estado → aprobada |
 | 2026-10-08 | 0.3 | A petición del usuario, el terapeuta pasa de ser un guion a ser un **agente LLM con formación en terapias de tercera generación** que dialoga y se adapta a cada persona (R-005 a R-005d: manual como guía, formulación del caso entre sesiones, motor que cuenta los componentes cubiertos, fidelidad que multiplica la dosis, alianza). La complacencia incluye aceptar suposiciones del terapeuta (R-008). CA-008 a CA-010. Pendiente de la confirmación del usuario |
 | 2026-10-08 | 0.4 | El usuario aprueba el terapeuta como agente (v0.3) y pide que la intervención se vea en las acciones posteriores de la persona: R-012 (lo aprendido se pone a prueba en la vida, con el mantenimiento y la recaída como resultado de las consecuencias, y registro de cada prueba) y R-013 (la persona vuelve a la sesión con sus dificultades o abandona). El terapeuta recibe lo que la persona dijo en la línea base. Modelo del piloto: `claude-haiku-5-5` con esfuerzo bajo. CA-011 y CA-012 |
+| 2026-10-08 | 0.5 | Decisiones del usuario al revisar el terapeuta: no sabe que es una simulación; tiene memoria de las sesiones anteriores (una nota clínica que escribe al cerrar cada una); va en una llamada propia con el mismo modelo del piloto. La persona responde en un escenario de consulta (R-005e). CA-013 |

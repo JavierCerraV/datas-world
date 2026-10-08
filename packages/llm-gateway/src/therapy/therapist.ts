@@ -29,14 +29,22 @@ export interface TherapistContext {
   admission?: string;
   /** Formulación del caso que el terapeuta lleva escrita (de turnos y sesiones anteriores). */
   formulation: string;
+  /** Sus notas de cierre de las sesiones anteriores con esta persona (R-005). */
+  history?: readonly SessionNote[];
   progress: SessionProgress;
   transcript: readonly TherapyTurn[];
   turnsLeft: number;
 }
 
+/** Nota clínica que el terapeuta escribe al cerrar una sesión: su memoria para la siguiente. */
+export interface SessionNote {
+  session: number;
+  note: string;
+}
+
 const ROLE = [
   'Usted es psicólogo clínico con formación y experiencia en terapias contextuales: terapia de aceptación y compromiso (ACT), análisis funcional de la conducta y teoría del marco relacional. Trabaja con defusión, aceptación, el yo como contexto, valores y acción comprometida.',
-  'Va a conducir una sesión de un protocolo breve con una persona que consulta. Es un estudio de investigación con una población simulada: la persona es un habitante de Data\'s World, un pueblo de Colombia, y su vida sigue entre una sesión y otra. Condúzcala como lo haría con cualquier consultante.',
+  'Va a conducir una sesión de un protocolo breve de tres sesiones semanales con una persona que consulta. Vive en un pueblo de Colombia y su vida sigue entre una sesión y otra: lo que le pase esos días es material de trabajo. Si ya la vio antes, tiene delante sus notas de las sesiones anteriores; retome el proceso desde ahí, sin empezar de cero.',
   '',
   'Cómo es la conversación:',
   '- Es por escrito y por turnos. Cada turno suyo es corto, de dos a cinco frases, con una sola pregunta o una sola invitación. Una sesión dicha de un tirón no sirve: la persona tiene que responder y usted trabajar con lo que responda.',
@@ -85,12 +93,39 @@ const liveOf = (ctx: TherapistContext, s: ProtocolSession): string => {
   return [
     `CONSULTANTE: ${ctx.patientName}.`,
     `ADMISIÓN (lo que respondió en los cuestionarios antes de empezar): ${ctx.admission?.trim() || 'sin datos.'}`,
+    'SUS NOTAS DE LAS SESIONES ANTERIORES:',
+    ...(ctx.history?.length ? ctx.history.map((h) => `- Sesión ${h.session}: ${h.note.trim()}`) : ['- Ninguna: es la primera vez que la ve.']),
     `SU FORMULACIÓN DEL CASO HASTA AHORA: ${ctx.formulation.trim() || 'todavía ninguna.'}`,
     `TRABAJADOS: ${cov.covered.join(', ') || 'ninguno'}`,
     `PENDIENTES: ${pending.join(', ') || 'ninguno'}`,
     `Le quedan ${ctx.turnsLeft} turnos en esta sesión.`,
   ].join('\n');
 };
+
+const dialogueOf = (ctx: Pick<TherapistContext, 'patientName' | 'transcript'>): string =>
+  ctx.transcript.map((t) => `${t.speaker === 'terapeuta' ? 'Usted' : ctx.patientName}: ${t.text}`).join('\n');
+
+/**
+ * Petición de la nota de cierre: lo que el terapeuta quiere recordar en la próxima sesión. Es texto libre y solo sale
+ * de lo que se dijo en la sesión y de su formulación.
+ */
+export function sessionNoteRequest(ctx: Pick<TherapistContext, 'protocol' | 'session' | 'patientName' | 'formulation' | 'transcript'>): LlmRequest<never> {
+  const system: PromptPart[] = [{
+    cacheable: true,
+    text: [
+      'Usted es psicólogo clínico y acaba de terminar una sesión de un protocolo breve de terapia de aceptación y compromiso. Escriba la nota clínica de la sesión para usted mismo: es lo único que tendrá delante cuando vuelva a ver a esta persona la semana próxima.',
+      'En menos de 150 palabras y en prosa: qué se trabajó y cómo respondió, qué contó de su vida con sus propias palabras, qué ejercicio le sirvió y cuál no, qué acordó practicar o hacer, y qué conviene revisar al empezar la próxima sesión.',
+      'Escriba solo lo que pasó en la sesión. Si algo no se habló, no lo ponga. Responda solo con la nota, sin título ni saludo.',
+    ].join('\n'),
+  }];
+  const text = [
+    `Sesión ${ctx.session} con ${ctx.patientName}.`,
+    `Su formulación del caso al terminar: ${ctx.formulation.trim() || 'ninguna.'}`,
+    'Lo que se dijo:',
+    dialogueOf(ctx),
+  ].join('\n');
+  return { purpose: 'therapist', system, messages: [{ role: 'user', text }] };
+}
 
 /** Petición del siguiente turno del terapeuta. Lo fijo va primero y es cacheable; lo que cambia cada turno, al final. */
 export function therapistRequest(ctx: TherapistContext): LlmRequest<TherapistOutput> {

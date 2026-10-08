@@ -21,6 +21,7 @@ import { chatBattery } from './battery.ts';
 import { chatStatsCommand } from './chat-stats.ts';
 import { psychometrics } from './psychometrics.ts';
 import { experimentRun } from './experiment.ts';
+import { studySession } from './study-session.ts';
 import { benchLife } from './bench-life.ts';
 import { benchRelations } from './bench-relations.ts';
 import { validateParity } from './validate.ts';
@@ -57,7 +58,8 @@ export const USAGE = `Uso: pnpm cli <comando> [opciones]
   chat:battery [--citizens N|CIT-…,…] [--scripts all|clave,…] [--provider mock|config] [--out RUTA] [--db RUTA]
   chat:stats [--json] [--db RUTA]
   experiment:run <definición.json> [--out RUTA] [--db RUTA]
-  psychometrics [--provider mock|config] [--n 50] [--month-days 30] [--year-days 365] [--concurrency 4] [--delay-ms 0] [--per-call person|instrument] [--llm-config RUTA] [--resume] [--db RUTA] [--work RUTA] [--out RUTA]`;
+  psychometrics [--provider mock|config] [--n 50] [--month-days 30] [--year-days 365] [--concurrency 4] [--delay-ms 0] [--per-call person|instrument] [--llm-config RUTA] [--resume] [--db RUTA] [--work RUTA] [--out RUTA]
+  study:session [--citizen CIT-000123] [--session 1] [--previous sesion.json] [--provider mock|config] [--llm-config RUTA] [--max-turns 40] [--out RUTA] [--db RUTA]   una sesión del protocolo, para leer el diálogo (047)`;
 
 function worldAdvance(args: string[], io: Io): void {
   const { values: v } = parseArgs({
@@ -172,6 +174,7 @@ const COMMANDS: Record<string, (args: string[], io: Io) => void> = {
 const ASYNC_COMMANDS: Record<string, (args: string[], io: Io) => Promise<void>> = {
   'chat:battery': (args, io) => chatBattery(args, io),
   psychometrics: (args, io) => psychometrics(args, io),
+  'study:session': (args, io) => studySession(args, io),
 };
 
 /** Como `run`, pero también atiende los comandos asíncronos (el punto de entrada usa este). */
