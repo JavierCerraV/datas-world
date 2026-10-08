@@ -3,7 +3,7 @@ modulo: llm-gateway
 ruta: packages/llm-gateway
 estado: en-desarrollo
 specs: [026, 043, 044, 013, 046]
-actualizado: 2026-10-06
+actualizado: 2026-10-08
 ---
 
 # Módulo: llm-gateway
@@ -20,7 +20,7 @@ El LLM expresa; no decide la postura ni cambia el mundo (ADR-003). No hace E/S d
 ## 2. Specs que implementa
 | Spec | Criterios cubiertos | Criterios pendientes |
 |---|---|---|
-| 026 | CA-003 a CA-011. R-001, R-003 (con almacén en memoria), R-004, R-006 a R-013 | CA-001 y CA-002 (el mundo con `mock` y el replay sin red se prueban con el worker, L3); R-002 y R-005 (decisiones de nivel 4, M6); el almacén SQLite de `llm_records` (L3) |
+| 026 | CA-003 a CA-013. R-001, R-003 (con almacén en memoria), R-004, R-006 a R-014 | CA-001 y CA-002 (el mundo con `mock` y el replay sin red se prueban con el worker, L3); R-002 y R-005 (decisiones de nivel 4, M6); el almacén SQLite de `llm_records` (L3) |
 | 043 | CA-002, CA-003, CA-009 a CA-012, CA-018. R-002 a R-004, R-010 a R-014, R-023 (streaming, caché y verificación asíncrona) | CA-001, CA-014, CA-015, CA-017 (L3); CA-016 (L4); la medición real de latencia y coste (L4.3) |
 | 044 | R-001: extracción de las afirmaciones sobre terceros en el clasificador, con respaldo léxico (L5.1) | Resolución a una persona real, credibilidad e impacto (L5.2, motor); CA-001 a CA-008 |
 
@@ -29,7 +29,8 @@ Desde `@datas-world/llm-gateway`:
 
 | Símbolo | Descripción |
 |---|---|
-| `DEFAULT_CONFIG`, `parseConfig(json)`, `HAIKU` | Configuración por propósito validada con Zod. Por defecto, Haiku 4.5 en los cuatro propósitos de la charla y `null` en `decision`, `diary` y `session` |
+| `DEFAULT_CONFIG`, `parseConfig(json)`, `HAIKU`, `HAIKU_5_5` | Configuración por propósito validada con Zod. Por defecto, Haiku 4.5 en los cuatro propósitos de la charla y `null` en `therapist`, `decision`, `diary` y `session`. `HAIKU_5_5`: modelo y precio de `claude-haiku-5-5`, para la configuración de un estudio (047) |
+| `EFFORTS`, tipo `Effort`; `ModelConfig.temperature?`, `effort?`, `thinking?` | Parámetros que dependen del modelo (026 R-014): solo se envían, y solo entran en la clave del registro, si están configurados |
 | `Gateway` (`run(req)`, `metrics()`, `budgetLeft()`) | Núcleo: registro, presupuesto, tiempo máximo, reparación, coste y métricas. Nunca lanza por un fallo del proveedor: devuelve `source: 'fallback'` con su motivo |
 | `anthropicAdapter(client?)`, `buildAnthropicParams` | Adaptador con el SDK oficial `@anthropic-ai/sdk`: streaming, caché en la última parte cacheable del sistema y `output_config.format` |
 | `openaiCompatibleAdapter({ baseUrl?, apiKey? })` | Otro proveedor o un modelo local (`LLM_BASE_URL`, `LLM_API_KEY`), por `fetch` |
@@ -46,6 +47,7 @@ Desde `@datas-world/llm-gateway`:
 
 ## 4. Diseño interno y decisiones
 - **SDK oficial para Claude.** El adaptador de Anthropic usa `@anthropic-ai/sdk`: `messages.stream` con `finalMessage()` y `messages.create`. Haiku 4.5 no lleva pensamiento adaptativo ni `effort`, y admite `temperature`.
+- **Parámetros según el modelo (R-014).** Haiku 5.5 es al revés: razona con pensamiento adaptativo regulado por `effort` y devuelve un error 400 si recibe `temperature`. Por eso `temperature`, `effort` y `thinking` son opcionales y la pasarela no añade ninguno por su cuenta. `effort` viaja en `output_config`, junto al formato. La clave del registro los incluye solo cuando están: una prueba fija el hash de una petición de antes para que los registros guardados sigan valiendo. El precio de Haiku 5.5 sube 5 veces por encima de 100 000 tokens de prompt y `costMicros` no lo calcula (ningún prompt se acerca).
 - **Salidas estructuradas por esquema JSON** (`output_config.format`). El esquema sale de Zod (`z.toJSONSchema`, sin `$schema`) y la pasarela valida con Zod: un solo camino de validación para todos los proveedores (R-010).
 - **Streaming por callback** (`onText`). El iterable del SDK queda dentro del adaptador.
 - **Caché (R-008).** Instrucciones y vista van primero, con `cache_control` en la última parte cacheable. La postura y el estado vivo cambian cada turno y van después, para no invalidar el prefijo.
@@ -93,3 +95,4 @@ No aplica: el prototipo no usa LLM.
 | 2026-10-06 | m4/bateria-psicometrica | 046 | `psychometrics.ts`: `administerInstrument` aplica un instrumento a una persona como charla en una sola llamada (`dialogue`, salida JSON validada con Zod). El motor da `target` y `disposition` por ítem; el LLM responde con sus palabras y elige una opción dentro de `LLM_RANGE` (±1); fuera de rango, el motor usa la decidida (`corregida`); sin LLM, plantilla (`plantilla`). El prompt no lleva la respuesta verdadera ni los indicadores (CA-010). Pruebas `psychometrics.test.ts` (046 CA-009, CA-010) |
 | 2026-10-06 | m4/bateria-psicometrica | 046 | `ItemAnswer.why`: la causa por la que una respuesta cayó a plantilla (`budget`, `timeout`, `invalid`, `disabled`, `network_error`), para que el fallo del proveedor no sea silencioso. `LlmResult.errorDetail`: estado y mensaje del proveedor (acotado, sin claves) cuando la pasarela cae a respaldo por un error de red. `administerBattery`: las seis pruebas de una persona en UNA llamada (`q` identifica la prueba de cada respuesta): 150 llamadas en vez de 900, necesario con proveedores de cuota diaria baja. Probada contra OpenRouter (`nvidia/nemotron-3-super-120b-a12b:free`): 65 de 65 ítems del LLM, ninguno corregido. El adaptador `openai_compatible` incluye el cuerpo (acotado) de las respuestas de error, para distinguir límite por minuto, por día o de crédito |
 | 2026-10-07 | fix/dass-rango-llm | 046 | `allowedRange(ins, target)` y `DOWN_ONLY`: en el DASS-21 el LLM solo puede elegir igual o por debajo de lo que decidió el motor (en la primera corrida duplicó la puntuación: 11,4 dicho frente a 4,9 verdadero). El prompt y las dos validaciones usan la misma función. Las demás pruebas, con el margen simétrico de siempre |
+| 2026-10-08 | feat/gateway-haiku-5-5 | 026, 047 | Pasarela lista para `claude-haiku-5-5` (026 R-014, CA-012, CA-013): `temperature` pasa a ser opcional y no se envía si falta (el modelo la rechaza con un 400); `effort` (`output_config.effort`) y `thinking: "disabled"` nuevos, en la configuración, la llamada y la clave del registro (solo cuando están: las claves anteriores no cambian). Propósito `therapist` (047 R-005), desactivado por defecto. `HAIKU_5_5` con su precio. El adaptador `openai_compatible` también omite la temperatura ausente |

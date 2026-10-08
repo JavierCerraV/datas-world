@@ -1,9 +1,12 @@
 // Contrato común de los adaptadores de proveedor (spec 026 §2).
-import type { ChatMessage, PromptPart, Usage } from '../types.ts';
+import type { ChatMessage, Effort, PromptPart, Usage } from '../types.ts';
 
 export interface ProviderCall {
   model: string;
-  temperature: number;
+  /** Los tres siguientes solo viajan si están configurados (R-014). */
+  temperature?: number;
+  effort?: Effort;
+  thinking?: 'disabled';
   maxOutputTokens: number;
   system: PromptPart[];
   messages: ChatMessage[];

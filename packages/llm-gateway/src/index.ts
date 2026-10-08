@@ -1,5 +1,5 @@
 // Pasarela LLM (spec 026) y capa de charla con ciudadanos (spec 043).
-export { DEFAULT_CONFIG, HAIKU, parseConfig } from './config.ts';
+export { DEFAULT_CONFIG, HAIKU, HAIKU_5_5, parseConfig } from './config.ts';
 export { Gateway, costMicros, extractJson } from './gateway.ts';
 export type { GatewayOptions } from './gateway.ts';
 export { recordKey } from './key.ts';
@@ -9,9 +9,9 @@ export { mockAdapter } from './providers/mock.ts';
 export type { MockResponder } from './providers/mock.ts';
 export { openaiCompatibleAdapter } from './providers/openai.ts';
 export type { ProviderAdapter, ProviderCall, ProviderResponse } from './providers/types.ts';
-export { NO_USAGE, PURPOSES } from './types.ts';
+export { EFFORTS, NO_USAGE, PURPOSES } from './types.ts';
 export type {
-  ChatMessage, FallbackReason, GatewayConfig, LlmRecord, LlmRequest, LlmResult, ModelConfig, PromptPart, ProviderName, Purpose,
+  ChatMessage, Effort, FallbackReason, GatewayConfig, LlmRecord, LlmRequest, LlmResult, ModelConfig, PromptPart, ProviderName, Purpose,
   RecordStore, Source, Usage,
 } from './types.ts';
 

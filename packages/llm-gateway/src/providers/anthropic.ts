@@ -1,5 +1,6 @@
 // Adaptador de Anthropic con el SDK oficial (spec 026; ADR-003). Haiku 4.5 no usa pensamiento adaptativo ni
-// `effort`, y admite `temperature`. Caché de prompts (R-008): la última parte cacheable del sistema lleva
+// `effort`, y admite `temperature`; Haiku 5.5 es al revés y rechaza `temperature`, así que cada parámetro viaja
+// solo si está configurado (R-014). Caché de prompts (R-008): la última parte cacheable del sistema lleva
 // `cache_control`, así que todo lo anterior (instrucciones y vista de la persona) se reutiliza entre turnos.
 import Anthropic from '@anthropic-ai/sdk';
 import type { ProviderAdapter, ProviderCall, ProviderResponse } from './types.ts';
@@ -13,13 +14,18 @@ export function buildAnthropicParams(c: Omit<ProviderCall, 'signal' | 'onText'>)
     text: p.text,
     ...(i === cacheable.length - 1 ? { cache_control: { type: 'ephemeral' } } : {}),
   }));
+  const outputConfig: Anthropic.OutputConfig = {
+    ...(c.effort ? { effort: c.effort } : {}),
+    ...(c.jsonSchema ? { format: { type: 'json_schema', schema: c.jsonSchema } } : {}),
+  };
   return {
     model: c.model,
     max_tokens: c.maxOutputTokens,
-    temperature: c.temperature,
+    ...(c.temperature !== undefined ? { temperature: c.temperature } : {}),
+    ...(c.thinking ? { thinking: { type: c.thinking } } : {}),
     system,
     messages: c.messages.map((m) => ({ role: m.role, content: m.text })),
-    ...(c.jsonSchema ? { output_config: { format: { type: 'json_schema', schema: c.jsonSchema } } } : {}),
+    ...(c.effort || c.jsonSchema ? { output_config: outputConfig } : {}),
   };
 }
 
