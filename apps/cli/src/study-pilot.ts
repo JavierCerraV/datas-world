@@ -81,9 +81,11 @@ export async function studyPilot(args: string[], io: Io): Promise<void> {
       concurrency: { type: 'string', default: '3' }, work: { type: 'string', default: 'data/estudio/piloto.db' }, out: { type: 'string', default: 'data/estudio/piloto' }, resume: { type: 'boolean', default: false },
     },
   });
-  const ids = (v.citizens ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  // Comas o espacios: PowerShell convierte `a,b,c` sin comillas en una lista y la pasa separada por espacios.
+  const list = (s: string | undefined) => (s ?? '').split(/[\s,]+/).filter(Boolean);
+  const ids = list(v.citizens);
   if (ids.length === 0) throw new UsageError('indique las personas: --citizens CIT-000013,CIT-000107,…');
-  const instruments = v.instruments!.split(',').map((s) => s.trim()) as InstrumentId[];
+  const instruments = list(v.instruments) as InstrumentId[];
   for (const k of instruments) if (!INSTRUMENT_IDS.includes(k)) throw new UsageError(`instrumento desconocido: ${k} (hay ${INSTRUMENT_IDS.join(', ')})`);
   const maxTurns = toInt('max-turns', v['max-turns'], 1), hour = toInt('hour', v.hour, 0), practiceUntilDay = toInt('practice-until-day', v['practice-until-day'], 0);
   if (hour > 23) throw new UsageError('--hour debe estar entre 0 y 23');

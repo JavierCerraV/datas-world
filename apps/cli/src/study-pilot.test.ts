@@ -145,4 +145,11 @@ describe('study:pilot (047)', () => {
     expect(await runAsync(['study:pilot', '--db', db, '--work', join(dir, 'x.db'), '--citizens', PEOPLE[0]!, '--instruments', 'OTRO', '--out', join(dir, 'x')], io)).toBe(2);
     expect(existsSync(join(dir, 'x', 'resumen.md'))).toBe(false);
   });
+
+  it('acepta las listas separadas por espacios, como las entrega PowerShell cuando van sin comillas', async () => {
+    const errs: string[] = [];
+    const code = await runAsync(['study:pilot', '--db', db, '--work', join(dir, 'y.db'), '--citizens', `${PEOPLE[0]} CIT-999999`, '--out', join(dir, 'y')], { ...io, err: (l) => errs.push(l) });
+    expect(code).toBe(2);
+    expect(errs.join('\n')).toMatch(/no existe CIT-999999$/m);
+  });
 });
