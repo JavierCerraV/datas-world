@@ -4,7 +4,7 @@ nombre: llm-gateway
 estado: aprobada
 hito: Bloque L (lo que necesita la charla, 043) · M6 (decisiones y diarios)
 depende_de: [021, 023, 025, 040]
-version: 0.3
+version: 0.4
 ---
 
 # 026 — Pasarela LLM
@@ -120,6 +120,7 @@ interface LlmRecord {            // tabla llm_records, fuera del stateHash
   - `thinking: "disabled"` apaga el pensamiento adaptativo en los modelos que lo permiten; el pensamiento cuenta como tokens de salida.
   - Los tres forman parte de la clave del registro (R-003) **solo cuando están**, para que los registros anteriores sigan valiendo.
   - El adaptador `openai_compatible` omite `temperature` igual, y no envía `effort` ni `thinking` (no hay un campo común entre proveedores).
+- **R-015** [M] — **Uso por tarea.** Además de las métricas por propósito de toda la pasarela (R-013), quien llama puede pedir una vista medida que lleva su propia cuenta de llamadas, tokens de entrada, de caché y de salida, y coste por propósito y modelo, para informar lo que costó una sesión o una medida cuando varias comparten pasarela y presupuesto. Lo que sale del registro cuenta como llamada, no como gasto.
 
 ## 5. Eventos
 | Tipo | Cuándo | Payload | Causas esperadas |
@@ -189,3 +190,4 @@ Las llamadas, los respaldos y el agotamiento del presupuesto no son eventos del 
 | 2026-09-27 | 0.2 | Estado → aprobada |
 | 2026-09-27 | 0.2 | Decisiones del usuario al aprobar: Haiku 4.5 por defecto, presupuesto de 20 USD al mes y 2 M de tokens al día, adaptador compatible con OpenAI listo y poda a 90 días de los registros que no afectan al mundo (`RECORD_TTL_DAYS`) |
 | 2026-10-08 | 0.3 | Para el estudio de intervención (047, aprobada por el usuario con el modelo `claude-haiku-5-5` en esfuerzo bajo): propósito `therapist`; `temperature` opcional, `effort` y `thinking` (R-014, CA-012, CA-013); precio de Haiku 5.5 |
+| 2026-10-08 | 0.4 | R-015: vista medida de la pasarela (`meteredGateway`) para informar tokens y coste por sesión del estudio (047), a petición del usuario |

@@ -3,7 +3,7 @@ import type { AddressInfo } from 'node:net';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { DEFAULT_CONFIG, HAIKU_5_5, parseConfig } from './config.ts';
-import { Gateway } from './gateway.ts';
+import { Gateway, meteredGateway } from './gateway.ts';
 import { recordKey } from './key.ts';
 import { buildAnthropicParams } from './providers/anthropic.ts';
 import { mockAdapter } from './providers/mock.ts';
@@ -97,6 +97,27 @@ describe('pasarela LLM (026)', () => {
     expect(recordKey(mockCfg({ effort: 'low' }), req)).not.toBe(plain);
     expect(recordKey(mockCfg({ effort: 'low' }), req)).not.toBe(recordKey(mockCfg({ effort: 'high' }), req));
     expect(recordKey(mockCfg({ thinking: 'disabled' }), req)).not.toBe(plain);
+  });
+
+  it('R-013: una vista medida lleva la cuenta de lo que pasa por ella, sin dejar de sumar en la pasarela', async () => {
+    const g = gw(() => 'hola');
+    const a = meteredGateway(g), b = meteredGateway(g);
+    await a.gateway.run(ask('uno'));
+    await a.gateway.run({ ...ask('dos'), purpose: 'classify' });
+    await b.gateway.run(ask('tres'));
+    const ua = a.usage();
+    expect(ua.dialogue).toMatchObject({ model: 'mock-1', calls: 1 });
+    expect(ua.dialogue!.inputTokens).toBeGreaterThan(0);
+    expect(ua.dialogue!.costMicros).toBeGreaterThan(0);
+    expect(ua.classify).toMatchObject({ model: 'mock-clasificador', calls: 1 });
+    expect(b.usage().dialogue!.calls).toBe(1);
+    expect(g.metrics().dialogue!.calls).toBe(2);
+    // Lo que sale del registro no vuelve a costar.
+    const paid = b.usage().dialogue!.costMicros;
+    await b.gateway.run(ask('tres'));
+    expect(b.usage().dialogue).toMatchObject({ calls: 2, costMicros: paid });
+    expect(a.gateway.config).toBe(g.config);
+    expect(a.gateway.budgetLeft()).toBe(true);
   });
 
   it('CA-007: con un tiempo máximo de 200 ms y 1 s de latencia, devuelve el respaldo por tiempo antes de 300 ms', async () => {

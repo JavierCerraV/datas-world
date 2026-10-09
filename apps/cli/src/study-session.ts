@@ -1,6 +1,6 @@
 // `pnpm cli study:session` (spec 047): UNA sesión del protocolo con una persona, para leer el diálogo antes de correr el
 // estudio. El terapeuta y la persona van en llamadas separadas; el mundo de origen se lee y no se toca (INV-003). Con
-// `--previous`, la semana entre sesiones pasa en una copia de trabajo. Todavía sin dosis del protocolo (R-004).
+// `--previous`, la semana entre sesiones pasa en una copia de trabajo, con la charla y la dosis de la sesión anterior ya aplicadas por el motor (R-004).
 import { existsSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import { MAX_TURNS_SESSION } from '@datas-world/llm-gateway';
@@ -9,7 +9,7 @@ import type { DisclosureLevel } from '@datas-world/engine';
 import { DEFAULT_DB, UsageError, nameOf, toInt } from './common.ts';
 import type { Io } from './common.ts';
 import { copyWorld } from './psychometrics.ts';
-import { advanceWorld, costOf, gatewayFor, holdSession, loadWorld, readSaved, saveSession, stampOf, withPnr } from './study-core.ts';
+import { advanceWorld, gatewayFor, holdSession, inputsOf, loadWorld, readSaved, saveSession, stampOf, usdOf, withPnr } from './study-core.ts';
 import type { Saved } from './study-core.ts';
 
 /** Deja la copia de trabajo `gapDays` días después de la sesión anterior y devuelve su ruta. */
@@ -22,7 +22,8 @@ function weekLater(src: string, work: string, prev: Saved, gapDays: number, io: 
     throw new UsageError(`${work} está en ${stampOf(work).date} y la sesión ${prev.meta.session} fue en ${prev.meta.date}: borre la copia o indique otra con --work`);
   }
   io.err(`Pasan ${gapDays} días…`);
-  advanceWorld(work, [prev], gapDays * MINUTES_PER_DAY);
+  // La sesión anterior entra al mundo antes de que pase la semana: la charla (043) y la dosis del protocolo (047 R-004).
+  advanceWorld(work, gapDays * MINUTES_PER_DAY, { atStart: inputsOf(prev) });
   return work;
 }
 
@@ -63,7 +64,7 @@ export async function studySession(args: string[], io: Io): Promise<void> {
 
   const r = saved.result;
   const templates = saved.patient.filter((p) => p.expression === 'template').length;
-  io.out(`Sesión ${n}: ${r.ended}${r.detail ? ` (${r.detail})` : ''} · ${r.therapistTurns} turnos · fidelidad ${Math.round(r.fidelity * 100)} % · coste ${costOf(gateway).toFixed(4)} USD`);
+  io.out(`Sesión ${n}: ${r.ended}${r.detail ? ` (${r.detail})` : ''} · ${r.therapistTurns} turnos · fidelidad ${Math.round(r.fidelity * 100)} % · coste ${usdOf(saved.usage).toFixed(4)} USD`);
   if (templates > 0) io.out(`AVISO: en ${templates} de ${saved.patient.length} turnos el LLM de la persona no respondió y habló la plantilla de la postura.`);
   io.out(`Transcripción: ${v.out}.md · datos: ${v.out}.json`);
   if (r.ended === 'sin_llm') throw new Error(`el LLM del terapeuta no respondió (${r.detail ?? 'sin detalle'})`);

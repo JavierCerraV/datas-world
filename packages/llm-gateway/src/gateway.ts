@@ -211,3 +211,38 @@ export class Gateway {
     m.total = [...m.total, r.latencyMs.total].slice(-MAX_SAMPLES);
   }
 }
+
+/** Uso acumulado de un propósito en una vista medida. */
+export interface UsageTotals extends Usage {
+  model: string;
+  calls: number;
+  /** Millonésimas de dólar. */
+  costMicros: number;
+}
+
+/**
+ * R-013: una vista de la pasarela que lleva su propia cuenta de llamadas, tokens y coste por propósito, para informar
+ * lo que costó una sesión o una medida cuando varias comparten pasarela (y presupuesto). Lo que sale del registro
+ * cuenta como llamada y no como gasto.
+ */
+export function meteredGateway(gateway: Gateway): { gateway: Gateway; usage: () => Record<string, UsageTotals> } {
+  const totals = new Map<string, UsageTotals>();
+  const view = Object.create(gateway) as Gateway;
+  Object.defineProperties(view, {
+    run: {
+      value: async <T>(req: LlmRequest<T>): Promise<LlmResult<T>> => {
+        const r = await gateway.run(req);
+        const t = totals.get(req.purpose) ?? { model: r.model, calls: 0, ...NO_USAGE, costMicros: 0 };
+        t.calls++;
+        if (r.source !== 'record') for (const k of Object.keys(NO_USAGE) as (keyof Usage)[]) t[k] += r.usage[k];
+        t.costMicros += r.costMicros;
+        totals.set(req.purpose, t);
+        return r;
+      },
+    },
+    // Los métodos de la clase usan campos privados: se delegan en la pasarela real.
+    metrics: { value: () => gateway.metrics() },
+    budgetLeft: { value: () => gateway.budgetLeft() },
+  });
+  return { gateway: view, usage: () => Object.fromEntries([...totals].sort(([a], [b]) => (a < b ? -1 : 1)).map(([p, t]) => [p, { ...t }])) };
+}

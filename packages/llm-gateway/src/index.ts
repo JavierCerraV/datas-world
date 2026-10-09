@@ -1,7 +1,7 @@
 // Pasarela LLM (spec 026) y capa de charla con ciudadanos (spec 043).
 export { DEFAULT_CONFIG, HAIKU, HAIKU_5_5, parseConfig } from './config.ts';
-export { Gateway, costMicros, extractJson } from './gateway.ts';
-export type { GatewayOptions } from './gateway.ts';
+export { Gateway, costMicros, extractJson, meteredGateway } from './gateway.ts';
+export type { GatewayOptions, UsageTotals } from './gateway.ts';
 export { recordKey } from './key.ts';
 export { MemoryRecordStore } from './records.ts';
 export { anthropicAdapter, buildAnthropicParams } from './providers/anthropic.ts';

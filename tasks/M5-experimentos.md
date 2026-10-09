@@ -19,8 +19,7 @@ Piloto con las 12 personas con episodios de PNR, protocolo ACT de 3 sesiones, `c
 - [x] P2 Guía del protocolo (`engine/protocol`) y terapeuta como agente con sesión dialogada y fidelidad (047 R-005 a R-005c; CA-008 a CA-010).
 - [x] P3 La persona en la sesión con la charla de la 043 en escenario de consulta (R-005d, R-005e); memoria del terapeuta entre sesiones y terapeuta que no sabe que es una simulación (CA-013); comando `study:session` con la transcripción guardada (CA-005).
 - [x] P3b Sesión real de prueba con una persona (Natalia, OpenRouter, 12 turnos) y revisión con el usuario: terapeuta por función (R-005f) y nivel de confianza en consulta.
-- [ ] P3c Piloto de diálogo con 3 personas y las 3 sesiones en `claude-haiku-5-5` (`study:pilot`); revisar transcripciones con el usuario.
-- [ ] P4 Efecto en el motor: compromiso por sesión, dosis por mecanismo, `PROTOCOL_SESSION`, `PRACTICE_DONE`, `PROTOCOL_ENDED`, adherencia a la práctica (R-004, R-006; CA-002 a CA-004).
+- [x] P4 Efecto en el motor: compromiso por sesión, dosis por mecanismo, `PROTOCOL_SESSION`, `PRACTICE_DONE`, `PROTOCOL_ENDED`, adherencia a la práctica y asistencia (R-004, R-006, R-013; CA-002 a CA-004). Falta crear las reglas de seguimiento hacia acciones valiosas.
 - [ ] P5 Pruebas en el mundo y regreso a sesión con lo que le pasó, o abandono (R-012, R-013; CA-011, CA-012).
-- [ ] P6 Medidas con los cuatro instrumentos, complacencia e informe (R-007 a R-009; CA-006, CA-007).
-- [ ] P7 Comando de la CLI y corrida del piloto, con tope de gasto de 5 USD.
+- [x] P6 Medidas en cada toma (dicho, decidido por el motor y verdadero), brecha de informe, mecanismos, episodios de rumia, brazo de espera e informe con tokens y coste por sesión (R-007 a R-009, R-001c; CA-006, CA-007, CA-014). Falta la complacencia en la transcripción y la sensibilidad a la dosis.
+- [ ] P7 Corrida del piloto en `claude-haiku-5-5` (3 personas, 7 tomas, 3 sesiones) y revisión de resultados con el usuario.

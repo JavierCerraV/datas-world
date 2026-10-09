@@ -510,5 +510,11 @@ export {
 } from './experiment/index.ts';
 export type { Arm, Contrast, Experiment, Intervention, InterventionKind, MetricId, Pair, Subjects } from './experiment/index.ts';
 
-export { ACT_PNR_3, PROTOCOLS, coverage, newProgress, recordExchange, sessionOf } from './protocol/index.ts';
-export type { Coverage, Mechanism, Protocol, ProtocolComponent, ProtocolId, ProtocolSession, SessionNumber, SessionProgress } from './protocol/index.ts';
+export {
+  ACT_PNR_3, NO_DOSE, PROTOCOLS, PROTOCOL_FEED_KINDS, PROTOCOL_PARAMS, applyDose, attendProbability, coverage, hasValue, newProgress, practiceProbability, protocolInputs,
+  recordExchange, sessionDose, sessionOf,
+} from './protocol/index.ts';
+export type {
+  Coverage, Dose, DoseEffect, Exchange as SessionExchange, Mechanism, Protocol, ProtocolComponent, ProtocolId, ProtocolPracticeInput, ProtocolSession, ProtocolSessionInput, SessionNumber,
+  SessionProgress,
+} from './protocol/index.ts';
