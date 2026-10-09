@@ -11,7 +11,7 @@ import { MAX_TURNS_SESSION } from '@datas-world/llm-gateway';
 import { DEFAULT_DB, UsageError, nameOf, toInt } from './common.ts';
 import type { Io } from './common.ts';
 import { copyWorld } from './psychometrics.ts';
-import { NO_SHOW, VISITOR, advanceWorld, gatewayFor, holdSession, inputsOf, loadWorld, noShow, readSaved, saveSession, usdOf } from './study-core.ts';
+import { LlmUnavailable, NO_SHOW, VISITOR, advanceWorld, gatewayFor, holdSession, inputsOf, loadWorld, noShow, readSaved, saveSession, usdOf } from './study-core.ts';
 import type { LoadedWorld, Saved, StudyInput } from './study-core.ts';
 import { STUDY_INSTRUMENTS, takeMeasures } from './study-measure.ts';
 import type { Measure } from './study-measure.ts';
@@ -32,6 +32,25 @@ export function stopsOf(baselineWeeks: number, followUpWeeks: number): Stop[] {
   for (const s of ACT_PNR_3.sessions) stops.push({ take: stops.length, label: `antes de la sesión ${s.n}`, day: 7 * (s.n - 1), phase: 'tratamiento', session: s.n });
   stops.push({ take: stops.length, label: `seguimiento (${followUpWeeks} semanas)`, day: 7 * (ACT_PNR_3.sessions.length - 1) + 7 * followUpWeeks, phase: 'seguimiento' });
   return stops;
+}
+
+/** Hasta `n` a la vez; al primer fallo no empieza más y, cuando terminan las que iban, lo lanza. */
+async function pool<T, R>(items: readonly T[], n: number, fn: (x: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = [];
+  let next = 0;
+  let failed: unknown;
+  await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => {
+    while (next < items.length && failed === undefined) {
+      const k = next++;
+      try {
+        out[k] = await fn(items[k]!);
+      } catch (e) {
+        failed ??= e;
+      }
+    }
+  }));
+  if (failed !== undefined) throw failed;
+  return out;
 }
 
 const DOSE_KEYS = ['yo', 'extincion', 'valores'] as const;
@@ -59,7 +78,7 @@ export async function studyPilot(args: string[], io: Io): Promise<void> {
       'max-turns': { type: 'string', default: String(MAX_TURNS_SESSION) }, 'min-level': { type: 'string', default: '2' }, hour: { type: 'string', default: '10' },
       'baseline-weeks': { type: 'string', default: '3' }, 'followup-weeks': { type: 'string', default: '5' }, 'practice-until-day': { type: 'string', default: '42' },
       instruments: { type: 'string', default: STUDY_INSTRUMENTS.join(',') }, 'measures-without-llm': { type: 'boolean', default: false },
-      work: { type: 'string', default: 'data/estudio/piloto.db' }, out: { type: 'string', default: 'data/estudio/piloto' }, resume: { type: 'boolean', default: false },
+      concurrency: { type: 'string', default: '3' }, work: { type: 'string', default: 'data/estudio/piloto.db' }, out: { type: 'string', default: 'data/estudio/piloto' }, resume: { type: 'boolean', default: false },
     },
   });
   const ids = (v.citizens ?? '').split(',').map((s) => s.trim()).filter(Boolean);
@@ -70,18 +89,23 @@ export async function studyPilot(args: string[], io: Io): Promise<void> {
   if (hour > 23) throw new UsageError('--hour debe estar entre 0 y 23');
   const minLevel = minLevelOf(v['min-level']);
   const stops = stopsOf(toInt('baseline-weeks', v['baseline-weeks'], 0), toInt('followup-weeks', v['followup-weeks'], 1));
-  const gateway = gatewayFor(v.provider!, v['llm-config']!, io);
+  const concurrency = toInt('concurrency', v.concurrency, 1);
+  const real = v.provider === 'config';
   const out = v.out!, work = v.work!, twin = work.replace(/(\.db)?$/, '-espera.db');
   const statePath = join(out, 'estado.json');
   const sessionFile = (id: string, n: number) => join(out, `${id}-s${n}`);
   const takeFile = (i: number) => join(out, `toma-${i + 1}.json`);
   mkdirSync(out, { recursive: true });
+  // Cada respuesta del LLM queda en disco en cuanto llega: una sesión cortada se retoma en el turno en que iba, y un
+  // piloto que hay que rehacer desde las copias no vuelve a pedir (ni a pagar) lo que ya se respondió.
+  const gateway = gatewayFor(v.provider!, v['llm-config']!, io, join(out, 'llm-registro.jsonl'));
 
   let state: State = { at: 0 };
   const saveState = () => writeFileSync(statePath, `${JSON.stringify(state)}\n`);
-  if (v.resume && existsSync(statePath) && existsSync(work) && existsSync(twin)) {
-    state = JSON.parse(readFileSync(statePath, 'utf8')) as State;
-    if (state.advancing) throw new UsageError('la ejecución anterior se cortó mientras avanzaba el mundo y las copias no son fiables: repita sin --resume (las sesiones y tomas ya pagadas no se pueden reutilizar)');
+  const saved: State | undefined = v.resume && existsSync(statePath) && existsSync(work) && existsSync(twin) ? (JSON.parse(readFileSync(statePath, 'utf8')) as State) : undefined;
+  if (saved?.advancing) io.err('La ejecución anterior se cortó mientras avanzaba el mundo: se rehacen las copias. Las tomas, las sesiones y las respuestas guardadas se reutilizan.');
+  if (saved && !saved.advancing) {
+    state = saved;
     io.err(`Reanudando en la parada ${state.at + 1} de ${stops.length}`);
   } else {
     const w = loadWorld(v.db!).world;
@@ -97,6 +121,7 @@ export async function studyPilot(args: string[], io: Io): Promise<void> {
 
   const sessions: Saved[] = [];
   const measures: Measure[] = [];
+  try {
   for (const [i, stop] of stops.entries()) {
     if (i > state.at) {
       const prevStop = stops[i - 1]!;
@@ -144,20 +169,24 @@ export async function studyPilot(args: string[], io: Io): Promise<void> {
     const todo = ids.filter((id) => !kept.includes(id));
     if (todo.length === 0) continue;
     io.err(`Sesión ${n}: ${todo.map((id) => nameOf(world().world, id)).join(', ')}`);
-    const held = await Promise.all(todo.map(async (id) => {
+    const held = await pool(todo, concurrency, async (id) => {
       const prev = sessions.filter((s) => s.meta.citizen === id).sort((a, b) => Number(b.meta.session) - Number(a.meta.session))[0];
       const base = { provider: v.provider!, citizenId: id, session: n, minLevel, ...(prev ? { prev } : {}) };
       const a = attendance(world(), id, n);
       const s = a.attends
-        ? await holdSession(world(), { ...base, gateway, maxTurns, onTurn: (turn, stance) => io.err(`  ${id} s${n} turno ${turn + 1}: ${stance ?? 'se fue'}`) })
+        ? await holdSession(world(), { ...base, gateway, maxTurns, strict: real, onTurn: (turn, stance) => io.err(`  ${id} s${n} turno ${turn + 1}: ${stance ?? 'se fue'}`) })
         : noShow(world(), base, a.p);
       if (!a.attends) io.err(`  ${id} no fue a la sesión ${n} (probabilidad de asistir ${a.p.toFixed(2)})`);
+      // Una sesión que el terapeuta no pudo terminar no se guarda: sus respuestas están en el registro y se retoma ahí.
+      if (s.result.ended === 'sin_llm') throw new LlmUnavailable(`el LLM del terapeuta no respondió con ${id} en la sesión ${n} (${s.result.detail ?? 'sin detalle'})`);
       saveSession(s, sessionFile(id, n));
       return s;
-    }));
+    });
     sessions.push(...held);
-    const failed = held.find((s) => s.result.ended === 'sin_llm');
-    if (failed) throw new Error(`el LLM del terapeuta no respondió con ${failed.meta.citizen} en la sesión ${n} (${failed.result.detail ?? 'sin detalle'}); corrija la causa y repita con --resume`);
+  }
+  } catch (e) {
+    if (e instanceof UsageError) throw e;
+    throw new Error(`${(e as Error).message}. Lo hecho quedó guardado: repita el mismo comando con --resume (puede cambiar las claves antes)`, { cause: e });
   }
 
   const order = (s: Saved) => `${s.meta.citizen}-${s.meta.session}`;

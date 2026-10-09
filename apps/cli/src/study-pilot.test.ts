@@ -1,6 +1,6 @@
 // Spec 047 (CA-002, CA-003, CA-005 a CA-007, INV-002): `study:pilot` hace el piloto de punta a punta: tomas de línea
 // base, sesiones semanales con su dosis decidida por el motor, práctica, seguimiento y un brazo de espera para comparar.
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { openReadonly, queryEvents } from '@datas-world/persistence';
@@ -118,6 +118,24 @@ describe('study:pilot (047)', () => {
     const before = statSync(file).mtimeMs;
     expect(await runAsync([...args('q'), '--resume'], io)).toBe(0);
     expect(statSync(file).mtimeMs).toBe(before);
+    expect(readFileSync(join(dir, 'q', 'resumen.md'), 'utf8')).toBe(readFileSync(join(dir, 'p', 'resumen.md'), 'utf8'));
+  }, 300_000);
+
+  it('026 R-003: las respuestas del LLM quedan en disco; lo que falte al reanudar se rehace sin pedirlas otra vez y da lo mismo', async () => {
+    const log = join(dir, 'q', 'llm-registro.jsonl');
+    const lines = () => readFileSync(log, 'utf8').trim().split('\n').length;
+    const n = lines();
+    expect(n).toBeGreaterThan(50);
+    // Se pierden una sesión y una toma, y además el avance del mundo «quedó a medias»: hay que rehacer las copias.
+    const session = join(dir, 'q', `${PEOPLE[0]}-s2.json`), take = join(dir, 'q', 'toma-4.json');
+    const [s0, t0] = [readFileSync(session, 'utf8'), readFileSync(take, 'utf8')];
+    rmSync(session);
+    rmSync(take);
+    writeFileSync(join(dir, 'q', 'estado.json'), '{"at":3,"advancing":true}\n');
+    expect(await runAsync([...args('q'), '--resume', '--concurrency', '1'], io)).toBe(0);
+    expect(readFileSync(session, 'utf8')).toBe(s0);
+    expect(readFileSync(take, 'utf8')).toBe(t0);
+    expect(lines()).toBe(n);
     expect(readFileSync(join(dir, 'q', 'resumen.md'), 'utf8')).toBe(readFileSync(join(dir, 'p', 'resumen.md'), 'utf8'));
   }, 300_000);
 

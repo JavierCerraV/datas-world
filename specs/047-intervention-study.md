@@ -141,7 +141,7 @@ Por brazo y momento: media y desviación de cada instrumento y de cada subescala
 - [ ] El usuario pidió GPQ-9, DASS-21 y SWLS; el piloto añade por defecto el AAQ-II (los cuatro de §3). `--instruments` lo quita.
 - [ ] ¿La medida de cribado debe ser la verdadera o una autoinformada? Con la verdadera no hay sesgo de informe, pero un estudio real usaría autoinforme.
 - [ ] ¿Se añade un brazo de control de atención (sesiones sin contenido activo)? Separa el efecto de la atención del de los ejercicios; tres brazos.
-- [ ] Reproducir las sesiones sin red exige persistir el registro de respuestas del LLM (026 R-003, hoy en memoria).
+- [x] Reproducir las sesiones sin red exige persistir el registro de respuestas del LLM (026 R-003). El piloto lo guarda en un archivo (`llm-registro.jsonl` en su carpeta) mientras llega el almacén SQLite: una sesión cortada se retoma en el turno en que iba y un piloto rehecho no repite llamadas (2026-10-09).
 - [ ] La complacencia en la transcripción por reglas léxicas es burda; ¿un clasificador LLM aparte, o revisión humana de una muestra?
 
 ## 11. Historial de cambios
@@ -155,3 +155,4 @@ Por brazo y momento: media y desviación de cada instrumento y de cada subescala
 | 2026-10-08 | 0.5 | Decisiones del usuario al revisar el terapeuta: no sabe que es una simulación; tiene memoria de las sesiones anteriores (una nota clínica que escribe al cerrar cada una); va en una llamada propia con el mismo modelo del piloto. La persona responde en un escenario de consulta (R-005e). CA-013 |
 | 2026-10-08 | 0.6 | Tras la primera sesión real (Natalia, 12 turnos): el terapeuta pasa a trabajar por función (R-005f: lectura funcional, relación primero, sin cuentas de pasos, puede cerrar la sesión). Hallazgo: con el nivel «conocido» la persona no puede contar su problema real y el modelo inventa otro; el piloto admite el nivel «de confianza» (R-005e), pendiente de confirmación. Dos preguntas abiertas nuevas sobre la vista de la persona |
 | 2026-10-08 | 0.7 | Piloto medible, a petición del usuario: diseño de caso único con 3 tomas de línea base, 3 con las sesiones y una de seguimiento a las 5 semanas (R-001c, CA-014), con el brazo de espera como copia sin LLM. Se concreta la dosis (R-004: ensayos por intercambio según la postura), la práctica (R-006) y la asistencia (R-013); la fidelidad ya no multiplica la dosis (R-005c). Tokens y coste por sesión. Preguntas abiertas: el AAQ-II y los mecanismos, y las reglas de seguimiento pendientes |
+| 2026-10-09 | 0.7 | Piloto con proveedores de cuota baja, a petición del usuario: varias claves que se relevan, registro de respuestas en disco y reanudación dentro de una sesión. Sin cambio de reglas |

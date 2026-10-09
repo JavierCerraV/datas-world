@@ -223,7 +223,8 @@ export interface UsageTotals extends Usage {
 /**
  * R-013: una vista de la pasarela que lleva su propia cuenta de llamadas, tokens y coste por propósito, para informar
  * lo que costó una sesión o una medida cuando varias comparten pasarela (y presupuesto). Lo que sale del registro
- * cuenta como llamada y no como gasto.
+ * cuenta con los tokens y el coste con que se registró: así el informe de una tarea reanudada dice lo que costó
+ * producirla, aunque esta ejecución no lo haya vuelto a pagar (la pasarela, en cambio, no lo suma a su presupuesto).
  */
 export function meteredGateway(gateway: Gateway): { gateway: Gateway; usage: () => Record<string, UsageTotals> } {
   const totals = new Map<string, UsageTotals>();
@@ -234,8 +235,8 @@ export function meteredGateway(gateway: Gateway): { gateway: Gateway; usage: () 
         const r = await gateway.run(req);
         const t = totals.get(req.purpose) ?? { model: r.model, calls: 0, ...NO_USAGE, costMicros: 0 };
         t.calls++;
-        if (r.source !== 'record') for (const k of Object.keys(NO_USAGE) as (keyof Usage)[]) t[k] += r.usage[k];
-        t.costMicros += r.costMicros;
+        for (const k of Object.keys(NO_USAGE) as (keyof Usage)[]) t[k] += r.usage[k];
+        t.costMicros += r.source === 'record' ? (gateway.records.get(r.recordKey)?.costMicros ?? 0) : r.costMicros;
         totals.set(req.purpose, t);
         return r;
       },

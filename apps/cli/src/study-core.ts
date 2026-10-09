@@ -1,80 +1,23 @@
 // Piezas comunes de los comandos del estudio de intervención (spec 047): la pasarela, una sesión con una persona, su
 // archivo y el paso del tiempo entre sesiones. El mundo de origen nunca se escribe (INV-003): lo que cambia es una copia.
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { ACT_PNR_3, MINUTES_PER_DAY, PROTOCOL_FEED_KINDS, learningParams, protocolInputs, stateHash } from '@datas-world/engine';
 import type { ChatSessionInput, DisclosureLevel, EntityId, ProtocolSessionInput, SessionNumber, World, WorldEvent } from '@datas-world/engine';
 import { buildOntology, lifeRunner, loadCatalogs } from '@datas-world/generators';
-import {
-  ChatSession, DEFAULT_CONFIG, Gateway, MemoryRecordStore, anthropicAdapter, chatCatalogs, meteredGateway, mockAdapter, openaiCompatibleAdapter, parseConfig,
-  patientResponder, runTherapySession,
-} from '@datas-world/llm-gateway';
-import type { GatewayConfig, MockResponder, ModelConfig, PatientTurnLog, ProviderAdapter, SessionNote, TherapySessionResult, UsageTotals } from '@datas-world/llm-gateway';
+import { ChatSession, chatCatalogs, meteredGateway, patientResponder, runTherapySession } from '@datas-world/llm-gateway';
+import type { Gateway, PatientTurnLog, SessionNote, TherapySessionResult, UsageTotals } from '@datas-world/llm-gateway';
 import { WorldRepository, WorldSession, acquireWriterLock, openReadonly, openWorldDb, queryEvents, releaseWriterLock } from '@datas-world/persistence';
 import { UsageError, dateOf, nameOf, withDb } from './common.ts';
-import type { Io } from './common.ts';
 
 /** El terapeuta es siempre el mismo para la persona: lo que aprende de él en una sesión vale en la siguiente (043 R-006). */
 export const VISITOR = 'EXT-TERAPEUTA';
 
-/** Una sesión son unas 160 llamadas con el diálogo acumulado: el tope diario de la charla se queda corto. */
-const STUDY_TOKENS = 20_000_000;
+export { gatewayFor } from './study-llm.ts';
 
-/** Terapeuta y persona deterministas: el terapeuta trabaja el primer componente pendiente; la persona dice su postura. */
-const mockResponder: MockResponder = (c) => {
-  const sys = c.system.map((p) => p.text).join('\n');
-  if (sys.startsWith('Clasifica el tono')) return '{"tone":"neutro"}';
-  if (sys.startsWith('Revisas la respuesta')) return '{"claims":[],"stance":"ok"}';
-  if (c.model === 'mock-terapeuta') {
-    if (!c.jsonSchema) return `Nota de prueba: ${c.messages[0]!.text.split('\n')[0]}`;
-    const component = (/PENDIENTES: (.*)/.exec(sys)?.[1] ?? '').split(', ')[0] ?? '';
-    return JSON.stringify({ read: 'Lectura de prueba.', say: `Hablemos de esto (${component}).`, component, covered: [], notes: 'Formulación de prueba.', close: false });
-  }
-  return `[${/POSTURA PARA ESTE TURNO: ([^.]+)\./.exec(sys)?.[1] ?? 'sin postura'}] respuesta simulada.`;
-};
-
-const TRANSIENT = /429|rate.?limit|overloaded|\b50[234]\b|\b529\b|ETIMEDOUT|ECONNRESET/i;
-const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-
-/** Reintenta ante límites de tasa o sobrecarga; otros fallos pasan tal cual. */
-const withRetry = (inner: () => ProviderAdapter, io: Io): ProviderAdapter => ({
-  async call(c) {
-    for (let attempt = 1; ; attempt++) {
-      try {
-        return await inner().call(c);
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : String(e);
-        if (attempt >= 6 || !TRANSIENT.test(msg) || c.signal.aborted) throw e;
-        io.err(`  proveedor ocupado (${msg.slice(0, 80)}); reintento ${attempt} en ${5 * attempt} s`);
-        await sleep(5_000 * attempt);
-      }
-    }
-  },
-});
-
-/** Pasarela del estudio. `config`: el archivo debe definir `therapist` y `dialogue`; su `budget` es el tope de gasto. */
-export function gatewayFor(provider: string, llmConfig: string, io: Io): Gateway {
-  const budget = (c: GatewayConfig): GatewayConfig => ({ ...c, budget: { ...c.budget, dailyTokens: Math.max(c.budget.dailyTokens, STUDY_TOKENS) } });
-  if (provider === 'mock') {
-    const m = (model: string): ModelConfig => ({ provider: 'mock', model, maxOutputTokens: 800, timeoutMs: 5_000 });
-    const purposes = { ...DEFAULT_CONFIG.purposes, dialogue: m('mock-persona'), classify: m('mock'), verify: m('mock'), therapist: m('mock-terapeuta') };
-    return new Gateway({ config: budget({ ...DEFAULT_CONFIG, purposes }), adapters: { mock: mockAdapter(mockResponder) }, records: new MemoryRecordStore(10_000) });
-  }
-  if (provider !== 'config') throw new UsageError('--provider debe ser mock o config');
-  if (!existsSync(llmConfig)) throw new UsageError(`no existe ${llmConfig} (use --llm-config RUTA)`);
-  const config = budget(parseConfig(JSON.parse(readFileSync(llmConfig, 'utf8'))));
-  const { therapist, dialogue } = config.purposes;
-  if (!therapist || !dialogue) throw new UsageError(`${llmConfig} debe definir los propósitos therapist y dialogue`);
-  // Los dos proveedores reales; `openai_compatible` lee LLM_BASE_URL y LLM_API_KEY del entorno, o `baseUrl` del archivo.
-  let a: ProviderAdapter | undefined;
-  let o: ProviderAdapter | undefined;
-  const adapters = {
-    anthropic: withRetry(() => (a ??= anthropicAdapter()), io),
-    openai_compatible: withRetry(() => (o ??= openaiCompatibleAdapter(therapist.baseUrl ? { baseUrl: therapist.baseUrl } : {})), io),
-  };
-  return new Gateway({ config, adapters, records: new MemoryRecordStore(10_000) });
-}
+/** El LLM de la persona no respondió en un turno: la sesión no vale y hay que retomarla (047 CA-005). */
+export class LlmUnavailable extends Error {}
 
 /** Final de una sesión a la que la persona no fue (047 R-013). */
 export const NO_SHOW = 'no_asistio';
@@ -174,6 +117,8 @@ export interface HoldOptions {
   maxTurns: number;
   /** Nivel de intimidad mínimo de la persona en consulta (047 R-005d). */
   minLevel: DisclosureLevel;
+  /** Con un proveedor real, que la persona hable por plantilla (su LLM no respondió) corta la sesión. */
+  strict?: boolean;
   onTurn?: (turn: number, stance: string | undefined) => void;
 }
 
@@ -199,6 +144,10 @@ export async function holdSession({ world, events }: LoadedWorld, o: HoldOptions
     ...(o.prev ? { formulation: o.prev.formulation } : {}),
     respond: async (say, turn) => {
       const reply = await respond(say, turn);
+      // Una respuesta de plantilla no es un dato de la persona. Lo ya respondido queda en el registro: al reanudar,
+      // la sesión se rehace hasta aquí sin llamadas y sigue.
+      if (o.strict && log.at(-1)?.expression === 'template')
+        throw new LlmUnavailable(`el LLM de ${o.citizenId} no respondió en el turno ${turn + 1} de la sesión ${o.session}`);
       o.onTurn?.(turn, reply.stance);
       return reply;
     },

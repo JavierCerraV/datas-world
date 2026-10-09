@@ -112,10 +112,13 @@ describe('pasarela LLM (026)', () => {
     expect(ua.classify).toMatchObject({ model: 'mock-clasificador', calls: 1 });
     expect(b.usage().dialogue!.calls).toBe(1);
     expect(g.metrics().dialogue!.calls).toBe(2);
-    // Lo que sale del registro no vuelve a costar.
-    const paid = b.usage().dialogue!.costMicros;
-    await b.gateway.run(ask('tres'));
-    expect(b.usage().dialogue).toMatchObject({ calls: 2, costMicros: paid });
+    // Lo que sale del registro cuenta con lo que costó cuando se pidió (el informe de una tarea reanudada es el mismo),
+    // pero la pasarela no lo vuelve a sumar a su gasto.
+    const paid = b.usage().dialogue!.costMicros, spent = g.metrics().dialogue!.costMicros;
+    const fresh = meteredGateway(g);
+    await fresh.gateway.run(ask('tres'));
+    expect(fresh.usage().dialogue).toMatchObject({ calls: 1, costMicros: paid, inputTokens: b.usage().dialogue!.inputTokens });
+    expect(g.metrics().dialogue!.costMicros).toBe(spent);
     expect(a.gateway.config).toBe(g.config);
     expect(a.gateway.budgetLeft()).toBe(true);
   });
