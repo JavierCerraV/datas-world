@@ -3,6 +3,7 @@
 // hechos de otros que no presenció. Se sustituye por la `PersonView` de la 025 cuando exista.
 import { ACTIVITY, ACTIVITY_COLUMN, CHAT_RECALL, MEMORY_DEFAULTS, ageInYears, formatId, recall, toCalendar } from '@datas-world/engine';
 import type { EntityId, Memory, WorldEvent, WorldView } from '@datas-world/engine';
+import { CONSULT_SUMMARIZED, consultFacts } from './consult.ts';
 import { factLevel } from './disclosure.ts';
 import { renderFact } from './facts.ts';
 
@@ -50,6 +51,8 @@ export interface ViewInput {
   memoryText?: (kind: string) => string | undefined;
   /** Nombre de un tema del que se habla (025), para lo que cree de otros. */
   topicText?: (key: string) => string | undefined;
+  /** 047 R-013: la persona va a consulta; su vista resume sus episodios de rumia, sus sesiones y su práctica. */
+  consult?: boolean;
 }
 
 /** Cómo lo recuerda, en palabras (la valencia actual, reconstruida, 013 R-007). */
@@ -136,10 +139,13 @@ export function buildPersonView(input: ViewInput): PersonView {
     e.participants.some((p) => p.id === id) ||
     (KIN_EVENTS.has(e.type) && kin.has(String((e.payload as { citizenId?: string }).citizenId))));
   const born = mine.find((e) => e.type === 'CITIZEN_BORN' && (e.payload as { citizenId: string }).citizenId === id);
-  const origin = mine.filter((e) => e.at < 0 && e.type !== 'LEISURE_DONE');
+  // 047 R-013: en consulta, sus episodios, sesiones y práctica van resumidos (abajo) y no como hechos sueltos; tampoco
+  // las líneas de desarrollo, que no le dicen nada a la persona.
+  const kept = (e: WorldEvent) => e.type !== 'LEISURE_DONE' && !(input.consult && CONSULT_SUMMARIZED.has(e.type));
+  const origin = mine.filter((e) => e.at < 0 && kept(e));
   // 013 P5 (a): con memoria, lo reciente no es la lista de hechos sino lo que la persona recuerda, como lo recuerda.
   const remembers = !!me.memory;
-  const recent = remembers ? [] : mine.filter((e) => e.at >= 0 && e.type !== 'LEISURE_DONE').slice(-(input.nRecent ?? 40));
+  const recent = remembers ? [] : mine.filter((e) => e.at >= 0 && kept(e)).slice(-(input.nRecent ?? 40));
   const dateOf = (at: number) => {
     const c = toCalendar(at, epoch);
     return `${c.year}-${String(c.month).padStart(2, '0')}-${String(c.day).padStart(2, '0')}`;
@@ -163,6 +169,7 @@ export function buildPersonView(input: ViewInput): PersonView {
     const sure = b.credibility >= 0.8 ? 'está segura/o' : b.credibility >= 0.5 ? 'lo cree' : 'no está segura/o';
     facts.push({ id: `CREE-${b.about}-${b.predicate}`, date: dateOf(b.at), age: ageAt(b.at), level: 2, text: `Cree que ${given(b.about)}: ${input.topicText(b.predicate)!.toLowerCase()}. ${how}; ${sure}.` });
   }
+  if (input.consult) facts.push(...consultFacts(mine, id, now, dateOf, ageAt));
   // El ocio de la última semana, resumido en un hecho.
   const week = mine.filter((e) => e.type === 'LEISURE_DONE' && e.at >= now - 7 * 1440);
   if (week.length > 0) {

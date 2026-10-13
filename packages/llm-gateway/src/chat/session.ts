@@ -15,7 +15,7 @@ import { classifyTone } from './classify.ts';
 import type { ToneResult } from './classify.ts';
 import { discloseView } from './disclosure.ts';
 import { expressionRequest } from './prompt.ts';
-import type { TranscriptTurn } from './prompt.ts';
+import type { ChatSetting, TranscriptTurn } from './prompt.ts';
 import { verifyReply } from './verify.ts';
 import type { Verification } from './verify.ts';
 import { buildPersonView } from './view.ts';
@@ -36,6 +36,18 @@ export const TEMPLATES: Record<string, string> = {
   responder_breve: 'Sí, claro.',
   terminar: 'Bueno, me tengo que ir. Hasta luego.',
 };
+
+/** Palabras que caben en un silencio [M]. */
+export const SILENCE_WORDS = 8;
+
+/** Lo que queda de una respuesta cuando la postura era callar: su primera frase, y de ella como mucho ocho palabras. */
+export function keepSilence(text: string): string {
+  const t = text.trim();
+  if (t.split(/\s+/).length <= SILENCE_WORDS) return t;
+  const first = (/^[^.!?…]*[.!?…]+/.exec(t)?.[0] ?? t).trim();
+  const words = first.split(/\s+/);
+  return words.length <= SILENCE_WORDS ? first : `${words.slice(0, SILENCE_WORDS).join(' ').replace(/[,;:]$/, '')}…`;
+}
 
 export class ChatEndedError extends Error {
   constructor(id: string) {
@@ -58,6 +70,10 @@ export interface ChatSessionOptions {
   /** Semilla de la sesión (R-011): sale del hash del mundo y del id de la sesión. */
   seed: number;
   now: number;
+  /** Dónde ocurre la charla para la persona (047 R-005e). Por defecto `chat`: un visitante que le escribe. */
+  setting?: ChatSetting;
+  /** Nivel de intimidad mínimo de la charla (047 R-005d): una consulta aceptada no empieza como con un desconocido. */
+  minLevel?: DisclosureLevel;
 }
 
 export interface TurnOptions {
@@ -79,6 +95,8 @@ export interface TurnOutcome {
   choice: StanceChoice;
   reply: string;
   expression: 'llm' | 'template';
+  /** La respuesta se acortó porque la postura era callar y el texto no lo fue (047 R-005e, solo en consulta). */
+  trimmed?: boolean;
   llmRef?: string;
   latencyMs: { firstToken?: number; total: number };
   /** Nivel de intimidad abierto en este turno (043 R-026): 0 desconocido, 1 conocido, 2 de confianza. */
@@ -100,7 +118,7 @@ export class ChatSession {
   constructor(o: ChatSessionOptions) {
     this.#o = o;
     const row = Number(o.citizenId.slice(4));
-    this.view = buildPersonView({ view: o.view, citizenId: o.citizenId, now: o.now, events: o.events, memoryText: (k) => o.catalogs.memories?.[k], topicText: (k) => o.catalogs.topics?.[k] });
+    this.view = buildPersonView({ view: o.view, citizenId: o.citizenId, now: o.now, events: o.events, memoryText: (k) => o.catalogs.memories?.[k], topicText: (k) => o.catalogs.topics?.[k], ...(o.setting === 'consulta' ? { consult: true } : {}) });
     this.state = startConversation(storeOf(o.view, row), o.visitorId);
     const person = o.view.citizens.get(formatId('CIT', row) as EntityId);
     this.#pc = {
@@ -137,9 +155,10 @@ export class ChatSession {
     this.transcript.push({ speaker: 'visitor', text });
     const stance = catalogs.stances.find((s) => s.key === choice.stance) as StanceInfo;
     // R-026: el LLM solo ve lo que este visitante se ha ganado; lo demás no está en el prompt y no se puede contar.
-    const level = disclosureOf(this.state, this.params);
+    const earned = disclosureOf(this.state, this.params);
+    const level = (this.#o.minLevel !== undefined && this.#o.minLevel > earned ? this.#o.minLevel : earned) as DisclosureLevel;
     const open = discloseView(this.view, level);
-    const r = await gw.run(expressionRequest(open, this.transcript, choice, stance, t.onText, level));
+    const r = await gw.run(expressionRequest(open, this.transcript, choice, stance, t.onText, level, this.#o.setting));
     let reply = r.text ?? '';
     let expression: 'llm' | 'template' = 'llm';
     if (!reply.trim()) {
@@ -149,11 +168,17 @@ export class ChatSession {
       expression = 'template';
       t.onText?.(reply);
     }
+    // 047 R-005e: en consulta, callar es callar. Si el LLM escribió una explicación, queda su primera frase corta: no
+    // se añade nada que no dijera, y la dosis (que sale de la postura) no se contradice con el texto.
+    const said = reply;
+    if (this.#o.setting === 'consulta' && choice.stance === 'callar') reply = keepSilence(reply);
+    const trimmed = reply !== said;
     this.transcript.push({ speaker: 'citizen', text: reply });
     this.#turns.push({ tone: tone.tone, stance: choice.stance, ...(valid.length > 0 ? { claims: valid } : {}) });
     if (choice.stance === 'terminar') this.ended = true;
     return {
       seq, tone, claims, choice, reply, expression, level,
+      ...(trimmed ? { trimmed } : {}),
       ...(expression === 'llm' ? { llmRef: r.recordKey } : {}),
       latencyMs: { ...(r.latencyMs.firstToken !== undefined ? { firstToken: r.latencyMs.firstToken } : {}), total: performance.now() - t0 },
       // R-026, R-027: se verifica contra la vista abierta de este turno; lo que cuente fuera de ella queda sin respaldo.

@@ -1,7 +1,7 @@
 // Pasarela LLM (spec 026) y capa de charla con ciudadanos (spec 043).
 export { DEFAULT_CONFIG, HAIKU, HAIKU_5_5, parseConfig } from './config.ts';
-export { Gateway, costMicros, extractJson } from './gateway.ts';
-export type { GatewayOptions } from './gateway.ts';
+export { Gateway, costMicros, extractJson, meteredGateway } from './gateway.ts';
+export type { GatewayOptions, UsageTotals } from './gateway.ts';
 export { recordKey } from './key.ts';
 export { MemoryRecordStore } from './records.ts';
 export { anthropicAdapter, buildAnthropicParams } from './providers/anthropic.ts';
@@ -21,7 +21,7 @@ export { classifyTone, lexicalClaims, lexicalTone } from './chat/classify.ts';
 export type { ClassifyCatalogs, ToneResult, VisitorClaim } from './chat/classify.ts';
 export { discloseView, factLevel } from './chat/disclosure.ts';
 export { TRANSCRIPT_TURNS, TRUST_TEXT, expressionRequest, instructions, renderView, stancePart } from './chat/prompt.ts';
-export type { TranscriptTurn } from './chat/prompt.ts';
+export type { ChatSetting, TranscriptTurn } from './chat/prompt.ts';
 export { ChatEndedError, ChatSession, STRANGER_TEMPLATE, TEMPLATES } from './chat/session.ts';
 export type { ChatSessionOptions, TurnOptions, TurnOutcome } from './chat/session.ts';
 export { verifyReply } from './chat/verify.ts';
@@ -30,3 +30,14 @@ export { buildPersonView } from './chat/view.ts';
 export type { FamilyMember, PersonView, ViewFact, ViewInput } from './chat/view.ts';
 export { DOWN_ONLY, LLM_RANGE, administerBattery, allowedRange, administerInstrument, itemsText } from './psychometrics.ts';
 export type { ItemAnswer, ItemPlan, ItemSource, PartPlan } from './psychometrics.ts';
+
+export { MAX_TURNS_SESSION, runTherapySession } from './therapy/session.ts';
+export type { PatientReply, SessionEnd, TherapySessionInput, TherapySessionResult } from './therapy/session.ts';
+export { TherapistSchema, sessionNoteRequest, therapistRequest } from './therapy/therapist.ts';
+export type { SessionNote, TherapistContext, TherapistOutput, TherapyTurn } from './therapy/therapist.ts';
+export { patientResponder } from './therapy/patient.ts';
+export type { PatientTurnLog } from './therapy/patient.ts';
+export { REPEAT_SIMILARITY, therapistQuality } from './therapy/quality.ts';
+export type { TherapistQuality } from './therapy/quality.ts';
+export { complacencyMarkers, complacencyOf } from './therapy/complacency.ts';
+export type { Complacency, Marker } from './therapy/complacency.ts';

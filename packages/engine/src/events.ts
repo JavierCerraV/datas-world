@@ -585,6 +585,25 @@ export const EVENT_TYPES = Object.freeze({
     check: (p) => needObj(p, { citizenId: str, amount: (v) => Number.isInteger(v) && (v as number) > 0, reason: str }),
     text: (e) => `Recibe ${e.payload.amount} de un experimento (${e.payload.reason}).`,
   }),
+  // Estudio de intervención (spec 047 §5): solo en la copia del estudio.
+  PROTOCOL_SESSION: def<{ citizenId: string; protocol: string; session: number; attended: boolean; engagement: number; fidelity: number }>({
+    baseImportance: 0.6,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, protocol: str, session: int, attended: (v) => typeof v === 'boolean', engagement: (v) => typeof v === 'number', fidelity: (v) => typeof v === 'number' }),
+    text: (e) => (e.payload.attended ? `Fue a la sesión ${e.payload.session} con el psicólogo.` : `No fue a la sesión ${e.payload.session} con el psicólogo.`),
+  }),
+  PRACTICE_DONE: def<{ citizenId: string; probability: number }>({
+    baseImportance: 0.2,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, probability: (v) => typeof v === 'number' }),
+    text: () => 'Hizo la práctica que le dejó el psicólogo.',
+  }),
+  PROTOCOL_ENDED: def<{ citizenId: string; reason: string }>({
+    baseImportance: 0.4,
+    spontaneous: false,
+    check: (p) => needObj(p, { citizenId: str, reason: str }),
+    text: (e) => `Terminó las sesiones con el psicólogo (${e.payload.reason}).`,
+  }),
 });
 
 export type EventType = keyof typeof EVENT_TYPES;
