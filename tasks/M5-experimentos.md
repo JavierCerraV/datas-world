@@ -22,4 +22,20 @@ Piloto con las 12 personas con episodios de PNR, protocolo ACT de 3 sesiones, `c
 - [x] P4 Efecto en el motor: compromiso por sesión, dosis por mecanismo, `PROTOCOL_SESSION`, `PRACTICE_DONE`, `PROTOCOL_ENDED`, adherencia a la práctica y asistencia (R-004, R-006, R-013; CA-002 a CA-004). Falta crear las reglas de seguimiento hacia acciones valiosas.
 - [ ] P5 Pruebas en el mundo y regreso a sesión con lo que le pasó, o abandono (R-012, R-013; CA-011, CA-012).
 - [x] P6 Medidas en cada toma (dicho, decidido por el motor y verdadero), brecha de informe, mecanismos, episodios de rumia, brazo de espera e informe con tokens y coste por sesión (R-007 a R-009, R-001c; CA-006, CA-007, CA-014). Falta la complacencia en la transcripción y la sensibilidad a la dosis.
-- [ ] P7 Corrida del piloto en `claude-haiku-5-5` (3 personas, 7 tomas, 3 sesiones) y revisión de resultados con el usuario.
+- [x] P7 Corrida del piloto (3 personas, 7 tomas, 3 sesiones) con Nemotron por OpenRouter y revisión de resultados: `docs/validaciones/M5-piloto-protocolo.md`. En `claude-haiku-5-5` no se ha corrido.
+- [x] P8 Complacencia en la transcripción por reglas léxicas, brecha de informe por fase y `study:report` para rehacer el informe sin LLM (R-008).
+
+### Lo que falta, tras el piloto (orden propuesto, pendiente del usuario)
+
+Del estudio (047):
+- [ ] Q1 Que el texto siga a la postura: verificación de adherencia en las sesiones, o reintento cuando el texto contradice la postura (hallazgo 6).
+- [ ] Q2 Terapeuta: tratar de usted, no reformular la misma pregunta, llegar a los ejercicios de «dejar de empujar» (hallazgos 4 y 9).
+- [ ] Q3 P5: los episodios de rumia y la práctica en la vista de la persona, para que los cuente en sesión (R-013; CA-011, CA-012).
+- [ ] Q4 Reglas propias de seguimiento hacia acciones valiosas (038 R-002), lo que falta de R-004.
+- [ ] Q5 Sensibilidad a la dosis (R-009) y criterio de entrada con margen de cambio (R-002).
+
+Del motor conductual (revisión que el usuario dejó para después):
+- [ ] M1 La postura casi no depende del tono del terapeuta: 18 % de contraataques ante trato amable o neutro (043; hallazgo 5).
+- [ ] M2 La rumia es demasiado rara y solo la dispara la deuda: sin episodios no hay pruebas en la vida (039; hallazgo 3).
+- [ ] M3 «Yo» en el máximo en personas con un solo episodio (039 R-006, R-007; hallazgo 10).
+- [ ] M4 Ruido en la vista íntima: líneas «vivió N episodios de aprendizaje» (043).

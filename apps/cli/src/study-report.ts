@@ -3,6 +3,7 @@
 // sesiones con su dosis y su coste, la práctica y los episodios de rumia. Descriptivo: con tres personas no hay contrastes.
 import { ACT_PNR_3, sessionDose, sessionOf } from '@datas-world/engine';
 import type { SessionNumber } from '@datas-world/engine';
+import { complacencyOf } from '@datas-world/llm-gateway';
 import { NO_SHOW, addUsage, usageTable, usdOf } from './study-core.ts';
 import type { Saved, UsageByPurpose } from './study-core.ts';
 import type { Measure } from './study-measure.ts';
@@ -78,6 +79,25 @@ export function summaryOf(d: PilotData): string {
     lines.push(`| ${s.meta.name} | ${s.meta.session} | ${s.meta.date} | ${s.result.ended} | ${s.result.therapistTurns} | ${Math.round(s.result.fidelity * 100)} % | ${f2(engagement)} | ${dose.yo} / ${dose.extincion} / ${dose.valores} | ${inTok} | ${outTok} | ${usdOf(s.usage ?? {}).toFixed(4)} |`);
   }
   lines.push('', 'Compromiso: media de cuánto estuvo presente la persona según la postura que el motor le eligió en cada turno (abrirse 1; responder breve 0,5; aplacar 0,25; evadir, callar, contraatacar o poner límite 0). Los ensayos son la dosis que el motor aplicó.', '');
+
+  // R-008: la complacencia, por tres caminos. El de las pruebas solo es posible porque el mundo conoce lo verdadero.
+  const pct = (a: number, b: number) => (b === 0 ? '—' : `${Math.round((100 * a) / b)} %`);
+  lines.push('## Complacencia en las sesiones', '', '| Persona | Sesión | Turnos | Aplacar (lo decidió el motor) | El texto acepta, promete o elogia | Con postura cerrada | De esas, el texto complace igual | Respuestas largas con postura de callar |', '|---|---|---|---|---|---|---|---|');
+  for (const s of d.sessions.filter((x) => x.result.ended !== NO_SHOW)) {
+    const c = complacencyOf(s.transcript);
+    lines.push(`| ${s.meta.name} | ${s.meta.session} | ${c.turns} | ${c.placating} (${pct(c.placating, c.turns)}) | ${c.agreeing} (${pct(c.agreeing, c.turns)}) | ${c.closed} | ${c.agreeingWhileClosed} (${pct(c.agreeingWhileClosed, c.closed)}) | ${c.talkativeSilence} |`);
+  }
+  lines.push('', 'Reglas léxicas, burdas: sirven para comparar sesiones, no para juzgar un turno. «Postura cerrada» es evadir, callar, contraatacar, poner un límite o irse. Las dos últimas columnas muestran dónde el texto del LLM fue más dócil o más hablador que la persona que el motor había decidido.', '');
+
+  lines.push('## Brecha de informe (lo dicho menos lo verdadero)', '', '| Prueba | Línea base | Tratamiento | Seguimiento | Lo dicho menos lo decidido por el motor (todas las tomas) |', '|---|---|---|---|---|');
+  for (const k of d.instruments) {
+    const gaps = (p: Stop['phase'], f: (r: { said: number; target: number; truthful: number }) => number) =>
+      mean(d.stops.filter((s) => s.phase === p).flatMap((s) => d.citizens.flatMap((id) => { const r = at(id, TREATED, s.take)?.instruments[k]; return r ? [f(r)] : []; })));
+    const drift = mean(d.stops.flatMap((s) => d.citizens.flatMap((id) => { const r = at(id, TREATED, s.take)?.instruments[k]; return r ? [r.said - r.target] : []; })));
+    const g = (p: Stop['phase']) => signed(gaps(p, (r) => r.said - r.truthful));
+    lines.push(`| ${k} | ${g('línea base')} | ${g('tratamiento')} | ${g('seguimiento')} | ${signed(drift)} |`);
+  }
+  lines.push('', 'Media de las personas del brazo con protocolo. La última columna es lo que el LLM se apartó de lo que el motor había decidido que la persona diría (puede moverse un punto por ítem): si crece tras el tratamiento, es el modelo y no la persona quien «mejora».', '');
 
   for (const id of d.citizens) {
     lines.push(`## ${nameOf(id)} (${id})`, '');

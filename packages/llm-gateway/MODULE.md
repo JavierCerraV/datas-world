@@ -50,6 +50,7 @@ Desde `@datas-world/llm-gateway`:
 | `patientResponder(chat, log?)`, tipo `PatientTurnLog` | La persona en la sesión: une una `ChatSession` en escenario `consulta` con `runTherapySession`. `log` recoge lo que el motor decidió en cada turno (tono, postura, nivel, si habló el LLM o la plantilla, verificación) |
 | `ChatSessionOptions.setting` (`chat` | `consulta`), `minLevel`; tipo `ChatSetting` | Escenario de la charla para la persona (047 R-005e) y nivel de intimidad mínimo (R-005d). Sin ellos la charla de la 043 es la de siempre |
 | `meteredGateway(gateway)` → `{ gateway, usage() }`, tipo `UsageTotals` | Vista de la pasarela que lleva su propia cuenta de llamadas, tokens y coste por propósito y modelo (026 R-015). Comparte adaptadores, registro y presupuesto con la original |
+| `complacencyOf(transcript)`, `complacencyMarkers(text)`, tipos `Complacency`, `Marker` | Complacencia en la transcripción por reglas léxicas (047 R-008): turnos en que el texto acepta, promete, agradece o elogia, cuántos con una postura cerrada, cuántos de aplacar, y respuestas largas con postura de callar |
 
 ## 4. Diseño interno y decisiones
 - **SDK oficial para Claude.** El adaptador de Anthropic usa `@anthropic-ai/sdk`: `messages.stream` con `finalMessage()` y `messages.create`. Haiku 4.5 no lleva pensamiento adaptativo ni `effort`, y admite `temperature`.
@@ -113,3 +114,4 @@ No aplica: el prototipo no usa LLM.
 | 2026-10-08 | m5/estudio-protocolo (terapeuta) | 047 | Terapeuta por función tras la primera sesión real (R-005f): prompt reescrito para un clínico con experiencia en consultantes difíciles, campos `read` y `close` en `TherapistSchema`, `TherapyTurn.read`, final `cierre`, y pendientes sin cuentas de intercambios |
 | 2026-10-08 | m5/estudio-protocolo (uso por sesión) | 026, 047 | `meteredGateway`: una vista medida de la pasarela, para informar tokens y coste de cada sesión y cada toma del estudio |
 | 2026-10-09 | m5/estudio-protocolo (reanudación) | 026 | `meteredGateway`: lo que sale del registro cuenta con sus tokens y su coste originales, así el informe de una sesión reanudada es el mismo que si no se hubiera cortado |
+| 2026-10-12 | m5/estudio-protocolo (complacencia) | 047 | `therapy/complacency.ts`: complacencia en la transcripción por reglas léxicas (R-008), declarada como medida burda; una negativa o un límite no cuentan, y «sí» se distingue del «si» condicional |

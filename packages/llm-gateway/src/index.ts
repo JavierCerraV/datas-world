@@ -37,3 +37,5 @@ export { TherapistSchema, sessionNoteRequest, therapistRequest } from './therapy
 export type { SessionNote, TherapistContext, TherapistOutput, TherapyTurn } from './therapy/therapist.ts';
 export { patientResponder } from './therapy/patient.ts';
 export type { PatientTurnLog } from './therapy/patient.ts';
+export { complacencyMarkers, complacencyOf } from './therapy/complacency.ts';
+export type { Complacency, Marker } from './therapy/complacency.ts';

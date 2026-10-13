@@ -191,13 +191,33 @@ export async function studyPilot(args: string[], io: Io): Promise<void> {
     throw new Error(`${(e as Error).message}. Lo hecho quedó guardado: repita el mismo comando con --resume (puede cambiar las claves antes)`, { cause: e });
   }
 
+  writeReport(out, { citizens: ids, instruments, stops, practiceUntilDay, sessions, measures }, io);
+}
+
+/** Escribe el informe del piloto a partir de sus sesiones y tomas. */
+function writeReport(out: string, data: PilotData, io: Io): void {
+  const { sessions, citizens, stops } = data;
   const order = (s: Saved) => `${s.meta.citizen}-${s.meta.session}`;
   sessions.sort((a, b) => (order(a) < order(b) ? -1 : 1));
-  const data: PilotData = { citizens: ids, instruments, stops, practiceUntilDay, sessions, measures };
   writeFileSync(join(out, 'resumen.md'), summaryOf(data));
   writeFileSync(join(out, 'medidas.csv'), csvOf(data));
   writeFileSync(join(out, 'resultados.json'), `${JSON.stringify({ ...data, sessions: sessions.map((s) => ({ ...s.meta, ...s.result, ...doseOf(s), usage: s.usage })), usage: totalUsage(data) }, null, 2)}\n`);
   const noShows = sessions.filter((s) => s.result.ended === NO_SHOW).length;
-  io.out(`Piloto: ${ids.length} personas · ${stops.length} tomas · ${sessions.length - noShows} sesiones${noShows ? ` (${noShows} inasistencias)` : ''} · coste ${usdOf(totalUsage(data)).toFixed(4)} USD`);
+  io.out(`Piloto: ${citizens.length} personas · ${stops.length} tomas · ${sessions.length - noShows} sesiones${noShows ? ` (${noShows} inasistencias)` : ''} · coste ${usdOf(totalUsage(data)).toFixed(4)} USD`);
   io.out(`Resultados: ${join(out, 'resumen.md')} · medidas: ${join(out, 'medidas.csv')} · transcripciones: ${out}`);
+}
+
+/**
+ * `pnpm cli study:report --out CARPETA`: rehace el informe de un piloto ya corrido a partir de sus archivos (sesiones y
+ * tomas), sin tocar el mundo ni llamar al LLM. Sirve cuando el informe gana una medida nueva.
+ */
+export function studyReport(args: string[], io: Io): void {
+  const { values: v } = parseArgs({ args, options: { out: { type: 'string', default: 'data/estudio/piloto' } } });
+  const out = v.out!;
+  const index = join(out, 'resultados.json');
+  if (!existsSync(index)) throw new UsageError(`no hay un piloto terminado en ${out} (falta resultados.json)`);
+  const old = JSON.parse(readFileSync(index, 'utf8')) as Pick<PilotData, 'citizens' | 'instruments' | 'stops' | 'practiceUntilDay'>;
+  const sessions = old.citizens.flatMap((id) => ACT_PNR_3.sessions.flatMap((s) => (existsSync(join(out, `${id}-s${s.n}.json`)) ? [readSaved(join(out, `${id}-s${s.n}.json`))] : [])));
+  const measures = old.stops.flatMap((s) => (existsSync(join(out, `toma-${s.take + 1}.json`)) ? (JSON.parse(readFileSync(join(out, `toma-${s.take + 1}.json`), 'utf8')) as Measure[]) : []));
+  writeReport(out, { citizens: old.citizens, instruments: old.instruments, stops: old.stops, practiceUntilDay: old.practiceUntilDay, sessions, measures }, io);
 }

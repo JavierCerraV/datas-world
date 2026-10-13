@@ -146,6 +146,16 @@ describe('study:pilot (047)', () => {
     expect(existsSync(join(dir, 'x', 'resumen.md'))).toBe(false);
   });
 
+  it('study:report rehace el mismo informe desde los archivos guardados, sin LLM, y trae la complacencia y la brecha (R-008)', () => {
+    const before = readFileSync(join(dir, 'p', 'resumen.md'), 'utf8');
+    rmSync(join(dir, 'p', 'resumen.md'));
+    expect(run(['study:report', '--out', join(dir, 'p')], io)).toBe(0);
+    expect(readFileSync(join(dir, 'p', 'resumen.md'), 'utf8')).toBe(before);
+    expect(before).toContain('## Complacencia en las sesiones');
+    expect(before).toContain('## Brecha de informe (lo dicho menos lo verdadero)');
+    expect(run(['study:report', '--out', join(dir, 'no-existe')], io)).toBe(2);
+  });
+
   it('acepta las listas separadas por espacios, como las entrega PowerShell cuando van sin comillas', async () => {
     const errs: string[] = [];
     const code = await runAsync(['study:pilot', '--db', db, '--work', join(dir, 'y.db'), '--citizens', `${PEOPLE[0]} CIT-999999`, '--out', join(dir, 'y')], { ...io, err: (l) => errs.push(l) });
