@@ -37,6 +37,18 @@ export const TEMPLATES: Record<string, string> = {
   terminar: 'Bueno, me tengo que ir. Hasta luego.',
 };
 
+/** Palabras que caben en un silencio [M]. */
+export const SILENCE_WORDS = 8;
+
+/** Lo que queda de una respuesta cuando la postura era callar: su primera frase, y de ella como mucho ocho palabras. */
+export function keepSilence(text: string): string {
+  const t = text.trim();
+  if (t.split(/\s+/).length <= SILENCE_WORDS) return t;
+  const first = (/^[^.!?…]*[.!?…]+/.exec(t)?.[0] ?? t).trim();
+  const words = first.split(/\s+/);
+  return words.length <= SILENCE_WORDS ? first : `${words.slice(0, SILENCE_WORDS).join(' ').replace(/[,;:]$/, '')}…`;
+}
+
 export class ChatEndedError extends Error {
   constructor(id: string) {
     super(`La charla ${id} ya terminó`);
@@ -83,6 +95,8 @@ export interface TurnOutcome {
   choice: StanceChoice;
   reply: string;
   expression: 'llm' | 'template';
+  /** La respuesta se acortó porque la postura era callar y el texto no lo fue (047 R-005e, solo en consulta). */
+  trimmed?: boolean;
   llmRef?: string;
   latencyMs: { firstToken?: number; total: number };
   /** Nivel de intimidad abierto en este turno (043 R-026): 0 desconocido, 1 conocido, 2 de confianza. */
@@ -104,7 +118,7 @@ export class ChatSession {
   constructor(o: ChatSessionOptions) {
     this.#o = o;
     const row = Number(o.citizenId.slice(4));
-    this.view = buildPersonView({ view: o.view, citizenId: o.citizenId, now: o.now, events: o.events, memoryText: (k) => o.catalogs.memories?.[k], topicText: (k) => o.catalogs.topics?.[k] });
+    this.view = buildPersonView({ view: o.view, citizenId: o.citizenId, now: o.now, events: o.events, memoryText: (k) => o.catalogs.memories?.[k], topicText: (k) => o.catalogs.topics?.[k], ...(o.setting === 'consulta' ? { consult: true } : {}) });
     this.state = startConversation(storeOf(o.view, row), o.visitorId);
     const person = o.view.citizens.get(formatId('CIT', row) as EntityId);
     this.#pc = {
@@ -154,11 +168,17 @@ export class ChatSession {
       expression = 'template';
       t.onText?.(reply);
     }
+    // 047 R-005e: en consulta, callar es callar. Si el LLM escribió una explicación, queda su primera frase corta: no
+    // se añade nada que no dijera, y la dosis (que sale de la postura) no se contradice con el texto.
+    const said = reply;
+    if (this.#o.setting === 'consulta' && choice.stance === 'callar') reply = keepSilence(reply);
+    const trimmed = reply !== said;
     this.transcript.push({ speaker: 'citizen', text: reply });
     this.#turns.push({ tone: tone.tone, stance: choice.stance, ...(valid.length > 0 ? { claims: valid } : {}) });
     if (choice.stance === 'terminar') this.ended = true;
     return {
       seq, tone, claims, choice, reply, expression, level,
+      ...(trimmed ? { trimmed } : {}),
       ...(expression === 'llm' ? { llmRef: r.recordKey } : {}),
       latencyMs: { ...(r.latencyMs.firstToken !== undefined ? { firstToken: r.latencyMs.firstToken } : {}), total: performance.now() - t0 },
       // R-026, R-027: se verifica contra la vista abierta de este turno; lo que cuente fuera de ella queda sin respaldo.

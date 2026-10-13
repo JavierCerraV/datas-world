@@ -156,6 +156,33 @@ describe('study:pilot (047)', () => {
     expect(run(['study:report', '--out', join(dir, 'no-existe')], io)).toBe(2);
   });
 
+  it('R-009: study:sensitivity repite el piloto con otras escalas de dosis, sin LLM; con escala 0 no hay dosis ni práctica', async () => {
+    expect(await runAsync(['study:sensitivity', '--db', db, '--out', join(dir, 'p'), '--work', join(dir, 'sens.db'), '--scales', '0,1,2'], io)).toBe(0);
+    const s = json<{ scales: number[]; runs: { scale: number; measures: Measure[] }[] }>(join(dir, 'p', 'sensibilidad.json'));
+    expect(s.scales).toEqual([0, 1, 2]);
+    const last = (scale: number, id: string) => s.runs.find((r) => r.scale === scale)!.measures.filter((m) => m.citizenId === id).sort((a, b) => b.take - a.take)[0]!;
+    for (const id of PEOPLE) {
+      expect(last(0, id).practices).toBe(0);
+      // Con escala 1 se reproduce el brazo con protocolo del piloto.
+      const pilot = json<Measure[]>(join(dir, 'p', 'toma-6.json')).find((m) => m.citizenId === id && m.arm === 'protocolo')!;
+      expect(last(1, id).mechanisms).toEqual(pilot.mechanisms);
+      expect(last(2, id).mechanisms!.selfFraming).toBeGreaterThanOrEqual(last(1, id).mechanisms!.selfFraming);
+      expect(last(1, id).mechanisms!.selfFraming).toBeGreaterThanOrEqual(last(0, id).mechanisms!.selfFraming);
+    }
+    expect(eventsOf(join(dir, 'sens.db'), 'PROTOCOL_SESSION').length).toBe(PEOPLE.length * 3);
+    expect(readFileSync(join(dir, 'p', 'sensibilidad.md'), 'utf8')).toContain('Dosis ×2');
+    expect(await runAsync(['study:sensitivity', '--db', db, '--out', join(dir, 'p'), '--scales', '9'], io)).toBe(2);
+  }, 300_000);
+
+  it('R-002: study:candidates lista a quien tuvo rumia y dice si tiene margen para cambiar', () => {
+    const lines: string[] = [];
+    expect(run(['study:candidates', '--db', db, '--json'], { ...io, out: (l) => lines.push(l) })).toBe(0);
+    const list = JSON.parse(lines.join('\n')) as { id: string; self: number; room: boolean; episodes: number }[];
+    for (const c of list) { expect(c.episodes).toBeGreaterThan(0); expect(c.room).toBe(c.self < 0.8); }
+    // Primero quien tiene margen.
+    expect(list.map((c) => c.room)).toEqual([...list.map((c) => c.room)].sort((a, b) => Number(b) - Number(a)));
+  });
+
   it('acepta las listas separadas por espacios, como las entrega PowerShell cuando van sin comillas', async () => {
     const errs: string[] = [];
     const code = await runAsync(['study:pilot', '--db', db, '--work', join(dir, 'y.db'), '--citizens', `${PEOPLE[0]} CIT-999999`, '--out', join(dir, 'y')], { ...io, err: (l) => errs.push(l) });

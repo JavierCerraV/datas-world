@@ -3,10 +3,13 @@
 // sesiones con su dosis y su coste, la práctica y los episodios de rumia. Descriptivo: con tres personas no hay contrastes.
 import { ACT_PNR_3, sessionDose, sessionOf } from '@datas-world/engine';
 import type { SessionNumber } from '@datas-world/engine';
-import { complacencyOf } from '@datas-world/llm-gateway';
+import { complacencyOf, therapistQuality } from '@datas-world/llm-gateway';
 import { NO_SHOW, addUsage, usageTable, usdOf } from './study-core.ts';
 import type { Saved, UsageByPurpose } from './study-core.ts';
 import type { Measure } from './study-measure.ts';
+
+/** Componentes con mecanismo propio (047 R-004): los ejercicios. */
+const EXERCISES: ReadonlySet<string> = new Set(ACT_PNR_3.sessions.flatMap((s) => s.components.filter((c) => c.mechanism === 'yo' || c.mechanism === 'extincion' || c.mechanism === 'valores').map((c) => c.id)));
 
 export const TREATED = 'protocolo';
 export const WAITLIST = 'espera';
@@ -88,6 +91,16 @@ export function summaryOf(d: PilotData): string {
     lines.push(`| ${s.meta.name} | ${s.meta.session} | ${c.turns} | ${c.placating} (${pct(c.placating, c.turns)}) | ${c.agreeing} (${pct(c.agreeing, c.turns)}) | ${c.closed} | ${c.agreeingWhileClosed} (${pct(c.agreeingWhileClosed, c.closed)}) | ${c.talkativeSilence} |`);
   }
   lines.push('', 'Reglas léxicas, burdas: sirven para comparar sesiones, no para juzgar un turno. «Postura cerrada» es evadir, callar, contraatacar, poner un límite o irse. Las dos últimas columnas muestran dónde el texto del LLM fue más dócil o más hablador que la persona que el motor había decidido.', '');
+
+  // R-005f: lo que el piloto mostró que el terapeuta hacía mal, contado igual en cada corrida para poder comparar.
+  lines.push('## Calidad del terapeuta', '', '| Persona | Sesión | Turnos | Tutea | Dos preguntas en un turno | Repite una pregunta | Elogia con fórmula | Turnos de ejercicio | El verificador: el texto de la persona no siguió su postura | Silencios acortados |', '|---|---|---|---|---|---|---|---|---|---|');
+  for (const s of d.sessions.filter((x) => x.result.ended !== NO_SHOW)) {
+    const q = therapistQuality(s.transcript);
+    const exercises = s.transcript.filter((t) => t.speaker === 'terapeuta' && EXERCISES.has(t.section)).length;
+    const checked = s.patient.filter((p) => p.stanceCheck !== 'unchecked');
+    lines.push(`| ${s.meta.name} | ${s.meta.session} | ${q.turns} | ${q.informal} | ${q.doubleQuestions} | ${q.repeats} | ${q.praise} | ${exercises} (${pct(exercises, q.turns)}) | ${checked.length ? `${checked.filter((p) => p.stanceCheck === 'mismatch').length} de ${checked.length}` : 'sin verificar'} | ${s.patient.filter((p) => p.trimmed).length} |`);
+  }
+  lines.push('', 'Reglas léxicas. «Turnos de ejercicio» son los que trabajaron un componente con mecanismo propio (tomar distancia, dejar de empujar, valores): de ellos sale la dosis.', '');
 
   lines.push('## Brecha de informe (lo dicho menos lo verdadero)', '', '| Prueba | Línea base | Tratamiento | Seguimiento | Lo dicho menos lo decidido por el motor (todas las tomas) |', '|---|---|---|---|---|');
   for (const k of d.instruments) {

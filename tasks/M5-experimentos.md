@@ -28,11 +28,12 @@ Piloto con las 12 personas con episodios de PNR, protocolo ACT de 3 sesiones, `c
 ### Lo que falta, tras el piloto (orden propuesto, pendiente del usuario)
 
 Del estudio (047):
-- [ ] Q1 Que el texto siga a la postura: verificación de adherencia en las sesiones, o reintento cuando el texto contradice la postura (hallazgo 6).
-- [ ] Q2 Terapeuta: tratar de usted, no reformular la misma pregunta, llegar a los ejercicios de «dejar de empujar» (hallazgos 4 y 9).
-- [ ] Q3 P5: los episodios de rumia y la práctica en la vista de la persona, para que los cuente en sesión (R-013; CA-011, CA-012).
+- [x] Q1 El texto no contradice a la postura: prompt de consulta por postura y silencio acortado (R-005g). Falta medir las demás posturas con el verificador encendido.
+- [x] Q2 Terapeuta: usted, no repetir, ejercicios marcados; medidas de calidad en el informe (R-005f). Falta comprobarlo en una corrida real.
+- [x] Q3 Los episodios de rumia, las sesiones y la práctica en la vista de la persona en consulta (R-013; CA-012).
 - [ ] Q4 Reglas propias de seguimiento hacia acciones valiosas (038 R-002), lo que falta de R-004.
-- [ ] Q5 Sensibilidad a la dosis (R-009) y criterio de entrada con margen de cambio (R-002).
+- [x] Q5 Sensibilidad a la dosis con control de atención (`study:sensitivity`, R-009b) y candidatas con margen de cambio (`study:candidates`, R-002).
+- [ ] Q6 Repetir el piloto con los cambios (personas con margen: `study:candidates`) y comparar la calidad del terapeuta y la adherencia a la postura.
 
 Del motor conductual (revisión que el usuario dejó para después):
 - [ ] M1 La postura casi no depende del tono del terapeuta: 18 % de contraataques ante trato amable o neutro (043; hallazgo 5).

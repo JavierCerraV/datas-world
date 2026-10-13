@@ -6,13 +6,14 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { ACT_PNR_3, INSTRUMENT_IDS, MINUTES_PER_DAY, attendProbability, createRng, visitorStimulus } from '@datas-world/engine';
-import type { Dose, EntityId, FunctionStore, InstrumentId } from '@datas-world/engine';
+import type { EntityId, FunctionStore, InstrumentId } from '@datas-world/engine';
 import { MAX_TURNS_SESSION } from '@datas-world/llm-gateway';
 import { DEFAULT_DB, UsageError, nameOf, toInt } from './common.ts';
 import type { Io } from './common.ts';
 import { copyWorld } from './psychometrics.ts';
-import { LlmUnavailable, NO_SHOW, VISITOR, advanceWorld, gatewayFor, holdSession, inputsOf, loadWorld, noShow, readSaved, saveSession, usdOf } from './study-core.ts';
-import type { LoadedWorld, Saved, StudyInput } from './study-core.ts';
+import { LlmUnavailable, NO_SHOW, VISITOR, advanceWorld, gatewayFor, holdSession, loadWorld, noShow, readSaved, saveSession, usdOf } from './study-core.ts';
+import type { LoadedWorld, Saved } from './study-core.ts';
+import { segmentOf } from './study-replay.ts';
 import { STUDY_INSTRUMENTS, takeMeasures } from './study-measure.ts';
 import type { Measure } from './study-measure.ts';
 import { TREATED, WAITLIST, csvOf, doseOf, summaryOf, totalUsage } from './study-report.ts';
@@ -51,15 +52,6 @@ async function pool<T, R>(items: readonly T[], n: number, fn: (x: T) => Promise<
   }));
   if (failed !== undefined) throw failed;
   return out;
-}
-
-const DOSE_KEYS = ['yo', 'extincion', 'valores'] as const;
-
-/** Ensayos de una práctica: uno por cada mecanismo que sus sesiones ya trabajaron con ella presente (R-004). */
-function practiceTrials(sessions: readonly Saved[], id: string): Dose {
-  const t: Dose = { yo: 0, extincion: 0, valores: 0 };
-  for (const s of sessions) if (s.meta.citizen === id) for (const k of DOSE_KEYS) if (doseOf(s).dose[k] > 0) t[k] = 1;
-  return t;
 }
 
 /** R-013: si la persona vuelve a la sesión, según lo que el terapeuta vale ya para ella. La primera la aceptó. */
@@ -126,25 +118,12 @@ export async function studyPilot(args: string[], io: Io): Promise<void> {
   try {
   for (const [i, stop] of stops.entries()) {
     if (i > state.at) {
-      const prevStop = stops[i - 1]!;
-      const held = prevStop.session ? sessions.filter((s) => s.meta.session === prevStop.session) : [];
-      const daily = (k: number): StudyInput[] => {
-        const day = prevStop.day + k;
-        const todo: StudyInput[] = [];
-        if (day >= 1 && day <= practiceUntilDay && !stops.some((s) => s.session && s.day === day))
-          for (const id of ids) {
-            const trials = practiceTrials(sessions, id);
-            if (trials.yo + trials.extincion + trials.valores > 0) todo.push({ kind: 'protocol_practice', payload: { citizenId: id, trials } });
-          }
-        if (day === practiceUntilDay) for (const id of ids) todo.push({ kind: 'protocol_end', payload: { citizenId: id, reason: 'completo' } });
-        return todo;
-      };
-      io.err(`Pasan ${stop.day - prevStop.day} días (hasta el día ${stop.day})…`);
+      const seg = segmentOf(stops, i, sessions, ids, practiceUntilDay);
+      io.err(`Pasan ${stop.day - stops[i - 1]!.day} días (hasta el día ${stop.day})…`);
       state = { at: state.at, advancing: true };
       saveState();
-      const minutes = (stop.day - prevStop.day) * MINUTES_PER_DAY;
-      advanceWorld(work, minutes, { atStart: held.flatMap(inputsOf), daily });
-      advanceWorld(twin, minutes);
+      advanceWorld(work, seg.minutes, seg.options);
+      advanceWorld(twin, seg.minutes);
       state = { at: i };
       saveState();
     }

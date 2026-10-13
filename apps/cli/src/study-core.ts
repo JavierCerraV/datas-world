@@ -193,7 +193,7 @@ export interface StudyInput {
  * como cualquier conversación (043 R-019), y la sesión del protocolo, de la que el motor saca la dosis a partir de qué
  * componente se trabajó en cada turno y con qué postura respondió ella. Ningún texto del LLM entra al mundo.
  */
-export function inputsOf(s: Saved): StudyInput[] {
+export function inputsOf(s: Saved, scale = 1): StudyInput[] {
   const citizenId = String(s.meta.citizen) as EntityId;
   const session = Number(s.meta.session);
   const attended = s.result.ended !== NO_SHOW;
@@ -204,7 +204,8 @@ export function inputsOf(s: Saved): StudyInput[] {
     out.push({ kind: 'chat_session', payload: chat });
   }
   const exchanges = s.transcript.filter((t) => t.speaker === 'persona' && t.stance).map((t) => ({ component: t.section, stance: t.stance! }));
-  const protocol: ProtocolSessionInput = { citizenId, protocol: ACT_PNR_3.id, session, attended, fidelity: s.result.fidelity, exchanges };
+  // La escala solo viaja si no es 1 (análisis de sensibilidad, R-009): así la entrada del piloto es la de siempre.
+  const protocol: ProtocolSessionInput = { citizenId, protocol: ACT_PNR_3.id, session, attended, fidelity: s.result.fidelity, exchanges, ...(scale !== 1 ? { scale } : {}) };
   out.push({ kind: 'protocol_session', payload: protocol });
   return out;
 }

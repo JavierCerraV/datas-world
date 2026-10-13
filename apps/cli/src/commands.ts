@@ -21,7 +21,9 @@ import { chatBattery } from './battery.ts';
 import { chatStatsCommand } from './chat-stats.ts';
 import { psychometrics } from './psychometrics.ts';
 import { experimentRun } from './experiment.ts';
+import { studyCandidates } from './study-candidates.ts';
 import { studyPilot, studyReport } from './study-pilot.ts';
+import { studySensitivity } from './study-replay.ts';
 import { studySession } from './study-session.ts';
 import { benchLife } from './bench-life.ts';
 import { benchRelations } from './bench-relations.ts';
@@ -62,7 +64,9 @@ export const USAGE = `Uso: pnpm cli <comando> [opciones]
   psychometrics [--provider mock|config] [--n 50] [--month-days 30] [--year-days 365] [--concurrency 4] [--delay-ms 0] [--per-call person|instrument] [--llm-config RUTA] [--resume] [--db RUTA] [--work RUTA] [--out RUTA]
   study:session [--citizen CIT-000123] [--session 1] [--previous sesion.json] [--provider mock|config] [--llm-config RUTA] [--max-turns 40] [--min-level 1|2] [--work RUTA] [--gap-days 7] [--out RUTA] [--db RUTA]   una sesión del protocolo, para leer el diálogo (047)
   study:pilot --citizens CIT-…,CIT-… [--provider mock|config] [--llm-config RUTA] [--max-turns 40] [--min-level 1|2] [--concurrency 3] [--resume] [--work RUTA] [--out CARPETA] [--db RUTA]   el piloto de punta a punta: tomas, sesiones y seguimiento (047)
-  study:report [--out CARPETA]   rehace el informe de un piloto ya corrido, sin LLM (047)`;
+  study:report [--out CARPETA]   rehace el informe de un piloto ya corrido, sin LLM (047)
+  study:sensitivity [--out CARPETA] [--scales 0,0.5,1,2] [--work RUTA] [--db RUTA]   repite un piloto con otras escalas de dosis, sin LLM (047)
+  study:candidates [--json] [--db RUTA]   personas con rumia y cuánto margen tienen para cambiar (047)`;
 
 function worldAdvance(args: string[], io: Io): void {
   const { values: v } = parseArgs({
@@ -172,6 +176,7 @@ const COMMANDS: Record<string, (args: string[], io: Io) => void> = {
   'chat:stats': chatStatsCommand,
   'experiment:run': experimentRun,
   'study:report': studyReport,
+  'study:candidates': studyCandidates,
 };
 
 /** Comandos asíncronos (usan la pasarela LLM, 026). */
@@ -180,6 +185,7 @@ const ASYNC_COMMANDS: Record<string, (args: string[], io: Io) => Promise<void>> 
   psychometrics: (args, io) => psychometrics(args, io),
   'study:session': (args, io) => studySession(args, io),
   'study:pilot': (args, io) => studyPilot(args, io),
+  'study:sensitivity': (args, io) => studySensitivity(args, io),
 };
 
 /** Como `run`, pero también atiende los comandos asíncronos (el punto de entrada usa este). */

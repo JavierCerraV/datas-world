@@ -5,7 +5,7 @@ import type { WorldEvent, WorldView } from '@datas-world/engine';
 import { buildOntology, generateWorld, loadCatalogs } from '@datas-world/generators';
 import { describe, expect, it } from 'vitest';
 import { chatCatalogs } from '../chat/catalog.ts';
-import { ChatSession } from '../chat/session.ts';
+import { ChatSession, keepSilence } from '../chat/session.ts';
 import { DEFAULT_CONFIG } from '../config.ts';
 import { Gateway } from '../gateway.ts';
 import { mockAdapter } from '../providers/mock.ts';
@@ -24,7 +24,7 @@ const events: readonly WorldEvent[] = gen.events;
 const SANTIAGO = 'CIT-000019';
 
 const mock = (model: string): ModelConfig => ({ provider: 'mock', model, maxOutputTokens: 800, timeoutMs: 5_000 });
-function gateway(prompts: { therapist: string[]; patient: string[] }): Gateway {
+function gateway(prompts: { therapist: string[]; patient: string[] }, says = 'Pues ahí vamos, doctor.'): Gateway {
   const responder: MockResponder = (c) => {
     const sys = c.system.map((p) => p.text).join('\n');
     if (sys.startsWith('Clasifica el tono')) return '{"tone":"calido"}';
@@ -36,7 +36,7 @@ function gateway(prompts: { therapist: string[]; patient: string[] }): Gateway {
       return JSON.stringify({ read: 'LECTURA-PRIVADA', say: `Cuénteme (${component}).`, component, covered: [], notes: 'Sin datos aún.', close: false });
     }
     prompts.patient.push(sys);
-    return 'Pues ahí vamos, doctor.';
+    return says;
   };
   const purposes = { ...DEFAULT_CONFIG.purposes, dialogue: mock('m-persona'), classify: mock('m-tono'), verify: mock('m-verif'), therapist: mock('m-terapeuta') };
   return new Gateway({ config: { ...DEFAULT_CONFIG, purposes }, adapters: { mock: mockAdapter(responder) } });
@@ -89,6 +89,21 @@ describe('047 R-005b: la sesión completa, terapeuta y persona, cada uno con su 
     }
     // La persona no ve la guía ni los componentes.
     for (const p of prompts.patient) expect(p).not.toContain('s1.');
+  });
+
+  it('R-005e: en consulta, si la postura es callar y el LLM escribe una explicación, queda su primera frase corta', async () => {
+    const long = 'Cuota. Esa palabra me viene nomás cuando pienso en la casa, porque es ahí donde siento el peso de no alcanzar a pagar.';
+    const quiet = await chatOf(gateway({ therapist: [], patient: [] }, long), 'consulta').turn('¿Qué le viene a la mente?', { forced: 'callar' });
+    expect(quiet.reply).toBe('Cuota.');
+    expect(quiet.trimmed).toBe(true);
+    // Con otra postura, o fuera de consulta, el texto queda como llegó.
+    const open = await chatOf(gateway({ therapist: [], patient: [] }, long), 'consulta').turn('¿Qué le viene a la mente?', { forced: 'abrirse' });
+    expect(open.reply).toBe(long);
+    expect(open.trimmed).toBeUndefined();
+    const chat = await chatOf(gateway({ therapist: [], patient: [] }, long)).turn('¿Qué le viene a la mente?', { forced: 'callar' });
+    expect(chat.reply).toBe(long);
+    expect(keepSilence('Mmm.')).toBe('Mmm.');
+    expect(keepSilence('Pues la verdad no sé qué decirle a usted de eso que me pregunta ahora')).toBe('Pues la verdad no sé qué decirle a…');
   });
 
   it('si la persona da por terminada la charla, la sesión acaba por abandono', async () => {

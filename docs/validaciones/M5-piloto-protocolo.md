@@ -71,6 +71,32 @@ Ninguno, en ninguna persona ni brazo, en las diez semanas.
 9. **El terapeuta trabaja por función, con defectos.** Lee la función de cada respuesta, respeta los límites, entra por lo que a la persona le importa y no elogia. Defectos: tutea aunque se le pide tratar de usted (entre 10 y 24 veces por sesión), a veces reformula casi la misma pregunta y de vez en cuando hace dos preguntas en un turno.
 10. **El «Yo» de Natalia ya estaba en el máximo antes de empezar**, con un solo episodio de rumia en su vida. Algo fuera de los episodios lo está reforzando; hay que revisarlo en el motor.
 
+## Sensibilidad a la dosis (2026-10-12, sin LLM)
+
+`pnpm cli study:sensitivity` volvió a aplicar las nueve sesiones guardadas sobre copias nuevas del mundo, con cada ensayo de sesión contando ×0, ×0,5, ×1 y ×2. La escala 0 deja la charla y quita ejercicios y práctica (control de atención). Todo es lo verdadero, en el seguimiento.
+
+| Persona | Medida | Dosis ×0 | ×0,5 | ×1 | ×2 |
+|---|---|---|---|---|---|
+| Natalia | Evitación | 0,40 | 0,20 | 0,18 | 0,16 |
+| Natalia | AAQ-II | 17 | 15 | 15 | 15 |
+| Ximena | «Yo» | 0,23 | 0,60 | 0,65 | 0,74 |
+| Ximena | AAQ-II | 21 | 21 | 21 | 20 |
+| Iván | «Yo» | 0,51 | 0,89 | 0,93 | 0,97 |
+| Iván | AAQ-II | 22 | 20 | 19 | 17 |
+
+- **Ir a consulta sin ejercicios no cambia nada.** Con escala 0 las personas terminan como en el brazo de espera.
+- **Casi todo el cambio lo pone la práctica, no la sesión.** Duplicar o reducir a la mitad la dosis de las sesiones mueve poco el resultado, porque los 14 a 19 días de práctica (que no se escalan) llevan la respuesta cerca de su techo. La sesión importa sobre todo como llave: sin ningún turno presente no hay nada que practicar.
+- **DASS-21, SWLS y GPQ-9 no dependen de la dosis.** Son iguales en las cuatro columnas.
+- Con escala 1 se reproduce exactamente el brazo con protocolo del piloto (comprobado en las pruebas).
+
+## Calidad del terapeuta en esta corrida (línea de partida)
+
+Medida con reglas léxicas antes de corregir el prompt: tuteó en 193 de 204 turnos, hizo dos preguntas en un turno 7 veces, repitió una pregunta 5 veces y elogió con fórmula 9 veces. Entre el 18 % y el 79 % de los turnos de cada sesión fueron de ejercicio. Sirve para comparar con la próxima corrida.
+
+## Candidatas con margen de cambio
+
+`pnpm cli study:candidates`: de las 17 personas con episodios de rumia, solo 6 tienen el «Yo» por debajo de 0,8. Natalia, con 1,00, no tenía margen en ese mecanismo; Iván (0,44) y Ximena Herrera (0,17) sí. Para la próxima corrida: Iván, Yolanda Díaz (0,25), Marta Martínez (0,01) o Ximena Herrera.
+
 ## Qué no se puede concluir
 
 - Nada sobre el efecto del protocolo: el cambio verdadero del AAQ-II está en parte garantizado por cómo se construyó la dosis.

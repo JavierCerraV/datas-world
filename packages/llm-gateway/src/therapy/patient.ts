@@ -15,6 +15,8 @@ export interface PatientTurnLog {
   level: DisclosureLevel;
   /** `template`: el LLM de la persona no respondió y habló la plantilla de la postura. */
   expression: 'llm' | 'template';
+  /** El texto se acortó porque la postura era callar (R-005e). */
+  trimmed?: boolean;
   /** Afirmaciones de la respuesta contra su vista y adherencia a la postura (043 R-012, R-013); llega después. */
   verification: Promise<Verification>;
 }
@@ -26,7 +28,7 @@ export function patientResponder(chat: ChatSession, log?: PatientTurnLog[]): (sa
   return async (say, turn) => {
     if (chat.ended) return { text: GONE, left: true };
     const out = await chat.turn(say);
-    log?.push({ turn, tone: out.tone.tone, stance: out.choice.stance, level: out.level, expression: out.expression, verification: out.verification });
+    log?.push({ turn, tone: out.tone.tone, stance: out.choice.stance, level: out.level, expression: out.expression, ...(out.trimmed ? { trimmed: true } : {}), verification: out.verification });
     return { text: out.reply, stance: out.choice.stance, ...(chat.ended ? { left: true } : {}) };
   };
 }
